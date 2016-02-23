@@ -1,0 +1,44 @@
+{
+  "fileFormatVersion": "0.1",
+  "title": "This is a jolly nice title",
+  "inputFilename": "/tmp/bank.csv",
+  "fieldNames": ["age", "job", "marital", "education", "default", "balance",
+                 "housing", "loan", "contact", "day", "month", "duration",
+                 "campaign", "pdays", "previous", "poutcome", "y"],
+  "excludeFieldNames": ["education"],
+  "isFirstLineFieldNames": true,
+  "separator":  ";",
+  "aggregators": [
+    {
+      "name": "numSignedUp",
+      "function": "count",
+      "arg": "y eq \"yes\""
+    },
+    {
+      "name": "cost",
+      "function": "calc",
+      "arg": "numMatches * 4.5"
+    },
+    {
+      "name": "income",
+      "function": "calc",
+      "arg": "numSignedUp * 24"
+    },
+    {
+      "name": "profit",
+      "function": "calc",
+      "arg": "income - cost"
+    }
+  ],
+  "goals": ["profit > 0"],
+  "sortOrder": [
+    {
+      "aggregatorName": "profit",
+      "direction": "descending"
+    },
+    {
+      "aggregatorName": "numSignedUp",
+      "direction": "descending"
+    }
+  ]
+}
