@@ -30,6 +30,10 @@ func (a *CalcAggregator) GetName() string {
 	return a.name
 }
 
+func (a *CalcAggregator) GetArg() string {
+	return a.expr.String()
+}
+
 func (a *CalcAggregator) NextRecord(
 	record map[string]*dlit.Literal, isRuleTrue bool) error {
 	return nil
@@ -39,4 +43,11 @@ func (a *CalcAggregator) GetResult(
 	aggregators []Aggregator, numRecords int64) *dlit.Literal {
 	return a.expr.Eval(AggregatorsToMap(aggregators, numRecords, a.name),
 		callFuncs)
+}
+
+func (a *CalcAggregator) IsEqual(o Aggregator) bool {
+	if _, ok := o.(*CalcAggregator); !ok {
+		return false
+	}
+	return a.name == o.GetName() && a.GetArg() == o.GetArg()
 }

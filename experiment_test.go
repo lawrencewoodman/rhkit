@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"github.com/lawrencewoodman/dexpr"
 	"os"
 	"path/filepath"
 	"testing"
@@ -9,9 +10,9 @@ import (
 
 // Ensure that correct number is returned
 func TestLoadExperiment(t *testing.T) {
-	expectedExperiments := []Experiment{
-		Experiment{},
-		Experiment{
+	expectedExperiments := []*Experiment{
+		&Experiment{},
+		&Experiment{
 			FileFormatVersion: "0.1",
 			Title:             "This is a jolly nice title",
 			InputFilename:     "/tmp/bank.csv",
@@ -20,13 +21,13 @@ func TestLoadExperiment(t *testing.T) {
 				"campaign", "pdays", "previous", "poutcome", "y"},
 			ExcludeFieldNames:     []string{"education"},
 			IsFirstLineFieldNames: true,
-			Separator:             ";",
-			Aggregators: []ExperimentAggregator{
-				ExperimentAggregator{"numSignedUp", "count", "y eq \"yes\""},
-				ExperimentAggregator{"cost", "calc", "numMatches * 4.5"},
-				ExperimentAggregator{"income", "calc", "numSignedUp * 24"},
-				ExperimentAggregator{"profit", "calc", "income - cost"}},
-			Goals: []string{"profit > 0"},
+			Separator:             ';',
+			Aggregators: []Aggregator{
+				mustNewCountAggregator("numSignedUp", "y == \"yes\""),
+				mustNewCalcAggregator("cost", "numMatches * 4.5"),
+				mustNewCalcAggregator("income", "numSignedUp * 24"),
+				mustNewCalcAggregator("profit", "income - cost")},
+			Goals: []*dexpr.Expr{mustNewDExpr("profit > 0")},
 			SortOrder: []SortField{
 				SortField{"profit", "descending"},
 				SortField{"numSignedUp", "descending"}},
@@ -34,7 +35,7 @@ func TestLoadExperiment(t *testing.T) {
 	}
 	cases := []struct {
 		filename string
-		want     Experiment
+		want     *Experiment
 		wantErr  error
 	}{
 		{"missingfile.json", expectedExperiments[0],
@@ -65,7 +66,7 @@ func TestLoadExperiment(t *testing.T) {
    Helper functions
 ************************/
 
-func experimentMatch(e1 Experiment, e2 Experiment) bool {
+func experimentMatch(e1 *Experiment, e2 *Experiment) bool {
 	if e1.FileFormatVersion != e2.FileFormatVersion ||
 		e1.Title != e2.Title ||
 		e1.InputFilename != e2.InputFilename ||
@@ -73,7 +74,7 @@ func experimentMatch(e1 Experiment, e2 Experiment) bool {
 		e1.Separator != e2.Separator ||
 		!areStringArraysEqual(e1.FieldNames, e2.FieldNames) ||
 		!areStringArraysEqual(e1.ExcludeFieldNames, e2.ExcludeFieldNames) ||
-		!areStringArraysEqual(e1.Goals, e2.Goals) ||
+		!areGoalsEqual(e1.Goals, e2.Goals) ||
 		!areAggregatorsEqual(e1.Aggregators, e2.Aggregators) ||
 		!areSortOrdersEqual(e1.SortOrder, e2.SortOrder) {
 		return false
@@ -93,13 +94,25 @@ func areStringArraysEqual(a1 []string, a2 []string) bool {
 	return true
 }
 
-func areAggregatorsEqual(a1 []ExperimentAggregator,
-	a2 []ExperimentAggregator) bool {
+func areGoalsEqual(g1 []*dexpr.Expr, g2 []*dexpr.Expr) bool {
+	if len(g1) != len(g2) {
+		return false
+	}
+	for i, g := range g1 {
+		if g.String() != g2[i].String() {
+			return false
+		}
+	}
+	return true
+
+}
+
+func areAggregatorsEqual(a1 []Aggregator, a2 []Aggregator) bool {
 	if len(a1) != len(a2) {
 		return false
 	}
 	for i, e := range a1 {
-		if e != a2[i] {
+		if !e.IsEqual(a2[i]) {
 			return false
 		}
 	}

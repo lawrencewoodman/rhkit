@@ -51,6 +51,10 @@ func (d *DummyAggregator) GetName() string {
 	return d.name
 }
 
+func (d *DummyAggregator) GetArg() string {
+	return ""
+}
+
 func (d *DummyAggregator) NextRecord(record map[string]*dlit.Literal,
 	isRuleTrue bool) error {
 	return nil
@@ -59,4 +63,11 @@ func (d *DummyAggregator) NextRecord(record map[string]*dlit.Literal,
 func (d *DummyAggregator) GetResult(aggregators []Aggregator,
 	numRecords int64) *dlit.Literal {
 	return d.result
+}
+
+func (a *DummyAggregator) IsEqual(o Aggregator) bool {
+	if _, ok := o.(*DummyAggregator); !ok {
+		return false
+	}
+	return a.name == o.GetName()
 }

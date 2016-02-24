@@ -12,7 +12,7 @@
     {
       "name": "numSignedUp",
       "function": "count",
-      "arg": "y eq \"yes\""
+      "arg": "y == \"yes\""
     },
     {
       "name": "cost",

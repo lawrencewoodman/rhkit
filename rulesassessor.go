@@ -18,7 +18,7 @@ type Report struct {
 
 type RuleReport struct {
 	Rule        string
-	Aggregators map[string]*dlit.Literal
+	Aggregators map[string]string
 	Goals       map[string]bool
 }
 
@@ -43,7 +43,7 @@ func (r *RuleReport) isEqual(o *RuleReport) bool {
 		return false
 	}
 	for aName, value := range r.Aggregators {
-		if o.Aggregators[aName].String() != value.String() {
+		if o.Aggregators[aName] != value {
 			return false
 		}
 	}
@@ -117,10 +117,19 @@ func makeReport(numRecords int64, goodRuleAssessments []*RuleAssessment,
 			return &Report{}, err
 		}
 		delete(aggregators, "numRecords")
-		ruleReports[i] = &RuleReport{Rule: rule, Aggregators: aggregators,
-			Goals: goals}
+		ruleReports[i] = &RuleReport{Rule: rule,
+			Aggregators: makeRuleReportAggregators(aggregators), Goals: goals}
 	}
 	return &Report{NumRecords: numRecords, RuleReports: ruleReports}, nil
+}
+
+func makeRuleReportAggregators(
+	aMap map[string]*dlit.Literal) map[string]string {
+	r := make(map[string]string, len(aMap))
+	for n, v := range aMap {
+		r[n] = v.String()
+	}
+	return r
 }
 
 func filterGoodReports(

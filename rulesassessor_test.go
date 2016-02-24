@@ -53,11 +53,11 @@ func TestAssessRules(t *testing.T) {
 		RuleReports: []*RuleReport{
 			&RuleReport{
 				Rule: "band > 4",
-				Aggregators: map[string]*dlit.Literal{
-					"numMatches":     mustNewLit(2),
-					"percentMatches": mustNewLit(50),
-					"numIncomeGt2":   mustNewLit(1),
-					"numBandGt4":     mustNewLit(2),
+				Aggregators: map[string]string{
+					"numMatches":     "2",
+					"percentMatches": "50",
+					"numIncomeGt2":   "1",
+					"numBandGt4":     "2",
 				},
 				Goals: map[string]bool{
 					"numIncomeGt2 == 1": true,
@@ -72,11 +72,11 @@ func TestAssessRules(t *testing.T) {
 			},
 			&RuleReport{
 				Rule: "band > 3",
-				Aggregators: map[string]*dlit.Literal{
-					"numMatches":     mustNewLit(4),
-					"percentMatches": mustNewLit(100),
-					"numIncomeGt2":   mustNewLit(2),
-					"numBandGt4":     mustNewLit(2),
+				Aggregators: map[string]string{
+					"numMatches":     "4",
+					"percentMatches": "100",
+					"numIncomeGt2":   "2",
+					"numBandGt4":     "2",
 				},
 				Goals: map[string]bool{
 					"numIncomeGt2 == 1": false,
@@ -91,11 +91,11 @@ func TestAssessRules(t *testing.T) {
 			},
 			&RuleReport{
 				Rule: "cost > 1.2",
-				Aggregators: map[string]*dlit.Literal{
-					"numMatches":     mustNewLit(2),
-					"percentMatches": mustNewLit(50),
-					"numIncomeGt2":   mustNewLit(2),
-					"numBandGt4":     mustNewLit(1),
+				Aggregators: map[string]string{
+					"numMatches":     "2",
+					"percentMatches": "50",
+					"numIncomeGt2":   "2",
+					"numBandGt4":     "1",
 				},
 				Goals: map[string]bool{
 					"numIncomeGt2 == 1": false,

@@ -31,6 +31,10 @@ func (a *CountAggregator) GetName() string {
 	return a.name
 }
 
+func (a *CountAggregator) GetArg() string {
+	return a.expr.String()
+}
+
 func (a *CountAggregator) NextRecord(record map[string]*dlit.Literal,
 	isRuleTrue bool) error {
 	countExprIsTrue, err := a.expr.EvalBool(record, callFuncs)
@@ -47,4 +51,11 @@ func (a *CountAggregator) GetResult(
 	aggregators []Aggregator, numRecords int64) *dlit.Literal {
 	l, _ := dlit.New(a.numMatches)
 	return l
+}
+
+func (a *CountAggregator) IsEqual(o Aggregator) bool {
+	if _, ok := o.(*CountAggregator); !ok {
+		return false
+	}
+	return a.name == o.GetName() && a.GetArg() == o.GetArg()
 }

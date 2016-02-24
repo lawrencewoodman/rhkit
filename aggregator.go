@@ -8,8 +8,10 @@ import "github.com/lawrencewoodman/dlit"
 type Aggregator interface {
 	CloneNew() Aggregator
 	GetName() string
-	NextRecord(map[string]*dlit.Literal, bool) error
+	GetArg() string
 	GetResult([]Aggregator, int64) *dlit.Literal
+	NextRecord(map[string]*dlit.Literal, bool) error
+	IsEqual(Aggregator) bool
 }
 
 // TODO: Make the thisName optional
