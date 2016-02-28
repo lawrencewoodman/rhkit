@@ -7,5 +7,6 @@ import "github.com/lawrencewoodman/dlit"
 
 type Input interface {
 	Read() (map[string]*dlit.Literal, error)
+	Rewind() error
 	// TODO: Add Close()
 }

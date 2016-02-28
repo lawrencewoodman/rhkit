@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
-	"io"
 	"testing"
 )
 
@@ -120,25 +119,4 @@ func TestAssessRules(t *testing.T) {
 		t.Errorf("AssessRules(%q, %q, %q, input)\ngot: %q\nwant: %q\n",
 			rules, aggregators, goals, gotReport, wantReport)
 	}
-}
-
-/*****************************
- *    Helper functions
- *****************************/
-type LiteralInput struct {
-	records  []map[string]*dlit.Literal
-	position int
-}
-
-func NewLiteralInput(records []map[string]*dlit.Literal) Input {
-	return &LiteralInput{records: records, position: 0}
-}
-
-func (l *LiteralInput) Read() (map[string]*dlit.Literal, error) {
-	if l.position < len(l.records) {
-		record := l.records[l.position]
-		l.position++
-		return record, nil
-	}
-	return map[string]*dlit.Literal{}, io.EOF
 }

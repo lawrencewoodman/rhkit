@@ -160,6 +160,11 @@ func filterGoodReports(
 func processInput(input Input,
 	ruleAssessments []*RuleAssessment) (int64, error) {
 	numRecords := int64(0)
+	// TODO: test this rewinds properly
+	if err := input.Rewind(); err != nil {
+		return numRecords, err
+	}
+
 	for {
 		record, err := input.Read()
 		if err == io.EOF {

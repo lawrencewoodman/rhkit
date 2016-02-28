@@ -21,11 +21,19 @@ func main() {
 		log.Fatal(err)
 	}
 	fmt.Printf("Experiment: %s\n\n", experiment)
+	// TODO: Create input from LoadExperiment
 	input, err = NewCsvInput(experiment.FieldNames, experiment.InputFilename,
-		experiment.Separator)
+		experiment.Separator, experiment.IsFirstLineFieldNames)
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	fieldDescriptions, err := DescribeInput(input)
+	if err != nil {
+		panic(fmt.Sprintf("Couldn't describe input: %s", err))
+	}
+
+	fmt.Printf("Input Description: %q\n\n", fieldDescriptions)
 
 	rules := []*dexpr.Expr{
 		makeRule("age > 20"),

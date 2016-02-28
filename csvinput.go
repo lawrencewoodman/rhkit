@@ -5,28 +5,30 @@ package main
 
 import (
 	"encoding/csv"
+	"fmt"
 	"github.com/lawrencewoodman/dlit"
 	"os"
 )
 
 type CsvInput struct {
-	reader     *csv.Reader
-	fieldNames []string
-	filename   string
-	separator  rune
+	file          *os.File
+	reader        *csv.Reader
+	fieldNames    []string
+	filename      string
+	separator     rune
+	skipFirstLine bool
 }
 
 func NewCsvInput(fieldNames []string, filename string,
-	separator rune) (*CsvInput, error) {
-	f, err := os.Open(filename)
+	separator rune, skipFirstLine bool) (*CsvInput, error) {
+	f, r, err := makeCsvReader(filename, separator, skipFirstLine)
 	if err != nil {
-		return &CsvInput{}, err
+		return nil, err
 	}
-
-	r := csv.NewReader(f)
 	r.Comma = separator
-	return &CsvInput{reader: r, fieldNames: fieldNames, filename: filename,
-		separator: separator}, nil
+	return &CsvInput{file: f, reader: r, fieldNames: fieldNames,
+		filename: filename, separator: separator,
+		skipFirstLine: skipFirstLine}, nil
 }
 
 func (c *CsvInput) Read() (map[string]*dlit.Literal, error) {
@@ -43,4 +45,35 @@ func (c *CsvInput) Read() (map[string]*dlit.Literal, error) {
 		recordLits[c.fieldNames[i]] = l
 	}
 	return recordLits, nil
+}
+
+func (c *CsvInput) Rewind() error {
+	var err error
+	if err = c.file.Close(); err != nil {
+		return err
+	}
+	c.file, c.reader, err =
+		makeCsvReader(c.filename, c.separator, c.skipFirstLine)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func makeCsvReader(filename string, separator rune,
+	skipFirstLine bool) (*os.File, *csv.Reader, error) {
+	f, err := os.Open(filename)
+	if err != nil {
+		return nil, nil, err
+	}
+	r := csv.NewReader(f)
+	r.Comma = separator
+	if skipFirstLine {
+		fmt.Printf("makeCsvReader - skipFirstLine\n")
+		_, err := r.Read()
+		if err != nil {
+			return nil, nil, err
+		}
+	}
+	return f, r, err
 }
