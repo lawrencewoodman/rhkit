@@ -5,7 +5,6 @@ package main
 
 import (
 	"encoding/csv"
-	"fmt"
 	"github.com/lawrencewoodman/dlit"
 	"os"
 )
@@ -69,7 +68,6 @@ func makeCsvReader(filename string, separator rune,
 	r := csv.NewReader(f)
 	r.Comma = separator
 	if skipFirstLine {
-		fmt.Printf("makeCsvReader - skipFirstLine\n")
 		_, err := r.Read()
 		if err != nil {
 			return nil, nil, err

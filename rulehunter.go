@@ -32,8 +32,7 @@ func main() {
 	if err != nil {
 		panic(fmt.Sprintf("Couldn't describe input: %s", err))
 	}
-
-	fmt.Printf("Input Description: %q\n\n", fieldDescriptions)
+	prettyPrintFieldDescriptions(fieldDescriptions)
 
 	rules := []*dexpr.Expr{
 		makeRule("age > 20"),
@@ -61,4 +60,23 @@ func makeRule(expr string) *dexpr.Expr {
 		panic("Can't make rule")
 	}
 	return r
+}
+
+func prettyPrintFieldDescriptions(fds map[string]*FieldDescription) {
+	fmt.Println("Input Description\n")
+	for field, fd := range fds {
+		fmt.Println("--------------------------")
+		fmt.Printf("%s\n--------------------------\n", field)
+		prettyPrintFieldDescription(fd)
+	}
+	fmt.Println("\n")
+}
+
+func prettyPrintFieldDescription(fd *FieldDescription) {
+	fmt.Printf("Kind: %s\n", fd.Kind)
+	fmt.Printf("Min: %s\n", fd.Min)
+	fmt.Printf("Max: %s\n", fd.Max)
+	fmt.Printf("MaxDP: %d\n", fd.MaxDP)
+	fmt.Printf("NumValues: %d\n", fd.NumValues)
+	fmt.Printf("Values: %s\n", fd.Values)
 }
