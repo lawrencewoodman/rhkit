@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
 	"testing"
@@ -118,5 +119,46 @@ func TestAssessRules(t *testing.T) {
 	if !gotReport.IsEqual(&wantReport) {
 		t.Errorf("AssessRules(%q, %q, %q, input)\ngot: %q\nwant: %q\n",
 			rules, aggregators, goals, gotReport, wantReport)
+	}
+}
+
+func TestAssessRules_errors(t *testing.T) {
+	cases := []struct {
+		rules       []*dexpr.Expr
+		aggregators []Aggregator
+		goals       []*dexpr.Expr
+		wantErr     error
+	}{
+		{[]*dexpr.Expr{mustNewDExpr("band >= 3")},
+			[]Aggregator{mustNewCountAggregator("numIncomeGt2", "income > 2")},
+			[]*dexpr.Expr{mustNewDExpr("numIncomeGt2 == 1")},
+			errors.New("Invalid operator: \">=\"")},
+		{[]*dexpr.Expr{mustNewDExpr("hand > 3")},
+			[]Aggregator{mustNewCountAggregator("numIncomeGt2", "income > 2")},
+			[]*dexpr.Expr{mustNewDExpr("numIncomeGt2 == 1")},
+			errors.New("Variable doesn't exist: hand")},
+		{[]*dexpr.Expr{mustNewDExpr("band > 3")},
+			[]Aggregator{mustNewCountAggregator("numIncomeGt2", "bincome > 2")},
+			[]*dexpr.Expr{mustNewDExpr("numIncomeGt2 == 1")},
+			errors.New("Variable doesn't exist: bincome")},
+		{[]*dexpr.Expr{mustNewDExpr("band > 3")},
+			[]Aggregator{mustNewCountAggregator("numIncomeGt2", "income > 2")},
+			[]*dexpr.Expr{mustNewDExpr("numIncomeGt == 1")},
+			errors.New("Variable doesn't exist: numIncomeGt")},
+	}
+	records := []map[string]*dlit.Literal{
+		map[string]*dlit.Literal{
+			"income": mustNewLit(3),
+			"cost":   mustNewLit(4.5),
+			"band":   mustNewLit(4),
+		},
+	}
+	input := NewLiteralInput(records)
+	for _, c := range cases {
+		_, err := AssessRules(c.rules, c.aggregators, c.goals, input)
+		if err.Error() != c.wantErr.Error() {
+			t.Errorf("AssessRules(%q, %q, %q, input) - err: %s, wantErr: %s",
+				c.rules, c.aggregators, c.goals, err, c.wantErr)
+		}
 	}
 }

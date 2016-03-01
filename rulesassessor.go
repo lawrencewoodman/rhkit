@@ -110,8 +110,8 @@ func makeReport(numRecords int64, goodRuleAssessments []*RuleAssessment,
 	ruleReports := make([]*RuleReport, len(goodRuleAssessments))
 	for i, ruleAssessment := range goodRuleAssessments {
 		rule := ruleAssessment.rule.String()
-		aggregators := AggregatorsToMap(ruleAssessment.aggregators,
-			numRecords, "")
+		aggregators :=
+			AggregatorsToMap(ruleAssessment.aggregators, numRecords, "")
 		goals, err := GoalsToMap(ruleAssessment.goals, aggregators)
 		if err != nil {
 			return &Report{}, err
@@ -175,7 +175,10 @@ func processInput(input Input,
 		}
 		numRecords++
 		for _, ruleAssessment := range ruleAssessments {
-			ruleAssessment.NextRecord(record)
+			err := ruleAssessment.NextRecord(record)
+			if err != nil {
+				return numRecords, err
+			}
 		}
 	}
 	return numRecords, nil

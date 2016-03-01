@@ -3,8 +3,10 @@
  */
 package main
 
-import "github.com/lawrencewoodman/dexpr"
-import "github.com/lawrencewoodman/dlit"
+import (
+	"github.com/lawrencewoodman/dexpr"
+	"github.com/lawrencewoodman/dlit"
+)
 
 // TODO: Create a Goal type
 
@@ -12,6 +14,7 @@ import "github.com/lawrencewoodman/dlit"
 func HasGoalPassed(goal *dexpr.Expr, aggregators []Aggregator,
 	numRecords int64) (bool, error) {
 	results := AggregatorsToMap(aggregators, numRecords, "")
+
 	isTrue, err := goal.EvalBool(results, callFuncs)
 	if err != nil {
 		return false, err

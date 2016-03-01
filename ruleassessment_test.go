@@ -123,6 +123,10 @@ func TestNextRecord_Errors(t *testing.T) {
 			[]Aggregator{mustNewCountAggregator("numIncomeGt2", "income > 2")},
 			[]*dexpr.Expr{mustNewDExpr("numIncomeGt == 1")},
 			dexpr.ErrInvalidExpr("Variable doesn't exist: hand")},
+		{mustNewDExpr("band ^^ 4"),
+			[]Aggregator{mustNewCountAggregator("numIncomeGt2", "income > 2")},
+			[]*dexpr.Expr{mustNewDExpr("numIncomeGt == 1")},
+			dexpr.ErrInvalidExpr("Invalid operator: \"^\"")},
 	}
 	for _, c := range cases {
 		ra := NewRuleAssessment(c.rule, c.aggregators, c.goals)
