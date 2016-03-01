@@ -17,7 +17,7 @@ type FieldDescription struct {
 	Max       *dlit.Literal
 	MaxDP     int
 	Values    []*dlit.Literal
-	NumValues int
+	numValues int
 }
 
 type kind int
@@ -31,7 +31,8 @@ const (
 )
 
 func (fd *FieldDescription) String() string {
-	return fmt.Sprintf("Kind: %s, Min: %s, Max: %s, MaxDP: %d, Values: %s, NumValues: %d", fd.Kind, fd.Min, fd.Max, fd.MaxDP, fd.Values, fd.NumValues)
+	return fmt.Sprintf("Kind: %s, Min: %s, Max: %s, MaxDP: %d, Values: %s",
+		fd.Kind, fd.Min, fd.Max, fd.MaxDP, fd.Values)
 }
 
 func (k kind) String() string {
@@ -114,7 +115,7 @@ func updateFieldKind(value *dlit.Literal, fd *FieldDescription) {
 func updateFieldValues(value *dlit.Literal, fd *FieldDescription) {
 	// Chose 31 so could hold each day in month
 	maxNumValues := 31
-	if fd.Kind == IGNORE || fd.Kind == UNKNOWN || fd.NumValues == -1 {
+	if fd.Kind == IGNORE || fd.Kind == UNKNOWN || fd.numValues == -1 {
 		return
 	}
 	for _, v := range fd.Values {
@@ -122,16 +123,16 @@ func updateFieldValues(value *dlit.Literal, fd *FieldDescription) {
 			return
 		}
 	}
-	if fd.NumValues >= maxNumValues {
+	if fd.numValues >= maxNumValues {
 		if fd.Kind == STRING {
 			fd.Kind = IGNORE
 		}
 		fd.Values = []*dlit.Literal{}
-		fd.NumValues = -1
+		fd.numValues = -1
 		return
 	}
 	fd.Values = append(fd.Values, value)
-	fd.NumValues++
+	fd.numValues++
 }
 
 func updateFieldNumBoundaries(value *dlit.Literal, fd *FieldDescription) {

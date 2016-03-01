@@ -23,25 +23,25 @@ func TestDescribeInput(t *testing.T) {
 				mustNewLit("z"), mustNewLit("1"), mustNewLit("2"),
 				mustNewLit("3"), mustNewLit("4"), mustNewLit("5"),
 				mustNewLit("6"), mustNewLit("7"), mustNewLit("8"),
-				mustNewLit("9"), mustNewLit("h")}, 31},
+				mustNewLit("9"), mustNewLit("h")}, 0},
 		"inputA": &FieldDescription{FLOAT, mustNewLit(7), mustNewLit(15.1), 1,
 			[]*dlit.Literal{mustNewLit(7), mustNewLit(7.3),
-				mustNewLit(9), mustNewLit(14), mustNewLit(15.1)}, 5},
+				mustNewLit(9), mustNewLit(14), mustNewLit(15.1)}, 0},
 		"inputB": &FieldDescription{FLOAT, mustNewLit(2), mustNewLit(5), 4,
 			[]*dlit.Literal{mustNewLit(2.6), mustNewLit(2.8789),
 				mustNewLit(3), mustNewLit(5), mustNewLit(2),
-				mustNewLit(2.8)}, 6},
+				mustNewLit(2.8)}, 0},
 		"version": &FieldDescription{STRING, nil, nil, 0,
 			[]*dlit.Literal{mustNewLit("9.9"), mustNewLit("9.97"),
 				mustNewLit("10"), mustNewLit("10.94"), mustNewLit("9.9a"),
-				mustNewLit("9.9b")}, 6},
+				mustNewLit("9.9b")}, 0},
 		"flow": &FieldDescription{INT, mustNewLit(21), mustNewLit(87), 0,
-			[]*dlit.Literal{}, -1},
+			[]*dlit.Literal{}, 0},
 		"score": &FieldDescription{INT, mustNewLit(1), mustNewLit(5), 0,
 			[]*dlit.Literal{mustNewLit(1), mustNewLit(2), mustNewLit(3),
-				mustNewLit(4), mustNewLit(5)}, 5},
+				mustNewLit(4), mustNewLit(5)}, 0},
 		"method": &FieldDescription{IGNORE, nil, nil, 0,
-			[]*dlit.Literal{}, -1},
+			[]*dlit.Literal{}, 0},
 	}
 	input, err := NewCsvInput(fieldNames, filename, ',', skipFirstLine)
 	if err != nil {
@@ -70,7 +70,7 @@ func fieldDescriptionsEqual(
 	return true
 }
 func fieldDescriptionEqual(fd1 *FieldDescription, fd2 *FieldDescription) bool {
-	if fd1.Kind != fd2.Kind || fd1.NumValues != fd2.NumValues {
+	if fd1.Kind != fd2.Kind || len(fd1.Values) != len(fd2.Values) {
 		return false
 	}
 	if fd1.Kind == INT || fd1.Kind == FLOAT {

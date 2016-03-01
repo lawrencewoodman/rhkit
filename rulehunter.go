@@ -77,6 +77,5 @@ func prettyPrintFieldDescription(fd *FieldDescription) {
 	fmt.Printf("Min: %s\n", fd.Min)
 	fmt.Printf("Max: %s\n", fd.Max)
 	fmt.Printf("MaxDP: %d\n", fd.MaxDP)
-	fmt.Printf("NumValues: %d\n", fd.NumValues)
 	fmt.Printf("Values: %s\n", fd.Values)
 }
