@@ -9,7 +9,8 @@ import (
 func TestDescribeInput(t *testing.T) {
 	filename := filepath.Join("fixtures", "flow.csv")
 	skipFirstLine := true
-	fieldNames := []string{"band", "inputA", "inputB", "version", "flow", "score"}
+	fieldNames :=
+		[]string{"band", "inputA", "inputB", "version", "flow", "score", "method"}
 	expected := map[string]*FieldDescription{
 		"band": &FieldDescription{STRING, nil, nil, 0,
 			[]*dlit.Literal{mustNewLit("a"), mustNewLit("b"),
@@ -39,6 +40,8 @@ func TestDescribeInput(t *testing.T) {
 		"score": &FieldDescription{INT, mustNewLit(1), mustNewLit(5), 0,
 			[]*dlit.Literal{mustNewLit(1), mustNewLit(2), mustNewLit(3),
 				mustNewLit(4), mustNewLit(5)}, 5},
+		"method": &FieldDescription{IGNORE, nil, nil, 0,
+			[]*dlit.Literal{}, -1},
 	}
 	input, err := NewCsvInput(fieldNames, filename, ',', skipFirstLine)
 	if err != nil {
