@@ -120,23 +120,25 @@ func TestRead(t *testing.T) {
 		}
 	}
 }
-
 func TestRead_errors(t *testing.T) {
 	cases := []struct {
 		filename   string
+		separator  rune
 		fieldNames []string
 		errRow     int
 		wantErr    error
 	}{
-		{filepath.Join("fixtures", "invalid_numfields_at_102.csv"),
+		{filepath.Join("fixtures", "invalid_numfields_at_102.csv"), ',',
+			[]string{"band", "score", "team", "points", "rating"}, 101,
+			&csv.ParseError{102, 0, errors.New("wrong number of fields in line")}},
+		{filepath.Join("fixtures", "bank.csv"), ';',
 			[]string{"age", "job", "marital", "education", "default", "balance",
 				"housing", "loan", "contact", "day", "month", "duration", "campaign",
-				"pdays", "previous", "poutcome", "y"},
-			101,
-			&csv.ParseError{102, 0, errors.New("wrong number of fields in line")}},
+				"pdays", "previous", "poutcome"}, -1,
+			errors.New("wrong number of field names for input")},
 	}
 	for _, c := range cases {
-		i, err := NewCsvInput(c.fieldNames, c.filename, ',', false)
+		i, err := NewCsvInput(c.fieldNames, c.filename, c.separator, false)
 		if err != nil {
 			t.Errorf("Read() - NewCsvInput() - filename: %q err: %q", c.filename, err)
 		}
@@ -147,7 +149,7 @@ func TestRead_errors(t *testing.T) {
 			if err == io.EOF {
 				break
 			} else if err != nil {
-				if row == c.errRow {
+				if row == c.errRow || c.errRow == -1 {
 					if err.Error() != c.wantErr.Error() {
 						t.Errorf("Read() - filename: %q err: %q, wantErr: %q",
 							c.filename, err, c.wantErr)

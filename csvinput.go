@@ -5,6 +5,7 @@ package main
 
 import (
 	"encoding/csv"
+	"errors"
 	"github.com/lawrencewoodman/dlit"
 	"os"
 )
@@ -35,6 +36,10 @@ func (c *CsvInput) Read() (map[string]*dlit.Literal, error) {
 	record, err := c.reader.Read()
 	if err != nil {
 		return recordLits, err
+	}
+	if len(record) != len(c.fieldNames) {
+		// TODO: Create specific error type for this
+		return recordLits, errors.New("wrong number of field names for input")
 	}
 	for i, field := range record {
 		l, err := dlit.New(field)
