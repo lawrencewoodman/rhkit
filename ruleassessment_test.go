@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/lawrencewoodman/dexpr"
-	"github.com/lawrencewoodman/dlit"
+	"github.com/lawrencewoodman/dlit_go"
 	"testing"
 )
 

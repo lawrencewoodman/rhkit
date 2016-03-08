@@ -5,7 +5,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/lawrencewoodman/dlit"
+	"github.com/lawrencewoodman/dlit_go"
 	"io"
 	"math"
 	"strings"

@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/csv"
 	"errors"
-	"github.com/lawrencewoodman/dlit"
+	"github.com/lawrencewoodman/dlit_go"
 	"io"
 	"os"
 	"path/filepath"

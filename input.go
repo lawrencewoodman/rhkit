@@ -3,7 +3,7 @@
  */
 package main
 
-import "github.com/lawrencewoodman/dlit"
+import "github.com/lawrencewoodman/dlit_go"
 
 type Input interface {
 	Read() (map[string]*dlit.Literal, error)

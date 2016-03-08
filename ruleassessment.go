@@ -6,7 +6,7 @@ package main
 import (
 	"errors"
 	"github.com/lawrencewoodman/dexpr"
-	"github.com/lawrencewoodman/dlit"
+	"github.com/lawrencewoodman/dlit_go"
 )
 
 type RuleAssessment struct {

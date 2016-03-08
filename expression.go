@@ -3,7 +3,7 @@
  */
 package main
 
-import "github.com/lawrencewoodman/dlit"
+import "github.com/lawrencewoodman/dlit_go"
 
 type Expression interface {
 	IsTrue([]*dlit.Literal) bool
