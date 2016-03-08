@@ -129,10 +129,10 @@ func TestAssessRules_errors(t *testing.T) {
 		goals       []*dexpr.Expr
 		wantErr     error
 	}{
-		{[]*dexpr.Expr{mustNewDExpr("band >= 3")},
+		{[]*dexpr.Expr{mustNewDExpr("band ^^ 3")},
 			[]Aggregator{mustNewCountAggregator("numIncomeGt2", "income > 2")},
 			[]*dexpr.Expr{mustNewDExpr("numIncomeGt2 == 1")},
-			errors.New("Invalid operator: \">=\"")},
+			errors.New("Invalid operator: \"^\"")},
 		{[]*dexpr.Expr{mustNewDExpr("hand > 3")},
 			[]Aggregator{mustNewCountAggregator("numIncomeGt2", "income > 2")},
 			[]*dexpr.Expr{mustNewDExpr("numIncomeGt2 == 1")},

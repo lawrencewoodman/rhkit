@@ -13,6 +13,8 @@ import (
 
 var callFuncs = map[string]dexpr.CallFun{
 	"roundto": roundTo,
+	"in":      in,
+	"ni":      ni,
 }
 
 // This uses round half-up to tie-break
@@ -44,5 +46,43 @@ func roundTo(args []*dlit.Literal) (*dlit.Literal, error) {
 	}
 	shift := math.Pow(10, float64(p))
 	r, err := dlit.New(math.Floor(.5+x*shift) / shift)
+	return r, err
+}
+
+// Is a string IN a list of strings
+func in(args []*dlit.Literal) (*dlit.Literal, error) {
+	if len(args) < 2 {
+		err := errors.New("Too few arguments")
+		r, _ := dlit.New(err)
+		return r, err
+	}
+	needle := args[0]
+	haystack := args[1:]
+	for _, v := range haystack {
+		if needle.String() == v.String() {
+			r, err := dlit.New(true)
+			return r, err
+		}
+	}
+	r, err := dlit.New(false)
+	return r, err
+}
+
+// Is a string NI a list of strings
+func ni(args []*dlit.Literal) (*dlit.Literal, error) {
+	if len(args) < 2 {
+		err := errors.New("Too few arguments")
+		r, _ := dlit.New(err)
+		return r, err
+	}
+	needle := args[0]
+	haystack := args[1:]
+	for _, v := range haystack {
+		if needle.String() == v.String() {
+			r, err := dlit.New(false)
+			return r, err
+		}
+	}
+	r, err := dlit.New(true)
 	return r, err
 }

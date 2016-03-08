@@ -34,12 +34,13 @@ func main() {
 	}
 	prettyPrintFieldDescriptions(fieldDescriptions)
 
-	rules := []*dexpr.Expr{
-		makeRule("age > 20"),
-		makeRule("age > 30"),
-		makeRule("age > 40"),
-		makeRule("marital == \"married\""),
+	fmt.Printf("Generating rules...")
+	rules, err := GenerateRules(fieldDescriptions, experiment.ExcludeFieldNames)
+	if err != nil {
+		panic(fmt.Sprintf("Couldn't make report: %s\n", err))
 	}
+	fmt.Printf("ok (%d generated)\n", len(rules))
+
 	report, err :=
 		AssessRules(rules, experiment.Aggregators, experiment.Goals, input)
 	if err != nil {

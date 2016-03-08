@@ -31,7 +31,7 @@ func (ra *RuleAssessment) NextRecord(record map[string]*dlit.Literal) error {
 	var ruleIsTrue bool
 	var err error
 	for _, aggregator := range ra.aggregators {
-		ruleIsTrue, err = ra.rule.EvalBool(record, map[string]dexpr.CallFun{})
+		ruleIsTrue, err = ra.rule.EvalBool(record, callFuncs)
 		if err != nil {
 			return err
 		}
