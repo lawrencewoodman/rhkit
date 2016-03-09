@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/lawrencewoodman/dexpr"
+	"github.com/lawrencewoodman/dexpr_go"
 	"github.com/lawrencewoodman/dlit_go"
 	"testing"
 )

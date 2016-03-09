@@ -2,8 +2,9 @@ package main
 
 import (
 	"errors"
-	"github.com/lawrencewoodman/dexpr"
+	"github.com/lawrencewoodman/dexpr_go"
 	"github.com/lawrencewoodman/dlit_go"
+	"sort"
 	"testing"
 )
 

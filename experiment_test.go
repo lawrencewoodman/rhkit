@@ -2,7 +2,7 @@ package main
 
 import (
 	"errors"
-	"github.com/lawrencewoodman/dexpr"
+	"github.com/lawrencewoodman/dexpr_go"
 	"os"
 	"path/filepath"
 	"testing"

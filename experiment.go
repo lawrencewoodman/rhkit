@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/lawrencewoodman/dexpr"
+	"github.com/lawrencewoodman/dexpr_go"
 	"os"
 )
 
