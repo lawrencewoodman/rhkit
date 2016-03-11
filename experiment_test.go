@@ -29,8 +29,8 @@ func TestLoadExperiment(t *testing.T) {
 				mustNewCalcAggregator("profit", "income - cost")},
 			Goals: []*dexpr.Expr{mustNewDExpr("profit > 0")},
 			SortOrder: []SortField{
-				SortField{"profit", "descending"},
-				SortField{"numSignedUp", "descending"}},
+				SortField{"profit", DESCENDING},
+				SortField{"numSignedUp", DESCENDING}},
 		},
 	}
 	cases := []struct {
@@ -123,8 +123,9 @@ func areSortOrdersEqual(so1 []SortField, so2 []SortField) bool {
 	if len(so1) != len(so2) {
 		return false
 	}
-	for i, e := range so1 {
-		if e != so2[i] {
+	for i, sf1 := range so1 {
+		sf2 := so2[i]
+		if sf1.Field != sf2.Field || sf1.Direction != sf2.Direction {
 			return false
 		}
 	}

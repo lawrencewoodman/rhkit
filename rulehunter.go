@@ -46,6 +46,7 @@ func main() {
 	if err != nil {
 		fmt.Printf("Couldn't make report: %s\n", err)
 	} else {
+		report.Sort(experiment.SortOrder)
 		b, err := json.MarshalIndent(report, "", "  ")
 		if err != nil {
 			fmt.Printf("Couldn't make report json: %s\n", err)

@@ -34,7 +34,7 @@ type experimentFile struct {
 	Separator             string
 	Aggregators           []experimentAggregator
 	Goals                 []string
-	SortOrder             []SortField
+	SortOrder             []experimentSortField
 }
 
 type experimentAggregator struct {
@@ -43,7 +43,7 @@ type experimentAggregator struct {
 	Arg      string
 }
 
-type SortField struct {
+type experimentSortField struct {
 	AggregatorName string
 	Direction      string
 }
@@ -104,12 +104,18 @@ func checkExperimentValid(e experimentFile) error {
 func makeExperiment(e experimentFile) (*Experiment, error) {
 	var goals []*dexpr.Expr
 	var aggregators []Aggregator
+	var sortOrder []SortField
 	var err error
 	goals, err = makeGoals(e.Goals)
 	if err != nil {
 		return nil, err
 	}
 	aggregators, err = makeAggregators(e.Aggregators)
+	if err != nil {
+		return nil, err
+	}
+
+	sortOrder, err = makeSortOrder(e.SortOrder)
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +130,7 @@ func makeExperiment(e experimentFile) (*Experiment, error) {
 		Separator:             rune(e.Separator[0]),
 		Aggregators:           aggregators,
 		Goals:                 goals,
-		SortOrder:             e.SortOrder,
+		SortOrder:             sortOrder,
 	}, nil
 }
 
@@ -175,6 +181,26 @@ func makeAggregators(
 	for i, ea := range eAggregators {
 		r[i], err = makeAggregator(ea.Name, ea.Function, ea.Arg)
 		if err != nil {
+			return r, err
+		}
+	}
+	return r, nil
+}
+
+func makeSortOrder(
+	eSortOrder []experimentSortField) ([]SortField, error) {
+	r := make([]SortField, len(eSortOrder))
+	for i, eSortField := range eSortOrder {
+		field := eSortField.AggregatorName
+		direction := eSortField.Direction
+		// TODO: Make case insensitive
+		if direction == "ascending" {
+			r[i] = SortField{field, ASCENDING}
+		} else if direction == "descending" {
+			r[i] = SortField{field, DESCENDING}
+		} else {
+			err := errors.New(fmt.Sprintf("Invalid sort direction: %s, for field: %s",
+				direction, field))
 			return r, err
 		}
 	}

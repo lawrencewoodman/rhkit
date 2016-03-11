@@ -4,7 +4,6 @@ import (
 	"errors"
 	"github.com/lawrencewoodman/dexpr_go"
 	"github.com/lawrencewoodman/dlit_go"
-	"sort"
 	"testing"
 )
 
@@ -162,4 +161,121 @@ func TestAssessRules_errors(t *testing.T) {
 				c.rules, c.aggregators, c.goals, err, c.wantErr)
 		}
 	}
+}
+
+func TestSort(t *testing.T) {
+	report := Report{NumRecords: 8,
+		RuleReports: []*RuleReport{
+			&RuleReport{
+				Rule: "band > 9",
+				Aggregators: map[string]string{
+					"numMatches":     "5",
+					"percentMatches": "65.3",
+					"numIncomeGt2":   "3",
+					"numBandGt4":     "2",
+				},
+				Goals: map[string]bool{
+					"numIncomeGt2 == 1": false,
+					"numIncomeGt2 == 2": true,
+					"numIncomeGt2 == 3": false,
+					"numIncomeGt2 == 4": false,
+					"numBandGt4 == 1":   false,
+					"numBandGt4 == 2":   true,
+					"numBandGt4 == 3":   false,
+					"numBandGt4 == 4":   true,
+				},
+			},
+			&RuleReport{
+				Rule: "band > 456",
+				Aggregators: map[string]string{
+					"numMatches":     "2",
+					"percentMatches": "50",
+					"numIncomeGt2":   "1",
+					"numBandGt4":     "2",
+				},
+				Goals: map[string]bool{
+					"numIncomeGt2 == 1": true,
+					"numIncomeGt2 == 2": false,
+					"numIncomeGt2 == 3": false,
+					"numIncomeGt2 == 4": false,
+					"numBandGt4 == 1":   false,
+					"numBandGt4 == 2":   true,
+					"numBandGt4 == 3":   false,
+					"numBandGt4 == 4":   false,
+				},
+			},
+			&RuleReport{
+				Rule: "band > 3",
+				Aggregators: map[string]string{
+					"numMatches":     "4",
+					"percentMatches": "76.3",
+					"numIncomeGt2":   "2",
+					"numBandGt4":     "2",
+				},
+				Goals: map[string]bool{
+					"numIncomeGt2 == 1": false,
+					"numIncomeGt2 == 2": true,
+					"numIncomeGt2 == 3": false,
+					"numIncomeGt2 == 4": false,
+					"numBandGt4 == 1":   false,
+					"numBandGt4 == 2":   true,
+					"numBandGt4 == 3":   false,
+					"numBandGt4 == 4":   false,
+				},
+			},
+			&RuleReport{
+				Rule: "cost > 1.2",
+				Aggregators: map[string]string{
+					"numMatches":     "2",
+					"percentMatches": "50",
+					"numIncomeGt2":   "2",
+					"numBandGt4":     "1",
+				},
+				Goals: map[string]bool{
+					"numIncomeGt2 == 1": false,
+					"numIncomeGt2 == 2": true,
+					"numIncomeGt2 == 3": false,
+					"numIncomeGt2 == 4": false,
+					"numBandGt4 == 1":   true,
+					"numBandGt4 == 2":   false,
+					"numBandGt4 == 3":   false,
+					"numBandGt4 == 4":   false,
+				},
+			},
+		},
+	}
+	cases := []struct {
+		sortOrder []SortField
+		wantRules []string
+	}{
+		{[]SortField{SortField{"numGoalsPassed", ASCENDING}},
+			[]string{"band > 456", "band > 9", "band > 3", "cost > 1.2"}},
+		{[]SortField{SortField{"percentMatches", DESCENDING}},
+			[]string{"band > 3", "band > 9", "cost > 1.2", "band > 456"}},
+		{[]SortField{SortField{"percentMatches", ASCENDING}},
+			[]string{"cost > 1.2", "band > 456", "band > 9", "band > 3"}},
+		{[]SortField{SortField{"percentMatches", ASCENDING},
+			SortField{"numIncomeGt2", ASCENDING}},
+			[]string{"band > 456", "cost > 1.2", "band > 9", "band > 3"}},
+		{[]SortField{SortField{"percentMatches", DESCENDING},
+			SortField{"numIncomeGt2", ASCENDING}},
+			[]string{"band > 9", "band > 3", "cost > 1.2", "band > 456"}},
+	}
+	for _, c := range cases {
+		report.Sort(c.sortOrder)
+		gotRules := getReportRules(&report)
+		rulesMatch, msg := matchRules(gotRules, c.wantRules)
+		if !rulesMatch {
+			t.Errorf("matchRules() rules don't match: %s\ngot: %s\nwant: %s\n",
+				msg, gotRules, c.wantRules)
+		}
+	}
+}
+
+func getReportRules(report *Report) []string {
+	rules := make([]string, len(report.RuleReports))
+	for i, ruleReport := range report.RuleReports {
+		rules[i] = ruleReport.Rule
+	}
+	return rules
 }

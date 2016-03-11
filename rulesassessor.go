@@ -9,6 +9,8 @@ import (
 	"github.com/lawrencewoodman/dexpr_go"
 	"github.com/lawrencewoodman/dlit_go"
 	"io"
+	"sort"
+	"strconv"
 )
 
 type Report struct {
@@ -20,6 +22,97 @@ type RuleReport struct {
 	Rule        string
 	Aggregators map[string]string
 	Goals       map[string]bool
+}
+
+type SortField struct {
+	Field     string
+	Direction direction
+}
+
+type direction int
+
+const (
+	ASCENDING direction = iota
+	DESCENDING
+)
+
+func (d direction) String() string {
+	if d == ASCENDING {
+		return "ascending"
+	}
+	return "descending"
+}
+
+// by implements sort.Interface for []*RuleReports based on the sortFields
+type by struct {
+	ruleReports []*RuleReport
+	sortFields  []SortField
+}
+
+func (b by) Len() int { return len(b.ruleReports) }
+func (b by) Swap(i, j int) {
+	b.ruleReports[i], b.ruleReports[j] = b.ruleReports[j], b.ruleReports[i]
+}
+func (b by) Less(i, j int) bool {
+	var vI string
+	var vJ string
+	for _, sortField := range b.sortFields {
+		field := sortField.Field
+		direction := sortField.Direction
+		// TODO: Perhaps ignore case
+		if field == "numGoalsPassed" {
+			// TODO: Work out if this should be calculated here, or elsewhere?
+			vI = calcNumGoalsPassedScore(b.ruleReports[i])
+			vJ = calcNumGoalsPassedScore(b.ruleReports[j])
+		} else {
+			vI = b.ruleReports[i].Aggregators[field]
+			vJ = b.ruleReports[j].Aggregators[field]
+		}
+		c := compareStrNums(vI, vJ)
+
+		if direction == DESCENDING {
+			c *= -1
+		}
+		if c < 0 {
+			return true
+		} else if c > 0 {
+			return false
+		}
+	}
+
+	ruleLenI := len(b.ruleReports[i].Rule)
+	ruleLenJ := len(b.ruleReports[j].Rule)
+	return ruleLenI < ruleLenJ
+}
+
+func compareStrNums(nStr1 string, nStr2 string) int {
+	i1, errI1 := strconv.ParseInt(nStr1, 10, 64)
+	i2, errI2 := strconv.ParseInt(nStr2, 10, 64)
+	if errI1 == nil && errI2 == nil {
+		if i1 < i2 {
+			return -1
+		}
+		if i1 > i2 {
+			return 1
+		}
+		return 0
+	}
+	f1, errF1 := strconv.ParseFloat(nStr1, 64)
+	f2, errF2 := strconv.ParseFloat(nStr2, 64)
+	if errF1 == nil && errF2 == nil {
+		if f1 < f2 {
+			return -1
+		}
+		if f1 > f2 {
+			return 1
+		}
+		return 0
+	}
+	panic(fmt.Sprintf("Can't compare strings as numbers: %s, %s", nStr1, nStr2))
+}
+
+func (r *Report) Sort(s []SortField) {
+	sort.Sort(by{r.RuleReports, s})
 }
 
 // TODO: Test this
@@ -200,6 +293,19 @@ func prependDefaultAggregators(aggregators []Aggregator) ([]Aggregator, error) {
 	newAggregators[1] = percentMatchesAggregator
 	newAggregators = append(newAggregators, aggregators...)
 	return newAggregators, nil
+}
+
+func calcNumGoalsPassedScore(r *RuleReport) string {
+	numGoalsPassed := 0.0
+	increment := 1.0
+	for _, goalPassed := range r.Goals {
+		if goalPassed {
+			numGoalsPassed += increment
+		} else {
+			increment = 0.001
+		}
+	}
+	return fmt.Sprintf("%f", numGoalsPassed)
 }
 
 /* TODO: Put this somewhere else

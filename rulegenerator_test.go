@@ -267,22 +267,3 @@ func getFieldRules(
 	}
 	return fieldRules
 }
-
-func matchRules(rules1 []string, rules2 []string) (bool, string) {
-	if len(rules1) != len(rules2) {
-		return false, "rules different lengths"
-	}
-	for _, rule1 := range rules1 {
-		found := false
-		for _, rule2 := range rules2 {
-			if rule1 == rule2 {
-				found = true
-				break
-			}
-		}
-		if !found {
-			return false, fmt.Sprintf("rule doesn't exist: %s", rule1)
-		}
-	}
-	return true, ""
-}
