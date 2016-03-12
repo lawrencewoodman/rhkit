@@ -29,24 +29,24 @@ func TestAssessRules(t *testing.T) {
 	}
 	records := []map[string]*dlit.Literal{
 		map[string]*dlit.Literal{
-			"income": mustNewLit(3),
-			"cost":   mustNewLit(4.5),
-			"band":   mustNewLit(4),
+			"income": dlit.MustNew(3),
+			"cost":   dlit.MustNew(4.5),
+			"band":   dlit.MustNew(4),
 		},
 		map[string]*dlit.Literal{
-			"income": mustNewLit(3),
-			"cost":   mustNewLit(3.2),
-			"band":   mustNewLit(7),
+			"income": dlit.MustNew(3),
+			"cost":   dlit.MustNew(3.2),
+			"band":   dlit.MustNew(7),
 		},
 		map[string]*dlit.Literal{
-			"income": mustNewLit(2),
-			"cost":   mustNewLit(1.2),
-			"band":   mustNewLit(4),
+			"income": dlit.MustNew(2),
+			"cost":   dlit.MustNew(1.2),
+			"band":   dlit.MustNew(4),
 		},
 		map[string]*dlit.Literal{
-			"income": mustNewLit(0),
-			"cost":   mustNewLit(0),
-			"band":   mustNewLit(9),
+			"income": dlit.MustNew(0),
+			"cost":   dlit.MustNew(0),
+			"band":   dlit.MustNew(9),
 		},
 	}
 	wantReport := Report{NumRecords: int64(len(records)),
@@ -148,9 +148,9 @@ func TestAssessRules_errors(t *testing.T) {
 	}
 	records := []map[string]*dlit.Literal{
 		map[string]*dlit.Literal{
-			"income": mustNewLit(3),
-			"cost":   mustNewLit(4.5),
-			"band":   mustNewLit(4),
+			"income": dlit.MustNew(3),
+			"cost":   dlit.MustNew(4.5),
+			"band":   dlit.MustNew(4),
 		},
 	}
 	input := NewLiteralInput(records)

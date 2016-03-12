@@ -23,14 +23,6 @@ func errorMatch(e1 error, e2 error) bool {
 	return false
 }
 
-func mustNewLit(v interface{}) *dlit.Literal {
-	l, err := dlit.New(v)
-	if err != nil {
-		panic(fmt.Sprintf("Can't create dlit.Literal: %q", err))
-	}
-	return l
-}
-
 func mustNewDExpr(expr string) *dexpr.Expr {
 	dexpr, err := dexpr.New(expr)
 	if err != nil {

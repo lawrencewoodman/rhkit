@@ -7,10 +7,10 @@ import (
 
 func TestCountGetResult(t *testing.T) {
 	records := [4]map[string]*dlit.Literal{
-		map[string]*dlit.Literal{"income": mustNewLit(3), "band": mustNewLit(4)},
-		map[string]*dlit.Literal{"income": mustNewLit(3), "band": mustNewLit(7)},
-		map[string]*dlit.Literal{"income": mustNewLit(2), "band": mustNewLit(4)},
-		map[string]*dlit.Literal{"income": mustNewLit(0), "band": mustNewLit(9)},
+		map[string]*dlit.Literal{"income": dlit.MustNew(3), "band": dlit.MustNew(4)},
+		map[string]*dlit.Literal{"income": dlit.MustNew(3), "band": dlit.MustNew(7)},
+		map[string]*dlit.Literal{"income": dlit.MustNew(2), "band": dlit.MustNew(4)},
+		map[string]*dlit.Literal{"income": dlit.MustNew(0), "band": dlit.MustNew(9)},
 	}
 	numBandGt4, err := NewCountAggregator("numBandGt4", "band > 4")
 	if err != nil {
@@ -33,8 +33,8 @@ func TestCountGetResult(t *testing.T) {
 
 func TestCountCloneNew(t *testing.T) {
 	record := map[string]*dlit.Literal{
-		"income": mustNewLit(3),
-		"band":   mustNewLit(4),
+		"income": dlit.MustNew(3),
+		"band":   dlit.MustNew(4),
 	}
 	numRecords := int64(1)
 	numBandGt4, err := NewCountAggregator("numBandGt4", "band > 3")

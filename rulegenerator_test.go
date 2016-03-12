@@ -13,69 +13,69 @@ func TestGenerateRules(t *testing.T) {
 		"team": &FieldDescription{
 			Kind: STRING,
 			Values: []*dlit.Literal{
-				mustNewLit("a"), mustNewLit("b"), mustNewLit("c"),
+				dlit.MustNew("a"), dlit.MustNew("b"), dlit.MustNew("c"),
 			},
 		},
 		"teamOut": &FieldDescription{
 			Kind: STRING,
 			Values: []*dlit.Literal{
-				mustNewLit("a"), mustNewLit("c"), mustNewLit("d"),
-				mustNewLit("e"), mustNewLit("f"),
+				dlit.MustNew("a"), dlit.MustNew("c"), dlit.MustNew("d"),
+				dlit.MustNew("e"), dlit.MustNew("f"),
 			},
 		},
 		"teamBob": &FieldDescription{
 			Kind: STRING,
 			Values: []*dlit.Literal{
-				mustNewLit("a"), mustNewLit("b"), mustNewLit("c"),
+				dlit.MustNew("a"), dlit.MustNew("b"), dlit.MustNew("c"),
 			},
 		},
 		"camp": &FieldDescription{
 			Kind: STRING,
 			Values: []*dlit.Literal{
-				mustNewLit("arthur"), mustNewLit("offa"),
-				mustNewLit("richard"), mustNewLit("owen"),
+				dlit.MustNew("arthur"), dlit.MustNew("offa"),
+				dlit.MustNew("richard"), dlit.MustNew("owen"),
 			},
 		},
 		"level": &FieldDescription{
 			Kind:  INT,
-			Min:   mustNewLit(0),
-			Max:   mustNewLit(5),
+			Min:   dlit.MustNew(0),
+			Max:   dlit.MustNew(5),
 			MaxDP: 0,
 			Values: []*dlit.Literal{
-				mustNewLit(0), mustNewLit(1), mustNewLit(2),
-				mustNewLit(3), mustNewLit(4), mustNewLit(5),
+				dlit.MustNew(0), dlit.MustNew(1), dlit.MustNew(2),
+				dlit.MustNew(3), dlit.MustNew(4), dlit.MustNew(5),
 			},
 		},
 		"levelBob": &FieldDescription{
 			Kind:  INT,
-			Min:   mustNewLit(0),
-			Max:   mustNewLit(5),
+			Min:   dlit.MustNew(0),
+			Max:   dlit.MustNew(5),
 			MaxDP: 0,
 			Values: []*dlit.Literal{
-				mustNewLit(0), mustNewLit(1), mustNewLit(2),
-				mustNewLit(3), mustNewLit(4), mustNewLit(5),
+				dlit.MustNew(0), dlit.MustNew(1), dlit.MustNew(2),
+				dlit.MustNew(3), dlit.MustNew(4), dlit.MustNew(5),
 			},
 		},
 		"flow": &FieldDescription{
 			Kind:  FLOAT,
-			Min:   mustNewLit(0),
-			Max:   mustNewLit(10.5),
+			Min:   dlit.MustNew(0),
+			Max:   dlit.MustNew(10.5),
 			MaxDP: 2,
 			Values: []*dlit.Literal{
-				mustNewLit(0.0), mustNewLit(2.34), mustNewLit(10.5),
+				dlit.MustNew(0.0), dlit.MustNew(2.34), dlit.MustNew(10.5),
 			},
 		},
 		"position": &FieldDescription{
 			Kind:  INT,
-			Min:   mustNewLit(1),
-			Max:   mustNewLit(13),
+			Min:   dlit.MustNew(1),
+			Max:   dlit.MustNew(13),
 			MaxDP: 0,
 			Values: []*dlit.Literal{
-				mustNewLit(1), mustNewLit(2), mustNewLit(3),
-				mustNewLit(4), mustNewLit(5), mustNewLit(6),
-				mustNewLit(7), mustNewLit(8), mustNewLit(9),
-				mustNewLit(10), mustNewLit(11), mustNewLit(12),
-				mustNewLit(13),
+				dlit.MustNew(1), dlit.MustNew(2), dlit.MustNew(3),
+				dlit.MustNew(4), dlit.MustNew(5), dlit.MustNew(6),
+				dlit.MustNew(7), dlit.MustNew(8), dlit.MustNew(9),
+				dlit.MustNew(10), dlit.MustNew(11), dlit.MustNew(12),
+				dlit.MustNew(13),
 			},
 		},
 	}

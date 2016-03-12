@@ -14,13 +14,13 @@ func TestAssess(t *testing.T) {
 		wantErr     error
 	}{
 		{mustNewDExpr("totalIncome > 5000"),
-			[]Aggregator{&DummyAggregator{"totalIncome", mustNewLit(5000)}},
+			[]Aggregator{&DummyAggregator{"totalIncome", dlit.MustNew(5000)}},
 			false, nil},
 		{mustNewDExpr("totalIncome > 5000"),
-			[]Aggregator{&DummyAggregator{"totalIncome", mustNewLit(5001)}},
+			[]Aggregator{&DummyAggregator{"totalIncome", dlit.MustNew(5001)}},
 			true, nil},
 		{mustNewDExpr("totalCosts < 5000"),
-			[]Aggregator{&DummyAggregator{"totalIncome", mustNewLit(9000)}},
+			[]Aggregator{&DummyAggregator{"totalIncome", dlit.MustNew(9000)}},
 			false,
 			dexpr.ErrInvalidExpr("Variable doesn't exist: totalCosts")},
 	}

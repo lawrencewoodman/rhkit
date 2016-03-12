@@ -15,11 +15,11 @@ func TestCalcGetResult(t *testing.T) {
 		mustNewCalcAggregator("d", "a + e"),
 	}
 	want := []*dlit.Literal{
-		mustNewLit(7),
-		mustNewLit(11),
-		mustNewLit(18),
-		mustNewLit(24),
-		mustNewLit(dexpr.ErrInvalidExpr("Variable doesn't exist: e")),
+		dlit.MustNew(7),
+		dlit.MustNew(11),
+		dlit.MustNew(18),
+		dlit.MustNew(24),
+		dlit.MustNew(dexpr.ErrInvalidExpr("Variable doesn't exist: e")),
 	}
 	numRecords := int64(12)
 	for i, aggregator := range aggregators {
