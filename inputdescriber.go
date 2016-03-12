@@ -143,8 +143,8 @@ func updateFieldNumBoundaries(value *dlit.Literal, fd *FieldDescription) {
 		if !valueIsInt || !minIsInt || !maxIsInt {
 			panic("Type mismatch")
 		}
-		fd.Min, _ = dlit.New(minI(minInt, valueInt))
-		fd.Max, _ = dlit.New(maxI(maxInt, valueInt))
+		fd.Min = dlit.MustNew(minI(minInt, valueInt))
+		fd.Max = dlit.MustNew(maxI(maxInt, valueInt))
 	} else if fd.Kind == FLOAT {
 		valueFloat, valueIsFloat := value.Float()
 		minFloat, minIsFloat := fd.Min.Float()
@@ -152,8 +152,8 @@ func updateFieldNumBoundaries(value *dlit.Literal, fd *FieldDescription) {
 		if !valueIsFloat || !minIsFloat || !maxIsFloat {
 			panic("Type mismatch")
 		}
-		fd.Min, _ = dlit.New(math.Min(minFloat, valueFloat))
-		fd.Max, _ = dlit.New(math.Max(maxFloat, valueFloat))
+		fd.Min = dlit.MustNew(math.Min(minFloat, valueFloat))
+		fd.Max = dlit.MustNew(math.Max(maxFloat, valueFloat))
 		fd.MaxDP = int(maxI(int64(fd.MaxDP), int64(numDecPlaces(value.String()))))
 	}
 }

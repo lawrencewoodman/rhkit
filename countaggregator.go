@@ -49,7 +49,7 @@ func (a *CountAggregator) NextRecord(record map[string]*dlit.Literal,
 
 func (a *CountAggregator) GetResult(
 	aggregators []Aggregator, numRecords int64) *dlit.Literal {
-	l, _ := dlit.New(a.numMatches)
+	l := dlit.MustNew(a.numMatches)
 	return l
 }
 

@@ -21,7 +21,7 @@ var callFuncs = map[string]dexpr.CallFun{
 func roundTo(args []*dlit.Literal) (*dlit.Literal, error) {
 	if len(args) > 2 {
 		err := errors.New("Too many arguments")
-		r, _ := dlit.New(err)
+		r := dlit.MustNew(err)
 		return r, err
 	}
 	x, isFloat := args[0].Float()
@@ -31,7 +31,7 @@ func roundTo(args []*dlit.Literal) (*dlit.Literal, error) {
 			return args[0], errors.New(args[0].String())
 		}
 		err := errors.New(fmt.Sprintf("Can't convert to float: %s", args[0]))
-		r, _ := dlit.New(err)
+		r := dlit.MustNew(err)
 		return r, err
 	}
 	p, isInt := args[1].Int()
@@ -41,7 +41,7 @@ func roundTo(args []*dlit.Literal) (*dlit.Literal, error) {
 			return args[1], errors.New(args[1].String())
 		}
 		err := errors.New(fmt.Sprintf("Can't convert to int: %s", args[0]))
-		r, _ := dlit.New(err)
+		r := dlit.MustNew(err)
 		return r, err
 	}
 	shift := math.Pow(10, float64(p))
@@ -53,7 +53,7 @@ func roundTo(args []*dlit.Literal) (*dlit.Literal, error) {
 func in(args []*dlit.Literal) (*dlit.Literal, error) {
 	if len(args) < 2 {
 		err := errors.New("Too few arguments")
-		r, _ := dlit.New(err)
+		r := dlit.MustNew(err)
 		return r, err
 	}
 	needle := args[0]
@@ -72,7 +72,7 @@ func in(args []*dlit.Literal) (*dlit.Literal, error) {
 func ni(args []*dlit.Literal) (*dlit.Literal, error) {
 	if len(args) < 2 {
 		err := errors.New("Too few arguments")
-		r, _ := dlit.New(err)
+		r := dlit.MustNew(err)
 		return r, err
 	}
 	needle := args[0]

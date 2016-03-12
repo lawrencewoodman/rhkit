@@ -52,6 +52,6 @@ func (ra *RuleAssessment) GetAggregatorValue(
 	}
 	// TODO: Test and create specific error type
 	err := errors.New("Aggregator doesn't exist")
-	l, _ := dlit.New(err)
+	l := dlit.MustNew(err)
 	return l, false
 }

@@ -21,7 +21,7 @@ func AggregatorsToMap(
 	numRecords int64,
 	thisName string) map[string]*dlit.Literal {
 	r := make(map[string]*dlit.Literal, len(aggregators))
-	numRecordsL, _ := dlit.New(numRecords)
+	numRecordsL := dlit.MustNew(numRecords)
 	r["numRecords"] = numRecordsL
 	for _, aggregator := range aggregators {
 		if thisName == aggregator.GetName() {
