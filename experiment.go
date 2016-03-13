@@ -24,6 +24,25 @@ type Experiment struct {
 	SortOrder             []SortField
 }
 
+type SortField struct {
+	Field     string
+	Direction direction
+}
+
+type direction int
+
+const (
+	ASCENDING direction = iota
+	DESCENDING
+)
+
+func (d direction) String() string {
+	if d == ASCENDING {
+		return "ascending"
+	}
+	return "descending"
+}
+
 type experimentFile struct {
 	FileFormatVersion     string
 	Title                 string

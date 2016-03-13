@@ -49,15 +49,15 @@ func TestAssessRules(t *testing.T) {
 			"band":   dlit.MustNew(9),
 		},
 	}
-	wantReport := Report{NumRecords: int64(len(records)),
-		RuleReports: []*RuleReport{
-			&RuleReport{
-				Rule: "band > 4",
-				Aggregators: map[string]string{
-					"numMatches":     "2",
-					"percentMatches": "50",
-					"numIncomeGt2":   "1",
-					"numBandGt4":     "2",
+	wantAssessment := Assessment{NumRecords: int64(len(records)),
+		RuleAssessments: []*RuleFinalAssessment{
+			&RuleFinalAssessment{
+				Rule: mustNewDExpr("band > 4"),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("2"),
+					"percentMatches": dlit.MustNew("50"),
+					"numIncomeGt2":   dlit.MustNew("1"),
+					"numBandGt4":     dlit.MustNew("2"),
 				},
 				Goals: map[string]bool{
 					"numIncomeGt2 == 1": true,
@@ -70,13 +70,13 @@ func TestAssessRules(t *testing.T) {
 					"numBandGt4 == 4":   false,
 				},
 			},
-			&RuleReport{
-				Rule: "band > 3",
-				Aggregators: map[string]string{
-					"numMatches":     "4",
-					"percentMatches": "100",
-					"numIncomeGt2":   "2",
-					"numBandGt4":     "2",
+			&RuleFinalAssessment{
+				Rule: mustNewDExpr("band > 3"),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("4"),
+					"percentMatches": dlit.MustNew("100"),
+					"numIncomeGt2":   dlit.MustNew("2"),
+					"numBandGt4":     dlit.MustNew("2"),
 				},
 				Goals: map[string]bool{
 					"numIncomeGt2 == 1": false,
@@ -89,13 +89,13 @@ func TestAssessRules(t *testing.T) {
 					"numBandGt4 == 4":   false,
 				},
 			},
-			&RuleReport{
-				Rule: "cost > 1.2",
-				Aggregators: map[string]string{
-					"numMatches":     "2",
-					"percentMatches": "50",
-					"numIncomeGt2":   "2",
-					"numBandGt4":     "1",
+			&RuleFinalAssessment{
+				Rule: mustNewDExpr("cost > 1.2"),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("2"),
+					"percentMatches": dlit.MustNew("50"),
+					"numIncomeGt2":   dlit.MustNew("2"),
+					"numBandGt4":     dlit.MustNew("1"),
 				},
 				Goals: map[string]bool{
 					"numIncomeGt2 == 1": false,
@@ -111,14 +111,14 @@ func TestAssessRules(t *testing.T) {
 		},
 	}
 	input := NewLiteralInput(records)
-	gotReport, err := AssessRules(rules, aggregators, goals, input)
+	gotAssessment, err := AssessRules(rules, aggregators, goals, input)
 	if err != nil {
 		t.Errorf("AssessRules(%q, %q, %q, input) - err: %q",
 			rules, aggregators, goals, err)
 	}
-	if !gotReport.IsEqual(&wantReport) {
+	if !gotAssessment.IsEqual(&wantAssessment) {
 		t.Errorf("AssessRules(%q, %q, %q, input)\ngot: %q\nwant: %q\n",
-			rules, aggregators, goals, gotReport, wantReport)
+			rules, aggregators, goals, gotAssessment, wantAssessment)
 	}
 }
 
@@ -164,15 +164,15 @@ func TestAssessRules_errors(t *testing.T) {
 }
 
 func TestSort(t *testing.T) {
-	report := Report{NumRecords: 8,
-		RuleReports: []*RuleReport{
-			&RuleReport{
-				Rule: "band > 9",
-				Aggregators: map[string]string{
-					"numMatches":     "5",
-					"percentMatches": "65.3",
-					"numIncomeGt2":   "3",
-					"numBandGt4":     "2",
+	assessment := Assessment{NumRecords: 8,
+		RuleAssessments: []*RuleFinalAssessment{
+			&RuleFinalAssessment{
+				Rule: mustNewDExpr("band > 9"),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("5"),
+					"percentMatches": dlit.MustNew("65.3"),
+					"numIncomeGt2":   dlit.MustNew("3"),
+					"numBandGt4":     dlit.MustNew("2"),
 				},
 				Goals: map[string]bool{
 					"numIncomeGt2 == 1": false,
@@ -185,13 +185,13 @@ func TestSort(t *testing.T) {
 					"numBandGt4 == 4":   true,
 				},
 			},
-			&RuleReport{
-				Rule: "band > 456",
-				Aggregators: map[string]string{
-					"numMatches":     "2",
-					"percentMatches": "50",
-					"numIncomeGt2":   "1",
-					"numBandGt4":     "2",
+			&RuleFinalAssessment{
+				Rule: mustNewDExpr("band > 456"),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("2"),
+					"percentMatches": dlit.MustNew("50"),
+					"numIncomeGt2":   dlit.MustNew("1"),
+					"numBandGt4":     dlit.MustNew("2"),
 				},
 				Goals: map[string]bool{
 					"numIncomeGt2 == 1": true,
@@ -204,13 +204,13 @@ func TestSort(t *testing.T) {
 					"numBandGt4 == 4":   false,
 				},
 			},
-			&RuleReport{
-				Rule: "band > 3",
-				Aggregators: map[string]string{
-					"numMatches":     "4",
-					"percentMatches": "76.3",
-					"numIncomeGt2":   "2",
-					"numBandGt4":     "2",
+			&RuleFinalAssessment{
+				Rule: mustNewDExpr("band > 3"),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("4"),
+					"percentMatches": dlit.MustNew("76.3"),
+					"numIncomeGt2":   dlit.MustNew("2"),
+					"numBandGt4":     dlit.MustNew("2"),
 				},
 				Goals: map[string]bool{
 					"numIncomeGt2 == 1": false,
@@ -223,13 +223,13 @@ func TestSort(t *testing.T) {
 					"numBandGt4 == 4":   false,
 				},
 			},
-			&RuleReport{
-				Rule: "cost > 1.2",
-				Aggregators: map[string]string{
-					"numMatches":     "2",
-					"percentMatches": "50",
-					"numIncomeGt2":   "2",
-					"numBandGt4":     "1",
+			&RuleFinalAssessment{
+				Rule: mustNewDExpr("cost > 1.2"),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("2"),
+					"percentMatches": dlit.MustNew("50"),
+					"numIncomeGt2":   dlit.MustNew("2"),
+					"numBandGt4":     dlit.MustNew("1"),
 				},
 				Goals: map[string]bool{
 					"numIncomeGt2 == 1": false,
@@ -262,8 +262,8 @@ func TestSort(t *testing.T) {
 			[]string{"band > 9", "band > 3", "cost > 1.2", "band > 456"}},
 	}
 	for _, c := range cases {
-		report.Sort(c.sortOrder)
-		gotRules := getReportRules(&report)
+		assessment.Sort(c.sortOrder)
+		gotRules := getAssessmentRules(&assessment)
 		rulesMatch, msg := matchRules(gotRules, c.wantRules)
 		if !rulesMatch {
 			t.Errorf("matchRules() rules don't match: %s\ngot: %s\nwant: %s\n",
@@ -272,10 +272,10 @@ func TestSort(t *testing.T) {
 	}
 }
 
-func getReportRules(report *Report) []string {
-	rules := make([]string, len(report.RuleReports))
-	for i, ruleReport := range report.RuleReports {
-		rules[i] = ruleReport.Rule
+func getAssessmentRules(assessment *Assessment) []string {
+	rules := make([]string, len(assessment.RuleAssessments))
+	for i, ruleAssessment := range assessment.RuleAssessments {
+		rules[i] = ruleAssessment.Rule.String()
 	}
 	return rules
 }

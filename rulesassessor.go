@@ -4,71 +4,55 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/lawrencewoodman/dexpr_go"
 	"github.com/lawrencewoodman/dlit_go"
 	"io"
+	"os"
 	"sort"
-	"strconv"
 )
 
-type Report struct {
-	NumRecords  int64
-	RuleReports []*RuleReport
+type Assessment struct {
+	NumRecords      int64
+	RuleAssessments []*RuleFinalAssessment
 }
 
-type RuleReport struct {
-	Rule        string
-	Aggregators map[string]string
+type RuleFinalAssessment struct {
+	Rule        *dexpr.Expr
+	Aggregators map[string]*dlit.Literal
 	Goals       map[string]bool
 }
 
-type SortField struct {
-	Field     string
-	Direction direction
-}
-
-type direction int
-
-const (
-	ASCENDING direction = iota
-	DESCENDING
-)
-
-func (d direction) String() string {
-	if d == ASCENDING {
-		return "ascending"
-	}
-	return "descending"
-}
-
-// by implements sort.Interface for []*RuleReports based on the sortFields
+// by implements sort.Interface for []*RuleFinalAssessments based
+// on the sortFields
 type by struct {
-	ruleReports []*RuleReport
-	sortFields  []SortField
+	ruleAssessments []*RuleFinalAssessment
+	sortFields      []SortField
 }
 
-func (b by) Len() int { return len(b.ruleReports) }
+func (b by) Len() int { return len(b.ruleAssessments) }
 func (b by) Swap(i, j int) {
-	b.ruleReports[i], b.ruleReports[j] = b.ruleReports[j], b.ruleReports[i]
+	b.ruleAssessments[i], b.ruleAssessments[j] =
+		b.ruleAssessments[j], b.ruleAssessments[i]
 }
 func (b by) Less(i, j int) bool {
-	var vI string
-	var vJ string
+	var vI *dlit.Literal
+	var vJ *dlit.Literal
 	for _, sortField := range b.sortFields {
 		field := sortField.Field
 		direction := sortField.Direction
 		// TODO: Perhaps ignore case
 		if field == "numGoalsPassed" {
 			// TODO: Work out if this should be calculated here, or elsewhere?
-			vI = calcNumGoalsPassedScore(b.ruleReports[i])
-			vJ = calcNumGoalsPassedScore(b.ruleReports[j])
+			vI = calcNumGoalsPassedScore(b.ruleAssessments[i])
+			vJ = calcNumGoalsPassedScore(b.ruleAssessments[j])
 		} else {
-			vI = b.ruleReports[i].Aggregators[field]
-			vJ = b.ruleReports[j].Aggregators[field]
+			vI = b.ruleAssessments[i].Aggregators[field]
+			vJ = b.ruleAssessments[j].Aggregators[field]
 		}
-		c := compareStrNums(vI, vJ)
+		c := compareDlitNums(vI, vJ)
 
 		if direction == DESCENDING {
 			c *= -1
@@ -80,15 +64,15 @@ func (b by) Less(i, j int) bool {
 		}
 	}
 
-	ruleLenI := len(b.ruleReports[i].Rule)
-	ruleLenJ := len(b.ruleReports[j].Rule)
+	ruleLenI := len(b.ruleAssessments[i].Rule.String())
+	ruleLenJ := len(b.ruleAssessments[j].Rule.String())
 	return ruleLenI < ruleLenJ
 }
 
-func compareStrNums(nStr1 string, nStr2 string) int {
-	i1, errI1 := strconv.ParseInt(nStr1, 10, 64)
-	i2, errI2 := strconv.ParseInt(nStr2, 10, 64)
-	if errI1 == nil && errI2 == nil {
+func compareDlitNums(l1 *dlit.Literal, l2 *dlit.Literal) int {
+	i1, l1IsInt := l1.Int()
+	i2, l2IsInt := l2.Int()
+	if l1IsInt && l2IsInt {
 		if i1 < i2 {
 			return -1
 		}
@@ -97,9 +81,11 @@ func compareStrNums(nStr1 string, nStr2 string) int {
 		}
 		return 0
 	}
-	f1, errF1 := strconv.ParseFloat(nStr1, 64)
-	f2, errF2 := strconv.ParseFloat(nStr2, 64)
-	if errF1 == nil && errF2 == nil {
+
+	f1, l1IsFloat := l1.Float()
+	f2, l2IsFloat := l2.Float()
+
+	if l1IsFloat && l2IsFloat {
 		if f1 < f2 {
 			return -1
 		}
@@ -108,35 +94,35 @@ func compareStrNums(nStr1 string, nStr2 string) int {
 		}
 		return 0
 	}
-	panic(fmt.Sprintf("Can't compare strings as numbers: %s, %s", nStr1, nStr2))
+	panic(fmt.Sprintf("Can't compare numbers: %s, %s", l1, l2))
 }
 
-func (r *Report) Sort(s []SortField) {
-	sort.Sort(by{r.RuleReports, s})
+func (r *Assessment) Sort(s []SortField) {
+	sort.Sort(by{r.RuleAssessments, s})
 }
 
 // TODO: Test this
-func (r *Report) IsEqual(o *Report) bool {
+func (r *Assessment) IsEqual(o *Assessment) bool {
 	if r.NumRecords != o.NumRecords {
 		return false
 	}
-	for i, ruleReport := range r.RuleReports {
-		if !ruleReport.isEqual(o.RuleReports[i]) {
+	for i, ruleAssessment := range r.RuleAssessments {
+		if !ruleAssessment.isEqual(o.RuleAssessments[i]) {
 			return false
 		}
 	}
 	return true
 }
 
-func (r *RuleReport) isEqual(o *RuleReport) bool {
-	if r.Rule != o.Rule {
+func (r *RuleFinalAssessment) isEqual(o *RuleFinalAssessment) bool {
+	if r.Rule.String() != o.Rule.String() {
 		return false
 	}
 	if len(r.Aggregators) != len(o.Aggregators) {
 		return false
 	}
 	for aName, value := range r.Aggregators {
-		if o.Aggregators[aName] != value {
+		if o.Aggregators[aName].String() != value.String() {
 			return false
 		}
 	}
@@ -151,9 +137,42 @@ func (r *RuleReport) isEqual(o *RuleReport) bool {
 	return true
 }
 
-func (r *RuleReport) String() string {
+func (r *RuleFinalAssessment) String() string {
 	return fmt.Sprintf("Rule: %s, Aggregators: %s, Goals: %s",
 		r.Rule, r.Aggregators, r.Goals)
+}
+
+type JReport struct {
+	NumRecords      int64
+	RuleAssessments []*JRuleReport
+}
+
+type JRuleReport struct {
+	Rule        string
+	Aggregators map[string]string
+	Goals       map[string]bool
+}
+
+func (a *Assessment) ToJSON() (string, error) {
+	jRuleAssessments := make([]*JRuleReport, len(a.RuleAssessments))
+	for i, ruleAssessment := range a.RuleAssessments {
+		jRuleAssessments[i] = makeJRuleReport(ruleAssessment)
+	}
+	jReport := &JReport{a.NumRecords, jRuleAssessments}
+	//fmt.Printf("jReport: %s\n", jReport)
+	b, err := json.MarshalIndent(jReport, "", "  ")
+	if err != nil {
+		os.Stdout.Write(b)
+	}
+	return string(b[:]), err
+}
+
+func makeJRuleReport(r *RuleFinalAssessment) *JRuleReport {
+	aggregators := make(map[string]string, len(r.Aggregators))
+	for n, l := range r.Aggregators {
+		aggregators[n] = l.String()
+	}
+	return &JRuleReport{r.Rule.String(), aggregators, r.Goals}
 }
 
 type ErrNameConflict string
@@ -164,14 +183,14 @@ func (e ErrNameConflict) Error() string {
 
 // need a progress callback and a specifier for how often to report
 func AssessRules(rules []*dexpr.Expr, aggregators []Aggregator,
-	goals []*dexpr.Expr, input Input) (*Report, error) {
+	goals []*dexpr.Expr, input Input) (*Assessment, error) {
 	var allAggregators []Aggregator
 	var numRecords int64
 	var err error
 
 	allAggregators, err = prependDefaultAggregators(aggregators)
 	if err != nil {
-		return &Report{}, err
+		return &Assessment{}, err
 	}
 	/*
 		TODO: Put this test somewhere else
@@ -187,42 +206,37 @@ func AssessRules(rules []*dexpr.Expr, aggregators []Aggregator,
 	}
 	numRecords, err = processInput(input, ruleAssessments)
 	if err != nil {
-		return &Report{}, err
+		return &Assessment{}, err
 	}
 	goodRuleAssessments, err := filterGoodReports(ruleAssessments, numRecords)
 	if err != nil {
-		return &Report{}, err
+		return &Assessment{}, err
 	}
 
-	report, err := makeReport(numRecords, goodRuleAssessments, goals)
+	report, err := makeAssessment(numRecords, goodRuleAssessments, goals)
 	return report, err
 }
 
-func makeReport(numRecords int64, goodRuleAssessments []*RuleAssessment,
-	goals []*dexpr.Expr) (*Report, error) {
-	ruleReports := make([]*RuleReport, len(goodRuleAssessments))
+func makeAssessment(numRecords int64, goodRuleAssessments []*RuleAssessment,
+	goals []*dexpr.Expr) (*Assessment, error) {
+	ruleAssessments := make([]*RuleFinalAssessment, len(goodRuleAssessments))
 	for i, ruleAssessment := range goodRuleAssessments {
-		rule := ruleAssessment.rule.String()
+		rule := ruleAssessment.rule
 		aggregators :=
 			AggregatorsToMap(ruleAssessment.aggregators, numRecords, "")
 		goals, err := GoalsToMap(ruleAssessment.goals, aggregators)
 		if err != nil {
-			return &Report{}, err
+			return &Assessment{}, err
 		}
 		delete(aggregators, "numRecords")
-		ruleReports[i] = &RuleReport{Rule: rule,
-			Aggregators: makeRuleReportAggregators(aggregators), Goals: goals}
+		ruleAssessments[i] = &RuleFinalAssessment{
+			Rule:        rule,
+			Aggregators: aggregators,
+			Goals:       goals,
+		}
 	}
-	return &Report{NumRecords: numRecords, RuleReports: ruleReports}, nil
-}
-
-func makeRuleReportAggregators(
-	aMap map[string]*dlit.Literal) map[string]string {
-	r := make(map[string]string, len(aMap))
-	for n, v := range aMap {
-		r[n] = v.String()
-	}
-	return r
+	return &Assessment{NumRecords: numRecords,
+		RuleAssessments: ruleAssessments}, nil
 }
 
 func filterGoodReports(
@@ -295,7 +309,7 @@ func prependDefaultAggregators(aggregators []Aggregator) ([]Aggregator, error) {
 	return newAggregators, nil
 }
 
-func calcNumGoalsPassedScore(r *RuleReport) string {
+func calcNumGoalsPassedScore(r *RuleFinalAssessment) *dlit.Literal {
 	numGoalsPassed := 0.0
 	increment := 1.0
 	for _, goalPassed := range r.Goals {
@@ -305,7 +319,7 @@ func calcNumGoalsPassedScore(r *RuleReport) string {
 			increment = 0.001
 		}
 	}
-	return fmt.Sprintf("%f", numGoalsPassed)
+	return dlit.MustNew(numGoalsPassed)
 }
 
 /* TODO: Put this somewhere else

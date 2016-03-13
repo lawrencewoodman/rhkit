@@ -4,7 +4,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/lawrencewoodman/dexpr_go"
 	"log"
@@ -41,17 +40,17 @@ func main() {
 	}
 	fmt.Printf("ok (%d generated)\n", len(rules))
 
-	report, err :=
+	assessment, err :=
 		AssessRules(rules, experiment.Aggregators, experiment.Goals, input)
 	if err != nil {
 		fmt.Printf("Couldn't make report: %s\n", err)
 	} else {
-		report.Sort(experiment.SortOrder)
-		b, err := json.MarshalIndent(report, "", "  ")
+		assessment.Sort(experiment.SortOrder)
+		s, err := assessment.ToJSON()
 		if err != nil {
 			fmt.Printf("Couldn't make report json: %s\n", err)
 		} else {
-			os.Stdout.Write(b)
+			fmt.Println(s)
 		}
 	}
 }
