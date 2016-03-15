@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/lawrencewoodman/dexpr_go"
 	"github.com/lawrencewoodman/dlit_go"
+	"reflect"
 	"testing"
 )
 
@@ -271,6 +272,68 @@ func TestSort(t *testing.T) {
 		}
 	}
 }
+
+func TestGetRuleStrings(t *testing.T) {
+	assessment := Assessment{NumRecords: 8,
+		RuleAssessments: []*RuleFinalAssessment{
+			&RuleFinalAssessment{
+				Rule: mustNewDExpr("band > 9"),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("5"),
+					"percentMatches": dlit.MustNew("65.3"),
+				},
+				Goals: map[string]bool{
+					"numMatches > 3 ": true,
+				},
+			},
+			&RuleFinalAssessment{
+				Rule: mustNewDExpr("band > 456"),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("2"),
+					"percentMatches": dlit.MustNew("50"),
+				},
+				Goals: map[string]bool{
+					"numMatches > 3 ": false,
+				},
+			},
+			&RuleFinalAssessment{
+				Rule: mustNewDExpr("band > 3"),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("4"),
+					"percentMatches": dlit.MustNew("76.3"),
+				},
+				Goals: map[string]bool{
+					"numMatches > 3 ": true,
+				},
+			},
+			&RuleFinalAssessment{
+				Rule: mustNewDExpr("cost > 1.2"),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("2"),
+					"percentMatches": dlit.MustNew("50"),
+				},
+				Goals: map[string]bool{
+					"numMatches > 3 ": false,
+				},
+			},
+		},
+	}
+	wantRules := []string{
+		"band > 9",
+		"band > 456",
+		"band > 3",
+		"cost > 1.2",
+	}
+	gotRules := assessment.GetRuleStrings()
+	if !reflect.DeepEqual(gotRules, wantRules) {
+		t.Errorf("GetRuleString() rules don't match\ngot: %s\nwant: %s\n",
+			gotRules, wantRules)
+	}
+}
+
+/******************************
+ *  Helper functions
+ ******************************/
 
 func getAssessmentRules(assessment *Assessment) []string {
 	rules := make([]string, len(assessment.RuleAssessments))

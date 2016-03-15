@@ -159,7 +159,6 @@ func (a *Assessment) ToJSON() (string, error) {
 		jRuleAssessments[i] = makeJRuleReport(ruleAssessment)
 	}
 	jReport := &JReport{a.NumRecords, jRuleAssessments}
-	//fmt.Printf("jReport: %s\n", jReport)
 	b, err := json.MarshalIndent(jReport, "", "  ")
 	if err != nil {
 		os.Stdout.Write(b)
@@ -173,6 +172,14 @@ func makeJRuleReport(r *RuleFinalAssessment) *JRuleReport {
 		aggregators[n] = l.String()
 	}
 	return &JRuleReport{r.Rule.String(), aggregators, r.Goals}
+}
+
+func (a *Assessment) GetRuleStrings() []string {
+	r := make([]string, len(a.RuleAssessments))
+	for i, ruleAssessment := range a.RuleAssessments {
+		r[i] = ruleAssessment.Rule.String()
+	}
+	return r
 }
 
 type ErrNameConflict string
