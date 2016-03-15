@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/lawrencewoodman/dexpr_go"
 	"github.com/lawrencewoodman/dlit_go"
 	"regexp"
 	"sort"
@@ -255,7 +254,7 @@ var matchFieldInNiRegexp = regexp.MustCompile("^((in\\(|ni\\()+)([^ ,]+)(.*)$")
 var matchFieldMatchRegexp = regexp.MustCompile("^([^ (]+)( .*)$")
 
 func getFieldRules(
-	field string, rules []*dexpr.Expr) []string {
+	field string, rules []*Rule) []string {
 	fieldRules := make([]string, 0)
 	for _, rule := range rules {
 		ruleStr := rule.String()

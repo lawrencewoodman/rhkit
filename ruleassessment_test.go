@@ -37,22 +37,22 @@ func TestNextRecord(t *testing.T) {
 	}
 	numRecords := int64(len(records))
 	cases := []struct {
-		rule             *dexpr.Expr
+		rule             *Rule
 		goals            []*dexpr.Expr
 		wantNumIncomeGt2 int64
 		wantNumBandGt4   int64
 	}{
-		{mustNewDExpr("band > 4"),
+		{mustNewRule("band > 4"),
 			[]*dexpr.Expr{
 				mustNewDExpr("numIncomeGt2 == 1"),
 				mustNewDExpr("numBandGt4 == 2"),
 			}, 1, 2},
-		{mustNewDExpr("band > 3"),
+		{mustNewRule("band > 3"),
 			[]*dexpr.Expr{
 				mustNewDExpr("numIncomeGt2 == 2"),
 				mustNewDExpr("numBandGt4 == 2"),
 			}, 2, 2},
-		{mustNewDExpr("cost > 1.2"),
+		{mustNewRule("cost > 1.2"),
 			[]*dexpr.Expr{
 				mustNewDExpr("numIncomeGt2 == 2"),
 				mustNewDExpr("numBandGt4 == 1"),
@@ -104,26 +104,26 @@ func TestNextRecord_Errors(t *testing.T) {
 		map[string]*dlit.Literal{"income": dlit.MustNew(0), "band": dlit.MustNew(9)},
 	}
 	cases := []struct {
-		rule        *dexpr.Expr
+		rule        *Rule
 		aggregators []Aggregator
 		goals       []*dexpr.Expr
 		wantErr     error
 	}{
-		{mustNewDExpr("band > 4"),
+		{mustNewRule("band > 4"),
 			[]Aggregator{mustNewCountAggregator("numIncomeGt2", "income > 2")},
 			[]*dexpr.Expr{mustNewDExpr("numIncomeGt2 == 1")}, nil},
-		{mustNewDExpr("band > 4"),
+		{mustNewRule("band > 4"),
 			[]Aggregator{mustNewCountAggregator("numIncomeGt2", "fred > 2")},
 			[]*dexpr.Expr{mustNewDExpr("numIncomeGt2 == 1")},
 			dexpr.ErrInvalidExpr("Variable doesn't exist: fred")},
-		{mustNewDExpr("band > 4"),
+		{mustNewRule("band > 4"),
 			[]Aggregator{mustNewCountAggregator("numIncomeGt2", "income > 2")},
 			[]*dexpr.Expr{mustNewDExpr("numIncomeGt == 1")}, nil},
-		{mustNewDExpr("hand > 4"),
+		{mustNewRule("hand > 4"),
 			[]Aggregator{mustNewCountAggregator("numIncomeGt2", "income > 2")},
 			[]*dexpr.Expr{mustNewDExpr("numIncomeGt == 1")},
 			dexpr.ErrInvalidExpr("Variable doesn't exist: hand")},
-		{mustNewDExpr("band ^^ 4"),
+		{mustNewRule("band ^^ 4"),
 			[]Aggregator{mustNewCountAggregator("numIncomeGt2", "income > 2")},
 			[]*dexpr.Expr{mustNewDExpr("numIncomeGt == 1")},
 			dexpr.ErrInvalidExpr("Invalid operator: \"^\"")},

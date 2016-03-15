@@ -10,15 +10,18 @@ import (
 )
 
 type RuleAssessment struct {
-	rule        *dexpr.Expr
+	rule        *Rule
 	aggregators []Aggregator
 	goals       []*dexpr.Expr
 }
 
 // Note: This clones the aggregators to ensure the results are specific
 //       to the rule.
-func NewRuleAssessment(rule *dexpr.Expr, aggregators []Aggregator,
-	goals []*dexpr.Expr) *RuleAssessment {
+func NewRuleAssessment(
+	rule *Rule,
+	aggregators []Aggregator,
+	goals []*dexpr.Expr,
+) *RuleAssessment {
 	cloneAggregators := make([]Aggregator, len(aggregators))
 	for i, a := range aggregators {
 		cloneAggregators[i] = a.CloneNew()
@@ -31,7 +34,7 @@ func (ra *RuleAssessment) NextRecord(record map[string]*dlit.Literal) error {
 	var ruleIsTrue bool
 	var err error
 	for _, aggregator := range ra.aggregators {
-		ruleIsTrue, err = ra.rule.EvalBool(record, callFuncs)
+		ruleIsTrue, err = ra.rule.IsTrue(record)
 		if err != nil {
 			return err
 		}

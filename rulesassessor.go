@@ -20,7 +20,7 @@ type Assessment struct {
 }
 
 type RuleFinalAssessment struct {
-	Rule        *dexpr.Expr
+	Rule        *Rule
 	Aggregators map[string]*dlit.Literal
 	Goals       map[string]bool
 }
@@ -189,7 +189,7 @@ func (e ErrNameConflict) Error() string {
 }
 
 // need a progress callback and a specifier for how often to report
-func AssessRules(rules []*dexpr.Expr, aggregators []Aggregator,
+func AssessRules(rules []*Rule, aggregators []Aggregator,
 	goals []*dexpr.Expr, input Input) (*Assessment, error) {
 	var allAggregators []Aggregator
 	var numRecords int64

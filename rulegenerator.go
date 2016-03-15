@@ -14,12 +14,12 @@ import (
 )
 
 type ruleGeneratorFunc func(map[string]*FieldDescription,
-	[]string, string) ([]*dexpr.Expr, error)
+	[]string, string) ([]*Rule, error)
 
 func GenerateRules(
 	fieldDescriptions map[string]*FieldDescription,
-	excludeFields []string) ([]*dexpr.Expr, error) {
-	rules := make([]*dexpr.Expr, 0)
+	excludeFields []string) ([]*Rule, error) {
+	rules := make([]*Rule, 0)
 	ruleGenerators := []ruleGeneratorFunc{
 		generateIntRules, generateFloatRules, generateStringRules,
 		generateCompareNumericRules, generateCompareStringRules,
@@ -50,12 +50,14 @@ func stringInSlice(s string, strings []string) bool {
 
 func generateIntRules(
 	fieldDescriptions map[string]*FieldDescription,
-	excludeFields []string, field string) ([]*dexpr.Expr, error) {
+	excludeFields []string,
+	field string,
+) ([]*Rule, error) {
 	fd := fieldDescriptions[field]
 	if fd.Kind != INT {
-		return []*dexpr.Expr{}, nil
+		return []*Rule{}, nil
 	}
-	rulesMap := make(map[string]*dexpr.Expr)
+	rulesMap := make(map[string]*Rule)
 	min, _ := fd.Min.Int()
 	max, _ := fd.Max.Int()
 	values := fd.Values
@@ -68,7 +70,7 @@ func generateIntRules(
 	for i := int64(0); i < diff; i += step {
 		n := min + i
 		exprStr := fmt.Sprintf("%s >= %d", field, n)
-		rule, err := dexpr.New(exprStr)
+		rule, err := NewRule(exprStr)
 		if err != nil {
 			return nil, err
 		}
@@ -78,7 +80,7 @@ func generateIntRules(
 	for i := step; i <= diff; i += step {
 		n := min + i
 		exprStr := fmt.Sprintf("%s <= %d", field, n)
-		rule, err := dexpr.New(exprStr)
+		rule, err := NewRule(exprStr)
 		if err != nil {
 			return nil, err
 		}
@@ -92,14 +94,14 @@ func generateIntRules(
 				return nil, errors.New(fmt.Sprintf("value isn't int: %s", v))
 			}
 			exprStr := fmt.Sprintf("%s == %d", field, n)
-			rule, err := dexpr.New(exprStr)
+			rule, err := NewRule(exprStr)
 			if err != nil {
 				return nil, err
 			}
 			rulesMap[exprStr] = rule
 
 			exprStr = fmt.Sprintf("%s != %d", field, n)
-			rule, err = dexpr.New(exprStr)
+			rule, err = NewRule(exprStr)
 			if err != nil {
 				return nil, err
 			}
@@ -121,12 +123,12 @@ func floatToString(f float64, maxDP int) string {
 
 func generateFloatRules(
 	fieldDescriptions map[string]*FieldDescription,
-	excludeFields []string, field string) ([]*dexpr.Expr, error) {
+	excludeFields []string, field string) ([]*Rule, error) {
 	fd := fieldDescriptions[field]
 	if fd.Kind != FLOAT {
-		return []*dexpr.Expr{}, nil
+		return []*Rule{}, nil
 	}
-	rulesMap := make(map[string]*dexpr.Expr)
+	rulesMap := make(map[string]*Rule)
 	min, _ := fd.Min.Float()
 	max, _ := fd.Max.Float()
 	maxDP := fd.MaxDP
@@ -139,7 +141,7 @@ func generateFloatRules(
 		n := min + i
 		nStr := floatToString(n, maxDP)
 		exprStr := fmt.Sprintf("%s >= %s", field, nStr)
-		rule, err := dexpr.New(exprStr)
+		rule, err := NewRule(exprStr)
 		if err != nil {
 			return nil, err
 		}
@@ -150,7 +152,7 @@ func generateFloatRules(
 		n := min + i
 		nStr := floatToString(n, maxDP)
 		exprStr := fmt.Sprintf("%s <= %s", field, nStr)
-		rule, err := dexpr.New(exprStr)
+		rule, err := NewRule(exprStr)
 		if err != nil {
 			return nil, err
 		}
@@ -165,14 +167,14 @@ func generateFloatRules(
 			}
 			nStr := floatToString(n, maxDP)
 			exprStr := fmt.Sprintf("%s == %s", field, nStr)
-			rule, err := dexpr.New(exprStr)
+			rule, err := NewRule(exprStr)
 			if err != nil {
 				return nil, err
 			}
 			rulesMap[exprStr] = rule
 
 			exprStr = fmt.Sprintf("%s != %s", field, nStr)
-			rule, err = dexpr.New(exprStr)
+			rule, err = NewRule(exprStr)
 			if err != nil {
 				return nil, err
 			}
@@ -185,13 +187,15 @@ func generateFloatRules(
 
 func generateCompareNumericRules(
 	fieldDescriptions map[string]*FieldDescription,
-	excludeFields []string, field string) ([]*dexpr.Expr, error) {
+	excludeFields []string,
+	field string,
+) ([]*Rule, error) {
 	fd := fieldDescriptions[field]
 	if fd.Kind != INT && fd.Kind != FLOAT {
-		return []*dexpr.Expr{}, nil
+		return []*Rule{}, nil
 	}
 	fieldNum := calcFieldNum(fieldDescriptions, field)
-	rulesMap := make(map[string]*dexpr.Expr)
+	rulesMap := make(map[string]*Rule)
 	exprFmts := []string{
 		"%s < %s", "%s <= %s", "%s == %s", "%s != %s", "%s >= %s", "%s > %s",
 	}
@@ -204,7 +208,7 @@ func generateCompareNumericRules(
 			!stringInSlice(oField, excludeFields) {
 			for _, exprFmt := range exprFmts {
 				exprStr := fmt.Sprintf(exprFmt, field, oField)
-				rule, err := dexpr.New(exprStr)
+				rule, err := NewRule(exprStr)
 				if err != nil {
 					return nil, err
 				}
@@ -218,13 +222,15 @@ func generateCompareNumericRules(
 
 func generateCompareStringRules(
 	fieldDescriptions map[string]*FieldDescription,
-	excludeFields []string, field string) ([]*dexpr.Expr, error) {
+	excludeFields []string,
+	field string,
+) ([]*Rule, error) {
 	fd := fieldDescriptions[field]
 	if fd.Kind != STRING {
-		return []*dexpr.Expr{}, nil
+		return []*Rule{}, nil
 	}
 	fieldNum := calcFieldNum(fieldDescriptions, field)
-	rulesMap := make(map[string]*dexpr.Expr)
+	rulesMap := make(map[string]*Rule)
 	exprFmts := []string{
 		"%s == %s", "%s != %s",
 	}
@@ -237,7 +243,7 @@ func generateCompareStringRules(
 				!stringInSlice(oField, excludeFields) {
 				for _, exprFmt := range exprFmts {
 					exprStr := fmt.Sprintf(exprFmt, field, oField)
-					rule, err := dexpr.New(exprStr)
+					rule, err := NewRule(exprStr)
 					if err != nil {
 						return nil, err
 					}
@@ -264,24 +270,24 @@ func calcNumSharedValues(fd1 *FieldDescription, fd2 *FieldDescription) int {
 
 func generateStringRules(
 	fieldDescriptions map[string]*FieldDescription,
-	excludeFields []string, field string) ([]*dexpr.Expr, error) {
+	excludeFields []string, field string) ([]*Rule, error) {
 	fd := fieldDescriptions[field]
 	if fd.Kind != STRING {
-		return []*dexpr.Expr{}, nil
+		return []*Rule{}, nil
 	}
-	rulesMap := make(map[string]*dexpr.Expr)
+	rulesMap := make(map[string]*Rule)
 
 	for _, v := range fd.Values {
 		s := v.String()
 		exprStr := fmt.Sprintf("%s == \"%s\"", field, s)
-		rule, err := dexpr.New(exprStr)
+		rule, err := NewRule(exprStr)
 		if err != nil {
 			return nil, err
 		}
 		rulesMap[exprStr] = rule
 		if len(fd.Values) > 2 {
 			exprStr := fmt.Sprintf("%s != \"%s\"", field, s)
-			rule, err := dexpr.New(exprStr)
+			rule, err := NewRule(exprStr)
 			if err != nil {
 				return nil, err
 			}
@@ -320,8 +326,8 @@ func hasComparableNumberRange(
 	return isComparable
 }
 
-func rulesMapToArray(rulesMap map[string]*dexpr.Expr) []*dexpr.Expr {
-	rules := make([]*dexpr.Expr, len(rulesMap))
+func rulesMapToArray(rulesMap map[string]*Rule) []*Rule {
+	rules := make([]*Rule, len(rulesMap))
 	i := 0
 	for _, expr := range rulesMap {
 		rules[i] = expr
@@ -332,14 +338,16 @@ func rulesMapToArray(rulesMap map[string]*dexpr.Expr) []*dexpr.Expr {
 
 func generateInNiRules(
 	fieldDescriptions map[string]*FieldDescription,
-	excludeFields []string, field string) ([]*dexpr.Expr, error) {
+	excludeFields []string,
+	field string,
+) ([]*Rule, error) {
 	fd := fieldDescriptions[field]
 	numValues := len(fd.Values)
 	if fd.Kind != STRING && fd.Kind != FLOAT && fd.Kind != INT ||
 		numValues <= 3 || numValues > 12 {
-		return []*dexpr.Expr{}, nil
+		return []*Rule{}, nil
 	}
-	rulesMap := make(map[string]*dexpr.Expr)
+	rulesMap := make(map[string]*Rule)
 	exprFmts := []string{
 		"in(%s,%s)", "ni(%s,%s)",
 	}
@@ -352,7 +360,7 @@ func generateInNiRules(
 			compareValuesStr := makeCompareValuesStr(fd.Values, i)
 			for _, exprFmt := range exprFmts {
 				exprStr := fmt.Sprintf(exprFmt, field, compareValuesStr)
-				rule, err := dexpr.New(exprStr)
+				rule, err := NewRule(exprStr)
 				if err != nil {
 					return nil, err
 				}
