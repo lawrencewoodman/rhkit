@@ -273,7 +273,7 @@ func TestSort(t *testing.T) {
 	}
 }
 
-func TestGetRuleStrings(t *testing.T) {
+func TestGetRules(t *testing.T) {
 	assessment := Assessment{NumRecords: 8,
 		RuleAssessments: []*RuleFinalAssessment{
 			&RuleFinalAssessment{
@@ -318,16 +318,262 @@ func TestGetRuleStrings(t *testing.T) {
 			},
 		},
 	}
-	wantRules := []string{
-		"band > 9",
-		"band > 456",
-		"band > 3",
-		"cost > 1.2",
+	wantRules := []*Rule{
+		mustNewRule("band > 9"),
+		mustNewRule("band > 456"),
+		mustNewRule("band > 3"),
+		mustNewRule("cost > 1.2"),
 	}
-	gotRules := assessment.GetRuleStrings()
+	gotRules := assessment.GetRules()
 	if !reflect.DeepEqual(gotRules, wantRules) {
 		t.Errorf("GetRuleString() rules don't match\ngot: %s\nwant: %s\n",
 			gotRules, wantRules)
+	}
+}
+
+func TestMerge(t *testing.T) {
+	assessment1 := &Assessment{NumRecords: 8,
+		RuleAssessments: []*RuleFinalAssessment{
+			&RuleFinalAssessment{
+				Rule: mustNewRule("band > 9"),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("5"),
+					"percentMatches": dlit.MustNew("65.3"),
+				},
+				Goals: map[string]bool{
+					"numMatches > 3 ": true,
+				},
+			},
+			&RuleFinalAssessment{
+				Rule: mustNewRule("band > 456"),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("2"),
+					"percentMatches": dlit.MustNew("50"),
+				},
+				Goals: map[string]bool{
+					"numMatches > 3 ": false,
+				},
+			},
+			&RuleFinalAssessment{
+				Rule: mustNewRule("band > 3"),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("4"),
+					"percentMatches": dlit.MustNew("76.3"),
+				},
+				Goals: map[string]bool{
+					"numMatches > 3 ": true,
+				},
+			},
+			&RuleFinalAssessment{
+				Rule: mustNewRule("cost > 1.2"),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("2"),
+					"percentMatches": dlit.MustNew("50"),
+				},
+				Goals: map[string]bool{
+					"numMatches > 3 ": false,
+				},
+			},
+		},
+	}
+	assessment2 := &Assessment{NumRecords: 8,
+		RuleAssessments: []*RuleFinalAssessment{
+			&RuleFinalAssessment{
+				Rule: mustNewRule("band > 16"),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("8"),
+					"percentMatches": dlit.MustNew("5.3"),
+				},
+				Goals: map[string]bool{
+					"numMatches > 3 ": true,
+				},
+			},
+			&RuleFinalAssessment{
+				Rule: mustNewRule("team == \"Pi\""),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("3"),
+					"percentMatches": dlit.MustNew("19"),
+				},
+				Goals: map[string]bool{
+					"numMatches > 3 ": false,
+				},
+			},
+			&RuleFinalAssessment{
+				Rule: mustNewRule("band > 36"),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("2"),
+					"percentMatches": dlit.MustNew("6.3"),
+				},
+				Goals: map[string]bool{
+					"numMatches > 3 ": false,
+				},
+			},
+			&RuleFinalAssessment{
+				Rule: mustNewRule("cost > 1.27"),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("3"),
+					"percentMatches": dlit.MustNew("3.5"),
+				},
+				Goals: map[string]bool{
+					"numMatches > 3 ": false,
+				},
+			},
+		},
+	}
+
+	wantAssessment := &Assessment{NumRecords: 8,
+		RuleAssessments: []*RuleFinalAssessment{
+			&RuleFinalAssessment{
+				Rule: mustNewRule("band > 9"),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("5"),
+					"percentMatches": dlit.MustNew("65.3"),
+				},
+				Goals: map[string]bool{
+					"numMatches > 3 ": true,
+				},
+			},
+			&RuleFinalAssessment{
+				Rule: mustNewRule("band > 456"),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("2"),
+					"percentMatches": dlit.MustNew("50"),
+				},
+				Goals: map[string]bool{
+					"numMatches > 3 ": false,
+				},
+			},
+			&RuleFinalAssessment{
+				Rule: mustNewRule("band > 3"),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("4"),
+					"percentMatches": dlit.MustNew("76.3"),
+				},
+				Goals: map[string]bool{
+					"numMatches > 3 ": true,
+				},
+			},
+			&RuleFinalAssessment{
+				Rule: mustNewRule("cost > 1.2"),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("2"),
+					"percentMatches": dlit.MustNew("50"),
+				},
+				Goals: map[string]bool{
+					"numMatches > 3 ": false,
+				},
+			},
+			&RuleFinalAssessment{
+				Rule: mustNewRule("band > 16"),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("8"),
+					"percentMatches": dlit.MustNew("5.3"),
+				},
+				Goals: map[string]bool{
+					"numMatches > 3 ": true,
+				},
+			},
+			&RuleFinalAssessment{
+				Rule: mustNewRule("team == \"Pi\""),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("3"),
+					"percentMatches": dlit.MustNew("19"),
+				},
+				Goals: map[string]bool{
+					"numMatches > 3 ": false,
+				},
+			},
+			&RuleFinalAssessment{
+				Rule: mustNewRule("band > 36"),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("2"),
+					"percentMatches": dlit.MustNew("6.3"),
+				},
+				Goals: map[string]bool{
+					"numMatches > 3 ": false,
+				},
+			},
+			&RuleFinalAssessment{
+				Rule: mustNewRule("cost > 1.27"),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("3"),
+					"percentMatches": dlit.MustNew("3.5"),
+				},
+				Goals: map[string]bool{
+					"numMatches > 3 ": false,
+				},
+			},
+		},
+	}
+	gotAssessment, err := assessment1.Merge(assessment2)
+	if err != nil {
+		t.Errorf("Merge() error: %s", err)
+		return
+	}
+	if !reflect.DeepEqual(gotAssessment, wantAssessment) {
+		t.Errorf("Merge() got assessment: %s\nwant: %s\n",
+			gotAssessment, wantAssessment)
+	}
+}
+
+func TestMerge_errors(t *testing.T) {
+	assessment1 := &Assessment{NumRecords: 8,
+		RuleAssessments: []*RuleFinalAssessment{
+			&RuleFinalAssessment{
+				Rule: mustNewRule("band > 9"),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("5"),
+					"percentMatches": dlit.MustNew("65.3"),
+				},
+				Goals: map[string]bool{
+					"numMatches > 3 ": true,
+				},
+			},
+			&RuleFinalAssessment{
+				Rule: mustNewRule("band > 456"),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("2"),
+					"percentMatches": dlit.MustNew("50"),
+				},
+				Goals: map[string]bool{
+					"numMatches > 3 ": false,
+				},
+			},
+		},
+	}
+	assessment2 := &Assessment{NumRecords: 2,
+		RuleAssessments: []*RuleFinalAssessment{
+			&RuleFinalAssessment{
+				Rule: mustNewRule("band > 16"),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("8"),
+					"percentMatches": dlit.MustNew("5.3"),
+				},
+				Goals: map[string]bool{
+					"numMatches > 3 ": true,
+				},
+			},
+			&RuleFinalAssessment{
+				Rule: mustNewRule("team == \"Pi\""),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("3"),
+					"percentMatches": dlit.MustNew("19"),
+				},
+				Goals: map[string]bool{
+					"numMatches > 3 ": false,
+				},
+			},
+		},
+	}
+	wantError :=
+		errors.New("Can't merge assessments: Number of records don't match")
+	_, err := assessment1.Merge(assessment2)
+	if err == nil {
+		t.Errorf("Merge() not error, expected: %s", wantError)
+		return
+	}
+	if err.Error() != wantError.Error() {
+		t.Errorf("Merge() got error: %s, want: %s", err, wantError)
 	}
 }
 

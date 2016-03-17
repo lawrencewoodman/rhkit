@@ -174,10 +174,10 @@ func makeJRuleReport(r *RuleFinalAssessment) *JRuleReport {
 	return &JRuleReport{r.Rule.String(), aggregators, r.Goals}
 }
 
-func (a *Assessment) GetRuleStrings() []string {
-	r := make([]string, len(a.RuleAssessments))
+func (a *Assessment) GetRules() []*Rule {
+	r := make([]*Rule, len(a.RuleAssessments))
 	for i, ruleAssessment := range a.RuleAssessments {
-		r[i] = ruleAssessment.Rule.String()
+		r[i] = ruleAssessment.Rule
 	}
 	return r
 }
@@ -186,6 +186,16 @@ type ErrNameConflict string
 
 func (e ErrNameConflict) Error() string {
 	return string(e)
+}
+
+func (a *Assessment) Merge(o *Assessment) (*Assessment, error) {
+	if a.NumRecords != o.NumRecords {
+		// TODO: Create error type
+		err := errors.New("Can't merge assessments: Number of records don't match")
+		return nil, err
+	}
+	newRuleAssessments := append(a.RuleAssessments, o.RuleAssessments...)
+	return &Assessment{a.NumRecords, newRuleAssessments}, nil
 }
 
 // need a progress callback and a specifier for how often to report

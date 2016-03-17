@@ -40,18 +40,39 @@ func main() {
 	}
 	fmt.Printf("ok (%d generated)\n", len(rules))
 
+	fmt.Printf("Assessing rules...")
 	assessment, err :=
 		AssessRules(rules, experiment.Aggregators, experiment.Goals, input)
 	if err != nil {
-		fmt.Printf("Couldn't make report: %s\n", err)
+		panic(fmt.Sprintf("Couldn't make report: %s\n", err))
+	}
+	fmt.Printf("ok\n")
+
+	assessment.Sort(experiment.SortOrder)
+	sortedRules := assessment.GetRules()
+
+	fmt.Printf("Tweaking rules...")
+	tweakableRules := TweakRules(sortedRules, fieldDescriptions)
+	fmt.Printf("ok (%d generated)\n", len(tweakableRules))
+
+	fmt.Printf("Assessing rules...")
+	assessment2, err :=
+		AssessRules(tweakableRules, experiment.Aggregators, experiment.Goals, input)
+	if err != nil {
+		panic(fmt.Sprintf("Couldn't make report: %s\n", err))
+	}
+	fmt.Printf("ok\n")
+
+	assessment3, err := assessment.Merge(assessment2)
+	if err != nil {
+		panic(err)
+	}
+	assessment3.Sort(experiment.SortOrder)
+	s, err := assessment3.ToJSON()
+	if err != nil {
+		panic(fmt.Sprintf("Couldn't make report: %s\n", err))
 	} else {
-		assessment.Sort(experiment.SortOrder)
-		s, err := assessment.ToJSON()
-		if err != nil {
-			fmt.Printf("Couldn't make report json: %s\n", err)
-		} else {
-			fmt.Println(s)
-		}
+		fmt.Println(s)
 	}
 }
 
