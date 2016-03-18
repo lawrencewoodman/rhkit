@@ -12,7 +12,7 @@ func TestTweakRules_1(t *testing.T) {
 			[]*dlit.Literal{}, 0},
 		"age": &FieldDescription{INT, dlit.MustNew(4), dlit.MustNew(30), 0,
 			[]*dlit.Literal{}, 0},
-		"flow": &FieldDescription{FLOAT, dlit.MustNew(50), dlit.MustNew(400), 0,
+		"flow": &FieldDescription{FLOAT, dlit.MustNew(50), dlit.MustNew(400), 2,
 			[]*dlit.Literal{}, 0},
 	}
 	rulesIn := []*Rule{
@@ -130,22 +130,24 @@ func TestTweakRules_3(t *testing.T) {
 		"Ensure that decimal places are no greater than maxDP for field",
 	}
 	fieldDescriptions := map[string]*FieldDescription{
-		"flow": &FieldDescription{FLOAT, dlit.MustNew(4), dlit.MustNew(30), 2,
+		"flow": &FieldDescription{FLOAT, dlit.MustNew(4), dlit.MustNew(30), 6,
 			[]*dlit.Literal{}, 0},
 	}
 	rulesIn := []*Rule{
-		mustNewRule("flow <= 40.78"),
+		mustNewRule("flow <= 40.78234"),
 		mustNewRule("flow <= 24.89"),
-		mustNewRule("flow <= 52.60"),
+		mustNewRule("flow <= 52.604956"),
 		mustNewRule("flow <= 65.80"),
 	}
 	wantMaxDP := fieldDescriptions["flow"].MaxDP
+	wantMinDP := 0
 	gotRules := TweakRules(rulesIn, fieldDescriptions)
 
 	num24To41 := 0
 	num41To53 := 0
 	numOther := 0
 	gotMaxDP := 0
+	gotMinDP := 100
 	for _, rule := range gotRules {
 		isTweakable, field, operator, value := rule.GetTweakableParts()
 		if !isTweakable && field != "flow" && operator != "<=" {
@@ -169,6 +171,9 @@ func TestTweakRules_3(t *testing.T) {
 		if valueDP > gotMaxDP {
 			gotMaxDP = valueDP
 		}
+		if valueDP < gotMinDP {
+			gotMinDP = valueDP
+		}
 	}
 
 	if num24To41 < 9 {
@@ -189,6 +194,11 @@ func TestTweakRules_3(t *testing.T) {
 			rulesIn, numOther, gotRules)
 	}
 
+	if gotMinDP != wantMinDP {
+		printTestPurposes(t, testPurposes)
+		t.Errorf("TweakRules(%q) maxDP for rules to big got, %d, want: %d, rules: %q",
+			rulesIn, gotMinDP, wantMinDP, gotRules)
+	}
 	if gotMaxDP != wantMaxDP {
 		printTestPurposes(t, testPurposes)
 		t.Errorf("TweakRules(%q) maxDP for rules to big got, %d, want: %d, rules: %q",

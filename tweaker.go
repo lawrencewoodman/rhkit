@@ -117,6 +117,7 @@ func makeComparisonPoints(
 			}
 		}
 	} else {
+		maxDP := fieldDescriptions[field].MaxDP
 		for numI, numJ := 0, 1; numJ < numNumbers; numI, numJ = numI+1, numJ+1 {
 			vI := numbers[numI]
 			vJ := numbers[numJ]
@@ -133,31 +134,36 @@ func makeComparisonPoints(
 			diff := maxFloat - minFloat
 			step := diff / 10.0
 			for i := step; i < diff; i += step {
-				newNum := dlit.MustNew(minFloat + i)
-				if !dlitInSlices(newNum, numbers, newPoints) {
-					newPoints = append(newPoints, newNum)
+				sum := minFloat + i
+				for dp := maxDP; dp >= 0; dp-- {
+					newNum := dlit.MustNew(floatReduceDP(sum, dp))
+					if !dlitInSlices(newNum, numbers, newPoints) {
+						newPoints = append(newPoints, newNum)
+					}
 				}
 			}
 		}
 	}
-	maxDP := fieldDescriptions[field].MaxDP
-	return arrayDlitsToStrings(newPoints, maxDP)
+	return arrayDlitsToStrings(newPoints)
 }
 
-func arrayDlitsToStrings(lits []*dlit.Literal, maxDP int) []string {
+func arrayDlitsToStrings(lits []*dlit.Literal) []string {
 	r := make([]string, len(lits))
 	for i, l := range lits {
-		s := l.String()
-		// TODO: limit Dec places 0..maxDP
-		r[i] = limitStringDecPlaces(s, maxDP)
+		r[i] = l.String()
 	}
 	return r
 }
 
-func limitStringDecPlaces(s string, maxDP int) string {
+func floatReduceDP(f float64, dp int) string {
+	s := fmt.Sprintf("%.*f", dp, f)
 	i := strings.IndexByte(s, '.')
 	if i > -1 {
-		return s[:i+maxDP+1]
+		s = strings.TrimRight(s, "0")
+		i = strings.IndexByte(s, '.')
+		if i == len(s)-1 {
+			s = strings.TrimRight(s, ".")
+		}
 	}
 	return s
 }
