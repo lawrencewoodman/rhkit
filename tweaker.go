@@ -28,7 +28,7 @@ func groupTweakableRules(
 	for _, rule := range sortedRules {
 		isTweakable, fieldName, operator, _ := rule.GetTweakableParts()
 		if isTweakable {
-			groupID := fmt.Sprintf("%s-%s", fieldName, operator)
+			groupID := fmt.Sprintf("%s^%s", fieldName, operator)
 			if len(groups[groupID]) < numPerGroup {
 				groups[groupID] = append(groups[groupID], rule)
 			}
@@ -41,7 +41,8 @@ func tweakRules(
 	groupedRules map[string][]*Rule,
 	fieldDescriptions map[string]*FieldDescription,
 ) []*Rule {
-	newRules := make([]*Rule, 0)
+	newRules := make([]*Rule, 1)
+	newRules[0] = MustNewRule("true()")
 	for _, rules := range groupedRules {
 		firstRule := rules[0]
 		comparisonPoints := makeComparisonPoints(rules, fieldDescriptions)

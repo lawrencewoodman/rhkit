@@ -19,12 +19,13 @@ type ruleGeneratorFunc func(map[string]*FieldDescription,
 func GenerateRules(
 	fieldDescriptions map[string]*FieldDescription,
 	excludeFields []string) ([]*Rule, error) {
-	rules := make([]*Rule, 0)
+	rules := make([]*Rule, 1)
 	ruleGenerators := []ruleGeneratorFunc{
 		generateIntRules, generateFloatRules, generateStringRules,
 		generateCompareNumericRules, generateCompareStringRules,
 		generateInNiRules,
 	}
+	rules[0] = MustNewRule("true()")
 	for field, _ := range fieldDescriptions {
 		if !stringInSlice(field, excludeFields) {
 			for _, ruleGenerator := range ruleGenerators {
@@ -121,6 +122,7 @@ func floatToString(f float64, maxDP int) string {
 	return matchAllZerosRegexp.ReplaceAllString(fStr, "0")
 }
 
+// TODO: For each rule give all dp numbers 0..maxDP
 func generateFloatRules(
 	fieldDescriptions map[string]*FieldDescription,
 	excludeFields []string, field string) ([]*Rule, error) {

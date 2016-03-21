@@ -49,6 +49,7 @@ func main() {
 	fmt.Printf("ok\n")
 
 	assessment.Sort(experiment.SortOrder)
+	assessment.Refine(3)
 	sortedRules := assessment.GetRules()
 
 	fmt.Printf("Tweaking rules...")
@@ -68,6 +69,7 @@ func main() {
 		panic(err)
 	}
 	assessment3.Sort(experiment.SortOrder)
+	assessment3.Refine(1)
 	s, err := assessment3.ToJSON()
 	if err != nil {
 		panic(fmt.Sprintf("Couldn't make report: %s\n", err))

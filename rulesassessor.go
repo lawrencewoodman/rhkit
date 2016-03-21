@@ -17,6 +17,7 @@ import (
 type Assessment struct {
 	NumRecords      int64
 	RuleAssessments []*RuleFinalAssessment
+	Flags           map[string]bool
 }
 
 type RuleFinalAssessment struct {
@@ -99,6 +100,7 @@ func compareDlitNums(l1 *dlit.Literal, l2 *dlit.Literal) int {
 
 func (r *Assessment) Sort(s []SortField) {
 	sort.Sort(by{r.RuleAssessments, s})
+	r.Flags["sorted"] = true
 }
 
 // TODO: Test this
@@ -108,6 +110,14 @@ func (r *Assessment) IsEqual(o *Assessment) bool {
 	}
 	for i, ruleAssessment := range r.RuleAssessments {
 		if !ruleAssessment.isEqual(o.RuleAssessments[i]) {
+			return false
+		}
+	}
+	if len(r.Flags) != len(o.Flags) {
+		return false
+	}
+	for k, v := range r.Flags {
+		if v != o.Flags[k] {
 			return false
 		}
 	}
@@ -182,6 +192,98 @@ func (a *Assessment) GetRules() []*Rule {
 	return r
 }
 
+// Tidy up rule assessments by removing poor and poorer similar rules
+// For example this removes all rules poorer than the 'true()' rule
+func (sortedAssessment *Assessment) Refine(numSimilarRules int) {
+	if !sortedAssessment.Flags["sorted"] {
+		panic("Assessment isn't sorted")
+	}
+	sortedAssessment.excludePoorRules()
+	sortedAssessment.excludePoorerInNiRules(numSimilarRules)
+	sortedAssessment.excludePoorerTweakableRules(numSimilarRules)
+}
+
+func (sortedAssessment *Assessment) excludePoorRules() {
+	trueFound := false
+	goodRuleAssessments := make([]*RuleFinalAssessment, 0)
+	for _, a := range sortedAssessment.RuleAssessments {
+		numMatches, numMatchesIsInt := a.Aggregators["numMatches"].Int()
+		if !numMatchesIsInt {
+			panic("numMatches aggregator isn't an int")
+		}
+		if numMatches > 1 {
+			goodRuleAssessments = append(goodRuleAssessments, a)
+		}
+		if a.Rule.String() == "true()" {
+			trueFound = true
+			break
+		}
+	}
+	if !trueFound {
+		panic("No 'true()' rule found")
+	}
+	sortedAssessment.RuleAssessments = goodRuleAssessments
+}
+
+func (sortedAssessment *Assessment) excludePoorerInNiRules(
+	numSimilarRules int,
+) {
+	goodRuleAssessments := make([]*RuleFinalAssessment, 0)
+	inFields := make(map[string]int)
+	niFields := make(map[string]int)
+	for _, a := range sortedAssessment.RuleAssessments {
+		rule := a.Rule
+		isInNiRule, operator, field := rule.GetInNiParts()
+		if !isInNiRule {
+			goodRuleAssessments = append(goodRuleAssessments, a)
+		} else if operator == "in" {
+			n, ok := inFields[field]
+			if !ok {
+				goodRuleAssessments = append(goodRuleAssessments, a)
+				inFields[field] = 1
+			} else if n < numSimilarRules {
+				goodRuleAssessments = append(goodRuleAssessments, a)
+				inFields[field]++
+			}
+		} else if operator == "ni" {
+			n, ok := niFields[field]
+			if !ok {
+				goodRuleAssessments = append(goodRuleAssessments, a)
+				niFields[field] = 1
+			} else if n < numSimilarRules {
+				goodRuleAssessments = append(goodRuleAssessments, a)
+				niFields[field]++
+			}
+		}
+	}
+	sortedAssessment.RuleAssessments = goodRuleAssessments
+}
+
+func (sortedAssessment *Assessment) excludePoorerTweakableRules(
+	numSimilarRules int,
+) {
+	goodRuleAssessments := make([]*RuleFinalAssessment, 0)
+	fieldOperatorIDs := make(map[string]int)
+	for _, a := range sortedAssessment.RuleAssessments {
+		rule := a.Rule
+		isTweakable, field, operator, _ := rule.GetTweakableParts()
+		if !isTweakable {
+			goodRuleAssessments = append(goodRuleAssessments, a)
+		} else {
+			fieldOperatorID := fmt.Sprintf("%s^%s", field, operator)
+			n, ok := fieldOperatorIDs[fieldOperatorID]
+			if !ok {
+				goodRuleAssessments = append(goodRuleAssessments, a)
+				fieldOperatorIDs[fieldOperatorID] = 1
+			} else if n < numSimilarRules {
+				goodRuleAssessments = append(goodRuleAssessments, a)
+				fieldOperatorIDs[fieldOperatorID]++
+			}
+		}
+	}
+	sortedAssessment.RuleAssessments = goodRuleAssessments
+}
+
 type ErrNameConflict string
 
 func (e ErrNameConflict) Error() string {
@@ -195,7 +297,10 @@ func (a *Assessment) Merge(o *Assessment) (*Assessment, error) {
 		return nil, err
 	}
 	newRuleAssessments := append(a.RuleAssessments, o.RuleAssessments...)
-	return &Assessment{a.NumRecords, newRuleAssessments}, nil
+	flags := map[string]bool{
+		"sorted": false,
+	}
+	return &Assessment{a.NumRecords, newRuleAssessments, flags}, nil
 }
 
 // need a progress callback and a specifier for how often to report
@@ -230,8 +335,8 @@ func AssessRules(rules []*Rule, aggregators []Aggregator,
 		return &Assessment{}, err
 	}
 
-	report, err := makeAssessment(numRecords, goodRuleAssessments, goals)
-	return report, err
+	assessment, err := makeAssessment(numRecords, goodRuleAssessments, goals)
+	return assessment, err
 }
 
 func makeAssessment(numRecords int64, goodRuleAssessments []*RuleAssessment,
@@ -252,8 +357,15 @@ func makeAssessment(numRecords int64, goodRuleAssessments []*RuleAssessment,
 			Goals:       goals,
 		}
 	}
-	return &Assessment{NumRecords: numRecords,
-		RuleAssessments: ruleAssessments}, nil
+	flags := map[string]bool{
+		"sorted": false,
+	}
+	assessment := &Assessment{
+		NumRecords:      numRecords,
+		RuleAssessments: ruleAssessments,
+		Flags:           flags,
+	}
+	return assessment, nil
 }
 
 func filterGoodReports(

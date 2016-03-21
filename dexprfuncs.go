@@ -15,6 +15,7 @@ var callFuncs = map[string]dexpr.CallFun{
 	"roundto": roundTo,
 	"in":      in,
 	"ni":      ni,
+	"true":    alwaysTrue,
 }
 
 // This uses round half-up to tie-break
@@ -85,4 +86,9 @@ func ni(args []*dlit.Literal) (*dlit.Literal, error) {
 	}
 	r, err := dlit.New(true)
 	return r, err
+}
+
+// Returns true
+func alwaysTrue(args []*dlit.Literal) (*dlit.Literal, error) {
+	return dlit.MustNew(true), nil
 }

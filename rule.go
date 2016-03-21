@@ -30,16 +30,35 @@ func NewRule(exprStr string) (*Rule, error) {
 	return &Rule{expr}, nil
 }
 
+func MustNewRule(exprStr string) *Rule {
+	rule, err := NewRule(exprStr)
+	if err != nil {
+		panic(err)
+	}
+	return rule
+}
+
 func (r *Rule) GetTweakableParts() (bool, string, string, string) {
 	ruleStr := r.String()
 	isTweakable := isTweakableRegexp.MatchString(ruleStr)
 	if !isTweakable {
 		return false, "", "", ""
 	}
-	fieldName := matchPartsRegexp.ReplaceAllString(ruleStr, "$1")
-	operator := matchPartsRegexp.ReplaceAllString(ruleStr, "$2")
-	value := matchPartsRegexp.ReplaceAllString(ruleStr, "$3")
+	fieldName := matchTweakablePartsRegexp.ReplaceAllString(ruleStr, "$1")
+	operator := matchTweakablePartsRegexp.ReplaceAllString(ruleStr, "$2")
+	value := matchTweakablePartsRegexp.ReplaceAllString(ruleStr, "$3")
 	return isTweakable, fieldName, operator, value
+}
+
+func (r *Rule) GetInNiParts() (bool, string, string) {
+	ruleStr := r.String()
+	isInNi := isInNiRegexp.MatchString(ruleStr)
+	if !isInNi {
+		return false, "", ""
+	}
+	operator := matchInNiPartsRegexp.ReplaceAllString(ruleStr, "$1")
+	fieldName := matchInNiPartsRegexp.ReplaceAllString(ruleStr, "$3")
+	return isInNi, operator, fieldName
 }
 
 func (r *Rule) IsTrue(record map[string]*dlit.Literal) (bool, error) {
@@ -63,4 +82,6 @@ func (r *Rule) CloneWithValue(newValue string) (*Rule, error) {
 }
 
 var isTweakableRegexp = regexp.MustCompile("^[^( ]* (<|<=|>=|>) \\d+\\.?\\d*$")
-var matchPartsRegexp = regexp.MustCompile("^([^( ]*) (<|<=|>=|>) (\\d+\\.?\\d*)$")
+var matchTweakablePartsRegexp = regexp.MustCompile("^([^( ]*) (<|<=|>=|>) (\\d+\\.?\\d*)$")
+var isInNiRegexp = regexp.MustCompile("^(in|ni)(\\()([^ ,]+)(.*\\))$")
+var matchInNiPartsRegexp = regexp.MustCompile("^(in|ni)(\\()([^ ,]+)(.*\\))$")

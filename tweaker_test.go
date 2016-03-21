@@ -33,6 +33,9 @@ func TestTweakRules_1(t *testing.T) {
 	numFlowGeqRules := 0
 	numOtherRules := 0
 	for _, rule := range gotRules {
+		if rule.String() == "true()" {
+			continue
+		}
 		isTweakable, field, operator, _ := rule.GetTweakableParts()
 		if !isTweakable {
 			printTestPurposes(t, testPurposes)
@@ -86,6 +89,9 @@ func TestTweakRules_2(t *testing.T) {
 	num40To50 := 0
 	numOther := 0
 	for _, rule := range gotRules {
+		if rule.String() == "true()" {
+			continue
+		}
 		isTweakable, field, operator, value := rule.GetTweakableParts()
 		if !isTweakable && field != "age" && operator != "<=" {
 			printTestPurposes(t, testPurposes)
@@ -149,6 +155,9 @@ func TestTweakRules_3(t *testing.T) {
 	gotMaxDP := 0
 	gotMinDP := 100
 	for _, rule := range gotRules {
+		if rule.String() == "true()" {
+			continue
+		}
 		isTweakable, field, operator, value := rule.GetTweakableParts()
 		if !isTweakable && field != "flow" && operator != "<=" {
 			printTestPurposes(t, testPurposes)
@@ -203,6 +212,35 @@ func TestTweakRules_3(t *testing.T) {
 		printTestPurposes(t, testPurposes)
 		t.Errorf("TweakRules(%q) maxDP for rules to big got, %d, want: %d, rules: %q",
 			rulesIn, gotMaxDP, wantMaxDP, gotRules)
+	}
+}
+
+func TestTweakRules_4(t *testing.T) {
+	testPurposes := []string{
+		"Ensure that generates a 'true()' rule",
+	}
+	fieldDescriptions := map[string]*FieldDescription{
+		"flow": &FieldDescription{FLOAT, dlit.MustNew(4), dlit.MustNew(30), 6,
+			[]*dlit.Literal{}, 0},
+	}
+	rulesIn := []*Rule{
+		mustNewRule("flow <= 40.78234"),
+		mustNewRule("flow <= 24.89"),
+		mustNewRule("flow <= 52.604956"),
+		mustNewRule("true()"),
+	}
+
+	gotRules := TweakRules(rulesIn, fieldDescriptions)
+	trueRuleFound := false
+	for _, rule := range gotRules {
+		if rule.String() == "true()" {
+			trueRuleFound = true
+			break
+		}
+	}
+	if !trueRuleFound {
+		printTestPurposes(t, testPurposes)
+		t.Errorf("TweakRules(%s)  - No 'true' rule found", rulesIn)
 	}
 }
 

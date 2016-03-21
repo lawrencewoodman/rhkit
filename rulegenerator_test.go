@@ -7,7 +7,8 @@ import (
 	"testing"
 )
 
-func TestGenerateRules(t *testing.T) {
+func TestGenerateRules_1(t *testing.T) {
+	testPurpose := "Ensure generates correct rules for each field"
 	fieldDescriptions := map[string]*FieldDescription{
 		"team": &FieldDescription{
 			Kind: STRING,
@@ -234,6 +235,7 @@ func TestGenerateRules(t *testing.T) {
 
 	rules, err := GenerateRules(fieldDescriptions, excludeFields)
 	if err != nil {
+		t.Errorf("Test: %s\n", testPurpose)
 		t.Errorf("GenerateRules(%q, %q) err: %q",
 			fieldDescriptions, excludeFields, err)
 	}
@@ -244,12 +246,56 @@ func TestGenerateRules(t *testing.T) {
 		if !rulesMatch {
 			sort.Strings(gotFieldRules)
 			sort.Strings(c.wantRules)
+			t.Errorf("Test: %s\n", testPurpose)
 			t.Errorf("matchRules() rules don't match for field: %s - %s\ngot: %s\nwant: %s\n",
 				c.field, msg, gotFieldRules, c.wantRules)
 		}
 	}
 }
 
+func TestGenerateRules_2(t *testing.T) {
+	testPurpose := "Ensure generates a 'true()' rule"
+	fieldDescriptions := map[string]*FieldDescription{
+		"team": &FieldDescription{
+			Kind: STRING,
+			Values: []*dlit.Literal{
+				dlit.MustNew("a"), dlit.MustNew("b"), dlit.MustNew("c"),
+			},
+		},
+		"teamOut": &FieldDescription{
+			Kind: STRING,
+			Values: []*dlit.Literal{
+				dlit.MustNew("a"), dlit.MustNew("c"), dlit.MustNew("d"),
+				dlit.MustNew("e"), dlit.MustNew("f"),
+			},
+		},
+	}
+	excludeFields := []string{}
+
+	rules, err := GenerateRules(fieldDescriptions, excludeFields)
+	if err != nil {
+		t.Errorf("Test: %s\n", testPurpose)
+		t.Errorf("GenerateRules(%q, %q) err: %q",
+			fieldDescriptions, excludeFields, err)
+	}
+
+	trueRuleFound := false
+	for _, rule := range rules {
+		if rule.String() == "true()" {
+			trueRuleFound = true
+			break
+		}
+	}
+	if !trueRuleFound {
+		t.Errorf("Test: %s\n", testPurpose)
+		t.Errorf("GenerateRules(%q, %q)  - 'true()' rule missing",
+			fieldDescriptions, excludeFields)
+	}
+}
+
+/*************************************
+ *    Helper Functions
+ *************************************/
 var matchFieldInNiRegexp = regexp.MustCompile("^((in\\(|ni\\()+)([^ ,]+)(.*)$")
 var matchFieldMatchRegexp = regexp.MustCompile("^([^ (]+)( .*)$")
 

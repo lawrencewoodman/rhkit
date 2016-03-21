@@ -124,6 +124,37 @@ func TestGetTweakableParts(t *testing.T) {
 	}
 }
 
+func TestGetInNiParts(t *testing.T) {
+	cases := []struct {
+		rule          *Rule
+		wantIsInNi    bool
+		wantOperator  string
+		wantFieldName string
+	}{
+		{MustNewRule("band > 3"), false, "", ""},
+		{MustNewRule("band == 2"), false, "", ""},
+		{MustNewRule("in(band, \"a\", \"b\")"), true, "in", "band"},
+		{MustNewRule("in(flow, \"4\", \"6\")"), true, "in", "flow"},
+		{MustNewRule("ni(band, \"a\", \"b\")"), true, "ni", "band"},
+		{MustNewRule("ni(flow, \"4\", \"6\")"), true, "ni", "flow"},
+	}
+	for _, c := range cases {
+		gotIsInNi, gotOperator, gotFieldName := c.rule.GetInNiParts()
+		if gotIsInNi != c.wantIsInNi {
+			t.Errorf("GetInNIParts() rule: %s, got isInNi: %s want: %s",
+				c.rule, gotIsInNi, c.wantIsInNi)
+		}
+		if gotOperator != c.wantOperator {
+			t.Errorf("GetInNIParts() rule: %s, got operator: %s want: %s",
+				c.rule, gotOperator, c.wantOperator)
+		}
+		if gotFieldName != c.wantFieldName {
+			t.Errorf("GetInNIParts() rule: %s, got fieldName: %s want: %s",
+				c.rule, gotFieldName, c.wantFieldName)
+		}
+	}
+}
+
 func TestCloneWithValue(t *testing.T) {
 	cases := []struct {
 		rule     *Rule
