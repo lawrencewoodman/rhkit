@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/lawrencewoodman/dexpr_go"
+	"github.com/lawrencewoodman/rulehunter/internal/aggregators"
 	"os"
 )
 
@@ -19,7 +20,7 @@ type Experiment struct {
 	ExcludeFieldNames     []string
 	IsFirstLineFieldNames bool
 	Separator             rune
-	Aggregators           []Aggregator
+	Aggregators           []aggregators.Aggregator
 	Goals                 []*dexpr.Expr
 	SortOrder             []SortField
 }
@@ -122,7 +123,7 @@ func checkExperimentValid(e experimentFile) error {
 
 func makeExperiment(e experimentFile) (*Experiment, error) {
 	var goals []*dexpr.Expr
-	var aggregators []Aggregator
+	var aggregators []aggregators.Aggregator
 	var sortOrder []SortField
 	var err error
 	goals, err = makeGoals(e.Goals)
@@ -173,15 +174,15 @@ func makeGoals(exprs []string) ([]*dexpr.Expr, error) {
 	return r, nil
 }
 
-func makeAggregator(name, aggType, arg string) (Aggregator, error) {
-	var r Aggregator
+func makeAggregator(name, aggType, arg string) (aggregators.Aggregator, error) {
+	var r aggregators.Aggregator
 	var err error
 	switch aggType {
 	case "calc":
-		r, err = NewCalcAggregator(name, arg)
+		r, err = aggregators.NewCalc(name, arg)
 		return r, err
 	case "count":
-		r, err = NewCountAggregator(name, arg)
+		r, err = aggregators.NewCount(name, arg)
 		return r, err
 	default:
 		err = errors.New("Unrecognized aggregator")
@@ -194,9 +195,9 @@ func makeAggregator(name, aggType, arg string) (Aggregator, error) {
 }
 
 func makeAggregators(
-	eAggregators []experimentAggregator) ([]Aggregator, error) {
+	eAggregators []experimentAggregator) ([]aggregators.Aggregator, error) {
 	var err error
-	r := make([]Aggregator, len(eAggregators))
+	r := make([]aggregators.Aggregator, len(eAggregators))
 	for i, ea := range eAggregators {
 		r[i], err = makeAggregator(ea.Name, ea.Function, ea.Arg)
 		if err != nil {

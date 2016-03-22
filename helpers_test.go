@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/lawrencewoodman/dexpr_go"
 	"github.com/lawrencewoodman/dlit_go"
+	"github.com/lawrencewoodman/rulehunter/internal/aggregators"
 	"io"
 )
 
@@ -39,16 +40,16 @@ func mustNewRule(expr string) *Rule {
 	return rule
 }
 
-func mustNewCountAggregator(name string, expr string) *CountAggregator {
-	c, err := NewCountAggregator(name, expr)
+func mustNewCountAggregator(name string, expr string) *aggregators.Count {
+	c, err := aggregators.NewCount(name, expr)
 	if err != nil {
 		panic(fmt.Sprintf("Can't create CountAggregator: %s", err))
 	}
 	return c
 }
 
-func mustNewCalcAggregator(name string, expr string) *CalcAggregator {
-	c, err := NewCalcAggregator(name, expr)
+func mustNewCalcAggregator(name string, expr string) *aggregators.Calc {
+	c, err := aggregators.NewCalc(name, expr)
 	if err != nil {
 		panic(fmt.Sprintf("Can't create CalcAggregator: %s", err))
 	}

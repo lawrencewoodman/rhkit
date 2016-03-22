@@ -1,43 +1,44 @@
 /*
  * Copyright (C) 2016 Lawrence Woodman <lwoodman@vlifesystems.com>
  */
-package main
+package aggregators
 
 import (
 	"github.com/lawrencewoodman/dexpr_go"
 	"github.com/lawrencewoodman/dlit_go"
+	"github.com/lawrencewoodman/rulehunter/internal/dexprfuncs"
 )
 
-type CountAggregator struct {
+type Count struct {
 	name       string
 	numMatches int64
 	expr       *dexpr.Expr
 }
 
-func NewCountAggregator(name string, expr string) (*CountAggregator, error) {
+func NewCount(name string, expr string) (*Count, error) {
 	dexpr, err := dexpr.New(expr)
 	if err != nil {
 		return nil, err
 	}
-	ca := &CountAggregator{name: name, numMatches: 0, expr: dexpr}
+	ca := &Count{name: name, numMatches: 0, expr: dexpr}
 	return ca, nil
 }
 
-func (a *CountAggregator) CloneNew() Aggregator {
-	return &CountAggregator{name: a.name, numMatches: 0, expr: a.expr}
+func (a *Count) CloneNew() Aggregator {
+	return &Count{name: a.name, numMatches: 0, expr: a.expr}
 }
 
-func (a *CountAggregator) GetName() string {
+func (a *Count) GetName() string {
 	return a.name
 }
 
-func (a *CountAggregator) GetArg() string {
+func (a *Count) GetArg() string {
 	return a.expr.String()
 }
 
-func (a *CountAggregator) NextRecord(record map[string]*dlit.Literal,
+func (a *Count) NextRecord(record map[string]*dlit.Literal,
 	isRuleTrue bool) error {
-	countExprIsTrue, err := a.expr.EvalBool(record, callFuncs)
+	countExprIsTrue, err := a.expr.EvalBool(record, dexprfuncs.CallFuncs)
 	if err != nil {
 		return err
 	}
@@ -47,14 +48,14 @@ func (a *CountAggregator) NextRecord(record map[string]*dlit.Literal,
 	return nil
 }
 
-func (a *CountAggregator) GetResult(
+func (a *Count) GetResult(
 	aggregators []Aggregator, numRecords int64) *dlit.Literal {
 	l := dlit.MustNew(a.numMatches)
 	return l
 }
 
-func (a *CountAggregator) IsEqual(o Aggregator) bool {
-	if _, ok := o.(*CountAggregator); !ok {
+func (a *Count) IsEqual(o Aggregator) bool {
+	if _, ok := o.(*Count); !ok {
 		return false
 	}
 	return a.name == o.GetName() && a.GetArg() == o.GetArg()

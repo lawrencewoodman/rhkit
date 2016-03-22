@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2016 Lawrence Woodman <lwoodman@vlifesystems.com>
  */
-package main
+package dexprfuncs
 
 import (
 	"errors"
@@ -11,7 +11,7 @@ import (
 	"math"
 )
 
-var callFuncs = map[string]dexpr.CallFun{
+var CallFuncs = map[string]dexpr.CallFun{
 	"roundto": roundTo,
 	"in":      in,
 	"ni":      ni,

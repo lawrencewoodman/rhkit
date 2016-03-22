@@ -1,52 +1,53 @@
 /*
  * Copyright (C) 2016 Lawrence Woodman <lwoodman@vlifesystems.com>
  */
-package main
+package aggregators
 
 import (
 	"github.com/lawrencewoodman/dexpr_go"
 	"github.com/lawrencewoodman/dlit_go"
+	"github.com/lawrencewoodman/rulehunter/internal/dexprfuncs"
 )
 
-type CalcAggregator struct {
+type Calc struct {
 	name string
 	expr *dexpr.Expr
 }
 
-func NewCalcAggregator(name string, expr string) (*CalcAggregator, error) {
+func NewCalc(name string, expr string) (*Calc, error) {
 	dexpr, err := dexpr.New(expr)
 	if err != nil {
 		return nil, err
 	}
-	ca := &CalcAggregator{name: name, expr: dexpr}
+	ca := &Calc{name: name, expr: dexpr}
 	return ca, nil
 }
 
-func (a *CalcAggregator) CloneNew() Aggregator {
-	return &CalcAggregator{name: a.name, expr: a.expr}
+func (a *Calc) CloneNew() Aggregator {
+	return &Calc{name: a.name, expr: a.expr}
 }
 
-func (a *CalcAggregator) GetName() string {
+func (a *Calc) GetName() string {
 	return a.name
 }
 
-func (a *CalcAggregator) GetArg() string {
+func (a *Calc) GetArg() string {
 	return a.expr.String()
 }
 
-func (a *CalcAggregator) NextRecord(
+func (a *Calc) NextRecord(
 	record map[string]*dlit.Literal, isRuleTrue bool) error {
 	return nil
 }
 
-func (a *CalcAggregator) GetResult(
+func (a *Calc) GetResult(
 	aggregators []Aggregator, numRecords int64) *dlit.Literal {
 	return a.expr.Eval(AggregatorsToMap(aggregators, numRecords, a.name),
-		callFuncs)
+		dexprfuncs.CallFuncs)
 }
 
-func (a *CalcAggregator) IsEqual(o Aggregator) bool {
-	if _, ok := o.(*CalcAggregator); !ok {
+func (a *Calc) IsEqual(o Aggregator) bool {
+	if _, ok := o.(*Calc); !ok {
 		return false
 	}
 	return a.name == o.GetName() && a.GetArg() == o.GetArg()

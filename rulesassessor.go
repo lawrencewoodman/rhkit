@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"github.com/lawrencewoodman/dexpr_go"
 	"github.com/lawrencewoodman/dlit_go"
+	"github.com/lawrencewoodman/rulehunter/internal/aggregators"
 	"io"
 	"os"
 	"sort"
@@ -304,13 +305,13 @@ func (a *Assessment) Merge(o *Assessment) (*Assessment, error) {
 }
 
 // need a progress callback and a specifier for how often to report
-func AssessRules(rules []*Rule, aggregators []Aggregator,
+func AssessRules(rules []*Rule, _aggregators []aggregators.Aggregator,
 	goals []*dexpr.Expr, input Input) (*Assessment, error) {
-	var allAggregators []Aggregator
+	var allAggregators []aggregators.Aggregator
 	var numRecords int64
 	var err error
 
-	allAggregators, err = prependDefaultAggregators(aggregators)
+	allAggregators, err = prependDefaultAggregators(_aggregators)
 	if err != nil {
 		return &Assessment{}, err
 	}
@@ -344,16 +345,16 @@ func makeAssessment(numRecords int64, goodRuleAssessments []*RuleAssessment,
 	ruleAssessments := make([]*RuleFinalAssessment, len(goodRuleAssessments))
 	for i, ruleAssessment := range goodRuleAssessments {
 		rule := ruleAssessment.rule
-		aggregators :=
-			AggregatorsToMap(ruleAssessment.aggregators, numRecords, "")
-		goals, err := GoalsToMap(ruleAssessment.goals, aggregators)
+		aggregatorsMap :=
+			aggregators.AggregatorsToMap(ruleAssessment.aggregators, numRecords, "")
+		goals, err := GoalsToMap(ruleAssessment.goals, aggregatorsMap)
 		if err != nil {
 			return &Assessment{}, err
 		}
-		delete(aggregators, "numRecords")
+		delete(aggregatorsMap, "numRecords")
 		ruleAssessments[i] = &RuleFinalAssessment{
 			Rule:        rule,
-			Aggregators: aggregators,
+			Aggregators: aggregatorsMap,
 			Goals:       goals,
 		}
 	}
@@ -420,21 +421,23 @@ func processInput(input Input,
 	return numRecords, nil
 }
 
-func prependDefaultAggregators(aggregators []Aggregator) ([]Aggregator, error) {
-	newAggregators := make([]Aggregator, 2)
-	numMatchesAggregator, err := NewCountAggregator("numMatches", "1==1")
+func prependDefaultAggregators(
+	_aggregators []aggregators.Aggregator,
+) ([]aggregators.Aggregator, error) {
+	newAggregators := make([]aggregators.Aggregator, 2)
+	numMatchesAggregator, err := aggregators.NewCount("numMatches", "1==1")
 	if err != nil {
 		return newAggregators, err
 	}
 	percentMatchesAggregator, err :=
-		NewCalcAggregator("percentMatches",
+		aggregators.NewCalc("percentMatches",
 			"roundto(100.0 * numMatches / numRecords, 2)")
 	if err != nil {
 		return newAggregators, err
 	}
 	newAggregators[0] = numMatchesAggregator
 	newAggregators[1] = percentMatchesAggregator
-	newAggregators = append(newAggregators, aggregators...)
+	newAggregators = append(newAggregators, _aggregators...)
 	return newAggregators, nil
 }
 

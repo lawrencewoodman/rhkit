@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"github.com/lawrencewoodman/dexpr_go"
+	"github.com/lawrencewoodman/rulehunter/internal/aggregators"
 	"os"
 	"path/filepath"
 	"testing"
@@ -22,7 +23,7 @@ func TestLoadExperiment(t *testing.T) {
 			ExcludeFieldNames:     []string{"education"},
 			IsFirstLineFieldNames: true,
 			Separator:             ';',
-			Aggregators: []Aggregator{
+			Aggregators: []aggregators.Aggregator{
 				mustNewCountAggregator("numSignedUp", "y == \"yes\""),
 				mustNewCalcAggregator("cost", "numMatches * 4.5"),
 				mustNewCalcAggregator("income", "numSignedUp * 24"),
@@ -107,7 +108,10 @@ func areGoalsEqual(g1 []*dexpr.Expr, g2 []*dexpr.Expr) bool {
 
 }
 
-func areAggregatorsEqual(a1 []Aggregator, a2 []Aggregator) bool {
+func areAggregatorsEqual(
+	a1 []aggregators.Aggregator,
+	a2 []aggregators.Aggregator,
+) bool {
 	if len(a1) != len(a2) {
 		return false
 	}

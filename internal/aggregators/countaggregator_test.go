@@ -1,4 +1,4 @@
-package main
+package aggregators
 
 import (
 	"github.com/lawrencewoodman/dlit_go"
@@ -12,9 +12,9 @@ func TestCountGetResult(t *testing.T) {
 		map[string]*dlit.Literal{"income": dlit.MustNew(2), "band": dlit.MustNew(4)},
 		map[string]*dlit.Literal{"income": dlit.MustNew(0), "band": dlit.MustNew(9)},
 	}
-	numBandGt4, err := NewCountAggregator("numBandGt4", "band > 4")
+	numBandGt4, err := NewCount("numBandGt4", "band > 4")
 	if err != nil {
-		t.Errorf("NewCountAggregator(\"numBandGt4\", \"band > 4\") err == %q",
+		t.Errorf("NewCount(\"numBandGt4\", \"band > 4\") err == %q",
 			err)
 	}
 	aggregators := []Aggregator{numBandGt4}
@@ -26,7 +26,7 @@ func TestCountGetResult(t *testing.T) {
 	got := numBandGt4.GetResult(aggregators, numRecords)
 	gotInt, gotIsInt := got.Int()
 	if !gotIsInt || gotInt != 2 {
-		t.Errorf("NewCountAggregator(\"numBandGt4\", \"band > 4\") == %q, want: %q",
+		t.Errorf("NewCount(\"numBandGt4\", \"band > 4\") == %q, want: %q",
 			got, 2)
 	}
 }
@@ -37,9 +37,9 @@ func TestCountCloneNew(t *testing.T) {
 		"band":   dlit.MustNew(4),
 	}
 	numRecords := int64(1)
-	numBandGt4, err := NewCountAggregator("numBandGt4", "band > 3")
+	numBandGt4, err := NewCount("numBandGt4", "band > 3")
 	if err != nil {
-		t.Errorf("NewCountAggregator(\"numBandGt4\", \"band > 3\") err == %q",
+		t.Errorf("NewCount(\"numBandGt4\", \"band > 3\") err == %q",
 			err)
 	}
 	numBandGt4_2 := numBandGt4.CloneNew()
@@ -51,12 +51,12 @@ func TestCountCloneNew(t *testing.T) {
 
 	gotInt1, gotIsInt1 := got1.Int()
 	if !gotIsInt1 || gotInt1 != 1 {
-		t.Errorf("NewCountAggregator(\"numBandGt4\", \"band > 4\") == %q, want: %q",
+		t.Errorf("NewCount(\"numBandGt4\", \"band > 4\") == %q, want: %q",
 			gotInt1, 1)
 	}
 	gotInt2, gotIsInt2 := got2.Int()
 	if !gotIsInt2 || gotInt2 != 0 {
-		t.Errorf("NewCountAggregator(\"numBandGt4\", \"band > 4\") == %q, want: %q",
+		t.Errorf("NewCount(\"numBandGt4\", \"band > 4\") == %q, want: %q",
 			gotInt2, 0)
 	}
 }

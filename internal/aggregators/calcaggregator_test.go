@@ -1,6 +1,7 @@
-package main
+package aggregators
 
 import (
+	"fmt"
 	"github.com/lawrencewoodman/dexpr_go"
 	"github.com/lawrencewoodman/dlit_go"
 	"testing"
@@ -44,4 +45,15 @@ func TestCalcCloneNew(t *testing.T) {
 	if gotC.String() != gotD.String() && gotC.String() != "18" {
 		t.Errorf("CloneNew() gotC: %s, gotD: %s", gotC, gotD)
 	}
+}
+
+/************************
+ *   Helper functions
+ ************************/
+func mustNewCalcAggregator(name string, expr string) *Calc {
+	c, err := NewCalc(name, expr)
+	if err != nil {
+		panic(fmt.Sprintf("Can't create CalcAggregator: %s", err))
+	}
+	return c
 }
