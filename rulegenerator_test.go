@@ -293,6 +293,41 @@ func TestGenerateRules_2(t *testing.T) {
 	}
 }
 
+func TestCombinedRules(t *testing.T) {
+	cases := []struct {
+		inRules   []*Rule
+		wantRules []string
+	}{
+		{[]*Rule{
+			MustNewRule("team == \"a\""),
+			MustNewRule("band > 4"),
+			MustNewRule("in(team,\"red\",\"green\",\"blue\")"),
+		},
+			[]string{
+				"team == \"a\" && band > 4",
+				"team == \"a\" || band > 4",
+				"team == \"a\" && in(team,\"red\",\"green\",\"blue\")",
+				"team == \"a\" || in(team,\"red\",\"green\",\"blue\")",
+				"band > 4 && in(team,\"red\",\"green\",\"blue\")",
+				"band > 4 || in(team,\"red\",\"green\",\"blue\")",
+			}},
+		{[]*Rule{MustNewRule("team == \"a\"")}, []string{}},
+		{[]*Rule{}, []string{}},
+	}
+
+	for _, c := range cases {
+		gotRules := CombineRules(c.inRules)
+		gotRuleStrs := rulesToStrings(gotRules)
+		rulesMatch, msg := matchRules(gotRuleStrs, c.wantRules)
+		if !rulesMatch {
+			sort.Strings(gotRuleStrs)
+			sort.Strings(c.wantRules)
+			t.Errorf("matchRules() rules don't match: %s\ngot: %s\nwant: %s\n",
+				msg, gotRuleStrs, c.wantRules)
+		}
+	}
+}
+
 /*************************************
  *    Helper Functions
  *************************************/
@@ -311,4 +346,12 @@ func getFieldRules(
 		}
 	}
 	return fieldRules
+}
+
+func rulesToStrings(rules []*Rule) []string {
+	r := make([]string, len(rules))
+	for i, rule := range rules {
+		r[i] = rule.String()
+	}
+	return r
 }

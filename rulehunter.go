@@ -44,7 +44,7 @@ func main() {
 	assessment, err :=
 		AssessRules(rules, experiment.Aggregators, experiment.Goals, input)
 	if err != nil {
-		panic(fmt.Sprintf("Couldn't make report: %s\n", err))
+		panic(fmt.Sprintf("Couldn't assess rules: %s\n", err))
 	}
 	fmt.Printf("ok\n")
 
@@ -60,7 +60,7 @@ func main() {
 	assessment2, err :=
 		AssessRules(tweakableRules, experiment.Aggregators, experiment.Goals, input)
 	if err != nil {
-		panic(fmt.Sprintf("Couldn't make report: %s\n", err))
+		panic(fmt.Sprintf("Couldn't assess rules: %s\n", err))
 	}
 	fmt.Printf("ok\n")
 
@@ -70,7 +70,28 @@ func main() {
 	}
 	assessment3.Sort(experiment.SortOrder)
 	assessment3.Refine(1)
-	s, err := assessment3.ToJSON()
+
+	fmt.Printf("Combining rules...")
+	bestNonCombinedRules := assessment3.GetRules()
+	numRulesToCombine := 50
+	combinedRules := CombineRules(bestNonCombinedRules[:numRulesToCombine])
+	fmt.Printf("ok (%d generated)\n", len(combinedRules))
+
+	fmt.Printf("Assessing rules...")
+	assessment4, err :=
+		AssessRules(combinedRules, experiment.Aggregators, experiment.Goals, input)
+	if err != nil {
+		panic(fmt.Sprintf("Couldn't assess rules: %s\n", err))
+	}
+	fmt.Printf("ok\n")
+
+	assessment5, err := assessment3.Merge(assessment4)
+	if err != nil {
+		panic(err)
+	}
+	assessment5.Sort(experiment.SortOrder)
+	assessment5.Refine(1)
+	s, err := assessment5.ToJSON()
 	if err != nil {
 		panic(fmt.Sprintf("Couldn't make report: %s\n", err))
 	} else {

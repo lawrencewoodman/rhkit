@@ -40,6 +40,26 @@ func GenerateRules(
 	return rules, nil
 }
 
+func CombineRules(rules []*Rule) []*Rule {
+	combinedRules := make([]*Rule, 0)
+	numRules := len(rules)
+	for i := 0; i < numRules-1; i++ {
+		for j := i + 1; j < numRules; j++ {
+			ruleI := rules[i].String()
+			ruleJ := rules[j].String()
+			if ruleI != "true()" && ruleJ != "true()" {
+				andRuleStr := fmt.Sprintf("%s && %s", ruleI, ruleJ)
+				orRuleStr := fmt.Sprintf("%s || %s", ruleI, ruleJ)
+				andRule := MustNewRule(andRuleStr)
+				orRule := MustNewRule(orRuleStr)
+				combinedRules = append(combinedRules, andRule)
+				combinedRules = append(combinedRules, orRule)
+			}
+		}
+	}
+	return combinedRules
+}
+
 func stringInSlice(s string, strings []string) bool {
 	for _, x := range strings {
 		if x == s {
