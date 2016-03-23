@@ -3,77 +3,60 @@ package main
 import (
 	"github.com/lawrencewoodman/dexpr_go"
 	"github.com/lawrencewoodman/dlit_go"
-	"github.com/lawrencewoodman/rulehunter/internal/aggregators"
+	"reflect"
 	"testing"
 )
 
-func TestAssess(t *testing.T) {
-	cases := []struct {
-		goal        *dexpr.Expr
-		aggregators []aggregators.Aggregator
-		wantPassed  bool
-		wantErr     error
-	}{
-		{mustNewDExpr("totalIncome > 5000"),
-			[]aggregators.Aggregator{
-				&DummyAggregator{"totalIncome", dlit.MustNew(5000)}},
-			false, nil},
-		{mustNewDExpr("totalIncome > 5000"),
-			[]aggregators.Aggregator{
-				&DummyAggregator{"totalIncome", dlit.MustNew(5001)}},
-			true, nil},
-		{mustNewDExpr("totalCosts < 5000"),
-			[]aggregators.Aggregator{
-				&DummyAggregator{"totalIncome", dlit.MustNew(9000)}},
-			false,
-			dexpr.ErrInvalidExpr("Variable doesn't exist: totalCosts")},
+func TestGoalsToMap(t *testing.T) {
+	allAggregators := map[string]*dlit.Literal{
+		"totalIncome":    dlit.MustNew(5000),
+		"totalCost":      dlit.MustNew(4001),
+		"percentMatches": dlit.MustNew(5.235),
 	}
-	numRecords := int64(12)
-	for _, c := range cases {
-		gotPassed, err := HasGoalPassed(c.goal, c.aggregators, numRecords)
-		if !errorMatch(c.wantErr, err) {
-			t.Errorf("HasGoalPassed(%q, %q) expr: %s - err: %q, wantErr: %q",
-				c.goal, c.aggregators, err, c.wantErr)
-		}
-		if gotPassed != c.wantPassed {
-			t.Errorf("HasGoalPassed(%q, %q) want: %s, got: %s",
-				c.goal, c.aggregators, c.wantPassed, gotPassed)
-		}
+	goals := []*dexpr.Expr{
+		mustNewDExpr("totalIncome > 4999"),
+		mustNewDExpr("totalIncome > 5000"),
+		mustNewDExpr("totalIncome + totalCost > 9000"),
+		mustNewDExpr("totalIncome + totalCost > 9001"),
+		mustNewDExpr("roundto(percentMatches,2) == 5.24"),
+		mustNewDExpr("roundto(percentMatches,2) == 5.23"),
+	}
+	wantPasses := map[string]bool{
+		"totalIncome > 4999":                true,
+		"totalIncome > 5000":                false,
+		"totalIncome + totalCost > 9000":    true,
+		"totalIncome + totalCost > 9001":    false,
+		"roundto(percentMatches,2) == 5.24": true,
+		"roundto(percentMatches,2) == 5.23": false,
+	}
+	gotPasses, err := GoalsToMap(goals, allAggregators)
+	if err != nil {
+		t.Errorf("GoalsToMap(%q, %q) err: %s", goals, allAggregators, err)
+	}
+	if !reflect.DeepEqual(gotPasses, wantPasses) {
+		t.Errorf("GoalsToMap(%q, %q) got: %s, want: %s",
+			goals, allAggregators, gotPasses, wantPasses)
 	}
 }
 
-type DummyAggregator struct {
-	name   string
-	result *dlit.Literal
-}
-
-func (d *DummyAggregator) CloneNew() aggregators.Aggregator {
-	return &DummyAggregator{name: d.name, result: d.result}
-}
-
-func (d *DummyAggregator) GetName() string {
-	return d.name
-}
-
-func (d *DummyAggregator) GetArg() string {
-	return ""
-}
-
-func (d *DummyAggregator) NextRecord(record map[string]*dlit.Literal,
-	isRuleTrue bool) error {
-	return nil
-}
-
-func (d *DummyAggregator) GetResult(
-	aggregators []aggregators.Aggregator,
-	numRecords int64,
-) *dlit.Literal {
-	return d.result
-}
-
-func (a *DummyAggregator) IsEqual(o aggregators.Aggregator) bool {
-	if _, ok := o.(*DummyAggregator); !ok {
-		return false
+func TestGoalsToMap_errors(t *testing.T) {
+	allAggregators := map[string]*dlit.Literal{
+		"totalIncome":    dlit.MustNew(5000),
+		"totalCost":      dlit.MustNew(4001),
+		"percentMatches": dlit.MustNew(5.235),
 	}
-	return a.name == o.GetName()
+	goals := []*dexpr.Expr{
+		mustNewDExpr("totalIncome > 4999"),
+		mustNewDExpr("totalIncome > 5000"),
+		mustNewDExpr("totalIncome + totalCost > 9000"),
+		mustNewDExpr("totalIncome + totalCost > 9001"),
+		mustNewDExpr("roundbob(percentMatches,2) == 5.24"),
+		mustNewDExpr("roundto(percentMatches,2) == 5.23"),
+	}
+	wantError := "Function doesn't exist: roundbob"
+	_, err := GoalsToMap(goals, allAggregators)
+	if err.Error() != wantError {
+		t.Errorf("GoalsToMap(%q, %q) err: %s, wantError: %s",
+			goals, allAggregators, err, wantError)
+	}
 }
