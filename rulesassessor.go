@@ -10,6 +10,7 @@ import (
 	"github.com/lawrencewoodman/dexpr_go"
 	"github.com/lawrencewoodman/dlit_go"
 	"github.com/lawrencewoodman/rulehunter/internal/aggregators"
+	"github.com/lawrencewoodman/rulehunter/internal/input"
 	"io"
 	"os"
 	"sort"
@@ -306,7 +307,7 @@ func (a *Assessment) Merge(o *Assessment) (*Assessment, error) {
 
 // need a progress callback and a specifier for how often to report
 func AssessRules(rules []*Rule, _aggregators []aggregators.Aggregator,
-	goals []*dexpr.Expr, input Input) (*Assessment, error) {
+	goals []*dexpr.Expr, _input input.Input) (*Assessment, error) {
 	var allAggregators []aggregators.Aggregator
 	var numRecords int64
 	var err error
@@ -327,7 +328,7 @@ func AssessRules(rules []*Rule, _aggregators []aggregators.Aggregator,
 	for i, rule := range rules {
 		ruleAssessments[i] = NewRuleAssessment(rule, allAggregators, goals)
 	}
-	numRecords, err = processInput(input, ruleAssessments)
+	numRecords, err = processInput(_input, ruleAssessments)
 	if err != nil {
 		return &Assessment{}, err
 	}
@@ -394,16 +395,16 @@ func filterGoodReports(
 	return goodRuleAssessments, nil
 }
 
-func processInput(input Input,
+func processInput(_input input.Input,
 	ruleAssessments []*RuleAssessment) (int64, error) {
 	numRecords := int64(0)
 	// TODO: test this rewinds properly
-	if err := input.Rewind(); err != nil {
+	if err := _input.Rewind(); err != nil {
 		return numRecords, err
 	}
 
 	for {
-		record, err := input.Read()
+		record, err := _input.Read()
 		if err == io.EOF {
 			break
 		}

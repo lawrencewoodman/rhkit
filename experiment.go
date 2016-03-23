@@ -9,20 +9,19 @@ import (
 	"fmt"
 	"github.com/lawrencewoodman/dexpr_go"
 	"github.com/lawrencewoodman/rulehunter/internal/aggregators"
+	"github.com/lawrencewoodman/rulehunter/internal/input"
 	"os"
 )
 
 type Experiment struct {
-	FileFormatVersion     string
-	Title                 string
-	InputFilename         string
-	FieldNames            []string
-	ExcludeFieldNames     []string
-	IsFirstLineFieldNames bool
-	Separator             rune
-	Aggregators           []aggregators.Aggregator
-	Goals                 []*dexpr.Expr
-	SortOrder             []SortField
+	FileFormatVersion string
+	Title             string
+	Input             input.Input
+	FieldNames        []string
+	ExcludeFieldNames []string
+	Aggregators       []aggregators.Aggregator
+	Goals             []*dexpr.Expr
+	SortOrder         []SortField
 }
 
 type SortField struct {
@@ -125,6 +124,7 @@ func makeExperiment(e experimentFile) (*Experiment, error) {
 	var goals []*dexpr.Expr
 	var aggregators []aggregators.Aggregator
 	var sortOrder []SortField
+	var _input input.Input
 	var err error
 	goals, err = makeGoals(e.Goals)
 	if err != nil {
@@ -140,17 +140,21 @@ func makeExperiment(e experimentFile) (*Experiment, error) {
 		return nil, err
 	}
 
+	_input, err = input.NewCsv(e.FieldNames, e.InputFilename,
+		rune(e.Separator[0]), e.IsFirstLineFieldNames)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Experiment{
-		FileFormatVersion:     e.FileFormatVersion,
-		Title:                 e.Title,
-		InputFilename:         e.InputFilename,
-		FieldNames:            e.FieldNames,
-		ExcludeFieldNames:     e.ExcludeFieldNames,
-		IsFirstLineFieldNames: e.IsFirstLineFieldNames,
-		Separator:             rune(e.Separator[0]),
-		Aggregators:           aggregators,
-		Goals:                 goals,
-		SortOrder:             sortOrder,
+		FileFormatVersion: e.FileFormatVersion,
+		Title:             e.Title,
+		Input:             _input,
+		FieldNames:        e.FieldNames,
+		ExcludeFieldNames: e.ExcludeFieldNames,
+		Aggregators:       aggregators,
+		Goals:             goals,
+		SortOrder:         sortOrder,
 	}, nil
 }
 

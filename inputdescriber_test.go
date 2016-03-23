@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/lawrencewoodman/dlit_go"
+	"github.com/lawrencewoodman/rulehunter/internal/input"
 	"path/filepath"
 	"testing"
 )
@@ -43,11 +44,11 @@ func TestDescribeInput(t *testing.T) {
 		"method": &FieldDescription{IGNORE, nil, nil, 0,
 			[]*dlit.Literal{}, 0},
 	}
-	input, err := NewCsvInput(fieldNames, filename, ',', skipFirstLine)
+	_input, err := input.NewCsv(fieldNames, filename, ',', skipFirstLine)
 	if err != nil {
 		t.Errorf("NewCsvInput() - err: %q", filename, err)
 	}
-	fd, err := DescribeInput(input)
+	fd, err := DescribeInput(_input)
 	if err != nil {
 		t.Errorf("DescribeInput(input) err: %s", err)
 	}

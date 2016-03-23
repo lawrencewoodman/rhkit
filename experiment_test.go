@@ -2,27 +2,35 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"github.com/lawrencewoodman/dexpr_go"
 	"github.com/lawrencewoodman/rulehunter/internal/aggregators"
+	"github.com/lawrencewoodman/rulehunter/internal/input"
+	"io"
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
 )
 
 // Ensure that correct number is returned
 func TestLoadExperiment(t *testing.T) {
+	fieldNames := []string{"age", "job", "marital", "education", "default",
+		"balance", "housing", "loan", "contact", "day", "month", "duration",
+		"campaign", "pdays", "previous", "poutcome", "y"}
 	expectedExperiments := []*Experiment{
 		&Experiment{},
 		&Experiment{
 			FileFormatVersion: "0.1",
 			Title:             "This is a jolly nice title",
-			InputFilename:     "/tmp/bank.csv",
-			FieldNames: []string{"age", "job", "marital", "education", "default",
-				"balance", "housing", "loan", "contact", "day", "month", "duration",
-				"campaign", "pdays", "previous", "poutcome", "y"},
-			ExcludeFieldNames:     []string{"education"},
-			IsFirstLineFieldNames: true,
-			Separator:             ';',
+			Input: mustNewCsvInput(
+				fieldNames,
+				filepath.Join("fixtures", "bank.csv"),
+				rune(';'),
+				true,
+			),
+			FieldNames:        fieldNames,
+			ExcludeFieldNames: []string{"education"},
 			Aggregators: []aggregators.Aggregator{
 				mustNewCountAggregator("numSignedUp", "y == \"yes\""),
 				mustNewCalcAggregator("cost", "numMatches * 4.5"),
@@ -70,15 +78,25 @@ func TestLoadExperiment(t *testing.T) {
 func experimentMatch(e1 *Experiment, e2 *Experiment) bool {
 	if e1.FileFormatVersion != e2.FileFormatVersion ||
 		e1.Title != e2.Title ||
-		e1.InputFilename != e2.InputFilename ||
-		e1.IsFirstLineFieldNames != e2.IsFirstLineFieldNames ||
-		e1.Separator != e2.Separator ||
 		!areStringArraysEqual(e1.FieldNames, e2.FieldNames) ||
 		!areStringArraysEqual(e1.ExcludeFieldNames, e2.ExcludeFieldNames) ||
 		!areGoalsEqual(e1.Goals, e2.Goals) ||
 		!areAggregatorsEqual(e1.Aggregators, e2.Aggregators) ||
 		!areSortOrdersEqual(e1.SortOrder, e2.SortOrder) {
 		return false
+	}
+	for {
+		e1Record, e1Err := e1.Input.Read()
+		e2Record, e2Err := e2.Input.Read()
+		if e1Err != e2Err {
+			return false
+		} else if e1Err == nil && e2Err == nil {
+			if !reflect.DeepEqual(e1Record, e2Record) {
+				return false
+			}
+		} else if e1Err == io.EOF || e2Err == io.EOF {
+			break
+		}
 	}
 	return true
 }
@@ -134,4 +152,17 @@ func areSortOrdersEqual(so1 []SortField, so2 []SortField) bool {
 		}
 	}
 	return true
+}
+
+func mustNewCsvInput(
+	fieldNames []string,
+	filename string,
+	separator rune,
+	skipFirstLine bool,
+) *input.Csv {
+	input, err := input.NewCsv(fieldNames, filename, separator, skipFirstLine)
+	if err != nil {
+		panic(fmt.Sprintf("Couldn't create Csv Input: %s", err))
+	}
+	return input
 }

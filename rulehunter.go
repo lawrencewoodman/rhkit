@@ -12,7 +12,6 @@ import (
 
 func main() {
 	var experiment *Experiment
-	var input Input
 	var err error
 	experimentFilename := os.Args[1]
 	experiment, err = LoadExperiment(experimentFilename)
@@ -20,14 +19,8 @@ func main() {
 		log.Fatal(err)
 	}
 	fmt.Printf("Experiment: %s\n\n", experiment)
-	// TODO: Create input from LoadExperiment
-	input, err = NewCsvInput(experiment.FieldNames, experiment.InputFilename,
-		experiment.Separator, experiment.IsFirstLineFieldNames)
-	if err != nil {
-		log.Fatal(err)
-	}
 
-	fieldDescriptions, err := DescribeInput(input)
+	fieldDescriptions, err := DescribeInput(experiment.Input)
 	if err != nil {
 		panic(fmt.Sprintf("Couldn't describe input: %s", err))
 	}
@@ -41,8 +34,12 @@ func main() {
 	fmt.Printf("ok (%d generated)\n", len(rules))
 
 	fmt.Printf("Assessing rules...")
-	assessment, err :=
-		AssessRules(rules, experiment.Aggregators, experiment.Goals, input)
+	assessment, err := AssessRules(
+		rules,
+		experiment.Aggregators,
+		experiment.Goals,
+		experiment.Input,
+	)
 	if err != nil {
 		panic(fmt.Sprintf("Couldn't assess rules: %s\n", err))
 	}
@@ -57,8 +54,12 @@ func main() {
 	fmt.Printf("ok (%d generated)\n", len(tweakableRules))
 
 	fmt.Printf("Assessing rules...")
-	assessment2, err :=
-		AssessRules(tweakableRules, experiment.Aggregators, experiment.Goals, input)
+	assessment2, err := AssessRules(
+		tweakableRules,
+		experiment.Aggregators,
+		experiment.Goals,
+		experiment.Input,
+	)
 	if err != nil {
 		panic(fmt.Sprintf("Couldn't assess rules: %s\n", err))
 	}
@@ -78,8 +79,12 @@ func main() {
 	fmt.Printf("ok (%d generated)\n", len(combinedRules))
 
 	fmt.Printf("Assessing rules...")
-	assessment4, err :=
-		AssessRules(combinedRules, experiment.Aggregators, experiment.Goals, input)
+	assessment4, err := AssessRules(
+		combinedRules,
+		experiment.Aggregators,
+		experiment.Goals,
+		experiment.Input,
+	)
 	if err != nil {
 		panic(fmt.Sprintf("Couldn't assess rules: %s\n", err))
 	}

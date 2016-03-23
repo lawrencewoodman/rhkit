@@ -8,6 +8,7 @@ import (
 	"github.com/lawrencewoodman/dexpr_go"
 	"github.com/lawrencewoodman/dlit_go"
 	"github.com/lawrencewoodman/rulehunter/internal/aggregators"
+	"github.com/lawrencewoodman/rulehunter/internal/input"
 	"io"
 )
 
@@ -80,7 +81,7 @@ type LiteralInput struct {
 	position int
 }
 
-func NewLiteralInput(records []map[string]*dlit.Literal) Input {
+func NewLiteralInput(records []map[string]*dlit.Literal) input.Input {
 	return &LiteralInput{records: records, position: 0}
 }
 

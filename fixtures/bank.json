@@ -1,7 +1,7 @@
 {
   "fileFormatVersion": "0.1",
   "title": "This is a jolly nice title",
-  "inputFilename": "/tmp/bank.csv",
+  "inputFilename": "fixtures/bank.csv",
   "fieldNames": ["age", "job", "marital", "education", "default", "balance",
                  "housing", "loan", "contact", "day", "month", "duration",
                  "campaign", "pdays", "previous", "poutcome", "y"],

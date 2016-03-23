@@ -1,4 +1,4 @@
-package main
+package input
 
 import (
 	"encoding/csv"
@@ -10,7 +10,7 @@ import (
 	"testing"
 )
 
-func TestNewCsvInput(t *testing.T) {
+func TestNewCsv(t *testing.T) {
 	cases := []struct {
 		filename   string
 		fieldNames []string
@@ -19,13 +19,13 @@ func TestNewCsvInput(t *testing.T) {
 		{"missing.csv", []string{},
 			&os.PathError{"open", "missing.csv",
 				errors.New("no such file or directory")}},
-		{filepath.Join("fixtures", "bank.csv"),
+		{filepath.Join("..", "..", "fixtures", "bank.csv"),
 			[]string{"age", "job", "marital", "education", "default", "balance",
 				"housing", "loan", "contact", "day", "month", "duration", "campaign",
 				"pdays", "previous", "poutcome", "y"}, nil},
 	}
 	for _, c := range cases {
-		_, err := NewCsvInput(c.fieldNames, c.filename, ';', false)
+		_, err := NewCsv(c.fieldNames, c.filename, ';', false)
 		if !errorMatch(c.wantErr, err) {
 			t.Errorf("NewCsvInput(filename: %q) err: %q, wantErr: %q",
 				c.filename, err, c.wantErr)
@@ -42,7 +42,7 @@ func TestRead(t *testing.T) {
 		wantNumRows     int
 		wantThirdRecord map[string]*dlit.Literal
 	}{
-		{filepath.Join("fixtures", "bank.csv"), false,
+		{filepath.Join("..", "..", "fixtures", "bank.csv"), false,
 			[]string{"age", "job", "marital", "education", "default", "balance",
 				"housing", "loan", "contact", "day", "month", "duration", "campaign",
 				"pdays", "previous", "poutcome", "y"},
@@ -65,7 +65,7 @@ func TestRead(t *testing.T) {
 				"previous":  dlit.MustNew(0),
 				"poutcome":  dlit.MustNew("unknown"),
 				"y":         dlit.MustNew("no")}},
-		{filepath.Join("fixtures", "bank.csv"), true,
+		{filepath.Join("..", "..", "fixtures", "bank.csv"), true,
 			[]string{"age", "job", "marital", "education", "default", "balance",
 				"housing", "loan", "contact", "day", "month", "duration", "campaign",
 				"pdays", "previous", "poutcome", "y"},
@@ -90,7 +90,7 @@ func TestRead(t *testing.T) {
 				"y":         dlit.MustNew("no")}},
 	}
 	for _, c := range cases {
-		i, err := NewCsvInput(c.fieldNames, c.filename, ';', c.skipFirstLine)
+		i, err := NewCsv(c.fieldNames, c.filename, ';', c.skipFirstLine)
 		if err != nil {
 			t.Errorf("Read() - NewCsvInput() - filename: %q err: %q", c.filename, err)
 		}
@@ -128,17 +128,17 @@ func TestRead_errors(t *testing.T) {
 		errRow     int
 		wantErr    error
 	}{
-		{filepath.Join("fixtures", "invalid_numfields_at_102.csv"), ',',
+		{filepath.Join("..", "..", "fixtures", "invalid_numfields_at_102.csv"), ',',
 			[]string{"band", "score", "team", "points", "rating"}, 101,
 			&csv.ParseError{102, 0, errors.New("wrong number of fields in line")}},
-		{filepath.Join("fixtures", "bank.csv"), ';',
+		{filepath.Join("..", "..", "fixtures", "bank.csv"), ';',
 			[]string{"age", "job", "marital", "education", "default", "balance",
 				"housing", "loan", "contact", "day", "month", "duration", "campaign",
 				"pdays", "previous", "poutcome"}, -1,
 			errors.New("wrong number of field names for input")},
 	}
 	for _, c := range cases {
-		i, err := NewCsvInput(c.fieldNames, c.filename, c.separator, false)
+		i, err := NewCsv(c.fieldNames, c.filename, c.separator, false)
 		if err != nil {
 			t.Errorf("Read() - NewCsvInput() - filename: %q err: %q", c.filename, err)
 		}
@@ -177,7 +177,7 @@ func TestRewind(t *testing.T) {
 		wantNumRows     int
 		wantThirdRecord map[string]*dlit.Literal
 	}{
-		{filepath.Join("fixtures", "bank.csv"),
+		{filepath.Join("..", "..", "fixtures", "bank.csv"),
 			[]string{"age", "job", "marital", "education", "default", "balance",
 				"housing", "loan", "contact", "day", "month", "duration", "campaign",
 				"pdays", "previous", "poutcome", "y"},
@@ -202,7 +202,7 @@ func TestRewind(t *testing.T) {
 				"y":         dlit.MustNew("no")}},
 	}
 	for _, c := range cases {
-		input, err := NewCsvInput(c.fieldNames, c.filename, ';', false)
+		input, err := NewCsv(c.fieldNames, c.filename, ';', false)
 		if err != nil {
 			t.Errorf("Read() - NewCsvInput() - filename: %q err: %q", c.filename, err)
 		}
@@ -253,4 +253,17 @@ func matchRecords(r1 map[string]*dlit.Literal,
 		}
 	}
 	return true
+}
+
+func errorMatch(e1 error, e2 error) bool {
+	if e1 == nil && e2 == nil {
+		return true
+	}
+	if e1 == nil || e2 == nil {
+		return false
+	}
+	if e1.Error() == e2.Error() {
+		return true
+	}
+	return false
 }
