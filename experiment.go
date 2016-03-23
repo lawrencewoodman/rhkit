@@ -8,18 +8,17 @@ import (
 	"errors"
 	"fmt"
 	"github.com/lawrencewoodman/dexpr_go"
-	"github.com/lawrencewoodman/rulehunter/internal/aggregators"
-	"github.com/lawrencewoodman/rulehunter/internal/input"
+	"github.com/lawrencewoodman/rulehunter/internal"
 	"os"
 )
 
 type Experiment struct {
 	FileFormatVersion string
 	Title             string
-	Input             input.Input
+	Input             internal.Input
 	FieldNames        []string
 	ExcludeFieldNames []string
-	Aggregators       []aggregators.Aggregator
+	Aggregators       []internal.Aggregator
 	Goals             []*dexpr.Expr
 	SortOrder         []SortField
 }
@@ -122,9 +121,9 @@ func checkExperimentValid(e experimentFile) error {
 
 func makeExperiment(e experimentFile) (*Experiment, error) {
 	var goals []*dexpr.Expr
-	var aggregators []aggregators.Aggregator
+	var aggregators []internal.Aggregator
 	var sortOrder []SortField
-	var _input input.Input
+	var input internal.Input
 	var err error
 	goals, err = makeGoals(e.Goals)
 	if err != nil {
@@ -140,7 +139,7 @@ func makeExperiment(e experimentFile) (*Experiment, error) {
 		return nil, err
 	}
 
-	_input, err = input.NewCsv(e.FieldNames, e.InputFilename,
+	input, err = internal.NewCsvInput(e.FieldNames, e.InputFilename,
 		rune(e.Separator[0]), e.IsFirstLineFieldNames)
 	if err != nil {
 		return nil, err
@@ -149,7 +148,7 @@ func makeExperiment(e experimentFile) (*Experiment, error) {
 	return &Experiment{
 		FileFormatVersion: e.FileFormatVersion,
 		Title:             e.Title,
-		Input:             _input,
+		Input:             input,
 		FieldNames:        e.FieldNames,
 		ExcludeFieldNames: e.ExcludeFieldNames,
 		Aggregators:       aggregators,
@@ -178,15 +177,15 @@ func makeGoals(exprs []string) ([]*dexpr.Expr, error) {
 	return r, nil
 }
 
-func makeAggregator(name, aggType, arg string) (aggregators.Aggregator, error) {
-	var r aggregators.Aggregator
+func makeAggregator(name, aggType, arg string) (internal.Aggregator, error) {
+	var r internal.Aggregator
 	var err error
 	switch aggType {
 	case "calc":
-		r, err = aggregators.NewCalc(name, arg)
+		r, err = internal.NewCalcAggregator(name, arg)
 		return r, err
 	case "count":
-		r, err = aggregators.NewCount(name, arg)
+		r, err = internal.NewCountAggregator(name, arg)
 		return r, err
 	default:
 		err = errors.New("Unrecognized aggregator")
@@ -199,9 +198,9 @@ func makeAggregator(name, aggType, arg string) (aggregators.Aggregator, error) {
 }
 
 func makeAggregators(
-	eAggregators []experimentAggregator) ([]aggregators.Aggregator, error) {
+	eAggregators []experimentAggregator) ([]internal.Aggregator, error) {
 	var err error
-	r := make([]aggregators.Aggregator, len(eAggregators))
+	r := make([]internal.Aggregator, len(eAggregators))
 	for i, ea := range eAggregators {
 		r[i], err = makeAggregator(ea.Name, ea.Function, ea.Arg)
 		if err != nil {
@@ -211,8 +210,7 @@ func makeAggregators(
 	return r, nil
 }
 
-func makeSortOrder(
-	eSortOrder []experimentSortField) ([]SortField, error) {
+func makeSortOrder(eSortOrder []experimentSortField) ([]SortField, error) {
 	r := make([]SortField, len(eSortOrder))
 	for i, eSortField := range eSortOrder {
 		field := eSortField.AggregatorName

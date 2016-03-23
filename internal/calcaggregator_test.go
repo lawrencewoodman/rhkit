@@ -1,4 +1,4 @@
-package aggregators
+package internal
 
 import (
 	"fmt"
@@ -50,8 +50,8 @@ func TestCalcCloneNew(t *testing.T) {
 /************************
  *   Helper functions
  ************************/
-func mustNewCalcAggregator(name string, expr string) *Calc {
-	c, err := NewCalc(name, expr)
+func mustNewCalcAggregator(name string, expr string) *CalcAggregator {
+	c, err := NewCalcAggregator(name, expr)
 	if err != nil {
 		panic(fmt.Sprintf("Can't create CalcAggregator: %s", err))
 	}

@@ -4,8 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/lawrencewoodman/dexpr_go"
-	"github.com/lawrencewoodman/rulehunter/internal/aggregators"
-	"github.com/lawrencewoodman/rulehunter/internal/input"
+	"github.com/lawrencewoodman/rulehunter/internal"
 	"io"
 	"os"
 	"path/filepath"
@@ -31,7 +30,7 @@ func TestLoadExperiment(t *testing.T) {
 			),
 			FieldNames:        fieldNames,
 			ExcludeFieldNames: []string{"education"},
-			Aggregators: []aggregators.Aggregator{
+			Aggregators: []internal.Aggregator{
 				mustNewCountAggregator("numSignedUp", "y == \"yes\""),
 				mustNewCalcAggregator("cost", "numMatches * 4.5"),
 				mustNewCalcAggregator("income", "numSignedUp * 24"),
@@ -127,8 +126,8 @@ func areGoalsEqual(g1 []*dexpr.Expr, g2 []*dexpr.Expr) bool {
 }
 
 func areAggregatorsEqual(
-	a1 []aggregators.Aggregator,
-	a2 []aggregators.Aggregator,
+	a1 []internal.Aggregator,
+	a2 []internal.Aggregator,
 ) bool {
 	if len(a1) != len(a2) {
 		return false
@@ -159,8 +158,9 @@ func mustNewCsvInput(
 	filename string,
 	separator rune,
 	skipFirstLine bool,
-) *input.Csv {
-	input, err := input.NewCsv(fieldNames, filename, separator, skipFirstLine)
+) *internal.CsvInput {
+	input, err :=
+		internal.NewCsvInput(fieldNames, filename, separator, skipFirstLine)
 	if err != nil {
 		panic(fmt.Sprintf("Couldn't create Csv Input: %s", err))
 	}

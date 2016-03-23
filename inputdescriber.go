@@ -6,7 +6,7 @@ package main
 import (
 	"fmt"
 	"github.com/lawrencewoodman/dlit_go"
-	"github.com/lawrencewoodman/rulehunter/internal/input"
+	"github.com/lawrencewoodman/rulehunter/internal"
 	"io"
 	"math"
 	"strings"
@@ -52,12 +52,12 @@ func (k kind) String() string {
 	panic(fmt.Sprintf("Unsupported kind: %d", k))
 }
 
-func DescribeInput(_input input.Input) (map[string]*FieldDescription, error) {
-	_input.Rewind()
+func DescribeInput(input internal.Input) (map[string]*FieldDescription, error) {
+	input.Rewind()
 	fd := make(map[string]*FieldDescription)
 	firstRecord := true
 	for {
-		record, err := _input.Read()
+		record, err := input.Read()
 		if err == io.EOF {
 			break
 		}

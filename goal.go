@@ -6,7 +6,7 @@ package main
 import (
 	"github.com/lawrencewoodman/dexpr_go"
 	"github.com/lawrencewoodman/dlit_go"
-	"github.com/lawrencewoodman/rulehunter/internal/dexprfuncs"
+	"github.com/lawrencewoodman/rulehunter/internal"
 )
 
 // TODO: Create a Goal type
@@ -19,7 +19,7 @@ func GoalsToMap(
 	r := make(map[string]bool, len(goals))
 
 	for _, goal := range goals {
-		r[goal.String()], err = goal.EvalBool(aggregators, dexprfuncs.CallFuncs)
+		r[goal.String()], err = goal.EvalBool(aggregators, internal.CallFuncs)
 		if err != nil {
 			return r, err
 		}

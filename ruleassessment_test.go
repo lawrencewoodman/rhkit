@@ -3,14 +3,14 @@ package main
 import (
 	"github.com/lawrencewoodman/dexpr_go"
 	"github.com/lawrencewoodman/dlit_go"
-	"github.com/lawrencewoodman/rulehunter/internal/aggregators"
+	"github.com/lawrencewoodman/rulehunter/internal"
 	"testing"
 )
 
 func TestNextRecord(t *testing.T) {
 	// It is important for this test to reuse the aggregators to ensure that
 	// they are cloned properly.
-	inAggregators := []aggregators.Aggregator{
+	inAggregators := []internal.Aggregator{
 		mustNewCountAggregator("numIncomeGt2", "income > 2"),
 		mustNewCountAggregator("numBandGt4", "band > 4"),
 	}
@@ -106,29 +106,29 @@ func TestNextRecord_Errors(t *testing.T) {
 	}
 	cases := []struct {
 		rule        *Rule
-		aggregators []aggregators.Aggregator
+		aggregators []internal.Aggregator
 		goals       []*dexpr.Expr
 		wantErr     error
 	}{
 		{mustNewRule("band > 4"),
-			[]aggregators.Aggregator{mustNewCountAggregator("numIncomeGt2", "income > 2")},
+			[]internal.Aggregator{mustNewCountAggregator("numIncomeGt2", "income > 2")},
 			[]*dexpr.Expr{mustNewDExpr("numIncomeGt2 == 1")}, nil},
 		{mustNewRule("band > 4"),
-			[]aggregators.Aggregator{
+			[]internal.Aggregator{
 				mustNewCountAggregator("numIncomeGt2", "fred > 2")},
 			[]*dexpr.Expr{mustNewDExpr("numIncomeGt2 == 1")},
 			dexpr.ErrInvalidExpr("Variable doesn't exist: fred")},
 		{mustNewRule("band > 4"),
-			[]aggregators.Aggregator{
+			[]internal.Aggregator{
 				mustNewCountAggregator("numIncomeGt2", "income > 2")},
 			[]*dexpr.Expr{mustNewDExpr("numIncomeGt == 1")}, nil},
 		{mustNewRule("hand > 4"),
-			[]aggregators.Aggregator{
+			[]internal.Aggregator{
 				mustNewCountAggregator("numIncomeGt2", "income > 2")},
 			[]*dexpr.Expr{mustNewDExpr("numIncomeGt == 1")},
 			dexpr.ErrInvalidExpr("Variable doesn't exist: hand")},
 		{mustNewRule("band ^^ 4"),
-			[]aggregators.Aggregator{
+			[]internal.Aggregator{
 				mustNewCountAggregator("numIncomeGt2", "income > 2")},
 			[]*dexpr.Expr{mustNewDExpr("numIncomeGt == 1")},
 			dexpr.ErrInvalidExpr("Invalid operator: \"^\"")},

@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2016 Lawrence Woodman <lwoodman@vlifesystems.com>
  */
-package input
+package internal
 
 import (
 	"encoding/csv"
@@ -10,7 +10,7 @@ import (
 	"os"
 )
 
-type Csv struct {
+type CsvInput struct {
 	file          *os.File
 	reader        *csv.Reader
 	fieldNames    []string
@@ -19,19 +19,19 @@ type Csv struct {
 	skipFirstLine bool
 }
 
-func NewCsv(fieldNames []string, filename string,
-	separator rune, skipFirstLine bool) (*Csv, error) {
+func NewCsvInput(fieldNames []string, filename string,
+	separator rune, skipFirstLine bool) (*CsvInput, error) {
 	f, r, err := makeCsvReader(filename, separator, skipFirstLine)
 	if err != nil {
 		return nil, err
 	}
 	r.Comma = separator
-	return &Csv{file: f, reader: r, fieldNames: fieldNames,
+	return &CsvInput{file: f, reader: r, fieldNames: fieldNames,
 		filename: filename, separator: separator,
 		skipFirstLine: skipFirstLine}, nil
 }
 
-func (c *Csv) Read() (map[string]*dlit.Literal, error) {
+func (c *CsvInput) Read() (map[string]*dlit.Literal, error) {
 	recordLits := make(map[string]*dlit.Literal)
 	record, err := c.reader.Read()
 	if err != nil {
@@ -51,7 +51,7 @@ func (c *Csv) Read() (map[string]*dlit.Literal, error) {
 	return recordLits, nil
 }
 
-func (c *Csv) Rewind() error {
+func (c *CsvInput) Rewind() error {
 	var err error
 	if err = c.file.Close(); err != nil {
 		return err

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"github.com/lawrencewoodman/dexpr_go"
 	"github.com/lawrencewoodman/dlit_go"
-	"github.com/lawrencewoodman/rulehunter/internal/aggregators"
+	"github.com/lawrencewoodman/rulehunter/internal"
 	"reflect"
 	"testing"
 )
@@ -15,7 +15,7 @@ func TestAssessRules(t *testing.T) {
 		mustNewRule("band > 3"),
 		mustNewRule("cost > 1.2"),
 	}
-	inAggregators := []aggregators.Aggregator{
+	inAggregators := []internal.Aggregator{
 		mustNewCountAggregator("numIncomeGt2", "income > 2"),
 		mustNewCountAggregator("numBandGt4", "band > 4"),
 	}
@@ -131,27 +131,27 @@ func TestAssessRules(t *testing.T) {
 func TestAssessRules_errors(t *testing.T) {
 	cases := []struct {
 		rules       []*Rule
-		aggregators []aggregators.Aggregator
+		aggregators []internal.Aggregator
 		goals       []*dexpr.Expr
 		wantErr     error
 	}{
 		{[]*Rule{mustNewRule("band ^^ 3")},
-			[]aggregators.Aggregator{
+			[]internal.Aggregator{
 				mustNewCountAggregator("numIncomeGt2", "income > 2")},
 			[]*dexpr.Expr{mustNewDExpr("numIncomeGt2 == 1")},
 			errors.New("Invalid operator: \"^\"")},
 		{[]*Rule{mustNewRule("hand > 3")},
-			[]aggregators.Aggregator{
+			[]internal.Aggregator{
 				mustNewCountAggregator("numIncomeGt2", "income > 2")},
 			[]*dexpr.Expr{mustNewDExpr("numIncomeGt2 == 1")},
 			errors.New("Variable doesn't exist: hand")},
 		{[]*Rule{mustNewRule("band > 3")},
-			[]aggregators.Aggregator{
+			[]internal.Aggregator{
 				mustNewCountAggregator("numIncomeGt2", "bincome > 2")},
 			[]*dexpr.Expr{mustNewDExpr("numIncomeGt2 == 1")},
 			errors.New("Variable doesn't exist: bincome")},
 		{[]*Rule{mustNewRule("band > 3")},
-			[]aggregators.Aggregator{
+			[]internal.Aggregator{
 				mustNewCountAggregator("numIncomeGt2", "income > 2")},
 			[]*dexpr.Expr{mustNewDExpr("numIncomeGt == 1")},
 			errors.New("Variable doesn't exist: numIncomeGt")},

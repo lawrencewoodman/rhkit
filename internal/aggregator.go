@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2016 Lawrence Woodman <lwoodman@vlifesystems.com>
  */
-package aggregators
+package internal
 
 import "github.com/lawrencewoodman/dlit_go"
 

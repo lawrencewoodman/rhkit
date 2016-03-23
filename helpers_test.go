@@ -7,8 +7,7 @@ import (
 	"fmt"
 	"github.com/lawrencewoodman/dexpr_go"
 	"github.com/lawrencewoodman/dlit_go"
-	"github.com/lawrencewoodman/rulehunter/internal/aggregators"
-	"github.com/lawrencewoodman/rulehunter/internal/input"
+	"github.com/lawrencewoodman/rulehunter/internal"
 	"io"
 )
 
@@ -41,16 +40,22 @@ func mustNewRule(expr string) *Rule {
 	return rule
 }
 
-func mustNewCountAggregator(name string, expr string) *aggregators.Count {
-	c, err := aggregators.NewCount(name, expr)
+func mustNewCountAggregator(
+	name string,
+	expr string,
+) *internal.CountAggregator {
+	c, err := internal.NewCountAggregator(name, expr)
 	if err != nil {
 		panic(fmt.Sprintf("Can't create CountAggregator: %s", err))
 	}
 	return c
 }
 
-func mustNewCalcAggregator(name string, expr string) *aggregators.Calc {
-	c, err := aggregators.NewCalc(name, expr)
+func mustNewCalcAggregator(
+	name string,
+	expr string,
+) *internal.CalcAggregator {
+	c, err := internal.NewCalcAggregator(name, expr)
 	if err != nil {
 		panic(fmt.Sprintf("Can't create CalcAggregator: %s", err))
 	}
@@ -81,7 +86,7 @@ type LiteralInput struct {
 	position int
 }
 
-func NewLiteralInput(records []map[string]*dlit.Literal) input.Input {
+func NewLiteralInput(records []map[string]*dlit.Literal) internal.Input {
 	return &LiteralInput{records: records, position: 0}
 }
 

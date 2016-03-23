@@ -9,8 +9,7 @@ import (
 	"fmt"
 	"github.com/lawrencewoodman/dexpr_go"
 	"github.com/lawrencewoodman/dlit_go"
-	"github.com/lawrencewoodman/rulehunter/internal/aggregators"
-	"github.com/lawrencewoodman/rulehunter/internal/input"
+	"github.com/lawrencewoodman/rulehunter/internal"
 	"io"
 	"os"
 	"sort"
@@ -306,13 +305,13 @@ func (a *Assessment) Merge(o *Assessment) (*Assessment, error) {
 }
 
 // need a progress callback and a specifier for how often to report
-func AssessRules(rules []*Rule, _aggregators []aggregators.Aggregator,
-	goals []*dexpr.Expr, _input input.Input) (*Assessment, error) {
-	var allAggregators []aggregators.Aggregator
+func AssessRules(rules []*Rule, aggregators []internal.Aggregator,
+	goals []*dexpr.Expr, input internal.Input) (*Assessment, error) {
+	var allAggregators []internal.Aggregator
 	var numRecords int64
 	var err error
 
-	allAggregators, err = prependDefaultAggregators(_aggregators)
+	allAggregators, err = prependDefaultAggregators(aggregators)
 	if err != nil {
 		return &Assessment{}, err
 	}
@@ -328,7 +327,7 @@ func AssessRules(rules []*Rule, _aggregators []aggregators.Aggregator,
 	for i, rule := range rules {
 		ruleAssessments[i] = NewRuleAssessment(rule, allAggregators, goals)
 	}
-	numRecords, err = processInput(_input, ruleAssessments)
+	numRecords, err = processInput(input, ruleAssessments)
 	if err != nil {
 		return &Assessment{}, err
 	}
@@ -347,7 +346,7 @@ func makeAssessment(numRecords int64, goodRuleAssessments []*RuleAssessment,
 	for i, ruleAssessment := range goodRuleAssessments {
 		rule := ruleAssessment.rule
 		aggregatorsMap :=
-			aggregators.AggregatorsToMap(ruleAssessment.aggregators, numRecords, "")
+			internal.AggregatorsToMap(ruleAssessment.aggregators, numRecords, "")
 		goals, err := GoalsToMap(ruleAssessment.goals, aggregatorsMap)
 		if err != nil {
 			return &Assessment{}, err
@@ -395,16 +394,16 @@ func filterGoodReports(
 	return goodRuleAssessments, nil
 }
 
-func processInput(_input input.Input,
+func processInput(input internal.Input,
 	ruleAssessments []*RuleAssessment) (int64, error) {
 	numRecords := int64(0)
 	// TODO: test this rewinds properly
-	if err := _input.Rewind(); err != nil {
+	if err := input.Rewind(); err != nil {
 		return numRecords, err
 	}
 
 	for {
-		record, err := _input.Read()
+		record, err := input.Read()
 		if err == io.EOF {
 			break
 		}
@@ -423,22 +422,22 @@ func processInput(_input input.Input,
 }
 
 func prependDefaultAggregators(
-	_aggregators []aggregators.Aggregator,
-) ([]aggregators.Aggregator, error) {
-	newAggregators := make([]aggregators.Aggregator, 2)
-	numMatchesAggregator, err := aggregators.NewCount("numMatches", "1==1")
+	aggregators []internal.Aggregator,
+) ([]internal.Aggregator, error) {
+	newAggregators := make([]internal.Aggregator, 2)
+	numMatchesAggregator, err := internal.NewCountAggregator("numMatches", "1==1")
 	if err != nil {
 		return newAggregators, err
 	}
 	percentMatchesAggregator, err :=
-		aggregators.NewCalc("percentMatches",
+		internal.NewCalcAggregator("percentMatches",
 			"roundto(100.0 * numMatches / numRecords, 2)")
 	if err != nil {
 		return newAggregators, err
 	}
 	newAggregators[0] = numMatchesAggregator
 	newAggregators[1] = percentMatchesAggregator
-	newAggregators = append(newAggregators, _aggregators...)
+	newAggregators = append(newAggregators, aggregators...)
 	return newAggregators, nil
 }
 

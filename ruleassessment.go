@@ -7,12 +7,12 @@ import (
 	"errors"
 	"github.com/lawrencewoodman/dexpr_go"
 	"github.com/lawrencewoodman/dlit_go"
-	"github.com/lawrencewoodman/rulehunter/internal/aggregators"
+	"github.com/lawrencewoodman/rulehunter/internal"
 )
 
 type RuleAssessment struct {
 	rule        *Rule
-	aggregators []aggregators.Aggregator
+	aggregators []internal.Aggregator
 	goals       []*dexpr.Expr
 }
 
@@ -20,11 +20,11 @@ type RuleAssessment struct {
 //       to the rule.
 func NewRuleAssessment(
 	rule *Rule,
-	_aggregators []aggregators.Aggregator,
+	aggregators []internal.Aggregator,
 	goals []*dexpr.Expr,
 ) *RuleAssessment {
-	cloneAggregators := make([]aggregators.Aggregator, len(_aggregators))
-	for i, a := range _aggregators {
+	cloneAggregators := make([]internal.Aggregator, len(aggregators))
+	for i, a := range aggregators {
 		cloneAggregators[i] = a.CloneNew()
 	}
 	return &RuleAssessment{rule: rule, aggregators: cloneAggregators,

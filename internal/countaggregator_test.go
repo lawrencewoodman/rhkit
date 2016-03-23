@@ -1,4 +1,4 @@
-package aggregators
+package internal
 
 import (
 	"github.com/lawrencewoodman/dlit_go"
@@ -12,7 +12,7 @@ func TestCountGetResult(t *testing.T) {
 		map[string]*dlit.Literal{"income": dlit.MustNew(2), "band": dlit.MustNew(4)},
 		map[string]*dlit.Literal{"income": dlit.MustNew(0), "band": dlit.MustNew(9)},
 	}
-	numBandGt4, err := NewCount("numBandGt4", "band > 4")
+	numBandGt4, err := NewCountAggregator("numBandGt4", "band > 4")
 	if err != nil {
 		t.Errorf("NewCount(\"numBandGt4\", \"band > 4\") err == %q",
 			err)
@@ -37,7 +37,7 @@ func TestCountCloneNew(t *testing.T) {
 		"band":   dlit.MustNew(4),
 	}
 	numRecords := int64(1)
-	numBandGt4, err := NewCount("numBandGt4", "band > 3")
+	numBandGt4, err := NewCountAggregator("numBandGt4", "band > 3")
 	if err != nil {
 		t.Errorf("NewCount(\"numBandGt4\", \"band > 3\") err == %q",
 			err)
