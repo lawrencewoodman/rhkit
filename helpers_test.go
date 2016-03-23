@@ -32,14 +32,6 @@ func mustNewDExpr(expr string) *dexpr.Expr {
 	return dexpr
 }
 
-func mustNewRule(expr string) *Rule {
-	rule, err := NewRule(expr)
-	if err != nil {
-		panic(fmt.Sprintf("Can't create rule: %s", err))
-	}
-	return rule
-}
-
 func mustNewCountAggregator(
 	name string,
 	expr string,

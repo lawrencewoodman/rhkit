@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/lawrencewoodman/dlit_go"
+	"github.com/lawrencewoodman/rulehunter/internal"
 	"regexp"
 	"sort"
 	"testing"
@@ -295,13 +296,13 @@ func TestGenerateRules_2(t *testing.T) {
 
 func TestCombinedRules(t *testing.T) {
 	cases := []struct {
-		inRules   []*Rule
+		inRules   []*internal.Rule
 		wantRules []string
 	}{
-		{[]*Rule{
-			MustNewRule("team == \"a\""),
-			MustNewRule("band > 4"),
-			MustNewRule("in(team,\"red\",\"green\",\"blue\")"),
+		{[]*internal.Rule{
+			internal.MustNewRule("team == \"a\""),
+			internal.MustNewRule("band > 4"),
+			internal.MustNewRule("in(team,\"red\",\"green\",\"blue\")"),
 		},
 			[]string{
 				"team == \"a\" && band > 4",
@@ -311,8 +312,8 @@ func TestCombinedRules(t *testing.T) {
 				"band > 4 && in(team,\"red\",\"green\",\"blue\")",
 				"band > 4 || in(team,\"red\",\"green\",\"blue\")",
 			}},
-		{[]*Rule{MustNewRule("team == \"a\"")}, []string{}},
-		{[]*Rule{}, []string{}},
+		{[]*internal.Rule{internal.MustNewRule("team == \"a\"")}, []string{}},
+		{[]*internal.Rule{}, []string{}},
 	}
 
 	for _, c := range cases {
@@ -335,7 +336,7 @@ var matchFieldInNiRegexp = regexp.MustCompile("^((in\\(|ni\\()+)([^ ,]+)(.*)$")
 var matchFieldMatchRegexp = regexp.MustCompile("^([^ (]+)( .*)$")
 
 func getFieldRules(
-	field string, rules []*Rule) []string {
+	field string, rules []*internal.Rule) []string {
 	fieldRules := make([]string, 0)
 	for _, rule := range rules {
 		ruleStr := rule.String()
@@ -348,7 +349,7 @@ func getFieldRules(
 	return fieldRules
 }
 
-func rulesToStrings(rules []*Rule) []string {
+func rulesToStrings(rules []*internal.Rule) []string {
 	r := make([]string, len(rules))
 	for i, rule := range rules {
 		r[i] = rule.String()

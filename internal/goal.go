@@ -1,12 +1,11 @@
 /*
  * Copyright (C) 2016 Lawrence Woodman <lwoodman@vlifesystems.com>
  */
-package main
+package internal
 
 import (
 	"github.com/lawrencewoodman/dexpr_go"
 	"github.com/lawrencewoodman/dlit_go"
-	"github.com/lawrencewoodman/rulehunter/internal"
 )
 
 // TODO: Create a Goal type
@@ -19,7 +18,7 @@ func GoalsToMap(
 	r := make(map[string]bool, len(goals))
 
 	for _, goal := range goals {
-		r[goal.String()], err = goal.EvalBool(aggregators, internal.CallFuncs)
+		r[goal.String()], err = goal.EvalBool(aggregators, CallFuncs)
 		if err != nil {
 			return r, err
 		}

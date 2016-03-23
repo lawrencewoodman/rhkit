@@ -1,41 +1,40 @@
 /*
  * Copyright (C) 2016 Lawrence Woodman <lwoodman@vlifesystems.com>
  */
-package main
+package internal
 
 import (
 	"errors"
 	"github.com/lawrencewoodman/dexpr_go"
 	"github.com/lawrencewoodman/dlit_go"
-	"github.com/lawrencewoodman/rulehunter/internal"
 )
 
 type RuleAssessment struct {
-	rule        *Rule
-	aggregators []internal.Aggregator
-	goals       []*dexpr.Expr
+	Rule        *Rule
+	Aggregators []Aggregator
+	Goals       []*dexpr.Expr
 }
 
 // Note: This clones the aggregators to ensure the results are specific
 //       to the rule.
 func NewRuleAssessment(
 	rule *Rule,
-	aggregators []internal.Aggregator,
+	aggregators []Aggregator,
 	goals []*dexpr.Expr,
 ) *RuleAssessment {
-	cloneAggregators := make([]internal.Aggregator, len(aggregators))
+	cloneAggregators := make([]Aggregator, len(aggregators))
 	for i, a := range aggregators {
 		cloneAggregators[i] = a.CloneNew()
 	}
-	return &RuleAssessment{rule: rule, aggregators: cloneAggregators,
-		goals: goals}
+	return &RuleAssessment{Rule: rule, Aggregators: cloneAggregators,
+		Goals: goals}
 }
 
 func (ra *RuleAssessment) NextRecord(record map[string]*dlit.Literal) error {
 	var ruleIsTrue bool
 	var err error
-	for _, aggregator := range ra.aggregators {
-		ruleIsTrue, err = ra.rule.IsTrue(record)
+	for _, aggregator := range ra.Aggregators {
+		ruleIsTrue, err = ra.Rule.IsTrue(record)
 		if err != nil {
 			return err
 		}
@@ -49,9 +48,9 @@ func (ra *RuleAssessment) NextRecord(record map[string]*dlit.Literal) error {
 
 func (ra *RuleAssessment) GetAggregatorValue(
 	name string, numRecords int64) (*dlit.Literal, bool) {
-	for _, aggregator := range ra.aggregators {
+	for _, aggregator := range ra.Aggregators {
 		if aggregator.GetName() == name {
-			return aggregator.GetResult(ra.aggregators, numRecords), true
+			return aggregator.GetResult(ra.Aggregators, numRecords), true
 		}
 	}
 	// TODO: Test and create specific error type

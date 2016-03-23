@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/lawrencewoodman/dlit_go"
+	"github.com/lawrencewoodman/rulehunter/internal"
 	"testing"
 )
 
@@ -15,17 +16,17 @@ func TestTweakRules_1(t *testing.T) {
 		"flow": &FieldDescription{FLOAT, dlit.MustNew(50), dlit.MustNew(400), 2,
 			[]*dlit.Literal{}, 0},
 	}
-	rulesIn := []*Rule{
-		mustNewRule("band > 4"),
-		mustNewRule("band > 20"),
-		mustNewRule("band > team"),
-		mustNewRule("age > 7"),
-		mustNewRule("age >= 8"),
-		mustNewRule("flow >= 60.7"),
-		mustNewRule("flow >= 70.20"),
-		mustNewRule("flow > 100.5"),
-		mustNewRule("age > band"),
-		mustNewRule("in(stage,\"20\",\"21\",\"22\")"),
+	rulesIn := []*internal.Rule{
+		internal.MustNewRule("band > 4"),
+		internal.MustNewRule("band > 20"),
+		internal.MustNewRule("band > team"),
+		internal.MustNewRule("age > 7"),
+		internal.MustNewRule("age >= 8"),
+		internal.MustNewRule("flow >= 60.7"),
+		internal.MustNewRule("flow >= 70.20"),
+		internal.MustNewRule("flow > 100.5"),
+		internal.MustNewRule("age > band"),
+		internal.MustNewRule("in(stage,\"20\",\"21\",\"22\")"),
 	}
 	gotRules := TweakRules(rulesIn, fieldDescriptions)
 
@@ -77,11 +78,11 @@ func TestTweakRules_2(t *testing.T) {
 		"age": &FieldDescription{INT, dlit.MustNew(20), dlit.MustNew(40), 0,
 			[]*dlit.Literal{}, 0},
 	}
-	rulesIn := []*Rule{
-		mustNewRule("age <= 40"),
-		mustNewRule("age <= 20"),
-		mustNewRule("age <= 50"),
-		mustNewRule("age <= 60"),
+	rulesIn := []*internal.Rule{
+		internal.MustNewRule("age <= 40"),
+		internal.MustNewRule("age <= 20"),
+		internal.MustNewRule("age <= 50"),
+		internal.MustNewRule("age <= 60"),
 	}
 	gotRules := TweakRules(rulesIn, fieldDescriptions)
 
@@ -139,11 +140,11 @@ func TestTweakRules_3(t *testing.T) {
 		"flow": &FieldDescription{FLOAT, dlit.MustNew(4), dlit.MustNew(30), 6,
 			[]*dlit.Literal{}, 0},
 	}
-	rulesIn := []*Rule{
-		mustNewRule("flow <= 40.78234"),
-		mustNewRule("flow <= 24.89"),
-		mustNewRule("flow <= 52.604956"),
-		mustNewRule("flow <= 65.80"),
+	rulesIn := []*internal.Rule{
+		internal.MustNewRule("flow <= 40.78234"),
+		internal.MustNewRule("flow <= 24.89"),
+		internal.MustNewRule("flow <= 52.604956"),
+		internal.MustNewRule("flow <= 65.80"),
 	}
 	wantMaxDP := fieldDescriptions["flow"].MaxDP
 	wantMinDP := 0
@@ -223,11 +224,11 @@ func TestTweakRules_4(t *testing.T) {
 		"flow": &FieldDescription{FLOAT, dlit.MustNew(4), dlit.MustNew(30), 6,
 			[]*dlit.Literal{}, 0},
 	}
-	rulesIn := []*Rule{
-		mustNewRule("flow <= 40.78234"),
-		mustNewRule("flow <= 24.89"),
-		mustNewRule("flow <= 52.604956"),
-		mustNewRule("true()"),
+	rulesIn := []*internal.Rule{
+		internal.MustNewRule("flow <= 40.78234"),
+		internal.MustNewRule("flow <= 24.89"),
+		internal.MustNewRule("flow <= 52.604956"),
+		internal.MustNewRule("true()"),
 	}
 
 	gotRules := TweakRules(rulesIn, fieldDescriptions)

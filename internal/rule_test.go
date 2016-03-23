@@ -1,4 +1,4 @@
-package main
+package internal
 
 import (
 	"errors"
@@ -32,8 +32,8 @@ func TestIsTrue(t *testing.T) {
 		rule       *Rule
 		wantIsTrue bool
 	}{
-		{mustNewRule("band > 3"), true},
-		{mustNewRule("band == 2"), false},
+		{MustNewRule("band > 3"), true},
+		{MustNewRule("band == 2"), false},
 	}
 	record := map[string]*dlit.Literal{
 		"cost": dlit.MustNew(4.5),
@@ -55,7 +55,7 @@ func TestIsTrue_errors(t *testing.T) {
 		rule      *Rule
 		wantError error
 	}{
-		{mustNewRule("band > 3"),
+		{MustNewRule("band > 3"),
 			dexpr.ErrInvalidExpr("Variable doesn't exist: band")},
 	}
 	record := map[string]*dlit.Literal{
@@ -79,8 +79,8 @@ func TestString(t *testing.T) {
 		rule *Rule
 		want string
 	}{
-		{mustNewRule("band > 3"), "band > 3"},
-		{mustNewRule("in(Band, \"a\", \"bb\")"), "in(Band, \"a\", \"bb\")"},
+		{MustNewRule("band > 3"), "band > 3"},
+		{MustNewRule("in(Band, \"a\", \"bb\")"), "in(Band, \"a\", \"bb\")"},
 	}
 	for _, c := range cases {
 		got := c.rule.String()
@@ -98,9 +98,9 @@ func TestGetTweakableParts(t *testing.T) {
 		wantOperator    string
 		wantValue       string
 	}{
-		{mustNewRule("band > 3"), true, "band", ">", "3"},
-		{mustNewRule("band == 2"), false, "", "", ""},
-		{mustNewRule("in(band, \"a\", \"b\")"), false, "", "", ""},
+		{MustNewRule("band > 3"), true, "band", ">", "3"},
+		{MustNewRule("band == 2"), false, "", "", ""},
+		{MustNewRule("in(band, \"a\", \"b\")"), false, "", "", ""},
 	}
 	for _, c := range cases {
 		gotIsTweakable, gotFieldName, gotOperator, gotValue :=
@@ -161,7 +161,7 @@ func TestCloneWithValue(t *testing.T) {
 		newValue string
 		wantRule *Rule
 	}{
-		{mustNewRule("band > 3"), "20", mustNewRule("band > 20")},
+		{MustNewRule("band > 3"), "20", MustNewRule("band > 20")},
 	}
 	for _, c := range cases {
 		gotRule, err := c.rule.CloneWithValue(c.newValue)
@@ -181,7 +181,7 @@ func TestCloneWithValue_errors(t *testing.T) {
 		newValue  string
 		wantError error
 	}{
-		{mustNewRule("band > 3 && band < 9"), "20",
+		{MustNewRule("band > 3 && band < 9"), "20",
 			errors.New("Can't clone non-tweakable rule: band > 3 && band < 9")},
 	}
 	for _, c := range cases {

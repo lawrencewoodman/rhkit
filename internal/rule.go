@@ -2,14 +2,13 @@
  * Copyright (C) 2016 Lawrence Woodman <lwoodman@vlifesystems.com>
  */
 
-package main
+package internal
 
 import (
 	"errors"
 	"fmt"
 	"github.com/lawrencewoodman/dexpr_go"
 	"github.com/lawrencewoodman/dlit_go"
-	"github.com/lawrencewoodman/rulehunter/internal"
 	"regexp"
 )
 
@@ -63,7 +62,7 @@ func (r *Rule) GetInNiParts() (bool, string, string) {
 }
 
 func (r *Rule) IsTrue(record map[string]*dlit.Literal) (bool, error) {
-	isTrue, err := r.expr.EvalBool(record, internal.CallFuncs)
+	isTrue, err := r.expr.EvalBool(record, CallFuncs)
 	// TODO: Create an error type for rule rather than coopting the dexpr one
 	return isTrue, err
 }
