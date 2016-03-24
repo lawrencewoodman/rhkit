@@ -323,9 +323,9 @@ func AssessRules(rules []*Rule, aggregators []internal.Aggregator,
 		}
 	*/
 
-	ruleAssessments := make([]*RuleAssessment, len(rules))
+	ruleAssessments := make([]*ruleAssessment, len(rules))
 	for i, rule := range rules {
-		ruleAssessments[i] = NewRuleAssessment(rule, allAggregators, goals)
+		ruleAssessments[i] = newRuleAssessment(rule, allAggregators, goals)
 	}
 	numRecords, err = processInput(input, ruleAssessments)
 	if err != nil {
@@ -342,7 +342,7 @@ func AssessRules(rules []*Rule, aggregators []internal.Aggregator,
 
 func makeAssessment(
 	numRecords int64,
-	goodRuleAssessments []*RuleAssessment,
+	goodRuleAssessments []*ruleAssessment,
 	goals []*dexpr.Expr,
 ) (*Assessment, error) {
 	ruleAssessments := make([]*RuleFinalAssessment, len(goodRuleAssessments))
@@ -373,12 +373,12 @@ func makeAssessment(
 }
 
 func filterGoodReports(
-	ruleAssessments []*RuleAssessment,
-	numRecords int64) ([]*RuleAssessment, error) {
-	goodRuleAssessments := make([]*RuleAssessment, 0)
+	ruleAssessments []*ruleAssessment,
+	numRecords int64) ([]*ruleAssessment, error) {
+	goodRuleAssessments := make([]*ruleAssessment, 0)
 	for _, ruleAssessment := range ruleAssessments {
 		numMatches, exists :=
-			ruleAssessment.GetAggregatorValue("numMatches", numRecords)
+			ruleAssessment.getAggregatorValue("numMatches", numRecords)
 		if !exists {
 			// TODO: Create a proper error for this?
 			err := errors.New("numMatches doesn't exist in aggregators")
@@ -398,7 +398,7 @@ func filterGoodReports(
 }
 
 func processInput(input Input,
-	ruleAssessments []*RuleAssessment) (int64, error) {
+	ruleAssessments []*ruleAssessment) (int64, error) {
 	numRecords := int64(0)
 	// TODO: test this rewinds properly
 	if err := input.Rewind(); err != nil {
@@ -415,7 +415,7 @@ func processInput(input Input,
 		}
 		numRecords++
 		for _, ruleAssessment := range ruleAssessments {
-			err := ruleAssessment.NextRecord(record)
+			err := ruleAssessment.nextRecord(record)
 			if err != nil {
 				return numRecords, err
 			}

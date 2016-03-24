@@ -10,7 +10,7 @@ import (
 	"github.com/lawrencewoodman/rulehunter/internal"
 )
 
-type RuleAssessment struct {
+type ruleAssessment struct {
 	Rule        *Rule
 	Aggregators []internal.Aggregator
 	Goals       []*dexpr.Expr
@@ -18,20 +18,20 @@ type RuleAssessment struct {
 
 // Note: This clones the aggregators to ensure the results are specific
 //       to the rule.
-func NewRuleAssessment(
+func newRuleAssessment(
 	rule *Rule,
 	aggregators []internal.Aggregator,
 	goals []*dexpr.Expr,
-) *RuleAssessment {
+) *ruleAssessment {
 	cloneAggregators := make([]internal.Aggregator, len(aggregators))
 	for i, a := range aggregators {
 		cloneAggregators[i] = a.CloneNew()
 	}
-	return &RuleAssessment{Rule: rule, Aggregators: cloneAggregators,
+	return &ruleAssessment{Rule: rule, Aggregators: cloneAggregators,
 		Goals: goals}
 }
 
-func (ra *RuleAssessment) NextRecord(record map[string]*dlit.Literal) error {
+func (ra *ruleAssessment) nextRecord(record map[string]*dlit.Literal) error {
 	var ruleIsTrue bool
 	var err error
 	for _, aggregator := range ra.Aggregators {
@@ -47,7 +47,7 @@ func (ra *RuleAssessment) NextRecord(record map[string]*dlit.Literal) error {
 	return nil
 }
 
-func (ra *RuleAssessment) GetAggregatorValue(
+func (ra *ruleAssessment) getAggregatorValue(
 	name string, numRecords int64) (*dlit.Literal, bool) {
 	for _, aggregator := range ra.Aggregators {
 		if aggregator.GetName() == name {

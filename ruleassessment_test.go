@@ -60,16 +60,16 @@ func TestNextRecord(t *testing.T) {
 			}, 2, 1},
 	}
 	for _, c := range cases {
-		ra := NewRuleAssessment(c.rule, inAggregators, c.goals)
+		ra := newRuleAssessment(c.rule, inAggregators, c.goals)
 		for _, record := range records {
-			err := ra.NextRecord(record)
+			err := ra.nextRecord(record)
 			if err != nil {
-				t.Errorf("NextRecord(%q) rule: %s, aggregators: %q, goals: %q - err: %q",
+				t.Errorf("nextRecord(%q) rule: %s, aggregators: %q, goals: %q - err: %q",
 					record, c.rule, inAggregators, c.goals, err)
 			}
 		}
 		gotNumIncomeGt2, gt2Exists :=
-			ra.GetAggregatorValue("numIncomeGt2", numRecords)
+			ra.getAggregatorValue("numIncomeGt2", numRecords)
 		if !gt2Exists {
 			t.Errorf("numIncomeGt2 aggregator doesn't exist")
 		}
@@ -78,7 +78,7 @@ func TestNextRecord(t *testing.T) {
 			t.Errorf("numIncomeGt2 aggregator can't be int")
 		}
 		gotNumBandGt4, gt4Exists :=
-			ra.GetAggregatorValue("numBandGt4", numRecords)
+			ra.getAggregatorValue("numBandGt4", numRecords)
 		if !gt4Exists {
 			t.Errorf("numBandGt4 aggregator doesn't exist")
 		}
@@ -87,11 +87,11 @@ func TestNextRecord(t *testing.T) {
 			t.Errorf("numBandGt4 aggregator can't be int")
 		}
 		if gotNumIncomeGt2Int != c.wantNumIncomeGt2 {
-			t.Errorf("NextRecord() rule: %s, aggregators: %q, goals: %q - wantNumIncomeGt2: %d, got: %d",
+			t.Errorf("nextRecord() rule: %s, aggregators: %q, goals: %q - wantNumIncomeGt2: %d, got: %d",
 				c.rule, inAggregators, c.goals, c.wantNumIncomeGt2, gotNumIncomeGt2Int)
 		}
 		if gotNumBandGt4Int != c.wantNumBandGt4 {
-			t.Errorf("NextRecord() rule: %s, aggregators: %q, goals: %q - wantNumBandGt4: %d, got: %d",
+			t.Errorf("nextRecord() rule: %s, aggregators: %q, goals: %q - wantNumBandGt4: %d, got: %d",
 				c.rule, inAggregators, c.goals, c.wantNumBandGt4, gotNumBandGt4Int)
 		}
 	}
@@ -134,9 +134,9 @@ func TestNextRecord_Errors(t *testing.T) {
 			dexpr.ErrInvalidExpr("Invalid operator: \"^\"")},
 	}
 	for _, c := range cases {
-		ra := NewRuleAssessment(c.rule, c.aggregators, c.goals)
+		ra := newRuleAssessment(c.rule, c.aggregators, c.goals)
 		for _, record := range records {
-			err := ra.NextRecord(record)
+			err := ra.nextRecord(record)
 			if !errorMatch(c.wantErr, err) {
 				t.Errorf("NextRecord(%q) rule: %q, aggregators: %q, goals: %q err: %q, wantErr: %q",
 					record, c.rule, c.aggregators, c.goals, err, c.wantErr)
