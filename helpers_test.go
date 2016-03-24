@@ -1,7 +1,7 @@
 /*************************
  *  Test helper functions
  *************************/
-package main
+package rulehunter
 
 import (
 	"fmt"
