@@ -26,7 +26,7 @@ func groupTweakableRules(
 ) map[string][]*Rule {
 	groups := make(map[string][]*Rule)
 	for _, rule := range sortedRules {
-		isTweakable, fieldName, operator, _ := rule.GetTweakableParts()
+		isTweakable, fieldName, operator, _ := rule.getTweakableParts()
 		if isTweakable {
 			groupID := fmt.Sprintf("%s^%s", fieldName, operator)
 			if len(groups[groupID]) < numPerGroup {
@@ -47,7 +47,7 @@ func tweakRules(
 		firstRule := rules[0]
 		comparisonPoints := makeComparisonPoints(rules, fieldDescriptions)
 		for _, point := range comparisonPoints {
-			newRule, err := firstRule.CloneWithValue(point)
+			newRule, err := firstRule.cloneWithValue(point)
 			if err != nil {
 				panic(fmt.Sprintf("Can't tweak rule: %s - %s", firstRule, err))
 			}
@@ -83,7 +83,7 @@ func makeComparisonPoints(
 	numbers := make([]*dlit.Literal, len(rules))
 	newPoints := make([]*dlit.Literal, 0)
 	for i, rule := range rules {
-		_, field, _, tweakableValue = rule.GetTweakableParts()
+		_, field, _, tweakableValue = rule.getTweakableParts()
 		numbers[i] = dlit.MustNew(tweakableValue)
 	}
 

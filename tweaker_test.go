@@ -36,7 +36,7 @@ func TestTweakRules_1(t *testing.T) {
 		if rule.String() == "true()" {
 			continue
 		}
-		isTweakable, field, operator, _ := rule.GetTweakableParts()
+		isTweakable, field, operator, _ := rule.getTweakableParts()
 		if !isTweakable {
 			printTestPurposes(t, testPurposes)
 			t.Errorf("TweakRules(%s) rule isn't tweakable: %s", rulesIn, rule)
@@ -92,7 +92,7 @@ func TestTweakRules_2(t *testing.T) {
 		if rule.String() == "true()" {
 			continue
 		}
-		isTweakable, field, operator, value := rule.GetTweakableParts()
+		isTweakable, field, operator, value := rule.getTweakableParts()
 		if !isTweakable && field != "age" && operator != "<=" {
 			printTestPurposes(t, testPurposes)
 			t.Errorf("TweakRules(%s) invalid rule(%s): isTweakable: %s, field: %s, operator: %s",
@@ -158,7 +158,7 @@ func TestTweakRules_3(t *testing.T) {
 		if rule.String() == "true()" {
 			continue
 		}
-		isTweakable, field, operator, value := rule.GetTweakableParts()
+		isTweakable, field, operator, value := rule.getTweakableParts()
 		if !isTweakable && field != "flow" && operator != "<=" {
 			printTestPurposes(t, testPurposes)
 			t.Errorf("TweakRules(%s) invalid rule(%s): isTweakable: %s, field: %s, operator: %s",

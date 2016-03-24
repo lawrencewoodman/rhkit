@@ -40,7 +40,7 @@ func TestIsTrue(t *testing.T) {
 		"band": dlit.MustNew(4),
 	}
 	for _, c := range cases {
-		gotIsTrue, err := c.rule.IsTrue(record)
+		gotIsTrue, err := c.rule.isTrue(record)
 		if err != nil {
 			t.Errorf("IsTrue(%s) rule: %s err: %s", record, c.rule, err)
 		}
@@ -63,7 +63,7 @@ func TestIsTrue_errors(t *testing.T) {
 		"length": dlit.MustNew(4),
 	}
 	for _, c := range cases {
-		_, err := c.rule.IsTrue(record)
+		_, err := c.rule.isTrue(record)
 		if err == nil {
 			t.Errorf("IsTrue(%s) no error, expected: %s", record, c.wantError)
 		}
@@ -104,7 +104,7 @@ func TestGetTweakableParts(t *testing.T) {
 	}
 	for _, c := range cases {
 		gotIsTweakable, gotFieldName, gotOperator, gotValue :=
-			c.rule.GetTweakableParts()
+			c.rule.getTweakableParts()
 		if gotIsTweakable != c.wantIsTweakable {
 			t.Errorf("GetTweakableParts() rule: %s, got tweakable: %s want: %s",
 				c.rule, gotIsTweakable, c.wantIsTweakable)
@@ -139,7 +139,7 @@ func TestGetInNiParts(t *testing.T) {
 		{mustNewRule("ni(flow, \"4\", \"6\")"), true, "ni", "flow"},
 	}
 	for _, c := range cases {
-		gotIsInNi, gotOperator, gotFieldName := c.rule.GetInNiParts()
+		gotIsInNi, gotOperator, gotFieldName := c.rule.getInNiParts()
 		if gotIsInNi != c.wantIsInNi {
 			t.Errorf("GetInNIParts() rule: %s, got isInNi: %s want: %s",
 				c.rule, gotIsInNi, c.wantIsInNi)
@@ -164,7 +164,7 @@ func TestCloneWithValue(t *testing.T) {
 		{mustNewRule("band > 3"), "20", mustNewRule("band > 20")},
 	}
 	for _, c := range cases {
-		gotRule, err := c.rule.CloneWithValue(c.newValue)
+		gotRule, err := c.rule.cloneWithValue(c.newValue)
 		if err != nil {
 			t.Errorf("CloneWithValue(%s) rule: %s, err: %s", c.newValue, c.rule, err)
 		}
@@ -185,7 +185,7 @@ func TestCloneWithValue_errors(t *testing.T) {
 			errors.New("Can't clone non-tweakable rule: band > 3 && band < 9")},
 	}
 	for _, c := range cases {
-		_, err := c.rule.CloneWithValue(c.newValue)
+		_, err := c.rule.cloneWithValue(c.newValue)
 		if err == nil {
 			t.Errorf("CloneWithValue(%s) rule: %s, no error, expected: %s",
 				c.newValue, c.rule, c.wantError)
