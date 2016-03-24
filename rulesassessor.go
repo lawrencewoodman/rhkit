@@ -27,6 +27,128 @@ type RuleFinalAssessment struct {
 	Goals       map[string]bool
 }
 
+// TODO: See if can stop this being exported
+type JReport struct {
+	NumRecords      int64
+	RuleAssessments []*JRuleReport
+}
+
+type JRuleReport struct {
+	Rule        string
+	Aggregators map[string]string
+	Goals       map[string]bool
+}
+
+type ErrNameConflict string
+
+func (r *Assessment) Sort(s []SortField) {
+	sort.Sort(by{r.RuleAssessments, s})
+	r.Flags["sorted"] = true
+}
+
+// TODO: Test this
+func (r *Assessment) IsEqual(o *Assessment) bool {
+	if r.NumRecords != o.NumRecords {
+		return false
+	}
+	for i, ruleAssessment := range r.RuleAssessments {
+		if !ruleAssessment.isEqual(o.RuleAssessments[i]) {
+			return false
+		}
+	}
+	if len(r.Flags) != len(o.Flags) {
+		return false
+	}
+	for k, v := range r.Flags {
+		if v != o.Flags[k] {
+			return false
+		}
+	}
+	return true
+}
+
+func (r *RuleFinalAssessment) String() string {
+	return fmt.Sprintf("Rule: %s, Aggregators: %s, Goals: %s",
+		r.Rule, r.Aggregators, r.Goals)
+}
+
+func (a *Assessment) ToJSON() (string, error) {
+	jRuleAssessments := make([]*JRuleReport, len(a.RuleAssessments))
+	for i, ruleAssessment := range a.RuleAssessments {
+		jRuleAssessments[i] = makeJRuleReport(ruleAssessment)
+	}
+	jReport := &JReport{a.NumRecords, jRuleAssessments}
+	b, err := json.MarshalIndent(jReport, "", "  ")
+	if err != nil {
+		os.Stdout.Write(b)
+	}
+	return string(b[:]), err
+}
+
+// Tidy up rule assessments by removing poor and poorer similar rules
+// For example this removes all rules poorer than the 'true()' rule
+func (sortedAssessment *Assessment) Refine(numSimilarRules int) {
+	if !sortedAssessment.Flags["sorted"] {
+		panic("Assessment isn't sorted")
+	}
+	sortedAssessment.excludePoorRules()
+	sortedAssessment.excludePoorerInNiRules(numSimilarRules)
+	sortedAssessment.excludePoorerTweakableRules(numSimilarRules)
+}
+
+func (e ErrNameConflict) Error() string {
+	return string(e)
+}
+
+func (a *Assessment) Merge(o *Assessment) (*Assessment, error) {
+	if a.NumRecords != o.NumRecords {
+		// TODO: Create error type
+		err := errors.New("Can't merge assessments: Number of records don't match")
+		return nil, err
+	}
+	newRuleAssessments := append(a.RuleAssessments, o.RuleAssessments...)
+	flags := map[string]bool{
+		"sorted": false,
+	}
+	return &Assessment{a.NumRecords, newRuleAssessments, flags}, nil
+}
+
+// need a progress callback and a specifier for how often to report
+func AssessRules(rules []*Rule, aggregators []internal.Aggregator,
+	goals []*dexpr.Expr, input Input) (*Assessment, error) {
+	var allAggregators []internal.Aggregator
+	var numRecords int64
+	var err error
+
+	allAggregators, err = prependDefaultAggregators(aggregators)
+	if err != nil {
+		return &Assessment{}, err
+	}
+	/*
+		TODO: Put this test somewhere else
+		err := checkForNameConflicts(fieldNames, aggregators)
+		if err != nil {
+			return &[]RuleAssessment{}, err
+		}
+	*/
+
+	ruleAssessments := make([]*ruleAssessment, len(rules))
+	for i, rule := range rules {
+		ruleAssessments[i] = newRuleAssessment(rule, allAggregators, goals)
+	}
+	numRecords, err = processInput(input, ruleAssessments)
+	if err != nil {
+		return &Assessment{}, err
+	}
+	goodRuleAssessments, err := filterGoodReports(ruleAssessments, numRecords)
+	if err != nil {
+		return &Assessment{}, err
+	}
+
+	assessment, err := makeAssessment(numRecords, goodRuleAssessments, goals)
+	return assessment, err
+}
+
 // by implements sort.Interface for []*RuleFinalAssessments based
 // on the sortFields
 type by struct {
@@ -99,32 +221,6 @@ func compareDlitNums(l1 *dlit.Literal, l2 *dlit.Literal) int {
 	panic(fmt.Sprintf("Can't compare numbers: %s, %s", l1, l2))
 }
 
-func (r *Assessment) Sort(s []SortField) {
-	sort.Sort(by{r.RuleAssessments, s})
-	r.Flags["sorted"] = true
-}
-
-// TODO: Test this
-func (r *Assessment) IsEqual(o *Assessment) bool {
-	if r.NumRecords != o.NumRecords {
-		return false
-	}
-	for i, ruleAssessment := range r.RuleAssessments {
-		if !ruleAssessment.isEqual(o.RuleAssessments[i]) {
-			return false
-		}
-	}
-	if len(r.Flags) != len(o.Flags) {
-		return false
-	}
-	for k, v := range r.Flags {
-		if v != o.Flags[k] {
-			return false
-		}
-	}
-	return true
-}
-
 func (r *RuleFinalAssessment) isEqual(o *RuleFinalAssessment) bool {
 	if r.Rule.String() != o.Rule.String() {
 		return false
@@ -148,35 +244,6 @@ func (r *RuleFinalAssessment) isEqual(o *RuleFinalAssessment) bool {
 	return true
 }
 
-func (r *RuleFinalAssessment) String() string {
-	return fmt.Sprintf("Rule: %s, Aggregators: %s, Goals: %s",
-		r.Rule, r.Aggregators, r.Goals)
-}
-
-type JReport struct {
-	NumRecords      int64
-	RuleAssessments []*JRuleReport
-}
-
-type JRuleReport struct {
-	Rule        string
-	Aggregators map[string]string
-	Goals       map[string]bool
-}
-
-func (a *Assessment) ToJSON() (string, error) {
-	jRuleAssessments := make([]*JRuleReport, len(a.RuleAssessments))
-	for i, ruleAssessment := range a.RuleAssessments {
-		jRuleAssessments[i] = makeJRuleReport(ruleAssessment)
-	}
-	jReport := &JReport{a.NumRecords, jRuleAssessments}
-	b, err := json.MarshalIndent(jReport, "", "  ")
-	if err != nil {
-		os.Stdout.Write(b)
-	}
-	return string(b[:]), err
-}
-
 func makeJRuleReport(r *RuleFinalAssessment) *JRuleReport {
 	aggregators := make(map[string]string, len(r.Aggregators))
 	for n, l := range r.Aggregators {
@@ -191,17 +258,6 @@ func (a *Assessment) GetRules() []*Rule {
 		r[i] = ruleAssessment.Rule
 	}
 	return r
-}
-
-// Tidy up rule assessments by removing poor and poorer similar rules
-// For example this removes all rules poorer than the 'true()' rule
-func (sortedAssessment *Assessment) Refine(numSimilarRules int) {
-	if !sortedAssessment.Flags["sorted"] {
-		panic("Assessment isn't sorted")
-	}
-	sortedAssessment.excludePoorRules()
-	sortedAssessment.excludePoorerInNiRules(numSimilarRules)
-	sortedAssessment.excludePoorerTweakableRules(numSimilarRules)
 }
 
 func (sortedAssessment *Assessment) excludePoorRules() {
@@ -283,61 +339,6 @@ func (sortedAssessment *Assessment) excludePoorerTweakableRules(
 		}
 	}
 	sortedAssessment.RuleAssessments = goodRuleAssessments
-}
-
-type ErrNameConflict string
-
-func (e ErrNameConflict) Error() string {
-	return string(e)
-}
-
-func (a *Assessment) Merge(o *Assessment) (*Assessment, error) {
-	if a.NumRecords != o.NumRecords {
-		// TODO: Create error type
-		err := errors.New("Can't merge assessments: Number of records don't match")
-		return nil, err
-	}
-	newRuleAssessments := append(a.RuleAssessments, o.RuleAssessments...)
-	flags := map[string]bool{
-		"sorted": false,
-	}
-	return &Assessment{a.NumRecords, newRuleAssessments, flags}, nil
-}
-
-// need a progress callback and a specifier for how often to report
-func AssessRules(rules []*Rule, aggregators []internal.Aggregator,
-	goals []*dexpr.Expr, input Input) (*Assessment, error) {
-	var allAggregators []internal.Aggregator
-	var numRecords int64
-	var err error
-
-	allAggregators, err = prependDefaultAggregators(aggregators)
-	if err != nil {
-		return &Assessment{}, err
-	}
-	/*
-		TODO: Put this test somewhere else
-		err := checkForNameConflicts(fieldNames, aggregators)
-		if err != nil {
-			return &[]RuleAssessment{}, err
-		}
-	*/
-
-	ruleAssessments := make([]*ruleAssessment, len(rules))
-	for i, rule := range rules {
-		ruleAssessments[i] = newRuleAssessment(rule, allAggregators, goals)
-	}
-	numRecords, err = processInput(input, ruleAssessments)
-	if err != nil {
-		return &Assessment{}, err
-	}
-	goodRuleAssessments, err := filterGoodReports(ruleAssessments, numRecords)
-	if err != nil {
-		return &Assessment{}, err
-	}
-
-	assessment, err := makeAssessment(numRecords, goodRuleAssessments, goals)
-	return assessment, err
 }
 
 func makeAssessment(
