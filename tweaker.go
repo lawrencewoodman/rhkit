@@ -6,15 +6,14 @@ package rulehunter
 import (
 	"fmt"
 	"github.com/lawrencewoodman/dlit_go"
-	"github.com/lawrencewoodman/rulehunter/internal"
 	"sort"
 	"strings"
 )
 
 func TweakRules(
-	sortedRules []*internal.Rule,
+	sortedRules []*Rule,
 	fieldDescriptions map[string]*FieldDescription,
-) []*internal.Rule {
+) []*Rule {
 	numRulesPerGroup := 3
 	groupedRules :=
 		groupTweakableRules(sortedRules, numRulesPerGroup)
@@ -22,10 +21,10 @@ func TweakRules(
 }
 
 func groupTweakableRules(
-	sortedRules []*internal.Rule,
+	sortedRules []*Rule,
 	numPerGroup int,
-) map[string][]*internal.Rule {
-	groups := make(map[string][]*internal.Rule)
+) map[string][]*Rule {
+	groups := make(map[string][]*Rule)
 	for _, rule := range sortedRules {
 		isTweakable, fieldName, operator, _ := rule.GetTweakableParts()
 		if isTweakable {
@@ -39,11 +38,11 @@ func groupTweakableRules(
 }
 
 func tweakRules(
-	groupedRules map[string][]*internal.Rule,
+	groupedRules map[string][]*Rule,
 	fieldDescriptions map[string]*FieldDescription,
-) []*internal.Rule {
-	newRules := make([]*internal.Rule, 1)
-	newRules[0] = internal.MustNewRule("true()")
+) []*Rule {
+	newRules := make([]*Rule, 1)
+	newRules[0] = mustNewRule("true()")
 	for _, rules := range groupedRules {
 		firstRule := rules[0]
 		comparisonPoints := makeComparisonPoints(rules, fieldDescriptions)
@@ -71,7 +70,7 @@ func dlitInSlices(needle *dlit.Literal, haystacks ...[]*dlit.Literal) bool {
 
 // TODO: Share similar code with generaters such as generateInt
 func makeComparisonPoints(
-	rules []*internal.Rule,
+	rules []*Rule,
 	fieldDescriptions map[string]*FieldDescription,
 ) []string {
 	var minInt int64

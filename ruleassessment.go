@@ -1,17 +1,18 @@
 /*
  * Copyright (C) 2016 Lawrence Woodman <lwoodman@vlifesystems.com>
  */
-package internal
+package rulehunter
 
 import (
 	"errors"
 	"github.com/lawrencewoodman/dexpr_go"
 	"github.com/lawrencewoodman/dlit_go"
+	"github.com/lawrencewoodman/rulehunter/internal"
 )
 
 type RuleAssessment struct {
 	Rule        *Rule
-	Aggregators []Aggregator
+	Aggregators []internal.Aggregator
 	Goals       []*dexpr.Expr
 }
 
@@ -19,10 +20,10 @@ type RuleAssessment struct {
 //       to the rule.
 func NewRuleAssessment(
 	rule *Rule,
-	aggregators []Aggregator,
+	aggregators []internal.Aggregator,
 	goals []*dexpr.Expr,
 ) *RuleAssessment {
-	cloneAggregators := make([]Aggregator, len(aggregators))
+	cloneAggregators := make([]internal.Aggregator, len(aggregators))
 	for i, a := range aggregators {
 		cloneAggregators[i] = a.CloneNew()
 	}

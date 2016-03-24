@@ -22,7 +22,7 @@ type Assessment struct {
 }
 
 type RuleFinalAssessment struct {
-	Rule        *internal.Rule
+	Rule        *Rule
 	Aggregators map[string]*dlit.Literal
 	Goals       map[string]bool
 }
@@ -185,8 +185,8 @@ func makeJRuleReport(r *RuleFinalAssessment) *JRuleReport {
 	return &JRuleReport{r.Rule.String(), aggregators, r.Goals}
 }
 
-func (a *Assessment) GetRules() []*internal.Rule {
-	r := make([]*internal.Rule, len(a.RuleAssessments))
+func (a *Assessment) GetRules() []*Rule {
+	r := make([]*Rule, len(a.RuleAssessments))
 	for i, ruleAssessment := range a.RuleAssessments {
 		r[i] = ruleAssessment.Rule
 	}
@@ -305,8 +305,8 @@ func (a *Assessment) Merge(o *Assessment) (*Assessment, error) {
 }
 
 // need a progress callback and a specifier for how often to report
-func AssessRules(rules []*internal.Rule, aggregators []internal.Aggregator,
-	goals []*dexpr.Expr, input internal.Input) (*Assessment, error) {
+func AssessRules(rules []*Rule, aggregators []internal.Aggregator,
+	goals []*dexpr.Expr, input Input) (*Assessment, error) {
 	var allAggregators []internal.Aggregator
 	var numRecords int64
 	var err error
@@ -323,9 +323,9 @@ func AssessRules(rules []*internal.Rule, aggregators []internal.Aggregator,
 		}
 	*/
 
-	ruleAssessments := make([]*internal.RuleAssessment, len(rules))
+	ruleAssessments := make([]*RuleAssessment, len(rules))
 	for i, rule := range rules {
-		ruleAssessments[i] = internal.NewRuleAssessment(rule, allAggregators, goals)
+		ruleAssessments[i] = NewRuleAssessment(rule, allAggregators, goals)
 	}
 	numRecords, err = processInput(input, ruleAssessments)
 	if err != nil {
@@ -342,7 +342,7 @@ func AssessRules(rules []*internal.Rule, aggregators []internal.Aggregator,
 
 func makeAssessment(
 	numRecords int64,
-	goodRuleAssessments []*internal.RuleAssessment,
+	goodRuleAssessments []*RuleAssessment,
 	goals []*dexpr.Expr,
 ) (*Assessment, error) {
 	ruleAssessments := make([]*RuleFinalAssessment, len(goodRuleAssessments))
@@ -373,9 +373,9 @@ func makeAssessment(
 }
 
 func filterGoodReports(
-	ruleAssessments []*internal.RuleAssessment,
-	numRecords int64) ([]*internal.RuleAssessment, error) {
-	goodRuleAssessments := make([]*internal.RuleAssessment, 0)
+	ruleAssessments []*RuleAssessment,
+	numRecords int64) ([]*RuleAssessment, error) {
+	goodRuleAssessments := make([]*RuleAssessment, 0)
 	for _, ruleAssessment := range ruleAssessments {
 		numMatches, exists :=
 			ruleAssessment.GetAggregatorValue("numMatches", numRecords)
@@ -397,8 +397,8 @@ func filterGoodReports(
 	return goodRuleAssessments, nil
 }
 
-func processInput(input internal.Input,
-	ruleAssessments []*internal.RuleAssessment) (int64, error) {
+func processInput(input Input,
+	ruleAssessments []*RuleAssessment) (int64, error) {
 	numRecords := int64(0)
 	// TODO: test this rewinds properly
 	if err := input.Rewind(); err != nil {

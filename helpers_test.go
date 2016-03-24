@@ -78,7 +78,7 @@ type LiteralInput struct {
 	position int
 }
 
-func NewLiteralInput(records []map[string]*dlit.Literal) internal.Input {
+func NewLiteralInput(records []map[string]*dlit.Literal) Input {
 	return &LiteralInput{records: records, position: 0}
 }
 

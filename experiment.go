@@ -15,7 +15,7 @@ import (
 type Experiment struct {
 	FileFormatVersion string
 	Title             string
-	Input             internal.Input
+	Input             Input
 	FieldNames        []string
 	ExcludeFieldNames []string
 	Aggregators       []internal.Aggregator
@@ -123,7 +123,7 @@ func makeExperiment(e experimentFile) (*Experiment, error) {
 	var goals []*dexpr.Expr
 	var aggregators []internal.Aggregator
 	var sortOrder []SortField
-	var input internal.Input
+	var input Input
 	var err error
 	goals, err = makeGoals(e.Goals)
 	if err != nil {

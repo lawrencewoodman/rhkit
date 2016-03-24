@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"fmt"
 	"github.com/lawrencewoodman/dexpr_go"
 	"github.com/lawrencewoodman/dlit_go"
 	"reflect"
@@ -59,4 +60,15 @@ func TestGoalsToMap_errors(t *testing.T) {
 		t.Errorf("GoalsToMap(%q, %q) err: %s, wantError: %s",
 			goals, allAggregators, err, wantError)
 	}
+}
+
+/*************************
+ *   Helper functions
+ *************************/
+func mustNewDExpr(expr string) *dexpr.Expr {
+	dexpr, err := dexpr.New(expr)
+	if err != nil {
+		panic(fmt.Sprintf("Can't create dexpr.Expr: %q", err))
+	}
+	return dexpr
 }

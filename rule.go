@@ -2,13 +2,14 @@
  * Copyright (C) 2016 Lawrence Woodman <lwoodman@vlifesystems.com>
  */
 
-package internal
+package rulehunter
 
 import (
 	"errors"
 	"fmt"
 	"github.com/lawrencewoodman/dexpr_go"
 	"github.com/lawrencewoodman/dlit_go"
+	"github.com/lawrencewoodman/rulehunter/internal"
 	"regexp"
 )
 
@@ -22,7 +23,7 @@ func (e ErrInvalidRule) Error() string {
 	return string(e)
 }
 
-func NewRule(exprStr string) (*Rule, error) {
+func newRule(exprStr string) (*Rule, error) {
 	expr, err := dexpr.New(exprStr)
 	if err != nil {
 		return nil, ErrInvalidRule(fmt.Sprintf("Invalid rule: %s", exprStr))
@@ -30,8 +31,8 @@ func NewRule(exprStr string) (*Rule, error) {
 	return &Rule{expr}, nil
 }
 
-func MustNewRule(exprStr string) *Rule {
-	rule, err := NewRule(exprStr)
+func mustNewRule(exprStr string) *Rule {
+	rule, err := newRule(exprStr)
 	if err != nil {
 		panic(err)
 	}
@@ -62,7 +63,7 @@ func (r *Rule) GetInNiParts() (bool, string, string) {
 }
 
 func (r *Rule) IsTrue(record map[string]*dlit.Literal) (bool, error) {
-	isTrue, err := r.expr.EvalBool(record, CallFuncs)
+	isTrue, err := r.expr.EvalBool(record, internal.CallFuncs)
 	// TODO: Create an error type for rule rather than coopting the dexpr one
 	return isTrue, err
 }
@@ -77,7 +78,7 @@ func (r *Rule) CloneWithValue(newValue string) (*Rule, error) {
 		return nil, errors.New(fmt.Sprintf("Can't clone non-tweakable rule: %s", r))
 	}
 	newRule, err :=
-		NewRule(fmt.Sprintf("%s %s %s", fieldName, operator, newValue))
+		newRule(fmt.Sprintf("%s %s %s", fieldName, operator, newValue))
 	return newRule, err
 }
 

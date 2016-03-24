@@ -1,16 +1,16 @@
-package internal
+package rulehunter
 
 import (
-	"fmt"
 	"github.com/lawrencewoodman/dexpr_go"
 	"github.com/lawrencewoodman/dlit_go"
+	"github.com/lawrencewoodman/rulehunter/internal"
 	"testing"
 )
 
 func TestNextRecord(t *testing.T) {
 	// It is important for this test to reuse the aggregators to ensure that
 	// they are cloned properly.
-	inAggregators := []Aggregator{
+	inAggregators := []internal.Aggregator{
 		mustNewCountAggregator("numIncomeGt2", "income > 2"),
 		mustNewCountAggregator("numBandGt4", "band > 4"),
 	}
@@ -43,17 +43,17 @@ func TestNextRecord(t *testing.T) {
 		wantNumIncomeGt2 int64
 		wantNumBandGt4   int64
 	}{
-		{MustNewRule("band > 4"),
+		{mustNewRule("band > 4"),
 			[]*dexpr.Expr{
 				mustNewDExpr("numIncomeGt2 == 1"),
 				mustNewDExpr("numBandGt4 == 2"),
 			}, 1, 2},
-		{MustNewRule("band > 3"),
+		{mustNewRule("band > 3"),
 			[]*dexpr.Expr{
 				mustNewDExpr("numIncomeGt2 == 2"),
 				mustNewDExpr("numBandGt4 == 2"),
 			}, 2, 2},
-		{MustNewRule("cost > 1.2"),
+		{mustNewRule("cost > 1.2"),
 			[]*dexpr.Expr{
 				mustNewDExpr("numIncomeGt2 == 2"),
 				mustNewDExpr("numBandGt4 == 1"),
@@ -106,29 +106,29 @@ func TestNextRecord_Errors(t *testing.T) {
 	}
 	cases := []struct {
 		rule        *Rule
-		aggregators []Aggregator
+		aggregators []internal.Aggregator
 		goals       []*dexpr.Expr
 		wantErr     error
 	}{
-		{MustNewRule("band > 4"),
-			[]Aggregator{mustNewCountAggregator("numIncomeGt2", "income > 2")},
+		{mustNewRule("band > 4"),
+			[]internal.Aggregator{mustNewCountAggregator("numIncomeGt2", "income > 2")},
 			[]*dexpr.Expr{mustNewDExpr("numIncomeGt2 == 1")}, nil},
-		{MustNewRule("band > 4"),
-			[]Aggregator{
+		{mustNewRule("band > 4"),
+			[]internal.Aggregator{
 				mustNewCountAggregator("numIncomeGt2", "fred > 2")},
 			[]*dexpr.Expr{mustNewDExpr("numIncomeGt2 == 1")},
 			dexpr.ErrInvalidExpr("Variable doesn't exist: fred")},
-		{MustNewRule("band > 4"),
-			[]Aggregator{
+		{mustNewRule("band > 4"),
+			[]internal.Aggregator{
 				mustNewCountAggregator("numIncomeGt2", "income > 2")},
 			[]*dexpr.Expr{mustNewDExpr("numIncomeGt == 1")}, nil},
-		{MustNewRule("hand > 4"),
-			[]Aggregator{
+		{mustNewRule("hand > 4"),
+			[]internal.Aggregator{
 				mustNewCountAggregator("numIncomeGt2", "income > 2")},
 			[]*dexpr.Expr{mustNewDExpr("numIncomeGt == 1")},
 			dexpr.ErrInvalidExpr("Variable doesn't exist: hand")},
-		{MustNewRule("band ^^ 4"),
-			[]Aggregator{
+		{mustNewRule("band ^^ 4"),
+			[]internal.Aggregator{
 				mustNewCountAggregator("numIncomeGt2", "income > 2")},
 			[]*dexpr.Expr{mustNewDExpr("numIncomeGt == 1")},
 			dexpr.ErrInvalidExpr("Invalid operator: \"^\"")},
@@ -143,26 +143,4 @@ func TestNextRecord_Errors(t *testing.T) {
 			}
 		}
 	}
-}
-
-/*************************
- *   Helper functions
- *************************/
-func mustNewDExpr(expr string) *dexpr.Expr {
-	dexpr, err := dexpr.New(expr)
-	if err != nil {
-		panic(fmt.Sprintf("Can't create dexpr.Expr: %q", err))
-	}
-	return dexpr
-}
-
-func mustNewCountAggregator(
-	name string,
-	expr string,
-) *CountAggregator {
-	c, err := NewCountAggregator(name, expr)
-	if err != nil {
-		panic(fmt.Sprintf("Can't create CountAggregator: %s", err))
-	}
-	return c
 }
