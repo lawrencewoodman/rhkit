@@ -42,30 +42,6 @@ func (d direction) String() string {
 	return "descending"
 }
 
-type experimentFile struct {
-	FileFormatVersion     string
-	Title                 string
-	InputFilename         string
-	FieldNames            []string
-	ExcludeFieldNames     []string
-	IsFirstLineFieldNames bool
-	Separator             string
-	Aggregators           []experimentAggregator
-	Goals                 []string
-	SortOrder             []experimentSortField
-}
-
-type experimentAggregator struct {
-	Name     string
-	Function string
-	Arg      string
-}
-
-type experimentSortField struct {
-	AggregatorName string
-	Direction      string
-}
-
 type ErrInvalidField struct {
 	FieldName string
 	Value     string
@@ -97,6 +73,30 @@ func LoadExperiment(filename string) (*Experiment, error) {
 	}
 	experiment, err = makeExperiment(e)
 	return experiment, err
+}
+
+type experimentFile struct {
+	FileFormatVersion     string
+	Title                 string
+	InputFilename         string
+	FieldNames            []string
+	ExcludeFieldNames     []string
+	IsFirstLineFieldNames bool
+	Separator             string
+	Aggregators           []experimentAggregator
+	Goals                 []string
+	SortOrder             []experimentSortField
+}
+
+type experimentAggregator struct {
+	Name     string
+	Function string
+	Arg      string
+}
+
+type experimentSortField struct {
+	AggregatorName string
+	Direction      string
 }
 
 func checkExperimentValid(e experimentFile) error {
