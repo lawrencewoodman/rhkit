@@ -17,11 +17,11 @@ import (
 
 type Assessment struct {
 	NumRecords      int64
-	RuleAssessments []*RuleFinalAssessment
+	RuleAssessments []*RuleAssessment
 	Flags           map[string]bool
 }
 
-type RuleFinalAssessment struct {
+type RuleAssessment struct {
 	Rule        *Rule
 	Aggregators map[string]*dlit.Literal
 	Goals       map[string]bool
@@ -67,7 +67,7 @@ func (r *Assessment) IsEqual(o *Assessment) bool {
 	return true
 }
 
-func (r *RuleFinalAssessment) String() string {
+func (r *RuleAssessment) String() string {
 	return fmt.Sprintf("Rule: %s, Aggregators: %s, Goals: %s",
 		r.Rule, r.Aggregators, r.Goals)
 }
@@ -149,10 +149,10 @@ func AssessRules(rules []*Rule, aggregators []internal.Aggregator,
 	return assessment, err
 }
 
-// by implements sort.Interface for []*RuleFinalAssessments based
+// by implements sort.Interface for []*RuleAssessments based
 // on the sortFields
 type by struct {
-	ruleAssessments []*RuleFinalAssessment
+	ruleAssessments []*RuleAssessment
 	sortFields      []SortField
 }
 
@@ -221,7 +221,7 @@ func compareDlitNums(l1 *dlit.Literal, l2 *dlit.Literal) int {
 	panic(fmt.Sprintf("Can't compare numbers: %s, %s", l1, l2))
 }
 
-func (r *RuleFinalAssessment) isEqual(o *RuleFinalAssessment) bool {
+func (r *RuleAssessment) isEqual(o *RuleAssessment) bool {
 	if r.Rule.String() != o.Rule.String() {
 		return false
 	}
@@ -244,7 +244,7 @@ func (r *RuleFinalAssessment) isEqual(o *RuleFinalAssessment) bool {
 	return true
 }
 
-func makeJRuleReport(r *RuleFinalAssessment) *JRuleReport {
+func makeJRuleReport(r *RuleAssessment) *JRuleReport {
 	aggregators := make(map[string]string, len(r.Aggregators))
 	for n, l := range r.Aggregators {
 		aggregators[n] = l.String()
@@ -262,7 +262,7 @@ func (a *Assessment) GetRules() []*Rule {
 
 func (sortedAssessment *Assessment) excludePoorRules() {
 	trueFound := false
-	goodRuleAssessments := make([]*RuleFinalAssessment, 0)
+	goodRuleAssessments := make([]*RuleAssessment, 0)
 	for _, a := range sortedAssessment.RuleAssessments {
 		numMatches, numMatchesIsInt := a.Aggregators["numMatches"].Int()
 		if !numMatchesIsInt {
@@ -285,7 +285,7 @@ func (sortedAssessment *Assessment) excludePoorRules() {
 func (sortedAssessment *Assessment) excludePoorerInNiRules(
 	numSimilarRules int,
 ) {
-	goodRuleAssessments := make([]*RuleFinalAssessment, 0)
+	goodRuleAssessments := make([]*RuleAssessment, 0)
 	inFields := make(map[string]int)
 	niFields := make(map[string]int)
 	for _, a := range sortedAssessment.RuleAssessments {
@@ -319,7 +319,7 @@ func (sortedAssessment *Assessment) excludePoorerInNiRules(
 func (sortedAssessment *Assessment) excludePoorerTweakableRules(
 	numSimilarRules int,
 ) {
-	goodRuleAssessments := make([]*RuleFinalAssessment, 0)
+	goodRuleAssessments := make([]*RuleAssessment, 0)
 	fieldOperatorIDs := make(map[string]int)
 	for _, a := range sortedAssessment.RuleAssessments {
 		rule := a.Rule
@@ -346,7 +346,7 @@ func makeAssessment(
 	goodRuleAssessments []*ruleAssessment,
 	goals []*dexpr.Expr,
 ) (*Assessment, error) {
-	ruleAssessments := make([]*RuleFinalAssessment, len(goodRuleAssessments))
+	ruleAssessments := make([]*RuleAssessment, len(goodRuleAssessments))
 	for i, ruleAssessment := range goodRuleAssessments {
 		rule := ruleAssessment.Rule
 		aggregatorsMap :=
@@ -356,7 +356,7 @@ func makeAssessment(
 			return &Assessment{}, err
 		}
 		delete(aggregatorsMap, "numRecords")
-		ruleAssessments[i] = &RuleFinalAssessment{
+		ruleAssessments[i] = &RuleAssessment{
 			Rule:        rule,
 			Aggregators: aggregatorsMap,
 			Goals:       goals,
@@ -445,7 +445,7 @@ func prependDefaultAggregators(
 	return newAggregators, nil
 }
 
-func calcNumGoalsPassedScore(r *RuleFinalAssessment) *dlit.Literal {
+func calcNumGoalsPassedScore(r *RuleAssessment) *dlit.Literal {
 	numGoalsPassed := 0.0
 	increment := 1.0
 	for _, goalPassed := range r.Goals {
