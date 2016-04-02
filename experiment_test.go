@@ -158,9 +158,9 @@ func mustNewCsvInput(
 	filename string,
 	separator rune,
 	skipFirstLine bool,
-) *internal.CsvInput {
+) Input {
 	input, err :=
-		internal.NewCsvInput(fieldNames, filename, separator, skipFirstLine)
+		newCsvInput(fieldNames, filename, separator, skipFirstLine)
 	if err != nil {
 		panic(fmt.Sprintf("Couldn't create Csv Input: %s", err))
 	}

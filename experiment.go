@@ -139,7 +139,7 @@ func makeExperiment(e experimentFile) (*Experiment, error) {
 		return nil, err
 	}
 
-	input, err = internal.NewCsvInput(e.FieldNames, e.InputFilename,
+	input, err = newCsvInput(e.FieldNames, e.InputFilename,
 		rune(e.Separator[0]), e.IsFirstLineFieldNames)
 	if err != nil {
 		return nil, err
