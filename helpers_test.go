@@ -82,6 +82,10 @@ func NewLiteralInput(records []map[string]*dlit.Literal) Input {
 	return &LiteralInput{records: records, position: 0}
 }
 
+func (l *LiteralInput) Clone() (Input, error) {
+	return &LiteralInput{records: l.records, position: 0}, nil
+}
+
 func (l *LiteralInput) Read() (map[string]*dlit.Literal, error) {
 	if l.position < len(l.records) {
 		record := l.records[l.position]

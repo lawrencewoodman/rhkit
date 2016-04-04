@@ -31,7 +31,13 @@ func newCsvInput(fieldNames []string, filename string,
 		skipFirstLine: skipFirstLine}, nil
 }
 
-func (c *CsvInput) Read() (map[string]*dlit.Literal, error) {
+func (c *csvInput) Clone() (Input, error) {
+	newC, err :=
+		newCsvInput(c.fieldNames, c.filename, c.separator, c.skipFirstLine)
+	return newC, err
+}
+
+func (c *csvInput) Read() (map[string]*dlit.Literal, error) {
 	recordLits := make(map[string]*dlit.Literal)
 	record, err := c.reader.Read()
 	if err != nil {

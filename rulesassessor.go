@@ -149,6 +149,116 @@ func AssessRules(rules []*Rule, aggregators []internal.Aggregator,
 	return assessment, err
 }
 
+type AssessRulesMPOutcome struct {
+	Assessment *Assessment
+	Err        error
+	Progress   float64
+	Finished   bool
+}
+
+func AssessRulesMP(
+	rules []*Rule,
+	aggregators []internal.Aggregator,
+	goals []*dexpr.Expr,
+	input Input,
+	maxProcesses int,
+	ec chan *AssessRulesMPOutcome,
+) {
+	var assessment *Assessment
+	var isError bool
+	ic := make(chan *assessRulesCOutcome)
+	numRules := len(rules)
+	progressIntervals := 1000
+	// TODO: Use System variable for number of concurrent processes or pass to funciton
+	numProcesses := 0
+	if numRules < progressIntervals {
+		progressIntervals = numRules
+	}
+	step := numRules / progressIntervals
+	collectedI := 0
+	for i := 0; i < numRules; i += step {
+		progress := float64(collectedI) / float64(numRules)
+		nextI := i + step
+		if nextI > numRules {
+			nextI = numRules
+		}
+		rulesPartial := rules[i:nextI]
+		inputClone, inputCloneError := input.Clone()
+		if inputCloneError != nil {
+			ec <- &AssessRulesMPOutcome{nil, inputCloneError, progress, false}
+			close(ec)
+			return
+		}
+		go assessRulesC(rulesPartial, aggregators, goals, inputClone, ic)
+		numProcesses++
+
+		if numProcesses >= maxProcesses {
+			assessment, isError = getCOutcome(ic, ec, assessment, progress)
+			if isError {
+				return
+			}
+			collectedI += step
+			numProcesses--
+		}
+	}
+
+	for p := 0; p < numProcesses; p++ {
+		progress := float64(collectedI) / float64(numRules)
+		assessment, isError = getCOutcome(ic, ec, assessment, progress)
+		if isError {
+			return
+		}
+		collectedI += step
+	}
+
+	ec <- &AssessRulesMPOutcome{assessment, nil, 1.0, true}
+	close(ec)
+}
+
+func getCOutcome(
+	ic chan *assessRulesCOutcome,
+	ec chan *AssessRulesMPOutcome,
+	assessment *Assessment,
+	progress float64,
+) (*Assessment, bool) {
+	var retAssessment *Assessment
+	var err error
+	ec <- &AssessRulesMPOutcome{nil, nil, progress, false}
+	assessmentOutcome := <-ic
+	if assessmentOutcome.err != nil {
+		ec <- &AssessRulesMPOutcome{nil, assessmentOutcome.err, progress, false}
+		close(ec)
+		return nil, true
+	}
+	if assessment == nil {
+		retAssessment = assessmentOutcome.assessment
+	} else {
+		retAssessment, err = assessment.Merge(assessmentOutcome.assessment)
+		if err != nil {
+			ec <- &AssessRulesMPOutcome{nil, err, progress, false}
+			close(ec)
+			return nil, true
+		}
+	}
+	return retAssessment, false
+}
+
+type assessRulesCOutcome struct {
+	assessment *Assessment
+	err        error
+}
+
+func assessRulesC(
+	rules []*Rule,
+	aggregators []internal.Aggregator,
+	goals []*dexpr.Expr,
+	input Input,
+	c chan *assessRulesCOutcome,
+) {
+	assessment, err := AssessRules(rules, aggregators, goals, input)
+	c <- &assessRulesCOutcome{assessment, err}
+}
+
 // by implements sort.Interface for []*RuleAssessments based
 // on the sortFields
 type by struct {

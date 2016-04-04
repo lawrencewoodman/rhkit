@@ -2,6 +2,7 @@ package rulehunter
 
 import (
 	"errors"
+	"fmt"
 	"github.com/lawrencewoodman/dexpr_go"
 	"github.com/lawrencewoodman/dlit_go"
 	"github.com/lawrencewoodman/rulehunter/internal"
@@ -170,6 +171,94 @@ func TestAssessRules_errors(t *testing.T) {
 			t.Errorf("AssessRules(%q, %q, %q, input) - err: %s, wantErr: %s",
 				c.rules, c.aggregators, c.goals, err, c.wantErr)
 		}
+	}
+}
+
+func TestAssessRulesMP(t *testing.T) {
+	rules := []*Rule{
+		mustNewRule("band > 4"),
+		mustNewRule("band > 3"),
+		mustNewRule("cost > 1.2"),
+	}
+	inAggregators := []internal.Aggregator{
+		mustNewCountAggregator("numIncomeGt2", "income > 2"),
+		mustNewCountAggregator("numBandGt4", "band > 4"),
+	}
+	goals := []*dexpr.Expr{
+		mustNewDExpr("numIncomeGt2 == 1"),
+		mustNewDExpr("numIncomeGt2 == 2"),
+		mustNewDExpr("numIncomeGt2 == 3"),
+		mustNewDExpr("numIncomeGt2 == 4"),
+		mustNewDExpr("numBandGt4 == 1"),
+		mustNewDExpr("numBandGt4 == 2"),
+		mustNewDExpr("numBandGt4 == 3"),
+		mustNewDExpr("numBandGt4 == 4"),
+	}
+	records := []map[string]*dlit.Literal{
+		map[string]*dlit.Literal{
+			"income": dlit.MustNew(3),
+			"cost":   dlit.MustNew(4.5),
+			"band":   dlit.MustNew(4),
+		},
+		map[string]*dlit.Literal{
+			"income": dlit.MustNew(3),
+			"cost":   dlit.MustNew(3.2),
+			"band":   dlit.MustNew(7),
+		},
+		map[string]*dlit.Literal{
+			"income": dlit.MustNew(2),
+			"cost":   dlit.MustNew(1.2),
+			"band":   dlit.MustNew(4),
+		},
+		map[string]*dlit.Literal{
+			"income": dlit.MustNew(0),
+			"cost":   dlit.MustNew(0),
+			"band":   dlit.MustNew(9),
+		},
+	}
+
+	input := NewLiteralInput(records)
+	maxProcesses := 4
+	wantAssessment, err :=
+		AssessRules(rules, inAggregators, goals, input)
+	if err != nil {
+		t.Errorf("AssessRules(%q, %q, %q, input) - err: %q",
+			rules, inAggregators, goals, err)
+	}
+	c := make(chan *AssessRulesMPOutcome)
+	progress := 0.0
+	var gotAssessment *Assessment
+	go AssessRulesMP(rules, inAggregators, goals, input, maxProcesses, c)
+
+	numRuns := 0
+	lastProgress := -1.0
+	for o := range c {
+		numRuns++
+		progress = o.Progress
+		if o.Err != nil {
+			t.Errorf("AssessRulesMP(%q, %q, %q, input, c) - err: %q",
+				rules, inAggregators, goals, o.Err)
+		}
+		if progress <= lastProgress {
+			t.Errorf("AssessRulesMP(%q, %q, %q, input, c) - progress not increasing in order: this: %f, last: %f",
+				rules, inAggregators, goals, progress, lastProgress)
+		}
+		if o.Finished {
+			gotAssessment = o.Assessment
+		}
+	}
+	if progress != 1.0 {
+		t.Errorf("AssessRulesMP(%q, %q, %q, input, c) - progress didn't finish at 100, but: %d",
+			rules, inAggregators, goals, progress)
+	}
+	if numRuns < len(rules) {
+		t.Errorf("AssessRulesMP(%q, %q, %q, input, c) - only made %d runs",
+			rules, inAggregators, goals, numRuns)
+	}
+	assessmentsEqual, msg := matchAssessments(gotAssessment, wantAssessment)
+	if !assessmentsEqual {
+		t.Errorf("AssessRulesMP(%q, %q, %q, input, c)\nassessments don't match: %s",
+			rules, inAggregators, goals, msg)
 	}
 }
 
@@ -857,4 +946,38 @@ func getAssessmentRules(assessment *Assessment) []string {
 		rules[i] = ruleAssessment.Rule.String()
 	}
 	return rules
+}
+
+func matchAssessments(assessment1, assessment2 *Assessment) (bool, string) {
+	if assessment1.NumRecords != assessment2.NumRecords {
+		return false, "Number of records don't match"
+	}
+	if !reflect.DeepEqual(assessment1.Flags, assessment2.Flags) {
+		return false,
+			fmt.Sprintf("Flags don't match: %s, %s",
+				assessment1.Flags,
+				assessment2.Flags)
+	}
+	if len(assessment1.RuleAssessments) != len(assessment2.RuleAssessments) {
+		return false, "Number of rule assessments don't match"
+	}
+
+	for _, ruleAssessment1 := range assessment1.RuleAssessments {
+		ruleFound := false
+		for _, ruleAssessment2 := range assessment2.RuleAssessments {
+			if ruleAssessment1.Rule.String() == ruleAssessment2.Rule.String() {
+				ruleFound = true
+				if !ruleAssessment1.isEqual(ruleAssessment2) {
+					return false,
+						fmt.Sprintf("RuleAssessments don't match:\n %s\n %s",
+							ruleAssessment1,
+							ruleAssessment2)
+				}
+			}
+		}
+		if !ruleFound {
+			return false, fmt.Sprintf("Rule doesn't exist: %s", ruleAssessment1.Rule)
+		}
+	}
+	return true, ""
 }
