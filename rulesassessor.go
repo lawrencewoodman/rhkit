@@ -28,11 +28,6 @@ type RuleAssessment struct {
 }
 
 // TODO: See if can stop this being exported
-type JReport struct {
-	NumRecords      int64
-	RuleAssessments []*JRuleReport
-}
-
 type JRuleReport struct {
 	Rule        string
 	Aggregators map[string]string
@@ -73,6 +68,11 @@ func (r *RuleAssessment) String() string {
 }
 
 func (a *Assessment) ToJSON() (string, error) {
+	type JReport struct {
+		NumRecords      int64
+		RuleAssessments []*JRuleReport
+	}
+
 	jRuleAssessments := make([]*JRuleReport, len(a.RuleAssessments))
 	for i, ruleAssessment := range a.RuleAssessments {
 		jRuleAssessments[i] = makeJRuleReport(ruleAssessment)
