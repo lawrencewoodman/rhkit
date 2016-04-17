@@ -2,6 +2,7 @@ package rulehunter
 
 import (
 	"github.com/lawrencewoodman/dlit_go"
+	"github.com/lawrencewoodman/rulehunter/csvinput"
 	"path/filepath"
 	"testing"
 )
@@ -43,7 +44,7 @@ func TestDescribeInput(t *testing.T) {
 		"method": &FieldDescription{IGNORE, nil, nil, 0,
 			[]*dlit.Literal{}, 0},
 	}
-	input, err := newCsvInput(fieldNames, filename, ',', skipFirstLine)
+	input, err := csvinput.New(fieldNames, filename, ',', skipFirstLine)
 	if err != nil {
 		t.Errorf("NewCsvInput() - err: %q", filename, err)
 	}

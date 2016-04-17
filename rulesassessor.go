@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"github.com/lawrencewoodman/dexpr_go"
 	"github.com/lawrencewoodman/dlit_go"
+	"github.com/lawrencewoodman/rulehunter/input"
 	"github.com/lawrencewoodman/rulehunter/internal"
 	"io"
 	"os"
@@ -115,7 +116,7 @@ func (a *Assessment) Merge(o *Assessment) (*Assessment, error) {
 
 // need a progress callback and a specifier for how often to report
 func AssessRules(rules []*Rule, aggregators []internal.Aggregator,
-	goals []*dexpr.Expr, input Input) (*Assessment, error) {
+	goals []*dexpr.Expr, input input.Input) (*Assessment, error) {
 	var allAggregators []internal.Aggregator
 	var numRecords int64
 	var err error
@@ -160,7 +161,7 @@ func AssessRulesMP(
 	rules []*Rule,
 	aggregators []internal.Aggregator,
 	goals []*dexpr.Expr,
-	input Input,
+	input input.Input,
 	maxProcesses int,
 	ec chan *AssessRulesMPOutcome,
 ) {
@@ -252,7 +253,7 @@ func assessRulesC(
 	rules []*Rule,
 	aggregators []internal.Aggregator,
 	goals []*dexpr.Expr,
-	input Input,
+	input input.Input,
 	c chan *assessRulesCOutcome,
 ) {
 	assessment, err := AssessRules(rules, aggregators, goals, input)
@@ -508,7 +509,7 @@ func filterGoodReports(
 	return goodRuleAssessments, nil
 }
 
-func processInput(input Input,
+func processInput(input input.Input,
 	ruleAssessments []*ruleAssessment) (int64, error) {
 	numRecords := int64(0)
 	// TODO: test this rewinds properly

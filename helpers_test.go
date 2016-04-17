@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/lawrencewoodman/dexpr_go"
 	"github.com/lawrencewoodman/dlit_go"
+	"github.com/lawrencewoodman/rulehunter/input"
 	"github.com/lawrencewoodman/rulehunter/internal"
 	"io"
 )
@@ -78,11 +79,11 @@ type LiteralInput struct {
 	position int
 }
 
-func NewLiteralInput(records []map[string]*dlit.Literal) Input {
+func NewLiteralInput(records []map[string]*dlit.Literal) input.Input {
 	return &LiteralInput{records: records, position: 0}
 }
 
-func (l *LiteralInput) Clone() (Input, error) {
+func (l *LiteralInput) Clone() (input.Input, error) {
 	return &LiteralInput{records: l.records, position: 0}, nil
 }
 

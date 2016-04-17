@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2016 Lawrence Woodman <lwoodman@vlifesystems.com>
  */
-package rulehunter
+package input
 
 import "github.com/lawrencewoodman/dlit_go"
 

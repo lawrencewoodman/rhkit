@@ -5,19 +5,46 @@ package rulehunter
 
 import (
 	"github.com/lawrencewoodman/rulehunter"
+	"github.com/lawrencewoodman/rulehunter/csvinput"
 	"path/filepath"
 	"runtime"
 	"testing"
 )
 
 func TestAll(t *testing.T) {
-	var experiment *rulehunter.Experiment
-	var err error
-	experimentFilename := filepath.Join("fixtures", "bank.json")
-	experiment, err = rulehunter.LoadExperiment(experimentFilename)
+	fieldNames := []string{"age", "job", "marital", "education", "default",
+		"balance", "housing", "loan", "contact", "day", "month", "duration",
+		"campaign", "pdays", "previous", "poutcome", "y"}
+	input, err := csvinput.New(
+		fieldNames,
+		filepath.Join("fixtures", "bank.csv"),
+		rune(';'),
+		true,
+	)
 	if err != nil {
-		t.Errorf("rulehunter.LoadExperiment(%s) - err: %s",
-			experimentFilename, err)
+		t.Errorf("rulehunter.NewCsvInput() - err: %s", err)
+		return
+	}
+	experimentDesc := &rulehunter.ExperimentDesc{
+		Title:         "This is a jolly nice title",
+		Input:         input,
+		Fields:        fieldNames,
+		ExcludeFields: []string{"education"},
+		Aggregators: []*rulehunter.AggregatorDesc{
+			&rulehunter.AggregatorDesc{"numSignedUp", "count", "y == \"yes\""},
+			&rulehunter.AggregatorDesc{"cost", "calc", "numMatches * 4.5"},
+			&rulehunter.AggregatorDesc{"income", "calc", "numSignedUp * 24"},
+			&rulehunter.AggregatorDesc{"profit", "calc", "income - cost"},
+		},
+		Goals: []string{"profit > 0"},
+		SortOrder: []*rulehunter.SortDesc{
+			&rulehunter.SortDesc{"profit", "descending"},
+			&rulehunter.SortDesc{"numSignedUp", "descending"},
+		},
+	}
+	experiment, err := rulehunter.MakeExperiment(experimentDesc)
+	if err != nil {
+		t.Errorf("rulehunter.MakeExperiment(%s) - err: %s", experimentDesc, err)
 		return
 	}
 

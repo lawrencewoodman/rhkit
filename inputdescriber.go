@@ -6,6 +6,7 @@ package rulehunter
 import (
 	"fmt"
 	"github.com/lawrencewoodman/dlit_go"
+	"github.com/lawrencewoodman/rulehunter/input"
 	"io"
 	"math"
 	"strings"
@@ -51,7 +52,7 @@ func (k kind) String() string {
 	panic(fmt.Sprintf("Unsupported kind: %d", k))
 }
 
-func DescribeInput(input Input) (map[string]*FieldDescription, error) {
+func DescribeInput(input input.Input) (map[string]*FieldDescription, error) {
 	input.Rewind()
 	fd := make(map[string]*FieldDescription)
 	firstRecord := true

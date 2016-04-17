@@ -1,16 +1,17 @@
 /*
  * Copyright (C) 2016 Lawrence Woodman <lwoodman@vlifesystems.com>
  */
-package rulehunter
+package csvinput
 
 import (
 	"encoding/csv"
 	"errors"
 	"github.com/lawrencewoodman/dlit_go"
+	"github.com/lawrencewoodman/rulehunter/input"
 	"os"
 )
 
-type csvInput struct {
+type CsvInput struct {
 	file          *os.File
 	reader        *csv.Reader
 	fieldNames    []string
@@ -19,25 +20,25 @@ type csvInput struct {
 	skipFirstLine bool
 }
 
-func newCsvInput(fieldNames []string, filename string,
-	separator rune, skipFirstLine bool) (Input, error) {
+func New(fieldNames []string, filename string,
+	separator rune, skipFirstLine bool) (input.Input, error) {
 	f, r, err := makeCsvReader(filename, separator, skipFirstLine)
 	if err != nil {
 		return nil, err
 	}
 	r.Comma = separator
-	return &csvInput{file: f, reader: r, fieldNames: fieldNames,
+	return &CsvInput{file: f, reader: r, fieldNames: fieldNames,
 		filename: filename, separator: separator,
 		skipFirstLine: skipFirstLine}, nil
 }
 
-func (c *csvInput) Clone() (Input, error) {
+func (c *CsvInput) Clone() (input.Input, error) {
 	newC, err :=
-		newCsvInput(c.fieldNames, c.filename, c.separator, c.skipFirstLine)
+		New(c.fieldNames, c.filename, c.separator, c.skipFirstLine)
 	return newC, err
 }
 
-func (c *csvInput) Read() (map[string]*dlit.Literal, error) {
+func (c *CsvInput) Read() (map[string]*dlit.Literal, error) {
 	recordLits := make(map[string]*dlit.Literal)
 	record, err := c.reader.Read()
 	if err != nil {
@@ -57,7 +58,7 @@ func (c *csvInput) Read() (map[string]*dlit.Literal, error) {
 	return recordLits, nil
 }
 
-func (c *csvInput) Rewind() error {
+func (c *CsvInput) Rewind() error {
 	var err error
 	if err = c.file.Close(); err != nil {
 		return err

@@ -4,18 +4,38 @@
 package rulehunter
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/lawrencewoodman/dexpr_go"
+	"github.com/lawrencewoodman/rulehunter/input"
 	"github.com/lawrencewoodman/rulehunter/internal"
-	"os"
+	"regexp"
 )
 
+type ExperimentDesc struct {
+	Title         string
+	Input         input.Input
+	Fields        []string
+	ExcludeFields []string
+	Aggregators   []*AggregatorDesc
+	Goals         []string
+	SortOrder     []*SortDesc
+}
+
+type AggregatorDesc struct {
+	Name     string
+	Function string
+	Arg      string
+}
+
+type SortDesc struct {
+	AggregatorName string
+	Direction      string
+}
+
 type Experiment struct {
-	FileFormatVersion string
 	Title             string
-	Input             Input
+	Input             input.Input
 	FieldNames        []string
 	ExcludeFieldNames []string
 	Aggregators       []internal.Aggregator
@@ -42,89 +62,16 @@ func (d direction) String() string {
 	return "descending"
 }
 
-type ErrInvalidField struct {
-	FieldName string
-	Value     string
-	Err       error
-}
-
-func (e *ErrInvalidField) Error() string {
-	return fmt.Sprintf("Field: %q has Value: %q - %s", e.FieldName, e.Value, e.Err)
-}
-
-func LoadExperiment(filename string) (*Experiment, error) {
-	var f *os.File
-	var e experimentFile
-	var experiment *Experiment
-	var err error
-
-	f, err = os.Open(filename)
-	if err != nil {
-		return nil, err
-	}
-
-	dec := json.NewDecoder(f)
-	if err = dec.Decode(&e); err != nil {
-		return nil, err
-	}
-	err = checkExperimentValid(e)
-	if err != nil {
-		return nil, err
-	}
-	experiment, err = makeExperiment(e)
-	return experiment, err
-}
-
-type experimentFile struct {
-	FileFormatVersion     string
-	Title                 string
-	InputFilename         string
-	FieldNames            []string
-	ExcludeFieldNames     []string
-	IsFirstLineFieldNames bool
-	Separator             string
-	Aggregators           []experimentAggregator
-	Goals                 []string
-	SortOrder             []experimentSortField
-}
-
-type experimentAggregator struct {
-	Name     string
-	Function string
-	Arg      string
-}
-
-type experimentSortField struct {
-	AggregatorName string
-	Direction      string
-}
-
-func checkExperimentValid(e experimentFile) error {
-	if e.FileFormatVersion == "" {
-		return &ErrInvalidField{"fileFormatVersion", e.FileFormatVersion,
-			errors.New("Must have a valid version number")}
-	}
-	// TODO: Test this more fully
-	if len(e.FieldNames) < 2 {
-		return &ErrInvalidField{"fieldNames",
-			fmt.Sprintf("%q", e.FieldNames),
-			errors.New("Must specify at least two field names")}
-	}
-
-	if len(e.Separator) != 1 {
-		return &ErrInvalidField{"separator",
-			fmt.Sprintf("%q", e.Separator),
-			errors.New("Must contain one character only")}
-	}
-	return nil
-}
-
-func makeExperiment(e experimentFile) (*Experiment, error) {
+func MakeExperiment(e *ExperimentDesc) (*Experiment, error) {
 	var goals []*dexpr.Expr
 	var aggregators []internal.Aggregator
 	var sortOrder []SortField
-	var input Input
 	var err error
+
+	err = checkExperimentDescValid(e)
+	if err != nil {
+		return nil, err
+	}
 	goals, err = makeGoals(e.Goals)
 	if err != nil {
 		return nil, err
@@ -139,22 +86,109 @@ func makeExperiment(e experimentFile) (*Experiment, error) {
 		return nil, err
 	}
 
-	input, err = newCsvInput(e.FieldNames, e.InputFilename,
-		rune(e.Separator[0]), e.IsFirstLineFieldNames)
-	if err != nil {
-		return nil, err
-	}
-
 	return &Experiment{
-		FileFormatVersion: e.FileFormatVersion,
 		Title:             e.Title,
-		Input:             input,
-		FieldNames:        e.FieldNames,
-		ExcludeFieldNames: e.ExcludeFieldNames,
+		Input:             e.Input,
+		FieldNames:        e.Fields,
+		ExcludeFieldNames: e.ExcludeFields,
 		Aggregators:       aggregators,
 		Goals:             goals,
 		SortOrder:         sortOrder,
 	}, nil
+}
+
+func checkExperimentDescValid(e *ExperimentDesc) error {
+	if len(e.Fields) < 2 {
+		return errors.New("Must specify at least two field names")
+	}
+	err := checkSortDescsValid(e)
+	if err != nil {
+		return err
+	}
+
+	err = checkFieldsValid(e)
+	if err != nil {
+		return err
+	}
+
+	err = checkExcludeFieldsValid(e)
+	if err != nil {
+		return err
+	}
+
+	err = checkAggregatorsValid(e)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+var validIdentifierRegexp = regexp.MustCompile("^[a-zA-z]([0-9a-zA-z_])*$")
+
+func checkFieldsValid(e *ExperimentDesc) error {
+	for _, field := range e.Fields {
+		if !validIdentifierRegexp.MatchString(field) {
+			return fmt.Errorf("Invalid field name: %s", field)
+		}
+	}
+	return nil
+}
+
+func checkSortDescsValid(e *ExperimentDesc) error {
+	for _, sortDesc := range e.SortOrder {
+		if sortDesc.Direction != "ascending" && sortDesc.Direction != "descending" {
+			return fmt.Errorf("Invalid sort direction: %s, for field: %s",
+				sortDesc.Direction, sortDesc.AggregatorName)
+		}
+		sortName := sortDesc.AggregatorName
+		nameFound := false
+		for _, aggregator := range e.Aggregators {
+			if aggregator.Name == sortName {
+				nameFound = true
+				break
+			}
+		}
+		if !nameFound && sortName != "percentMatches" && sortName != "numMatches" {
+			return fmt.Errorf("Invalid sort field: %s", sortName)
+		}
+	}
+	return nil
+}
+
+func checkExcludeFieldsValid(e *ExperimentDesc) error {
+	for _, excludeField := range e.ExcludeFields {
+		found := false
+		for _, field := range e.Fields {
+			if excludeField == field {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return fmt.Errorf("Invalid exclude field: %s", excludeField)
+		}
+	}
+	return nil
+}
+
+func checkAggregatorsValid(e *ExperimentDesc) error {
+	for _, aggregator := range e.Aggregators {
+		if !validIdentifierRegexp.MatchString(aggregator.Name) {
+			return fmt.Errorf("Invalid aggregator name: %s", aggregator.Name)
+		}
+		nameClash := false
+		for _, field := range e.Fields {
+			if aggregator.Name == field {
+				nameClash = true
+				break
+			}
+		}
+		if nameClash {
+			return fmt.Errorf("Aggregator name clashes with field name: %s",
+				aggregator.Name)
+		}
+	}
+	return nil
 }
 
 func makeGoal(expr string) (*dexpr.Expr, error) {
@@ -198,7 +232,8 @@ func makeAggregator(name, aggType, arg string) (internal.Aggregator, error) {
 }
 
 func makeAggregators(
-	eAggregators []experimentAggregator) ([]internal.Aggregator, error) {
+	eAggregators []*AggregatorDesc,
+) ([]internal.Aggregator, error) {
 	var err error
 	r := make([]internal.Aggregator, len(eAggregators))
 	for i, ea := range eAggregators {
@@ -210,7 +245,7 @@ func makeAggregators(
 	return r, nil
 }
 
-func makeSortOrder(eSortOrder []experimentSortField) ([]SortField, error) {
+func makeSortOrder(eSortOrder []*SortDesc) ([]SortField, error) {
 	r := make([]SortField, len(eSortOrder))
 	for i, eSortField := range eSortOrder {
 		field := eSortField.AggregatorName
