@@ -221,6 +221,9 @@ func makeAggregator(name, aggType, arg string) (internal.Aggregator, error) {
 	case "count":
 		r, err = internal.NewCountAggregator(name, arg)
 		return r, err
+	case "sum":
+		r, err = internal.NewSumAggregator(name, arg)
+		return r, err
 	default:
 		err = errors.New("Unrecognized aggregator")
 	}
