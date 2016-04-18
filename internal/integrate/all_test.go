@@ -36,6 +36,11 @@ func TestAll(t *testing.T) {
 			&rulehunter.AggregatorDesc{"income", "calc", "numSignedUp * 24"},
 			&rulehunter.AggregatorDesc{"profit", "calc", "income - cost"},
 			&rulehunter.AggregatorDesc{"oddFigure", "sum", "balance - age"},
+			&rulehunter.AggregatorDesc{
+				"percentMarried",
+				"percent",
+				"marital == \"married\"",
+			},
 		},
 		Goals: []string{"profit > 0"},
 		SortOrder: []*rulehunter.SortDesc{
