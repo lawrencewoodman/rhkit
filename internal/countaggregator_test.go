@@ -6,10 +6,11 @@ import (
 )
 
 func TestCountGetResult(t *testing.T) {
-	records := [4]map[string]*dlit.Literal{
+	records := []map[string]*dlit.Literal{
 		map[string]*dlit.Literal{"income": dlit.MustNew(3), "band": dlit.MustNew(4)},
 		map[string]*dlit.Literal{"income": dlit.MustNew(3), "band": dlit.MustNew(7)},
 		map[string]*dlit.Literal{"income": dlit.MustNew(2), "band": dlit.MustNew(4)},
+		map[string]*dlit.Literal{"income": dlit.MustNew(2), "band": dlit.MustNew(6)},
 		map[string]*dlit.Literal{"income": dlit.MustNew(0), "band": dlit.MustNew(9)},
 	}
 	numBandGt4, err := NewCountAggregator("numBandGt4", "band > 4")
@@ -19,15 +20,16 @@ func TestCountGetResult(t *testing.T) {
 	}
 	aggregators := []Aggregator{numBandGt4}
 
-	for _, record := range records {
-		numBandGt4.NextRecord(record, true)
+	for i, record := range records {
+		numBandGt4.NextRecord(record, i != 3)
 	}
 	numRecords := int64(len(records))
+	want := int64(2)
 	got := numBandGt4.GetResult(aggregators, numRecords)
 	gotInt, gotIsInt := got.Int()
-	if !gotIsInt || gotInt != 2 {
+	if !gotIsInt || gotInt != want {
 		t.Errorf("NewCount(\"numBandGt4\", \"band > 4\") == %q, want: %q",
-			got, 2)
+			got, want)
 	}
 }
 
@@ -60,19 +62,3 @@ func TestCountCloneNew(t *testing.T) {
 			gotInt2, 0)
 	}
 }
-
-/*
-TODO:
-test compile-count-2 {Ensure that ignores false isRuleTrue rules} -setup {
-  set prospects {{3 4} {3 7} {2 4} {0 9}}
-  set fields {income band}
-  set numBandGt4NewCmd [aggregator compile $fields {count {$band > 4}}]
-  set numBandGt4 [{*}$numBandGt4NewCmd]
-  foreach prospect $prospects {
-    $numBandGt4 nextProspect $prospect true
-  }
-  $numBandGt4 nextProspect {50 100} false
-} -body {
-  $numBandGt4 getResult {}
-} -result {2}
-*/
