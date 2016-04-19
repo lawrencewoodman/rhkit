@@ -175,11 +175,6 @@ func TestAssessRules_errors(t *testing.T) {
 }
 
 func TestAssessRulesMP(t *testing.T) {
-	rules := []*Rule{
-		mustNewRule("band > 4"),
-		mustNewRule("band > 3"),
-		mustNewRule("cost > 1.2"),
-	}
 	inAggregators := []internal.Aggregator{
 		mustNewCountAggregator("numIncomeGt2", "income > 2"),
 		mustNewCountAggregator("numBandGt4", "band > 4"),
@@ -216,49 +211,65 @@ func TestAssessRulesMP(t *testing.T) {
 			"band":   dlit.MustNew(9),
 		},
 	}
+	cases := []struct {
+		rules []*Rule
+	}{
+		{[]*Rule{
+			mustNewRule("band > 4"),
+			mustNewRule("band > 3"),
+			mustNewRule("cost > 1.2"),
+		}},
+		{[]*Rule{
+			mustNewRule("band > 4"),
+			mustNewRule("cost > 1.2"),
+		}},
+		{[]*Rule{}},
+	}
 
 	input := NewLiteralInput(records)
 	maxProcesses := 4
-	wantAssessment, err :=
-		AssessRules(rules, inAggregators, goals, input)
-	if err != nil {
-		t.Errorf("AssessRules(%q, %q, %q, input) - err: %q",
-			rules, inAggregators, goals, err)
-	}
-	c := make(chan *AssessRulesMPOutcome)
-	progress := 0.0
-	var gotAssessment *Assessment
-	go AssessRulesMP(rules, inAggregators, goals, input, maxProcesses, c)
+	for _, cs := range cases {
+		wantAssessment, err :=
+			AssessRules(cs.rules, inAggregators, goals, input)
+		if err != nil {
+			t.Errorf("AssessRules(%q, %q, %q, input) - err: %q",
+				cs.rules, inAggregators, goals, err)
+		}
+		c := make(chan *AssessRulesMPOutcome)
+		progress := 0.0
+		var gotAssessment *Assessment
+		go AssessRulesMP(cs.rules, inAggregators, goals, input, maxProcesses, c)
 
-	numRuns := 0
-	lastProgress := -1.0
-	for o := range c {
-		numRuns++
-		progress = o.Progress
-		if o.Err != nil {
-			t.Errorf("AssessRulesMP(%q, %q, %q, input, c) - err: %q",
-				rules, inAggregators, goals, o.Err)
+		numRuns := 0
+		lastProgress := -1.0
+		for o := range c {
+			numRuns++
+			progress = o.Progress
+			if o.Err != nil {
+				t.Errorf("AssessRulesMP(%q, %q, %q, input, c) - err: %q",
+					cs.rules, inAggregators, goals, o.Err)
+			}
+			if progress <= lastProgress {
+				t.Errorf("AssessRulesMP(%q, %q, %q, input, c) - progress not increasing in order: this: %f, last: %f",
+					cs.rules, inAggregators, goals, progress, lastProgress)
+			}
+			if o.Finished {
+				gotAssessment = o.Assessment
+			}
 		}
-		if progress <= lastProgress {
-			t.Errorf("AssessRulesMP(%q, %q, %q, input, c) - progress not increasing in order: this: %f, last: %f",
-				rules, inAggregators, goals, progress, lastProgress)
+		if progress != 1.0 {
+			t.Errorf("AssessRulesMP(%q, %q, %q, input, c) - progress didn't finish at 100, but: %d",
+				cs.rules, inAggregators, goals, progress)
 		}
-		if o.Finished {
-			gotAssessment = o.Assessment
+		if numRuns < len(cs.rules) {
+			t.Errorf("AssessRulesMP(%q, %q, %q, input, c) - only made %d runs",
+				cs.rules, inAggregators, goals, numRuns)
 		}
-	}
-	if progress != 1.0 {
-		t.Errorf("AssessRulesMP(%q, %q, %q, input, c) - progress didn't finish at 100, but: %d",
-			rules, inAggregators, goals, progress)
-	}
-	if numRuns < len(rules) {
-		t.Errorf("AssessRulesMP(%q, %q, %q, input, c) - only made %d runs",
-			rules, inAggregators, goals, numRuns)
-	}
-	assessmentsEqual, msg := matchAssessments(gotAssessment, wantAssessment)
-	if !assessmentsEqual {
-		t.Errorf("AssessRulesMP(%q, %q, %q, input, c)\nassessments don't match: %s",
-			rules, inAggregators, goals, msg)
+		assessmentsEqual, msg := matchAssessments(gotAssessment, wantAssessment)
+		if !assessmentsEqual {
+			t.Errorf("AssessRulesMP(%q, %q, %q, input, c)\nassessments don't match: %s",
+				cs.rules, inAggregators, goals, msg)
+		}
 	}
 }
 

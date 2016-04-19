@@ -169,6 +169,12 @@ func AssessRulesMP(
 	var isError bool
 	ic := make(chan *assessRulesCOutcome)
 	numRules := len(rules)
+	if numRules < 2 {
+		assessment, err := AssessRules(rules, aggregators, goals, input)
+		ec <- &AssessRulesMPOutcome{assessment, err, 1.0, true}
+		close(ec)
+		return
+	}
 	progressIntervals := 1000
 	// TODO: Use System variable for number of concurrent processes or pass to funciton
 	numProcesses := 0
