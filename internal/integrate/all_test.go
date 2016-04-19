@@ -46,6 +46,7 @@ func TestAll(t *testing.T) {
 		SortOrder: []*rulehunter.SortDesc{
 			&rulehunter.SortDesc{"profit", "descending"},
 			&rulehunter.SortDesc{"numSignedUp", "descending"},
+			&rulehunter.SortDesc{"numGoalsPassed", "descending"},
 		},
 	}
 	experiment, err := rulehunter.MakeExperiment(experimentDesc)

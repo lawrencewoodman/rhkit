@@ -148,7 +148,10 @@ func checkSortDescsValid(e *ExperimentDesc) error {
 				break
 			}
 		}
-		if !nameFound && sortName != "percentMatches" && sortName != "numMatches" {
+		if !nameFound &&
+			sortName != "percentMatches" &&
+			sortName != "numMatches" &&
+			sortName != "numGoalsPassed" {
 			return fmt.Errorf("Invalid sort field: %s", sortName)
 		}
 	}

@@ -42,6 +42,9 @@ func TestMakeExperiment(t *testing.T) {
 				SortField{"profit", DESCENDING},
 				SortField{"numSignedUp", DESCENDING},
 				SortField{"cost", ASCENDING},
+				SortField{"numMatches", DESCENDING},
+				SortField{"percentMatches", DESCENDING},
+				SortField{"numGoalsPassed", DESCENDING},
 			},
 		},
 	}
@@ -71,6 +74,9 @@ func TestMakeExperiment(t *testing.T) {
 				&SortDesc{"profit", "descending"},
 				&SortDesc{"numSignedUp", "descending"},
 				&SortDesc{"cost", "ascending"},
+				&SortDesc{"numMatches", "descending"},
+				&SortDesc{"percentMatches", "descending"},
+				&SortDesc{"numGoalsPassed", "descending"},
 			}},
 			expectedExperiments[1],
 		},
@@ -78,11 +84,11 @@ func TestMakeExperiment(t *testing.T) {
 	for _, c := range cases {
 		got, err := MakeExperiment(c.experimentDesc)
 		if err != nil {
-			t.Errorf("LoadExperiment(%q) err: %s", c.experimentDesc, err)
+			t.Errorf("MakeExperiment(%q) err: %s", c.experimentDesc, err)
 		}
 		experimentsMatch, reason := experimentMatch(got, c.want)
 		if !experimentsMatch {
-			t.Errorf("LoadExperiment(%q)\n Reason: %s\n got: %q\n want: %q",
+			t.Errorf("MakeExperiment(%q)\n Reason: %s\n got: %q\n want: %q",
 				c.experimentDesc, reason, got, c.want)
 		}
 	}
@@ -269,7 +275,7 @@ func TestMakeExperiment_errors(t *testing.T) {
 	for _, c := range cases {
 		_, err := MakeExperiment(c.experimentDesc)
 		if err == nil || c.wantErr.Error() != err.Error() {
-			t.Errorf("LoadExperiment(%q) err: %q, wantErr: %q",
+			t.Errorf("MakeExperiment(%q) err: %q, wantErr: %q",
 				c.experimentDesc, err, c.wantErr)
 		}
 	}
