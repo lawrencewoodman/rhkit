@@ -43,22 +43,30 @@ func TestPercentGetResult(t *testing.T) {
 			"band":   dlit.MustNew(9),
 		},
 	}
-	percentCostGt2, err := NewPercentAggregator("percentCostGt2", "cost > 2")
-	if err != nil {
-		t.Errorf("NewPercentAggregator(\"percentCostGt2\", \"cost > 2\") err == %s",
-			err)
+	cases := []struct {
+		records []map[string]*dlit.Literal
+		want    float64
+	}{
+		{records, 33.33},
+		{[]map[string]*dlit.Literal{}, 0},
 	}
-	aggregators := []Aggregator{percentCostGt2}
+	for _, c := range cases {
+		percentCostGt2, err := NewPercentAggregator("percentCostGt2", "cost > 2")
+		if err != nil {
+			t.Errorf("NewPercentAggregator(\"percentCostGt2\", \"cost > 2\") err == %s",
+				err)
+		}
+		aggregators := []Aggregator{percentCostGt2}
 
-	for i, record := range records {
-		percentCostGt2.NextRecord(record, i != 1)
-	}
-	want := 33.33
-	numRecords := int64(len(records))
-	got := percentCostGt2.GetResult(aggregators, numRecords)
-	gotFloat, gotIsFloat := got.Float()
-	if !gotIsFloat || gotFloat != want {
-		t.Errorf("GetResult() got: %s, want: %s", got, want)
+		for i, record := range c.records {
+			percentCostGt2.NextRecord(record, i != 1)
+		}
+		numRecords := int64(len(c.records))
+		got := percentCostGt2.GetResult(aggregators, numRecords)
+		gotFloat, gotIsFloat := got.Float()
+		if !gotIsFloat || gotFloat != c.want {
+			t.Errorf("GetResult() got: %s, want: %s", got, c.want)
+		}
 	}
 }
 
