@@ -40,9 +40,16 @@ func (a *CalcAggregator) NextRecord(
 }
 
 func (a *CalcAggregator) GetResult(
-	aggregators []Aggregator, numRecords int64) *dlit.Literal {
-	return a.expr.Eval(AggregatorsToMap(aggregators, numRecords, a.name),
-		CallFuncs)
+	aggregators []Aggregator,
+	goals []*Goal,
+	numRecords int64,
+) *dlit.Literal {
+	aggregatorsMap, err :=
+		AggregatorsToMap(aggregators, goals, numRecords, a.name)
+	if err != nil {
+		return dlit.MustNew(err)
+	}
+	return a.expr.Eval(aggregatorsMap, CallFuncs)
 }
 
 func (a *CalcAggregator) IsEqual(o Aggregator) bool {

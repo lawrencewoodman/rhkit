@@ -6,7 +6,6 @@ package rulehunter
 import (
 	"errors"
 	"fmt"
-	"github.com/lawrencewoodman/dexpr_go"
 	"github.com/lawrencewoodman/rulehunter/input"
 	"github.com/lawrencewoodman/rulehunter/internal"
 	"regexp"
@@ -39,7 +38,7 @@ type Experiment struct {
 	FieldNames        []string
 	ExcludeFieldNames []string
 	Aggregators       []internal.Aggregator
-	Goals             []*dexpr.Expr
+	Goals             []*internal.Goal
 	SortOrder         []SortField
 }
 
@@ -63,7 +62,7 @@ func (d direction) String() string {
 }
 
 func MakeExperiment(e *ExperimentDesc) (*Experiment, error) {
-	var goals []*dexpr.Expr
+	var goals []*internal.Goal
 	var aggregators []internal.Aggregator
 	var sortOrder []SortField
 	var err error
@@ -189,22 +188,26 @@ func checkAggregatorsValid(e *ExperimentDesc) error {
 		if nameClash {
 			return fmt.Errorf("Aggregator name clashes with field name: %s",
 				aggregator.Name)
+		} else if aggregator.Name == "percentMatches" ||
+			aggregator.Name == "numMatches" ||
+			aggregator.Name == "numGoalsPassed" {
+			return fmt.Errorf("Aggregator name reserved: %s", aggregator.Name)
 		}
 	}
 	return nil
 }
 
-func makeGoal(expr string) (*dexpr.Expr, error) {
-	r, err := dexpr.New(expr)
+func makeGoal(expr string) (*internal.Goal, error) {
+	r, err := internal.NewGoal(expr)
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("Can't make goal: %s", err))
 	}
 	return r, nil
 }
 
-func makeGoals(exprs []string) ([]*dexpr.Expr, error) {
+func makeGoals(exprs []string) ([]*internal.Goal, error) {
 	var err error
-	r := make([]*dexpr.Expr, len(exprs))
+	r := make([]*internal.Goal, len(exprs))
 	for i, s := range exprs {
 		r[i], err = makeGoal(s)
 		if err != nil {
@@ -218,6 +221,9 @@ func makeAggregator(name, aggType, arg string) (internal.Aggregator, error) {
 	var r internal.Aggregator
 	var err error
 	switch aggType {
+	case "accuracy":
+		r, err = internal.NewAccuracyAggregator(name, arg)
+		return r, err
 	case "calc":
 		r, err = internal.NewCalcAggregator(name, arg)
 		return r, err

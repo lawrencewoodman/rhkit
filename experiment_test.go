@@ -3,7 +3,6 @@ package rulehunter
 import (
 	"errors"
 	"fmt"
-	"github.com/lawrencewoodman/dexpr_go"
 	"github.com/lawrencewoodman/rulehunter/csvinput"
 	"github.com/lawrencewoodman/rulehunter/input"
 	"github.com/lawrencewoodman/rulehunter/internal"
@@ -37,7 +36,7 @@ func TestMakeExperiment(t *testing.T) {
 				mustNewCalcAggregator("cost", "numMatches * 4.5"),
 				mustNewCalcAggregator("income", "numSignedUp * 24"),
 				mustNewCalcAggregator("profit", "income - cost")},
-			Goals: []*dexpr.Expr{mustNewDExpr("profit > 0")},
+			Goals: []*internal.Goal{mustNewGoal("profit > 0")},
 			SortOrder: []SortField{
 				SortField{"profit", DESCENDING},
 				SortField{"numSignedUp", DESCENDING},
@@ -208,6 +207,51 @@ func TestMakeExperiment_errors(t *testing.T) {
 			Fields:        []string{"month", "y", "numSignedUp"},
 			ExcludeFields: []string{},
 			Aggregators: []*AggregatorDesc{
+				&AggregatorDesc{"numMatches", "count", "y == \"yes\""},
+			},
+			Goals: []string{"profit > 0"},
+			SortOrder: []*SortDesc{
+				&SortDesc{"numMatches", "descending"},
+				&SortDesc{"percentMatches", "descending"},
+			}},
+			errors.New("Aggregator name reserved: numMatches"),
+		},
+		{&ExperimentDesc{
+			Title:         "This is a nice title",
+			Input:         input,
+			Fields:        []string{"month", "y", "numSignedUp"},
+			ExcludeFields: []string{},
+			Aggregators: []*AggregatorDesc{
+				&AggregatorDesc{"percentMatches", "percent", "y == \"yes\""},
+			},
+			Goals: []string{"profit > 0"},
+			SortOrder: []*SortDesc{
+				&SortDesc{"numMatches", "descending"},
+				&SortDesc{"percentMatches", "descending"},
+			}},
+			errors.New("Aggregator name reserved: percentMatches"),
+		},
+		{&ExperimentDesc{
+			Title:         "This is a nice title",
+			Input:         input,
+			Fields:        []string{"month", "y", "numSignedUp"},
+			ExcludeFields: []string{},
+			Aggregators: []*AggregatorDesc{
+				&AggregatorDesc{"numGoalsPassed", "count", "y == \"yes\""},
+			},
+			Goals: []string{"profit > 0"},
+			SortOrder: []*SortDesc{
+				&SortDesc{"numMatches", "descending"},
+				&SortDesc{"percentMatches", "descending"},
+			}},
+			errors.New("Aggregator name reserved: numGoalsPassed"),
+		},
+		{&ExperimentDesc{
+			Title:         "This is a nice title",
+			Input:         input,
+			Fields:        []string{"month", "y", "numSignedUp"},
+			ExcludeFields: []string{},
+			Aggregators: []*AggregatorDesc{
 				&AggregatorDesc{"3numSignedUp", "count", "y == \"yes\""},
 			},
 			Goals: []string{"profit > 0"},
@@ -296,7 +340,7 @@ func experimentMatch(e1 *Experiment, e2 *Experiment) (bool, string) {
 	if !areStringArraysEqual(e1.ExcludeFieldNames, e2.ExcludeFieldNames) {
 		return false, "ExcludeFieldNames don't match"
 	}
-	if !areGoalsEqual(e1.Goals, e2.Goals) {
+	if !areGoalExpressionsEqual(e1.Goals, e2.Goals) {
 		return false, "Goals don't match"
 	}
 	if !areAggregatorsEqual(e1.Aggregators, e2.Aggregators) {
@@ -333,7 +377,7 @@ func areStringArraysEqual(a1 []string, a2 []string) bool {
 	return true
 }
 
-func areGoalsEqual(g1 []*dexpr.Expr, g2 []*dexpr.Expr) bool {
+func areGoalExpressionsEqual(g1 []*internal.Goal, g2 []*internal.Goal) bool {
 	if len(g1) != len(g2) {
 		return false
 	}

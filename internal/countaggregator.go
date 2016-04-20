@@ -48,7 +48,10 @@ func (a *CountAggregator) NextRecord(record map[string]*dlit.Literal,
 }
 
 func (a *CountAggregator) GetResult(
-	aggregators []Aggregator, numRecords int64) *dlit.Literal {
+	aggregators []Aggregator,
+	goals []*Goal,
+	numRecords int64,
+) *dlit.Literal {
 	l := dlit.MustNew(a.numMatches)
 	return l
 }

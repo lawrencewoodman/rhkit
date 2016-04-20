@@ -8,11 +8,12 @@ import (
 )
 
 func TestNextRecord(t *testing.T) {
-	// It is important for this test to reuse the aggregators to ensure that
-	// they are cloned properly.
+	// It is important for this test to reuse the aggregators and goals
+	// to ensure that they are cloned properly.
 	inAggregators := []internal.Aggregator{
 		mustNewCountAggregator("numIncomeGt2", "income > 2"),
 		mustNewCountAggregator("numBandGt4", "band > 4"),
+		mustNewGoalsPassedScoreAggregator("numGoalsPassed"),
 	}
 	records := [4]map[string]*dlit.Literal{
 		map[string]*dlit.Literal{
@@ -36,36 +37,28 @@ func TestNextRecord(t *testing.T) {
 			"band":   dlit.MustNew(9),
 		},
 	}
+	goals := []*internal.Goal{
+		mustNewGoal("numIncomeGt2 == 1"),
+		mustNewGoal("numBandGt4 == 2"),
+	}
 	numRecords := int64(len(records))
 	cases := []struct {
-		rule             *Rule
-		goals            []*dexpr.Expr
-		wantNumIncomeGt2 int64
-		wantNumBandGt4   int64
+		rule               *Rule
+		wantNumIncomeGt2   int64
+		wantNumBandGt4     int64
+		wantNumGoalsPassed float64
 	}{
-		{mustNewRule("band > 4"),
-			[]*dexpr.Expr{
-				mustNewDExpr("numIncomeGt2 == 1"),
-				mustNewDExpr("numBandGt4 == 2"),
-			}, 1, 2},
-		{mustNewRule("band > 3"),
-			[]*dexpr.Expr{
-				mustNewDExpr("numIncomeGt2 == 2"),
-				mustNewDExpr("numBandGt4 == 2"),
-			}, 2, 2},
-		{mustNewRule("cost > 1.2"),
-			[]*dexpr.Expr{
-				mustNewDExpr("numIncomeGt2 == 2"),
-				mustNewDExpr("numBandGt4 == 1"),
-			}, 2, 1},
+		{mustNewRule("band > 4"), 1, 2, 2.0},
+		{mustNewRule("band > 3"), 2, 2, 0.001},
+		{mustNewRule("cost > 1.2"), 2, 1, 0},
 	}
 	for _, c := range cases {
-		ra := newRuleAssessment(c.rule, inAggregators, c.goals)
+		ra := newRuleAssessment(c.rule, inAggregators, goals)
 		for _, record := range records {
 			err := ra.nextRecord(record)
 			if err != nil {
 				t.Errorf("nextRecord(%q) rule: %s, aggregators: %q, goals: %q - err: %q",
-					record, c.rule, inAggregators, c.goals, err)
+					record, c.rule, inAggregators, goals, err)
 			}
 		}
 		gotNumIncomeGt2, gt2Exists :=
@@ -77,6 +70,10 @@ func TestNextRecord(t *testing.T) {
 		if !gt2IsInt {
 			t.Errorf("numIncomeGt2 aggregator can't be int")
 		}
+		if gotNumIncomeGt2Int != c.wantNumIncomeGt2 {
+			t.Errorf("nextRecord() rule: %s, aggregators: %q, goals: %q - wantNumIncomeGt2: %d, got: %d",
+				c.rule, inAggregators, goals, c.wantNumIncomeGt2, gotNumIncomeGt2Int)
+		}
 		gotNumBandGt4, gt4Exists :=
 			ra.getAggregatorValue("numBandGt4", numRecords)
 		if !gt4Exists {
@@ -86,13 +83,22 @@ func TestNextRecord(t *testing.T) {
 		if !gt4IsInt {
 			t.Errorf("numBandGt4 aggregator can't be int")
 		}
-		if gotNumIncomeGt2Int != c.wantNumIncomeGt2 {
-			t.Errorf("nextRecord() rule: %s, aggregators: %q, goals: %q - wantNumIncomeGt2: %d, got: %d",
-				c.rule, inAggregators, c.goals, c.wantNumIncomeGt2, gotNumIncomeGt2Int)
-		}
 		if gotNumBandGt4Int != c.wantNumBandGt4 {
 			t.Errorf("nextRecord() rule: %s, aggregators: %q, goals: %q - wantNumBandGt4: %d, got: %d",
-				c.rule, inAggregators, c.goals, c.wantNumBandGt4, gotNumBandGt4Int)
+				c.rule, inAggregators, goals, c.wantNumBandGt4, gotNumBandGt4Int)
+		}
+		gotNumGoalsPassed, goalsPassedExists :=
+			ra.getAggregatorValue("numGoalsPassed", numRecords)
+		if !goalsPassedExists {
+			t.Errorf("numGoalsPassed aggregator doesn't exist")
+		}
+		gotNumGoalsPassedFloat, goalsPassedIsFloat := gotNumGoalsPassed.Float()
+		if !goalsPassedIsFloat {
+			t.Errorf("numGoalsPassed aggregator can't be float")
+		}
+		if gotNumGoalsPassedFloat != c.wantNumGoalsPassed {
+			t.Errorf("nextRecord() rule: %s, aggregators: %q, goals: %q - wantNumGoalsPassed: %d, got: %d",
+				c.rule, inAggregators, goals, c.wantNumGoalsPassed, gotNumGoalsPassed)
 		}
 	}
 }
@@ -104,42 +110,36 @@ func TestNextRecord_Errors(t *testing.T) {
 		map[string]*dlit.Literal{"income": dlit.MustNew(2), "band": dlit.MustNew(4)},
 		map[string]*dlit.Literal{"income": dlit.MustNew(0), "band": dlit.MustNew(9)},
 	}
+	goals := []*internal.Goal{mustNewGoal("numIncomeGt2 == 1")}
 	cases := []struct {
 		rule        *Rule
 		aggregators []internal.Aggregator
-		goals       []*dexpr.Expr
 		wantErr     error
 	}{
 		{mustNewRule("band > 4"),
-			[]internal.Aggregator{mustNewCountAggregator("numIncomeGt2", "income > 2")},
-			[]*dexpr.Expr{mustNewDExpr("numIncomeGt2 == 1")}, nil},
-		{mustNewRule("band > 4"),
 			[]internal.Aggregator{
 				mustNewCountAggregator("numIncomeGt2", "fred > 2")},
-			[]*dexpr.Expr{mustNewDExpr("numIncomeGt2 == 1")},
 			dexpr.ErrInvalidExpr("Variable doesn't exist: fred")},
 		{mustNewRule("band > 4"),
 			[]internal.Aggregator{
-				mustNewCountAggregator("numIncomeGt2", "income > 2")},
-			[]*dexpr.Expr{mustNewDExpr("numIncomeGt == 1")}, nil},
+				mustNewCountAggregator("numIncomeGt2", "income > 2")}, nil},
 		{mustNewRule("hand > 4"),
 			[]internal.Aggregator{
 				mustNewCountAggregator("numIncomeGt2", "income > 2")},
-			[]*dexpr.Expr{mustNewDExpr("numIncomeGt == 1")},
 			dexpr.ErrInvalidExpr("Variable doesn't exist: hand")},
 		{mustNewRule("band ^^ 4"),
 			[]internal.Aggregator{
 				mustNewCountAggregator("numIncomeGt2", "income > 2")},
-			[]*dexpr.Expr{mustNewDExpr("numIncomeGt == 1")},
 			dexpr.ErrInvalidExpr("Invalid operator: \"^\"")},
 	}
 	for _, c := range cases {
-		ra := newRuleAssessment(c.rule, c.aggregators, c.goals)
+		ra := newRuleAssessment(c.rule, c.aggregators, goals)
 		for _, record := range records {
 			err := ra.nextRecord(record)
 			if !errorMatch(c.wantErr, err) {
 				t.Errorf("NextRecord(%q) rule: %q, aggregators: %q, goals: %q err: %q, wantErr: %q",
-					record, c.rule, c.aggregators, c.goals, err, c.wantErr)
+					record, c.rule, c.aggregators, goals, err, c.wantErr)
+				return
 			}
 		}
 	}

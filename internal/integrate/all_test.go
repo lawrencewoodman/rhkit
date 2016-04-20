@@ -129,11 +129,6 @@ func TestAll(t *testing.T) {
 	}
 	assessment5.Sort(experiment.SortOrder)
 	assessment5.Refine(1)
-	_, jsonErr := assessment5.ToJSON()
-	if jsonErr != nil {
-		t.Errorf("assessment5.ToJSON() - err: %s", jsonErr)
-		return
-	}
 }
 
 func assessRules(

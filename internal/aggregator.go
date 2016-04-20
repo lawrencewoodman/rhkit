@@ -3,13 +3,16 @@
  */
 package internal
 
-import "github.com/lawrencewoodman/dlit_go"
+import (
+	"errors"
+	"github.com/lawrencewoodman/dlit_go"
+)
 
 type Aggregator interface {
 	CloneNew() Aggregator
 	GetName() string
 	GetArg() string
-	GetResult([]Aggregator, int64) *dlit.Literal
+	GetResult([]Aggregator, []*Goal, int64) *dlit.Literal
 	NextRecord(map[string]*dlit.Literal, bool) error
 	IsEqual(Aggregator) bool
 }
@@ -18,8 +21,10 @@ type Aggregator interface {
 // TODO: Test this
 func AggregatorsToMap(
 	aggregators []Aggregator,
+	goals []*Goal,
 	numRecords int64,
-	thisName string) map[string]*dlit.Literal {
+	thisName string,
+) (map[string]*dlit.Literal, error) {
 	r := make(map[string]*dlit.Literal, len(aggregators))
 	numRecordsL := dlit.MustNew(numRecords)
 	r["numRecords"] = numRecordsL
@@ -27,7 +32,11 @@ func AggregatorsToMap(
 		if thisName == aggregator.GetName() {
 			break
 		}
-		r[aggregator.GetName()] = aggregator.GetResult(aggregators, numRecords)
+		l := aggregator.GetResult(aggregators, goals, numRecords)
+		if l.IsError() {
+			return r, errors.New(l.String())
+		}
+		r[aggregator.GetName()] = l
 	}
-	return r
+	return r, nil
 }

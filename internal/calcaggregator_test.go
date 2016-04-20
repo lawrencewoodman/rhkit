@@ -15,6 +15,7 @@ func TestCalcGetResult(t *testing.T) {
 		mustNewCalcAggregator("2NumRecords", "numRecords * 2"),
 		mustNewCalcAggregator("d", "a + e"),
 	}
+	goals := []*Goal{}
 	want := []*dlit.Literal{
 		dlit.MustNew(7),
 		dlit.MustNew(11),
@@ -24,7 +25,7 @@ func TestCalcGetResult(t *testing.T) {
 	}
 	numRecords := int64(12)
 	for i, aggregator := range aggregators {
-		got := aggregator.GetResult(aggregators, numRecords)
+		got := aggregator.GetResult(aggregators, goals, numRecords)
 		if got.String() != want[i].String() {
 			t.Errorf("GetResult() i: %d got: %s, want: %s", i, got, want[i])
 		}
@@ -37,10 +38,11 @@ func TestCalcCloneNew(t *testing.T) {
 		mustNewCalcAggregator("b", "5 + 6"),
 		mustNewCalcAggregator("c", "a + b"),
 	}
+	goals := []*Goal{}
 	numRecords := int64(12)
 	aggregatorD := aggregators[2].CloneNew()
-	gotC := aggregators[2].GetResult(aggregators, numRecords)
-	gotD := aggregatorD.GetResult(aggregators, numRecords)
+	gotC := aggregators[2].GetResult(aggregators, goals, numRecords)
+	gotD := aggregatorD.GetResult(aggregators, goals, numRecords)
 
 	if gotC.String() != gotD.String() && gotC.String() != "18" {
 		t.Errorf("CloneNew() gotC: %s, gotD: %s", gotC, gotD)

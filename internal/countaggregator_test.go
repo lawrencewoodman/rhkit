@@ -13,6 +13,7 @@ func TestCountGetResult(t *testing.T) {
 		map[string]*dlit.Literal{"income": dlit.MustNew(2), "band": dlit.MustNew(6)},
 		map[string]*dlit.Literal{"income": dlit.MustNew(0), "band": dlit.MustNew(9)},
 	}
+	goals := []*Goal{}
 	numBandGt4, err := NewCountAggregator("numBandGt4", "band > 4")
 	if err != nil {
 		t.Errorf("NewCount(\"numBandGt4\", \"band > 4\") err == %q",
@@ -25,7 +26,7 @@ func TestCountGetResult(t *testing.T) {
 	}
 	numRecords := int64(len(records))
 	want := int64(2)
-	got := numBandGt4.GetResult(aggregators, numRecords)
+	got := numBandGt4.GetResult(aggregators, goals, numRecords)
 	gotInt, gotIsInt := got.Int()
 	if !gotIsInt || gotInt != want {
 		t.Errorf("NewCount(\"numBandGt4\", \"band > 4\") == %q, want: %q",
@@ -38,6 +39,7 @@ func TestCountCloneNew(t *testing.T) {
 		"income": dlit.MustNew(3),
 		"band":   dlit.MustNew(4),
 	}
+	goals := []*Goal{}
 	numRecords := int64(1)
 	numBandGt4, err := NewCountAggregator("numBandGt4", "band > 3")
 	if err != nil {
@@ -48,8 +50,8 @@ func TestCountCloneNew(t *testing.T) {
 	aggregators := []Aggregator{}
 
 	numBandGt4.NextRecord(record, true)
-	got1 := numBandGt4.GetResult(aggregators, numRecords)
-	got2 := numBandGt4_2.GetResult(aggregators, numRecords)
+	got1 := numBandGt4.GetResult(aggregators, goals, numRecords)
+	got2 := numBandGt4_2.GetResult(aggregators, goals, numRecords)
 
 	gotInt1, gotIsInt1 := got1.Int()
 	if !gotIsInt1 || gotInt1 != 1 {

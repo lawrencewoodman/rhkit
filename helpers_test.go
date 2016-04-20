@@ -33,6 +33,14 @@ func mustNewDExpr(expr string) *dexpr.Expr {
 	return dexpr
 }
 
+func mustNewGoal(expr string) *internal.Goal {
+	g, err := internal.NewGoal(expr)
+	if err != nil {
+		panic(fmt.Sprintf("Can't create goal: %s", err))
+	}
+	return g
+}
+
 func mustNewCountAggregator(
 	name string,
 	expr string,
@@ -53,6 +61,16 @@ func mustNewCalcAggregator(
 		panic(fmt.Sprintf("Can't create CalcAggregator: %s", err))
 	}
 	return c
+}
+
+func mustNewGoalsPassedScoreAggregator(
+	name string,
+) *internal.GoalsPassedScoreAggregator {
+	a, err := internal.NewGoalsPassedScoreAggregator(name)
+	if err != nil {
+		panic(fmt.Sprintf("Can't create GoalsPassedScoreAggregator: %s", err))
+	}
+	return a
 }
 
 func matchRules(rules1 []string, rules2 []string) (bool, string) {

@@ -5,7 +5,6 @@ package rulehunter
 
 import (
 	"errors"
-	"github.com/lawrencewoodman/dexpr_go"
 	"github.com/lawrencewoodman/dlit_go"
 	"github.com/lawrencewoodman/rulehunter/internal"
 )
@@ -13,7 +12,7 @@ import (
 type ruleAssessment struct {
 	Rule        *Rule
 	Aggregators []internal.Aggregator
-	Goals       []*dexpr.Expr
+	Goals       []*internal.Goal
 }
 
 // Note: This clones the aggregators to ensure the results are specific
@@ -21,14 +20,18 @@ type ruleAssessment struct {
 func newRuleAssessment(
 	rule *Rule,
 	aggregators []internal.Aggregator,
-	goals []*dexpr.Expr,
+	goals []*internal.Goal,
 ) *ruleAssessment {
 	cloneAggregators := make([]internal.Aggregator, len(aggregators))
 	for i, a := range aggregators {
 		cloneAggregators[i] = a.CloneNew()
 	}
+	cloneGoals := make([]*internal.Goal, len(goals))
+	for i, g := range goals {
+		cloneGoals[i] = g.Clone()
+	}
 	return &ruleAssessment{Rule: rule, Aggregators: cloneAggregators,
-		Goals: goals}
+		Goals: cloneGoals}
 }
 
 func (ra *ruleAssessment) nextRecord(record map[string]*dlit.Literal) error {
@@ -48,10 +51,12 @@ func (ra *ruleAssessment) nextRecord(record map[string]*dlit.Literal) error {
 }
 
 func (ra *ruleAssessment) getAggregatorValue(
-	name string, numRecords int64) (*dlit.Literal, bool) {
+	name string,
+	numRecords int64,
+) (*dlit.Literal, bool) {
 	for _, aggregator := range ra.Aggregators {
 		if aggregator.GetName() == name {
-			return aggregator.GetResult(ra.Aggregators, numRecords), true
+			return aggregator.GetResult(ra.Aggregators, ra.Goals, numRecords), true
 		}
 	}
 	// TODO: Test and create specific error type

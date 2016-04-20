@@ -4,15 +4,12 @@
 package rulehunter
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/lawrencewoodman/dexpr_go"
 	"github.com/lawrencewoodman/dlit_go"
 	"github.com/lawrencewoodman/rulehunter/input"
 	"github.com/lawrencewoodman/rulehunter/internal"
 	"io"
-	"os"
 	"sort"
 )
 
@@ -25,14 +22,12 @@ type Assessment struct {
 type RuleAssessment struct {
 	Rule        *Rule
 	Aggregators map[string]*dlit.Literal
-	Goals       map[string]bool
+	Goals       []*GoalAssessment
 }
 
-// TODO: See if can stop this being exported
-type JRuleReport struct {
-	Rule        string
-	Aggregators map[string]string
-	Goals       map[string]bool
+type GoalAssessment struct {
+	Expr   string
+	Passed bool
 }
 
 type ErrNameConflict string
@@ -68,24 +63,6 @@ func (r *RuleAssessment) String() string {
 		r.Rule, r.Aggregators, r.Goals)
 }
 
-func (a *Assessment) ToJSON() (string, error) {
-	type JReport struct {
-		NumRecords      int64
-		RuleAssessments []*JRuleReport
-	}
-
-	jRuleAssessments := make([]*JRuleReport, len(a.RuleAssessments))
-	for i, ruleAssessment := range a.RuleAssessments {
-		jRuleAssessments[i] = makeJRuleReport(ruleAssessment)
-	}
-	jReport := &JReport{a.NumRecords, jRuleAssessments}
-	b, err := json.MarshalIndent(jReport, "", "  ")
-	if err != nil {
-		os.Stdout.Write(b)
-	}
-	return string(b[:]), err
-}
-
 // Tidy up rule assessments by removing poor and poorer similar rules
 // For example this removes all rules poorer than the 'true()' rule
 func (sortedAssessment *Assessment) Refine(numSimilarRules int) {
@@ -115,23 +92,20 @@ func (a *Assessment) Merge(o *Assessment) (*Assessment, error) {
 }
 
 // need a progress callback and a specifier for how often to report
-func AssessRules(rules []*Rule, aggregators []internal.Aggregator,
-	goals []*dexpr.Expr, input input.Input) (*Assessment, error) {
+func AssessRules(
+	rules []*Rule,
+	aggregators []internal.Aggregator,
+	goals []*internal.Goal,
+	input input.Input,
+) (*Assessment, error) {
 	var allAggregators []internal.Aggregator
 	var numRecords int64
 	var err error
 
-	allAggregators, err = prependDefaultAggregators(aggregators)
+	allAggregators, err = addDefaultAggregators(aggregators)
 	if err != nil {
 		return &Assessment{}, err
 	}
-	/*
-		TODO: Put this test somewhere else
-		err := checkForNameConflicts(fieldNames, aggregators)
-		if err != nil {
-			return &[]RuleAssessment{}, err
-		}
-	*/
 
 	ruleAssessments := make([]*ruleAssessment, len(rules))
 	for i, rule := range rules {
@@ -160,7 +134,7 @@ type AssessRulesMPOutcome struct {
 func AssessRulesMP(
 	rules []*Rule,
 	aggregators []internal.Aggregator,
-	goals []*dexpr.Expr,
+	goals []*internal.Goal,
 	input input.Input,
 	maxProcesses int,
 	ec chan *AssessRulesMPOutcome,
@@ -258,7 +232,7 @@ type assessRulesCOutcome struct {
 func assessRulesC(
 	rules []*Rule,
 	aggregators []internal.Aggregator,
-	goals []*dexpr.Expr,
+	goals []*internal.Goal,
 	input input.Input,
 	c chan *assessRulesCOutcome,
 ) {
@@ -278,20 +252,17 @@ func (b by) Swap(i, j int) {
 	b.ruleAssessments[i], b.ruleAssessments[j] =
 		b.ruleAssessments[j], b.ruleAssessments[i]
 }
+
 func (b by) Less(i, j int) bool {
 	var vI *dlit.Literal
 	var vJ *dlit.Literal
 	for _, sortField := range b.sortFields {
 		field := sortField.Field
 		direction := sortField.Direction
-		// TODO: Perhaps ignore case
-		if field == "numGoalsPassed" {
-			// TODO: Work out if this should be calculated here, or elsewhere?
-			vI = calcNumGoalsPassedScore(b.ruleAssessments[i])
-			vJ = calcNumGoalsPassedScore(b.ruleAssessments[j])
-		} else {
-			vI = b.ruleAssessments[i].Aggregators[field]
-			vJ = b.ruleAssessments[j].Aggregators[field]
+		vI = b.ruleAssessments[i].Aggregators[field]
+		vJ = b.ruleAssessments[j].Aggregators[field]
+		if vI == nil || vJ == nil {
+			fmt.Printf("vI or vJ == nil field: %s", field)
 		}
 		c := compareDlitNums(vI, vJ)
 
@@ -353,20 +324,12 @@ func (r *RuleAssessment) isEqual(o *RuleAssessment) bool {
 	if len(r.Goals) != len(o.Goals) {
 		return false
 	}
-	for gName, passed := range r.Goals {
-		if o.Goals[gName] != passed {
+	for i, goal := range r.Goals {
+		if o.Goals[i].Expr != goal.Expr || o.Goals[i].Passed != goal.Passed {
 			return false
 		}
 	}
 	return true
-}
-
-func makeJRuleReport(r *RuleAssessment) *JRuleReport {
-	aggregators := make(map[string]string, len(r.Aggregators))
-	for n, l := range r.Aggregators {
-		aggregators[n] = l.String()
-	}
-	return &JRuleReport{r.Rule.String(), aggregators, r.Goals}
 }
 
 func (a *Assessment) GetRules() []*Rule {
@@ -461,22 +424,34 @@ func (sortedAssessment *Assessment) excludePoorerTweakableRules(
 func makeAssessment(
 	numRecords int64,
 	goodRuleAssessments []*ruleAssessment,
-	goals []*dexpr.Expr,
+	goals []*internal.Goal,
 ) (*Assessment, error) {
 	ruleAssessments := make([]*RuleAssessment, len(goodRuleAssessments))
 	for i, ruleAssessment := range goodRuleAssessments {
 		rule := ruleAssessment.Rule
-		aggregatorsMap :=
-			internal.AggregatorsToMap(ruleAssessment.Aggregators, numRecords, "")
-		goals, err := internal.GoalsToMap(ruleAssessment.Goals, aggregatorsMap)
+		aggregatorsMap, err :=
+			internal.AggregatorsToMap(
+				ruleAssessment.Aggregators,
+				ruleAssessment.Goals,
+				numRecords,
+				"",
+			)
 		if err != nil {
-			return &Assessment{}, err
+			return nil, err
+		}
+		goalAssessments := make([]*GoalAssessment, len(ruleAssessment.Goals))
+		for j, goal := range ruleAssessment.Goals {
+			passed, err := goal.Assess(aggregatorsMap)
+			if err != nil {
+				return &Assessment{}, err
+			}
+			goalAssessments[j] = &GoalAssessment{goal.String(), passed}
 		}
 		delete(aggregatorsMap, "numRecords")
 		ruleAssessments[i] = &RuleAssessment{
 			Rule:        rule,
 			Aggregators: aggregatorsMap,
-			Goals:       goals,
+			Goals:       goalAssessments,
 		}
 	}
 	flags := map[string]bool{
@@ -542,7 +517,7 @@ func processInput(input input.Input,
 	return numRecords, nil
 }
 
-func prependDefaultAggregators(
+func addDefaultAggregators(
 	aggregators []internal.Aggregator,
 ) ([]internal.Aggregator, error) {
 	newAggregators := make([]internal.Aggregator, 2)
@@ -556,36 +531,14 @@ func prependDefaultAggregators(
 	if err != nil {
 		return newAggregators, err
 	}
+	goalsPassedScoreAggregator, err :=
+		internal.NewGoalsPassedScoreAggregator("numGoalsPassed")
+	if err != nil {
+		return newAggregators, err
+	}
 	newAggregators[0] = numMatchesAggregator
 	newAggregators[1] = percentMatchesAggregator
 	newAggregators = append(newAggregators, aggregators...)
+	newAggregators = append(newAggregators, goalsPassedScoreAggregator)
 	return newAggregators, nil
 }
-
-func calcNumGoalsPassedScore(r *RuleAssessment) *dlit.Literal {
-	numGoalsPassed := 0.0
-	increment := 1.0
-	for _, goalPassed := range r.Goals {
-		if goalPassed {
-			numGoalsPassed += increment
-		} else {
-			increment = 0.001
-		}
-	}
-	return dlit.MustNew(numGoalsPassed)
-}
-
-/* TODO: Put this somewhere else
-func checkForNameConflicts(fields []string, aggregators []Aggregator) error {
-	for _, aggregator := range aggregators {
-		for _, fieldName := range fields {
-			if aggregator.GetName() == fieldName {
-				return ErrNameConflict(
-					fmt.Sprintf("Aggregator name and field name conflict: %s",
-						fieldName))
-			}
-		}
-	}
-	return nil
-}
-*/

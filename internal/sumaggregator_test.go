@@ -28,6 +28,7 @@ func TestSumGetResult(t *testing.T) {
 			"band":   dlit.MustNew(9),
 		},
 	}
+	goals := []*Goal{}
 	profit, err := NewSumAggregator("profit", "income-cost")
 	if err != nil {
 		t.Errorf("NewSumAggregator(\"profit\", \"income-cost\") err == %s", err)
@@ -39,7 +40,7 @@ func TestSumGetResult(t *testing.T) {
 	}
 	want := 5.3
 	numRecords := int64(len(records))
-	got := profit.GetResult(aggregators, numRecords)
+	got := profit.GetResult(aggregators, goals, numRecords)
 	gotFloat, gotIsFloat := got.Float()
 	if !gotIsFloat || gotFloat != want {
 		t.Errorf("GetResult() got: %s, want: %s", got, want)
@@ -51,6 +52,7 @@ func TestSumCloneNew(t *testing.T) {
 		"income": dlit.MustNew(3),
 		"band":   dlit.MustNew(4),
 	}
+	goals := []*Goal{}
 	numRecords := int64(1)
 	totalIncome, err := NewSumAggregator("totalIncome", "income")
 	if err != nil {
@@ -60,8 +62,8 @@ func TestSumCloneNew(t *testing.T) {
 	aggregators := []Aggregator{}
 	want := int64(3)
 	totalIncome.NextRecord(record, true)
-	got1 := totalIncome.GetResult(aggregators, numRecords)
-	got2 := totalIncome_2.GetResult(aggregators, numRecords)
+	got1 := totalIncome.GetResult(aggregators, goals, numRecords)
+	got2 := totalIncome_2.GetResult(aggregators, goals, numRecords)
 
 	gotInt1, gotIsInt1 := got1.Int()
 	if !gotIsInt1 || gotInt1 != want {

@@ -61,6 +61,7 @@ func (a *PercentAggregator) NextRecord(record map[string]*dlit.Literal,
 
 func (a *PercentAggregator) GetResult(
 	aggregators []Aggregator,
+	goals []*Goal,
 	numRecords int64,
 ) *dlit.Literal {
 	if a.numRecords == 0 {

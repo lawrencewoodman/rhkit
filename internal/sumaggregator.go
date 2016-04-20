@@ -67,7 +67,10 @@ func (a *SumAggregator) NextRecord(
 }
 
 func (a *SumAggregator) GetResult(
-	aggregators []Aggregator, numRecords int64) *dlit.Literal {
+	aggregators []Aggregator,
+	goals []*Goal,
+	numRecords int64,
+) *dlit.Literal {
 	return a.sum
 }
 
