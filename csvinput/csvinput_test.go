@@ -4,7 +4,6 @@ import (
 	"encoding/csv"
 	"errors"
 	"github.com/lawrencewoodman/dlit_go"
-	"io"
 	"os"
 	"path/filepath"
 	"testing"
@@ -104,16 +103,14 @@ func TestRead(t *testing.T) {
 				"y":         dlit.MustNew("no")}},
 	}
 	for _, c := range cases {
-		i, err := New(c.fieldNames, c.filename, ';', c.skipFirstLine)
+		records, err := New(c.fieldNames, c.filename, ';', c.skipFirstLine)
 		if err != nil {
 			t.Errorf("Read() - New() - filename: %q err: %q", c.filename, err)
 		}
 		gotNumRows := 0
-		for {
-			record, err := i.Read()
-			if err == io.EOF {
-				break
-			} else if err != nil {
+		for records.Next() {
+			record, err := records.Read()
+			if err != nil {
 				t.Errorf("Read() - filename: %q err: %q", c.filename, err)
 			}
 
@@ -128,12 +125,16 @@ func TestRead(t *testing.T) {
 			}
 			gotNumRows++
 		}
+		if err := records.Err(); err != nil {
+			t.Errorf("Read() - filename: %q err: %s", c.filename, err)
+		}
 		if gotNumRows != c.wantNumRows {
 			t.Errorf("Read() - filename: %q gotNumRows:: %d, want: %d",
 				c.filename, gotNumRows, c.wantNumRows)
 		}
 	}
 }
+
 func TestRead_errors(t *testing.T) {
 	cases := []struct {
 		filename   string
@@ -148,37 +149,97 @@ func TestRead_errors(t *testing.T) {
 		{filepath.Join("..", "fixtures", "bank.csv"), ';',
 			[]string{"age", "job", "marital", "education", "default", "balance",
 				"housing", "loan", "contact", "day", "month", "duration", "campaign",
-				"pdays", "previous", "poutcome"}, -1,
+				"pdays", "previous", "poutcome"}, 0,
 			errors.New("wrong number of field names for input")},
 	}
 	for _, c := range cases {
-		i, err := New(c.fieldNames, c.filename, c.separator, false)
+		records, err := New(c.fieldNames, c.filename, c.separator, false)
 		if err != nil {
 			t.Errorf("Read() - New() - filename: %q err: %q", c.filename, err)
 		}
 		row := 0
-		raisedCorrectErr := false
-		for {
-			_, err := i.Read()
-			if err == io.EOF {
-				break
-			} else if err != nil {
-				if row == c.errRow || c.errRow == -1 {
-					if err.Error() != c.wantErr.Error() {
-						t.Errorf("Read() - filename: %q err: %q, wantErr: %q",
-							c.filename, err, c.wantErr)
-					} else {
-						raisedCorrectErr = true
-					}
-				} else {
-					t.Errorf("Read() - filename: %q err: %q", c.filename, err)
+		for records.Next() {
+			_, err := records.Read()
+			if row == c.errRow {
+				if err == nil {
+					t.Errorf("Read() - filename: %q Failed to raise error", c.filename)
+					return
 				}
 			}
 			row++
 		}
-		if !raisedCorrectErr {
-			t.Errorf("Read() - filename: %q failed to raise error: %q",
-				c.filename, c.wantErr)
+		if records.Err().Error() != c.wantErr.Error() {
+			t.Errorf("Read() - filename: %q Failed to raise error", c.filename)
+		}
+	}
+}
+
+func TestErr(t *testing.T) {
+	cases := []struct {
+		filename   string
+		separator  rune
+		fieldNames []string
+		wantErr    error
+	}{
+		{filepath.Join("..", "fixtures", "invalid_numfields_at_102.csv"), ',',
+			[]string{"band", "score", "team", "points", "rating"},
+			&csv.ParseError{102, 0, errors.New("wrong number of fields in line")}},
+		{filepath.Join("..", "fixtures", "bank.csv"), ';',
+			[]string{"age", "job", "marital", "education", "default", "balance",
+				"housing", "loan", "contact", "day", "month", "duration", "campaign",
+				"pdays", "previous", "poutcome"},
+			errors.New("wrong number of field names for input")},
+		{filepath.Join("..", "fixtures", "bank.csv"), ';',
+			[]string{"age", "job", "marital", "education", "default", "balance",
+				"housing", "loan", "contact", "day", "month", "duration", "campaign",
+				"pdays", "previous", "poutcome", "y"}, nil},
+	}
+	for _, c := range cases {
+		records, err := New(c.fieldNames, c.filename, c.separator, false)
+		if err != nil {
+			t.Errorf("Read() - New() - filename: %q err: %q", c.filename, err)
+		}
+		for records.Next() {
+			records.Read()
+		}
+		if c.wantErr == nil {
+			if records.Err() != nil {
+				t.Errorf("Read() - filename: %q wantErr: %s, got error: %s",
+					c.filename, c.wantErr, records.Err())
+			}
+		} else {
+			if records.Err() == nil ||
+				records.Err().Error() != c.wantErr.Error() {
+				t.Errorf("Read() - filename: %q wantErr: %s, got error: %s",
+					c.filename, c.wantErr, records.Err())
+			}
+		}
+	}
+}
+
+// TODO: Add a test for if closed part way through
+func TestNext(t *testing.T) {
+	cases := []struct {
+		filename   string
+		separator  rune
+		fieldNames []string
+	}{
+		{filepath.Join("..", "fixtures", "bank.csv"), ';',
+			[]string{"age", "job", "marital", "education", "default", "balance",
+				"housing", "loan", "contact", "day", "month", "duration", "campaign",
+				"pdays", "previous", "poutcome"}},
+		{filepath.Join("..", "fixtures", "invalid_numfields_at_102.csv"), ',',
+			[]string{"band", "score", "team", "points", "rating"}},
+	}
+	for _, c := range cases {
+		records, err := New(c.fieldNames, c.filename, c.separator, false)
+		if err != nil {
+			t.Errorf("New() - filename: %q err: %q", c.filename, err)
+		}
+		for records.Next() {
+		}
+		if records.Next() {
+			t.Errorf("records.Next() - Return true, despite having finished")
 		}
 	}
 }
@@ -222,11 +283,9 @@ func TestRewind(t *testing.T) {
 		}
 		for i := 0; i < 5; i++ {
 			gotNumRows := 0
-			for {
+			for input.Next() {
 				record, err := input.Read()
-				if err == io.EOF {
-					break
-				} else if err != nil {
+				if err != nil {
 					t.Errorf("Read() - filename: %q err: %q", c.filename, err)
 				}
 
@@ -248,6 +307,32 @@ func TestRewind(t *testing.T) {
 			if err := input.Rewind(); err != nil {
 				t.Errorf("Rewind() - filename: %q err: %s", c.filename, err)
 			}
+		}
+	}
+}
+
+func TestRewind_errors(t *testing.T) {
+	cases := []struct {
+		filename   string
+		separator  rune
+		fieldNames []string
+		wantErr    error
+	}{
+		{filepath.Join("..", "fixtures", "invalid_numfields_at_102.csv"), ',',
+			[]string{"band", "score", "team", "points", "rating"},
+			errors.New("wrong number of field names for input")},
+	}
+	for _, c := range cases {
+		input, err := New(c.fieldNames, c.filename, ';', false)
+		if err != nil {
+			t.Errorf("New() - filename: %q err: %q", c.filename, err)
+		}
+		for input.Next() {
+			input.Read()
+		}
+		err = input.Rewind()
+		if err.Error() != c.wantErr.Error() {
+			t.Errorf("Rewind() - err: %s, wantErr: %s", err, c.wantErr)
 		}
 	}
 }

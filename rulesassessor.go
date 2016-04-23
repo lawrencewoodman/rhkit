@@ -9,7 +9,6 @@ import (
 	"github.com/lawrencewoodman/dlit_go"
 	"github.com/lawrencewoodman/rulehunter/input"
 	"github.com/lawrencewoodman/rulehunter/internal"
-	"io"
 	"sort"
 )
 
@@ -498,11 +497,8 @@ func processInput(input input.Input,
 		return numRecords, err
 	}
 
-	for {
+	for input.Next() {
 		record, err := input.Read()
-		if err == io.EOF {
-			break
-		}
 		if err != nil {
 			return numRecords, err
 		}
@@ -514,7 +510,8 @@ func processInput(input input.Input,
 			}
 		}
 	}
-	return numRecords, nil
+
+	return numRecords, input.Err()
 }
 
 func addDefaultAggregators(

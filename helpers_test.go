@@ -9,7 +9,6 @@ import (
 	"github.com/lawrencewoodman/dlit_go"
 	"github.com/lawrencewoodman/rulehunter/input"
 	"github.com/lawrencewoodman/rulehunter/internal"
-	"io"
 )
 
 func errorMatch(e1 error, e2 error) bool {
@@ -98,23 +97,31 @@ type LiteralInput struct {
 }
 
 func NewLiteralInput(records []map[string]*dlit.Literal) input.Input {
-	return &LiteralInput{records: records, position: 0}
+	return &LiteralInput{records: records, position: -1}
 }
 
 func (l *LiteralInput) Clone() (input.Input, error) {
-	return &LiteralInput{records: l.records, position: 0}, nil
+	return &LiteralInput{records: l.records, position: -1}, nil
+}
+
+func (l *LiteralInput) Next() bool {
+	if (l.position + 1) < len(l.records) {
+		l.position++
+		return true
+	}
+	return false
 }
 
 func (l *LiteralInput) Read() (map[string]*dlit.Literal, error) {
-	if l.position < len(l.records) {
-		record := l.records[l.position]
-		l.position++
-		return record, nil
-	}
-	return map[string]*dlit.Literal{}, io.EOF
+	record := l.records[l.position]
+	return record, nil
+}
+
+func (l *LiteralInput) Err() error {
+	return nil
 }
 
 func (l *LiteralInput) Rewind() error {
-	l.position = 0
+	l.position = -1
 	return nil
 }

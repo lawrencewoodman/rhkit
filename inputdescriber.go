@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/lawrencewoodman/dlit_go"
 	"github.com/lawrencewoodman/rulehunter/input"
-	"io"
 	"math"
 	"strings"
 )
@@ -56,11 +55,8 @@ func DescribeInput(input input.Input) (map[string]*FieldDescription, error) {
 	input.Rewind()
 	fd := make(map[string]*FieldDescription)
 	firstRecord := true
-	for {
+	for input.Next() {
 		record, err := input.Read()
-		if err == io.EOF {
-			break
-		}
 		if err != nil {
 			return fd, err
 		}
@@ -70,7 +66,7 @@ func DescribeInput(input input.Input) (map[string]*FieldDescription, error) {
 		}
 		updateFieldDescriptions(record, fd)
 	}
-	return fd, nil
+	return fd, input.Err()
 }
 
 func initFieldDescriptions(

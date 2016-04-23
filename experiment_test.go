@@ -6,7 +6,6 @@ import (
 	"github.com/lawrencewoodman/rulehunter/csvinput"
 	"github.com/lawrencewoodman/rulehunter/input"
 	"github.com/lawrencewoodman/rulehunter/internal"
-	"io"
 	"path/filepath"
 	"reflect"
 	"testing"
@@ -349,18 +348,33 @@ func experimentMatch(e1 *Experiment, e2 *Experiment) (bool, string) {
 	if !areSortOrdersEqual(e1.SortOrder, e2.SortOrder) {
 		return false, "Sort Orders don't match"
 	}
+	inputsEqual, msg := areInputsEqual(e1.Input, e2.Input)
+	return inputsEqual, msg
+}
+
+func areInputsEqual(i1, i2 input.Input) (bool, string) {
 	for {
-		e1Record, e1Err := e1.Input.Read()
-		e2Record, e2Err := e2.Input.Read()
-		if e1Err != e2Err {
-			return false, "Inputs don't error at same point"
-		} else if e1Err == nil && e2Err == nil {
-			if !reflect.DeepEqual(e1Record, e2Record) {
-				return false, "Inputs don't match"
-			}
-		} else if e1Err == io.EOF || e2Err == io.EOF {
+		i1Next := i1.Next()
+		i2Next := i2.Next()
+		if i1Next != i2Next {
+			return false, "Inputs don't finish at same point"
+		}
+		if !i1Next {
 			break
 		}
+
+		i1Record, i1Err := i1.Read()
+		i2Record, i2Err := i2.Read()
+		if i1Err != i2Err {
+			return false, "Inputs don't error at same point"
+		} else if i1Err == nil && i2Err == nil {
+			if !reflect.DeepEqual(i1Record, i2Record) {
+				return false, "Inputs don't match"
+			}
+		}
+	}
+	if i1.Err() != i2.Err() {
+		return false, "Inputs final error doesn't match"
 	}
 	return true, ""
 }
