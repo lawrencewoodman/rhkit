@@ -94,6 +94,7 @@ func matchRules(rules1 []string, rules2 []string) (bool, string) {
 type LiteralInput struct {
 	records  []map[string]*dlit.Literal
 	position int
+	isClosed bool
 }
 
 func NewLiteralInput(records []map[string]*dlit.Literal) input.Input {
@@ -104,8 +105,12 @@ func (l *LiteralInput) Clone() (input.Input, error) {
 	return &LiteralInput{records: l.records, position: -1}, nil
 }
 
+func (l *LiteralInput) Close() error {
+	return nil
+}
+
 func (l *LiteralInput) Next() bool {
-	if (l.position + 1) < len(l.records) {
+	if !l.isClosed && (l.position+1) < len(l.records) {
 		l.position++
 		return true
 	}

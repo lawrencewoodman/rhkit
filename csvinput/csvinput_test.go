@@ -174,6 +174,37 @@ func TestRead_errors(t *testing.T) {
 	}
 }
 
+func TestRead_errors2(t *testing.T) {
+	cases := []struct {
+		filename   string
+		separator  rune
+		fieldNames []string
+		wantErr    error
+	}{
+		{filepath.Join("..", "fixtures", "bank.csv"), ';',
+			[]string{"age", "job", "marital", "education", "default", "balance",
+				"housing", "loan", "contact", "day", "month", "duration", "campaign",
+				"pdays", "previous", "poutcome", "y"},
+			errors.New("wrong number of field names for input")},
+	}
+	for _, c := range cases {
+		records, err := New(c.fieldNames, c.filename, c.separator, false)
+		if err != nil {
+			t.Errorf("Read() - New() - filename: %q err: %q", c.filename, err)
+		}
+		_, err = records.Read()
+		if err.Error() != c.wantErr.Error() {
+			t.Errorf("Read() - filename: %q got error: %s, want error: %s",
+				c.filename, err, c.wantErr)
+			return
+		}
+		if records.Err().Error() != c.wantErr.Error() {
+			t.Errorf("Read() - filename: %q got error: %s, want error: %s",
+				c.filename, records.Err().Error(), c.wantErr)
+		}
+	}
+}
+
 func TestErr(t *testing.T) {
 	cases := []struct {
 		filename   string
@@ -217,7 +248,6 @@ func TestErr(t *testing.T) {
 	}
 }
 
-// TODO: Add a test for if closed part way through
 func TestNext(t *testing.T) {
 	cases := []struct {
 		filename   string
@@ -240,6 +270,47 @@ func TestNext(t *testing.T) {
 		}
 		if records.Next() {
 			t.Errorf("records.Next() - Return true, despite having finished")
+		}
+	}
+}
+
+func TestNext_errors(t *testing.T) {
+	cases := []struct {
+		filename   string
+		separator  rune
+		fieldNames []string
+		stopRow    int
+		wantErr    error
+	}{
+		{filepath.Join("..", "fixtures", "bank.csv"), ';',
+			[]string{"age", "job", "marital", "education", "default", "balance",
+				"housing", "loan", "contact", "day", "month", "duration", "campaign",
+				"pdays", "previous", "poutcome"}, 2,
+			errors.New("input has been closed")},
+	}
+	for _, c := range cases {
+		records, err := New(c.fieldNames, c.filename, c.separator, false)
+		if err != nil {
+			t.Errorf("New() - filename: %q err: %q", c.filename, err)
+		}
+		i := 0
+		for records.Next() {
+			if i == c.stopRow {
+				if err := records.Close(); err != nil {
+					t.Errorf("records.Close() - Err: %d", err)
+				}
+				break
+			}
+			i++
+		}
+		if i != c.stopRow {
+			t.Errorf("records.Next() - Not stopped at row: %d", c.stopRow)
+		}
+		if records.Next() {
+			t.Errorf("records.Next() - Return true, despite records being closed")
+		}
+		if records.Err() == nil || records.Err().Error() != c.wantErr.Error() {
+			t.Errorf("records.Err() - err: %s, want err: %s", records.Err(), c.wantErr)
 		}
 	}
 }
@@ -298,6 +369,9 @@ func TestRewind(t *testing.T) {
 					t.Errorf("Read() - filename: %q got: %q, want: %q",
 						c.filename, record, c.wantThirdRecord)
 				}
+				if err := input.Err(); err != nil {
+					t.Errorf("Err() - filename: %s err: %s", c.filename, err)
+				}
 				gotNumRows++
 			}
 			if gotNumRows != c.wantNumRows {
@@ -305,7 +379,7 @@ func TestRewind(t *testing.T) {
 					c.filename, gotNumRows, c.wantNumRows)
 			}
 			if err := input.Rewind(); err != nil {
-				t.Errorf("Rewind() - filename: %q err: %s", c.filename, err)
+				t.Errorf("Rewind() - filename: %s err: %s", c.filename, err)
 			}
 		}
 	}

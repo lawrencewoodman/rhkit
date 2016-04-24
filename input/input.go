@@ -11,5 +11,5 @@ type Input interface {
 	Err() error
 	Read() (map[string]*dlit.Literal, error)
 	Rewind() error
-	// TODO: Add Close()
+	Close() error
 }

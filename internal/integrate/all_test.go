@@ -54,6 +54,7 @@ func TestAll(t *testing.T) {
 		t.Errorf("rulehunter.MakeExperiment(%s) - err: %s", experimentDesc, err)
 		return
 	}
+	defer experiment.Close()
 
 	fieldDescriptions, err := rulehunter.DescribeInput(experiment.Input)
 	if err != nil {

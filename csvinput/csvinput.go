@@ -51,8 +51,16 @@ func (c *CsvInput) Next() bool {
 	if c.err != nil {
 		return false
 	}
+	if c.reader == nil {
+		c.err = errors.New("input has been closed")
+		return false
+	}
 	record, err := c.reader.Read()
-	if err != nil {
+	if err == io.EOF {
+		c.err = err
+		return false
+	} else if err != nil {
+		c.Close()
 		c.err = err
 		return false
 	}
@@ -75,11 +83,13 @@ func (c *CsvInput) Read() (map[string]*dlit.Literal, error) {
 	if len(c.currentRecord) != len(c.fieldNames) {
 		// TODO: Create specific error type for this
 		c.err = errors.New("wrong number of field names for input")
+		c.Close()
 		return recordLits, c.err
 	}
 	for i, field := range c.currentRecord {
 		l, err := dlit.New(field)
 		if err != nil {
+			c.Close()
 			c.err = err
 			return recordLits, err
 		}
@@ -93,13 +103,28 @@ func (c *CsvInput) Rewind() error {
 	if c.Err() != nil {
 		return c.err
 	}
+	if c.reader == nil {
+		c.err = errors.New("input has been closed")
+		return c.err
+	}
 	if err := c.file.Close(); err != nil {
 		c.err = err
 		return err
 	}
 	c.file, c.reader, err =
 		makeCsvReader(c.filename, c.separator, c.skipFirstLine)
+	if err != nil {
+		_ = c.Close
+	}
 	c.err = err
+	return err
+}
+
+// This should only be called by Experiment.Close() ordinarily
+func (c *CsvInput) Close() error {
+	err := c.file.Close()
+	c.file = nil
+	c.reader = nil
 	return err
 }
 

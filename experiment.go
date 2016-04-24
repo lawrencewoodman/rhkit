@@ -96,6 +96,10 @@ func MakeExperiment(e *ExperimentDesc) (*Experiment, error) {
 	}, nil
 }
 
+func (e *Experiment) Close() error {
+	return e.Input.Close()
+}
+
 func checkExperimentDescValid(e *ExperimentDesc) error {
 	if len(e.Fields) < 2 {
 		return errors.New("Must specify at least two field names")

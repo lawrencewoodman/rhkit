@@ -324,6 +324,51 @@ func TestMakeExperiment_errors(t *testing.T) {
 	}
 }
 
+func TestClose(t *testing.T) {
+	fieldNames := []string{"age", "job", "marital", "education", "default",
+		"balance", "housing", "loan", "contact", "day", "month", "duration",
+		"campaign", "pdays", "previous", "poutcome", "y",
+	}
+	input := mustNewCsvInput(
+		fieldNames,
+		filepath.Join("fixtures", "bank.csv"),
+		rune(';'),
+		true,
+	)
+
+	experimentDesc := &ExperimentDesc{
+		Title:         "This is a nice title",
+		Input:         input,
+		Fields:        fieldNames,
+		ExcludeFields: []string{},
+		Aggregators: []*AggregatorDesc{
+			&AggregatorDesc{"numSignedUp", "count", "y == \"yes\""},
+			&AggregatorDesc{"cost", "calc", "numMatches * 4.5"},
+			&AggregatorDesc{"income", "calc", "numSignedUp * 24"},
+			&AggregatorDesc{"profit", "calc", "income - cost"},
+		},
+		Goals: []string{"profit > 0"},
+		SortOrder: []*SortDesc{
+			&SortDesc{"profit", "descending"},
+			&SortDesc{"numSignedUp", "descending"},
+			&SortDesc{"cost", "ascending"},
+		},
+	}
+	experiment, err := MakeExperiment(experimentDesc)
+	if err != nil {
+		t.Errorf("MakeExperiment(%q) err: %q", experimentDesc, err)
+	}
+	if !experiment.Input.Next() {
+		t.Errorf("Next() return false on first call")
+	}
+	if err := experiment.Close(); err != nil {
+		t.Errorf("Close() err: %s", err)
+	}
+	if experiment.Input.Next() {
+		t.Errorf("Next() return true on second call")
+	}
+}
+
 /***********************
    Helper functions
 ************************/
