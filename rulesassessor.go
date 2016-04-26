@@ -149,7 +149,6 @@ func AssessRulesMP(
 		return
 	}
 	progressIntervals := 1000
-	// TODO: Use System variable for number of concurrent processes or pass to funciton
 	numProcesses := 0
 	if numRules < progressIntervals {
 		progressIntervals = numRules
