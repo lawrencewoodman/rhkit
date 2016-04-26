@@ -4,27 +4,94 @@
 package rulehunter
 
 import (
+	"fmt"
 	"github.com/lawrencewoodman/rulehunter"
 	"github.com/lawrencewoodman/rulehunter/csvinput"
+	"github.com/lawrencewoodman/rulehunter/input"
+	"github.com/lawrencewoodman/rulehunter/reduceinput"
 	"path/filepath"
 	"runtime"
 	"testing"
 )
 
-func TestAll(t *testing.T) {
+func TestAll_full(t *testing.T) {
 	fieldNames := []string{"age", "job", "marital", "education", "default",
 		"balance", "housing", "loan", "contact", "day", "month", "duration",
 		"campaign", "pdays", "previous", "poutcome", "y"}
 	input, err := csvinput.New(
 		fieldNames,
-		filepath.Join("fixtures", "bank.csv"),
+		filepath.Join("..", "..", "fixtures", "bank.csv"),
 		rune(';'),
 		true,
 	)
 	if err != nil {
-		t.Errorf("rulehunter.NewCsvInput() - err: %s", err)
+		t.Errorf("csvInput.New() - err: %s", err)
 		return
 	}
+	if err = processInput(input, fieldNames); err != nil {
+		t.Errorf("processInput() - err: %s", err)
+		return
+	}
+}
+
+func TestAll_reduced(t *testing.T) {
+	fieldNames := []string{"age", "job", "marital", "education", "default",
+		"balance", "housing", "loan", "contact", "day", "month", "duration",
+		"campaign", "pdays", "previous", "poutcome", "y"}
+	numRecords := 5
+
+	input, err := csvinput.New(
+		fieldNames,
+		filepath.Join("..", "..", "fixtures", "bank.csv"),
+		rune(';'),
+		true,
+	)
+	if err != nil {
+		t.Errorf("csvInput.New() - err: %s", err)
+		return
+	}
+
+	records, err := reduceinput.New(input, numRecords)
+	if err != nil {
+		t.Errorf("reduceInput.New() - err: %s", err)
+		return
+	}
+
+	if err = processInput(records, fieldNames); err != nil {
+		t.Errorf("processInput() - err: %s", err)
+		return
+	}
+}
+
+/****************************
+ *  Helper functions
+ ****************************/
+func assessRules(
+	rules []*rulehunter.Rule,
+	experiment *rulehunter.Experiment,
+) (*rulehunter.Assessment, error) {
+	var assessment *rulehunter.Assessment
+	maxProcesses := runtime.NumCPU()
+	c := make(chan *rulehunter.AssessRulesMPOutcome)
+
+	go rulehunter.AssessRulesMP(
+		rules,
+		experiment.Aggregators,
+		experiment.Goals,
+		experiment.Input,
+		maxProcesses,
+		c,
+	)
+	for o := range c {
+		if o.Err != nil {
+			return nil, o.Err
+		}
+		assessment = o.Assessment
+	}
+	return assessment, nil
+}
+
+func processInput(input input.Input, fieldNames []string) error {
 	experimentDesc := &rulehunter.ExperimentDesc{
 		Title:         "This is a jolly nice title",
 		Input:         input,
@@ -51,34 +118,32 @@ func TestAll(t *testing.T) {
 	}
 	experiment, err := rulehunter.MakeExperiment(experimentDesc)
 	if err != nil {
-		t.Errorf("rulehunter.MakeExperiment(%s) - err: %s", experimentDesc, err)
-		return
+		return fmt.Errorf("rulehunter.MakeExperiment(%s) - err: %s",
+			experimentDesc, err)
 	}
 	defer experiment.Close()
 
 	fieldDescriptions, err := rulehunter.DescribeInput(experiment.Input)
 	if err != nil {
-		t.Errorf("rulehunter.DescribeInput(experiment.input) - err: %s", err)
-		return
+		return fmt.Errorf("rulehunter.DescribeInput(experiment.input) - err: %s",
+			err)
 	}
 	rules, err :=
 		rulehunter.GenerateRules(fieldDescriptions, experiment.ExcludeFieldNames)
 	if err != nil {
-		t.Errorf("rulehunter.GenerateRules(%q, %q) - err: %s",
+		return fmt.Errorf("rulehunter.GenerateRules(%q, %q) - err: %s",
 			fieldDescriptions, experiment.ExcludeFieldNames, err)
-		return
 	}
 	if len(rules) < 2 {
-		t.Errorf("rulehunter.GenerateRules(%q, %q) - not enough rules generated",
+		return fmt.Errorf("rulehunter.GenerateRules(%q, %q) - not enough rules generated",
+
 			fieldDescriptions, experiment.ExcludeFieldNames)
-		return
 	}
 
 	assessment, err := assessRules(rules, experiment)
 	if err != nil {
-		t.Errorf("rulehunter.assessRules(rules, %q) - err: %s",
+		return fmt.Errorf("rulehunter.assessRules(rules, %q) - err: %s",
 			experiment, err)
-		return
 	}
 
 	assessment.Sort(experiment.SortOrder)
@@ -87,22 +152,20 @@ func TestAll(t *testing.T) {
 
 	tweakableRules := rulehunter.TweakRules(sortedRules, fieldDescriptions)
 	if len(tweakableRules) < 2 {
-		t.Errorf("rulehunter.TweakRules(sortedRules, %q) - not enough rules generated",
+		return fmt.Errorf("rulehunter.TweakRules(sortedRules, %q) - not enough rules generated",
+
 			fieldDescriptions)
-		return
 	}
 
 	assessment2, err := assessRules(tweakableRules, experiment)
 	if err != nil {
-		t.Errorf("rulehunter.assessRules(tweakableRules, %q) - err: %s",
+		return fmt.Errorf("rulehunter.assessRules(tweakableRules, %q) - err: %s",
 			experiment, err)
-		return
 	}
 
 	assessment3, err := assessment.Merge(assessment2)
 	if err != nil {
-		t.Errorf("assessment.Merge(assessment2) - err: %s", err)
-		return
+		return fmt.Errorf("assessment.Merge(assessment2) - err: %s", err)
 	}
 	assessment3.Sort(experiment.SortOrder)
 	assessment3.Refine(1)
@@ -112,47 +175,20 @@ func TestAll(t *testing.T) {
 	combinedRules :=
 		rulehunter.CombineRules(bestNonCombinedRules[:numRulesToCombine])
 	if len(combinedRules) < 2 {
-		t.Errorf("rulehunter.CombineRules(bestNonCombinedRules) - not enough rules generated")
-		return
+		return fmt.Errorf("rulehunter.CombineRules(bestNonCombinedRules) - not enough rules generated")
 	}
 
 	assessment4, err := assessRules(combinedRules, experiment)
 	if err != nil {
-		t.Errorf("rulehunter.assessRules(combinedRules, %q) - err: %s",
+		return fmt.Errorf("rulehunter.assessRules(combinedRules, %q) - err: %s",
 			experiment, err)
-		return
 	}
 
 	assessment5, err := assessment3.Merge(assessment4)
 	if err != nil {
-		t.Errorf("assessment3.Merge(assessment4) - err: %s", err)
-		return
+		return fmt.Errorf("assessment3.Merge(assessment4) - err: %s", err)
 	}
 	assessment5.Sort(experiment.SortOrder)
 	assessment5.Refine(1)
-}
-
-func assessRules(
-	rules []*rulehunter.Rule,
-	experiment *rulehunter.Experiment,
-) (*rulehunter.Assessment, error) {
-	var assessment *rulehunter.Assessment
-	maxProcesses := runtime.NumCPU()
-	c := make(chan *rulehunter.AssessRulesMPOutcome)
-
-	go rulehunter.AssessRulesMP(
-		rules,
-		experiment.Aggregators,
-		experiment.Goals,
-		experiment.Input,
-		maxProcesses,
-		c,
-	)
-	for o := range c {
-		if o.Err != nil {
-			return nil, o.Err
-		}
-		assessment = o.Assessment
-	}
-	return assessment, nil
+	return nil
 }

@@ -394,10 +394,10 @@ func TestRewind_errors(t *testing.T) {
 	}{
 		{filepath.Join("..", "fixtures", "invalid_numfields_at_102.csv"), ',',
 			[]string{"band", "score", "team", "points", "rating"},
-			errors.New("wrong number of field names for input")},
+			&csv.ParseError{102, 0, errors.New("wrong number of fields in line")}},
 	}
 	for _, c := range cases {
-		input, err := New(c.fieldNames, c.filename, ';', false)
+		input, err := New(c.fieldNames, c.filename, c.separator, false)
 		if err != nil {
 			t.Errorf("New() - filename: %q err: %q", c.filename, err)
 		}

@@ -78,7 +78,7 @@ func (c *CsvInput) Err() error {
 func (c *CsvInput) Read() (map[string]*dlit.Literal, error) {
 	recordLits := make(map[string]*dlit.Literal)
 	if c.Err() != nil {
-		return recordLits, c.err
+		return recordLits, c.Err()
 	}
 	if len(c.currentRecord) != len(c.fieldNames) {
 		// TODO: Create specific error type for this
