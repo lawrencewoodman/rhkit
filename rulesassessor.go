@@ -71,6 +71,7 @@ func (sortedAssessment *Assessment) Refine(numSimilarRules int) {
 	sortedAssessment.excludePoorRules()
 	sortedAssessment.excludePoorerInNiRules(numSimilarRules)
 	sortedAssessment.excludePoorerTweakableRules(numSimilarRules)
+	sortedAssessment.Flags["refined"] = true
 }
 
 func (e ErrNameConflict) Error() string {
@@ -85,9 +86,42 @@ func (a *Assessment) Merge(o *Assessment) (*Assessment, error) {
 	}
 	newRuleAssessments := append(a.RuleAssessments, o.RuleAssessments...)
 	flags := map[string]bool{
-		"sorted": false,
+		"sorted":  false,
+		"refined": false,
 	}
 	return &Assessment{a.NumRecords, newRuleAssessments, flags}, nil
+}
+
+// Assessment must be sorted and refined first
+func (a *Assessment) LimitRuleAssessments(
+	numRuleAssessments int,
+) *Assessment {
+	if !a.Flags["sorted"] {
+		panic("Assessment isn't sorted")
+	}
+	if !a.Flags["refined"] {
+		panic("Assessment isn't refined")
+	}
+	if len(a.RuleAssessments) < numRuleAssessments {
+		numRuleAssessments = len(a.RuleAssessments)
+	}
+
+	ruleAssessments := a.RuleAssessments[:numRuleAssessments]
+
+	if len(a.RuleAssessments) != numRuleAssessments {
+		trueRuleAssessment := a.RuleAssessments[len(a.RuleAssessments)-1]
+		if trueRuleAssessment.Rule.String() != "true()" {
+			panic("Assessment doesn't have 'true()' rule last")
+		}
+
+		ruleAssessments = append(ruleAssessments, trueRuleAssessment)
+	}
+
+	flags := map[string]bool{
+		"sorted":  true,
+		"refined": true,
+	}
+	return &Assessment{a.NumRecords, ruleAssessments, flags}
 }
 
 // need a progress callback and a specifier for how often to report
@@ -453,7 +487,8 @@ func makeAssessment(
 		}
 	}
 	flags := map[string]bool{
-		"sorted": false,
+		"sorted":  false,
+		"refined": false,
 	}
 	assessment := &Assessment{
 		NumRecords:      numRecords,

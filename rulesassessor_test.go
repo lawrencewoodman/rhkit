@@ -54,7 +54,8 @@ func TestAssessRules(t *testing.T) {
 	wantAssessment := Assessment{
 		NumRecords: int64(len(records)),
 		Flags: map[string]bool{
-			"sorted": false,
+			"sorted":  false,
+			"refined": false,
 		},
 		RuleAssessments: []*RuleAssessment{
 			&RuleAssessment{
@@ -556,7 +557,8 @@ func TestMerge(t *testing.T) {
 	wantAssessment := &Assessment{
 		NumRecords: 8,
 		Flags: map[string]bool{
-			"sorted": false,
+			"sorted":  false,
+			"refined": false,
 		},
 		RuleAssessments: []*RuleAssessment{
 			&RuleAssessment{
@@ -950,6 +952,194 @@ func TestRefine_panic_2(t *testing.T) {
 	}()
 	numSimilarRules := 1
 	sortedAssessment.Refine(numSimilarRules)
+	if !paniced {
+		t.Errorf("Test: %s\n", testPurpose)
+		t.Errorf("Refine() - failed to panic with: %s", wantPanic)
+	}
+}
+
+func TestLimitRuleAssessments(t *testing.T) {
+	refinedAssessment := &Assessment{
+		NumRecords: 20,
+		Flags: map[string]bool{
+			"sorted":  true,
+			"refined": true,
+		},
+		RuleAssessments: []*RuleAssessment{
+			&RuleAssessment{
+				Rule: mustNewRule("band > 4"),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches": dlit.MustNew("2"),
+				},
+				Goals: []*GoalAssessment{
+					&GoalAssessment{"numIncomeGt2 == 1", true},
+				},
+			},
+			&RuleAssessment{
+				Rule: mustNewRule("in(band,\"4\",\"3\",\"2\")"),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches": dlit.MustNew("4"),
+				},
+				Goals: []*GoalAssessment{
+					&GoalAssessment{"numIncomeGt2 == 1", false},
+				},
+			},
+			&RuleAssessment{
+				Rule: mustNewRule("in(team,\"a\",\"b\")"),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches": dlit.MustNew("4"),
+				},
+				Goals: []*GoalAssessment{
+					&GoalAssessment{"numIncomeGt2 == 1", false},
+				},
+			},
+			&RuleAssessment{
+				Rule: mustNewRule("in(band,\"99\",\"23\")"),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches": dlit.MustNew("4"),
+				},
+				Goals: []*GoalAssessment{
+					&GoalAssessment{"numIncomeGt2 == 1", false},
+				},
+			},
+			&RuleAssessment{
+				Rule: mustNewRule("true()"),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches": dlit.MustNew("2"),
+				},
+				Goals: []*GoalAssessment{
+					&GoalAssessment{"numIncomeGt2 == 1", false},
+				},
+			},
+		},
+	}
+	cases := []struct {
+		numRules  int
+		wantRules []string
+	}{
+		{3,
+			[]string{
+				"band > 4",
+				"in(band,\"4\",\"3\",\"2\")",
+				"in(team,\"a\",\"b\")",
+				"true()",
+			},
+		},
+		{4,
+			[]string{
+				"band > 4",
+				"in(band,\"4\",\"3\",\"2\")",
+				"in(team,\"a\",\"b\")",
+				"in(band,\"99\",\"23\")",
+				"true()",
+			},
+		},
+		{5,
+			[]string{
+				"band > 4",
+				"in(band,\"4\",\"3\",\"2\")",
+				"in(team,\"a\",\"b\")",
+				"in(band,\"99\",\"23\")",
+				"true()",
+			},
+		},
+	}
+	for _, c := range cases {
+		limitedAssessment := refinedAssessment.LimitRuleAssessments(c.numRules)
+		gotRules := getAssessmentRules(limitedAssessment)
+		rulesMatch, msg := matchRules(gotRules, c.wantRules)
+		if !rulesMatch {
+			t.Errorf("matchRules() rules don't match: %s\nnumRules: %d\ngot: %s\nwant: %s\n",
+				msg, c.numRules, gotRules, c.wantRules)
+		}
+	}
+}
+
+func TestLimitRuleAssessment_panic_1(t *testing.T) {
+	testPurpose := "Ensure panics if assessment not sorted"
+	unsortedAssessment := &Assessment{
+		NumRecords: 20,
+		RuleAssessments: []*RuleAssessment{
+			&RuleAssessment{
+				Rule: mustNewRule("band > 4"),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("2"),
+					"percentMatches": dlit.MustNew("50"),
+				},
+				Goals: []*GoalAssessment{},
+			},
+			&RuleAssessment{
+				Rule: mustNewRule("true()"),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("4"),
+					"percentMatches": dlit.MustNew("100"),
+				},
+				Goals: []*GoalAssessment{},
+			},
+		},
+	}
+	paniced := false
+	wantPanic := "Assessment isn't sorted"
+	defer func() {
+		if r := recover(); r != nil {
+			if r.(string) == wantPanic {
+				paniced = true
+			} else {
+				t.Errorf("Test: %s\n", testPurpose)
+				t.Errorf("LimitRuleAssessments() - got panic: %s, wanted: %s",
+					r, wantPanic)
+			}
+		}
+	}()
+	numRules := 1
+	unsortedAssessment.LimitRuleAssessments(numRules)
+	if !paniced {
+		t.Errorf("Test: %s\n", testPurpose)
+		t.Errorf("Refine() - failed to panic with: %s", wantPanic)
+	}
+}
+
+func TestLimitRuleAssessment_panic_2(t *testing.T) {
+	testPurpose := "Ensure panics if assessment not refined"
+	unsortedAssessment := &Assessment{
+		NumRecords: 20,
+		Flags: map[string]bool{
+			"sorted": true,
+		},
+		RuleAssessments: []*RuleAssessment{
+			&RuleAssessment{
+				Rule: mustNewRule("band > 4"),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("2"),
+					"percentMatches": dlit.MustNew("50"),
+				},
+				Goals: []*GoalAssessment{},
+			},
+			&RuleAssessment{
+				Rule: mustNewRule("true()"),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("4"),
+					"percentMatches": dlit.MustNew("100"),
+				},
+				Goals: []*GoalAssessment{},
+			},
+		},
+	}
+	paniced := false
+	wantPanic := "Assessment isn't refined"
+	defer func() {
+		if r := recover(); r != nil {
+			if r.(string) == wantPanic {
+				paniced = true
+			} else {
+				t.Errorf("Test: %s\n", testPurpose)
+				t.Errorf("LimitRuleAssessments() - got panic: %s, wanted: %s",
+					r, wantPanic)
+			}
+		}
+	}()
+	numRules := 1
+	unsortedAssessment.LimitRuleAssessments(numRules)
 	if !paniced {
 		t.Errorf("Test: %s\n", testPurpose)
 		t.Errorf("Refine() - failed to panic with: %s", wantPanic)

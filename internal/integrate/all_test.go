@@ -190,5 +190,8 @@ func processInput(input input.Input, fieldNames []string) error {
 	}
 	assessment5.Sort(experiment.SortOrder)
 	assessment5.Refine(1)
+
+	finalNumRuleAssessments := 100
+	assessment5.LimitRuleAssessments(finalNumRuleAssessments)
 	return nil
 }
