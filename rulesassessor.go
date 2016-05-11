@@ -364,9 +364,26 @@ func (r *RuleAssessment) isEqual(o *RuleAssessment) bool {
 	return true
 }
 
-func (a *Assessment) GetRules() []*Rule {
-	r := make([]*Rule, len(a.RuleAssessments))
+// Can optionally pass maximum number of rules to return
+func (a *Assessment) GetRules(args ...int) []*Rule {
+	var numRules int
+	switch len(args) {
+	case 0:
+		numRules = len(a.RuleAssessments)
+	case 1:
+		numRules = args[0]
+		if len(a.RuleAssessments) < numRules {
+			numRules = len(a.RuleAssessments)
+		}
+	default:
+		panic(fmt.Sprintf("incorrect number of arguments passed: %d", len(args)))
+	}
+
+	r := make([]*Rule, numRules)
 	for i, ruleAssessment := range a.RuleAssessments {
+		if i >= numRules {
+			break
+		}
 		r[i] = ruleAssessment.Rule
 	}
 	return r

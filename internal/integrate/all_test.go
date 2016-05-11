@@ -170,10 +170,10 @@ func processInput(input input.Input, fieldNames []string) error {
 	assessment3.Sort(experiment.SortOrder)
 	assessment3.Refine(1)
 
-	bestNonCombinedRules := assessment3.GetRules()
 	numRulesToCombine := 50
+	bestNonCombinedRules := assessment3.GetRules(numRulesToCombine)
 	combinedRules :=
-		rulehunter.CombineRules(bestNonCombinedRules[:numRulesToCombine])
+		rulehunter.CombineRules(bestNonCombinedRules)
 	if len(combinedRules) < 2 {
 		return fmt.Errorf("rulehunter.CombineRules(bestNonCombinedRules) - not enough rules generated")
 	}

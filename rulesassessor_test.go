@@ -399,6 +399,7 @@ func TestSort(t *testing.T) {
 }
 
 func TestGetRules(t *testing.T) {
+	var gotRules []*Rule
 	assessment := Assessment{NumRecords: 8,
 		RuleAssessments: []*RuleAssessment{
 			&RuleAssessment{
@@ -443,16 +444,46 @@ func TestGetRules(t *testing.T) {
 			},
 		},
 	}
-	wantRules := []*Rule{
-		mustNewRule("band > 9"),
-		mustNewRule("band > 456"),
-		mustNewRule("band > 3"),
-		mustNewRule("cost > 1.2"),
+	cases := []struct {
+		numRules     int
+		passNumRules bool
+		wantRules    []*Rule
+	}{
+		{0, true, []*Rule{}},
+		{1, true, []*Rule{mustNewRule("band > 9")}},
+		{2, true, []*Rule{mustNewRule("band > 9"), mustNewRule("band > 456")}},
+		{4, true, []*Rule{
+			mustNewRule("band > 9"),
+			mustNewRule("band > 456"),
+			mustNewRule("band > 3"),
+			mustNewRule("cost > 1.2"),
+		},
+		},
+		{5, true, []*Rule{
+			mustNewRule("band > 9"),
+			mustNewRule("band > 456"),
+			mustNewRule("band > 3"),
+			mustNewRule("cost > 1.2"),
+		},
+		},
+		{0, false, []*Rule{
+			mustNewRule("band > 9"),
+			mustNewRule("band > 456"),
+			mustNewRule("band > 3"),
+			mustNewRule("cost > 1.2"),
+		},
+		},
 	}
-	gotRules := assessment.GetRules()
-	if !reflect.DeepEqual(gotRules, wantRules) {
-		t.Errorf("GetRuleString() rules don't match\ngot: %s\nwant: %s\n",
-			gotRules, wantRules)
+	for _, c := range cases {
+		if c.passNumRules {
+			gotRules = assessment.GetRules(c.numRules)
+		} else {
+			gotRules = assessment.GetRules()
+		}
+		if !reflect.DeepEqual(gotRules, c.wantRules) {
+			t.Errorf("GetRules() passNumRules: %t, numRules: %d rules don't match\ngot: %s\nwant: %s\n",
+				c.passNumRules, c.numRules, gotRules, c.wantRules)
+		}
 	}
 }
 
