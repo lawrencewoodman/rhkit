@@ -1,7 +1,7 @@
 package internal
 
 import (
-	"github.com/lawrencewoodman/dlit_go"
+	"github.com/lawrencewoodman/dlit"
 	"testing"
 )
 

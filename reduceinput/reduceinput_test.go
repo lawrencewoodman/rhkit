@@ -4,7 +4,7 @@ import (
 	"encoding/csv"
 	"errors"
 	"fmt"
-	"github.com/lawrencewoodman/dlit_go"
+	"github.com/lawrencewoodman/dlit"
 	"github.com/lawrencewoodman/rulehunter/csvinput"
 	"github.com/lawrencewoodman/rulehunter/input"
 	"path/filepath"

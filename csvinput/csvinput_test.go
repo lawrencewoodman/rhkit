@@ -3,7 +3,7 @@ package csvinput
 import (
 	"encoding/csv"
 	"errors"
-	"github.com/lawrencewoodman/dlit_go"
+	"github.com/lawrencewoodman/dlit"
 	"os"
 	"path/filepath"
 	"testing"

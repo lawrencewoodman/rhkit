@@ -3,7 +3,7 @@ package rulehunter
 import (
 	"errors"
 	"fmt"
-	"github.com/lawrencewoodman/dlit_go"
+	"github.com/lawrencewoodman/dlit"
 	"github.com/lawrencewoodman/rulehunter/internal"
 	"reflect"
 	"testing"

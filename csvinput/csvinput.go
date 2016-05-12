@@ -6,7 +6,7 @@ package csvinput
 import (
 	"encoding/csv"
 	"errors"
-	"github.com/lawrencewoodman/dlit_go"
+	"github.com/lawrencewoodman/dlit"
 	"github.com/lawrencewoodman/rulehunter/input"
 	"io"
 	"os"

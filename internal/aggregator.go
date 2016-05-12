@@ -5,7 +5,7 @@ package internal
 
 import (
 	"errors"
-	"github.com/lawrencewoodman/dlit_go"
+	"github.com/lawrencewoodman/dlit"
 )
 
 type Aggregator interface {

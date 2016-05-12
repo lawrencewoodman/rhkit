@@ -4,8 +4,8 @@
 package internal
 
 import (
-	"github.com/lawrencewoodman/dexpr_go"
-	"github.com/lawrencewoodman/dlit_go"
+	"github.com/lawrencewoodman/dexpr"
+	"github.com/lawrencewoodman/dlit"
 )
 
 type PercentAggregator struct {

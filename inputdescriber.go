@@ -5,7 +5,7 @@ package rulehunter
 
 import (
 	"fmt"
-	"github.com/lawrencewoodman/dlit_go"
+	"github.com/lawrencewoodman/dlit"
 	"github.com/lawrencewoodman/rulehunter/input"
 	"math"
 	"strings"

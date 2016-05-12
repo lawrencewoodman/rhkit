@@ -3,7 +3,7 @@
  */
 package input
 
-import "github.com/lawrencewoodman/dlit_go"
+import "github.com/lawrencewoodman/dlit"
 
 type Input interface {
 	Clone() (Input, error)
