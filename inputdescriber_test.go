@@ -2,7 +2,7 @@ package rulehunter
 
 import (
 	"github.com/lawrencewoodman/dlit"
-	"github.com/lawrencewoodman/rulehunter/csvinput"
+	"github.com/vlifesystems/rulehunter/csvinput"
 	"path/filepath"
 	"testing"
 )

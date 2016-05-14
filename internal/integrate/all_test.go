@@ -5,10 +5,10 @@ package rulehunter
 
 import (
 	"fmt"
-	"github.com/lawrencewoodman/rulehunter"
-	"github.com/lawrencewoodman/rulehunter/csvinput"
-	"github.com/lawrencewoodman/rulehunter/input"
-	"github.com/lawrencewoodman/rulehunter/reduceinput"
+	"github.com/vlifesystems/rulehunter"
+	"github.com/vlifesystems/rulehunter/csvinput"
+	"github.com/vlifesystems/rulehunter/input"
+	"github.com/vlifesystems/rulehunter/reduceinput"
 	"path/filepath"
 	"runtime"
 	"testing"

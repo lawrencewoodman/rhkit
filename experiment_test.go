@@ -3,9 +3,9 @@ package rulehunter
 import (
 	"errors"
 	"fmt"
-	"github.com/lawrencewoodman/rulehunter/csvinput"
-	"github.com/lawrencewoodman/rulehunter/input"
-	"github.com/lawrencewoodman/rulehunter/internal"
+	"github.com/vlifesystems/rulehunter/csvinput"
+	"github.com/vlifesystems/rulehunter/input"
+	"github.com/vlifesystems/rulehunter/internal"
 	"path/filepath"
 	"reflect"
 	"testing"

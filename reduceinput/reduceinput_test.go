@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/lawrencewoodman/dlit"
-	"github.com/lawrencewoodman/rulehunter/csvinput"
-	"github.com/lawrencewoodman/rulehunter/input"
+	"github.com/vlifesystems/rulehunter/csvinput"
+	"github.com/vlifesystems/rulehunter/input"
 	"path/filepath"
 	"testing"
 )

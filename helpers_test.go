@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
-	"github.com/lawrencewoodman/rulehunter/input"
-	"github.com/lawrencewoodman/rulehunter/internal"
+	"github.com/vlifesystems/rulehunter/input"
+	"github.com/vlifesystems/rulehunter/internal"
 )
 
 func errorMatch(e1 error, e2 error) bool {

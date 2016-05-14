@@ -20,7 +20,7 @@ package reduceinput
 
 import (
 	"github.com/lawrencewoodman/dlit"
-	"github.com/lawrencewoodman/rulehunter/input"
+	"github.com/vlifesystems/rulehunter/input"
 	"io"
 )
 
