@@ -6,15 +6,16 @@ import (
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rulehunter/experiment"
 	"github.com/vlifesystems/rulehunter/internal"
+	"github.com/vlifesystems/rulehunter/rule"
 	"reflect"
 	"testing"
 )
 
 func TestAssessRules(t *testing.T) {
-	rules := []*Rule{
-		mustNewRule("band > 4"),
-		mustNewRule("band > 3"),
-		mustNewRule("cost > 1.2"),
+	rules := []*rule.Rule{
+		rule.MustNew("band > 4"),
+		rule.MustNew("band > 3"),
+		rule.MustNew("cost > 1.2"),
 	}
 	aggregators := []*experiment.AggregatorDesc{
 		&experiment.AggregatorDesc{"numIncomeGt2", "count", "income > 2"},
@@ -70,7 +71,7 @@ func TestAssessRules(t *testing.T) {
 		},
 		RuleAssessments: []*RuleAssessment{
 			&RuleAssessment{
-				Rule: mustNewRule("band > 4"),
+				Rule: rule.MustNew("band > 4"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("50"),
@@ -90,7 +91,7 @@ func TestAssessRules(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: mustNewRule("band > 3"),
+				Rule: rule.MustNew("band > 3"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("4"),
 					"percentMatches": dlit.MustNew("100"),
@@ -110,7 +111,7 @@ func TestAssessRules(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: mustNewRule("cost > 1.2"),
+				Rule: rule.MustNew("cost > 1.2"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("50"),
@@ -146,30 +147,30 @@ func TestAssessRules(t *testing.T) {
 
 func TestAssessRules_errors(t *testing.T) {
 	cases := []struct {
-		rules       []*Rule
+		rules       []*rule.Rule
 		aggregators []*experiment.AggregatorDesc
 		goals       []string
 		wantErr     error
 	}{
-		{[]*Rule{mustNewRule("band ^^ 3")},
+		{[]*rule.Rule{rule.MustNew("band ^^ 3")},
 			[]*experiment.AggregatorDesc{
 				&experiment.AggregatorDesc{"numIncomeGt2", "count", "income > 2"},
 			},
 			[]string{"numIncomeGt2 == 1"},
 			errors.New("Invalid operator: \"^\"")},
-		{[]*Rule{mustNewRule("hand > 3")},
+		{[]*rule.Rule{rule.MustNew("hand > 3")},
 			[]*experiment.AggregatorDesc{
 				&experiment.AggregatorDesc{"numIncomeGt2", "count", "income > 2"},
 			},
 			[]string{"numIncomeGt2 == 1"},
 			errors.New("Variable doesn't exist: hand")},
-		{[]*Rule{mustNewRule("band > 3")},
+		{[]*rule.Rule{rule.MustNew("band > 3")},
 			[]*experiment.AggregatorDesc{
 				&experiment.AggregatorDesc{"numIncomeGt2", "count", "bincome > 2"},
 			},
 			[]string{"numIncomeGt2 == 1"},
 			errors.New("Variable doesn't exist: bincome")},
-		{[]*Rule{mustNewRule("band > 3")},
+		{[]*rule.Rule{rule.MustNew("band > 3")},
 			[]*experiment.AggregatorDesc{
 				&experiment.AggregatorDesc{"numIncomeGt2", "count", "income > 2"},
 			},
@@ -240,18 +241,18 @@ func TestAssessRulesMP(t *testing.T) {
 		},
 	}
 	cases := []struct {
-		rules []*Rule
+		rules []*rule.Rule
 	}{
-		{[]*Rule{
-			mustNewRule("band > 4"),
-			mustNewRule("band > 3"),
-			mustNewRule("cost > 1.2"),
+		{[]*rule.Rule{
+			rule.MustNew("band > 4"),
+			rule.MustNew("band > 3"),
+			rule.MustNew("cost > 1.2"),
 		}},
-		{[]*Rule{
-			mustNewRule("band > 4"),
-			mustNewRule("cost > 1.2"),
+		{[]*rule.Rule{
+			rule.MustNew("band > 4"),
+			rule.MustNew("cost > 1.2"),
 		}},
-		{[]*Rule{}},
+		{[]*rule.Rule{}},
 	}
 
 	input := NewLiteralInput(records)
@@ -318,7 +319,7 @@ func TestSort(t *testing.T) {
 		},
 		RuleAssessments: []*RuleAssessment{
 			&RuleAssessment{
-				Rule: mustNewRule("band > 9"),
+				Rule: rule.MustNew("band > 9"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("5"),
 					"percentMatches": dlit.MustNew("65.3"),
@@ -338,7 +339,7 @@ func TestSort(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: mustNewRule("band > 456"),
+				Rule: rule.MustNew("band > 456"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("50"),
@@ -358,7 +359,7 @@ func TestSort(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: mustNewRule("band > 3"),
+				Rule: rule.MustNew("band > 3"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("4"),
 					"percentMatches": dlit.MustNew("76.3"),
@@ -378,7 +379,7 @@ func TestSort(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: mustNewRule("cost > 1.2"),
+				Rule: rule.MustNew("cost > 1.2"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("50"),
@@ -441,11 +442,11 @@ func TestSort(t *testing.T) {
 }
 
 func TestGetRules(t *testing.T) {
-	var gotRules []*Rule
+	var gotRules []*rule.Rule
 	assessment := Assessment{NumRecords: 8,
 		RuleAssessments: []*RuleAssessment{
 			&RuleAssessment{
-				Rule: mustNewRule("band > 9"),
+				Rule: rule.MustNew("band > 9"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("5"),
 					"percentMatches": dlit.MustNew("65.3"),
@@ -455,7 +456,7 @@ func TestGetRules(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: mustNewRule("band > 456"),
+				Rule: rule.MustNew("band > 456"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("50"),
@@ -465,7 +466,7 @@ func TestGetRules(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: mustNewRule("band > 3"),
+				Rule: rule.MustNew("band > 3"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("4"),
 					"percentMatches": dlit.MustNew("76.3"),
@@ -475,7 +476,7 @@ func TestGetRules(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: mustNewRule("cost > 1.2"),
+				Rule: rule.MustNew("cost > 1.2"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("50"),
@@ -489,30 +490,33 @@ func TestGetRules(t *testing.T) {
 	cases := []struct {
 		numRules     int
 		passNumRules bool
-		wantRules    []*Rule
+		wantRules    []*rule.Rule
 	}{
-		{0, true, []*Rule{}},
-		{1, true, []*Rule{mustNewRule("band > 9")}},
-		{2, true, []*Rule{mustNewRule("band > 9"), mustNewRule("band > 456")}},
-		{4, true, []*Rule{
-			mustNewRule("band > 9"),
-			mustNewRule("band > 456"),
-			mustNewRule("band > 3"),
-			mustNewRule("cost > 1.2"),
+		{0, true, []*rule.Rule{}},
+		{1, true, []*rule.Rule{rule.MustNew("band > 9")}},
+		{2, true, []*rule.Rule{
+			rule.MustNew("band > 9"),
+			rule.MustNew("band > 456"),
+		}},
+		{4, true, []*rule.Rule{
+			rule.MustNew("band > 9"),
+			rule.MustNew("band > 456"),
+			rule.MustNew("band > 3"),
+			rule.MustNew("cost > 1.2"),
 		},
 		},
-		{5, true, []*Rule{
-			mustNewRule("band > 9"),
-			mustNewRule("band > 456"),
-			mustNewRule("band > 3"),
-			mustNewRule("cost > 1.2"),
+		{5, true, []*rule.Rule{
+			rule.MustNew("band > 9"),
+			rule.MustNew("band > 456"),
+			rule.MustNew("band > 3"),
+			rule.MustNew("cost > 1.2"),
 		},
 		},
-		{0, false, []*Rule{
-			mustNewRule("band > 9"),
-			mustNewRule("band > 456"),
-			mustNewRule("band > 3"),
-			mustNewRule("cost > 1.2"),
+		{0, false, []*rule.Rule{
+			rule.MustNew("band > 9"),
+			rule.MustNew("band > 456"),
+			rule.MustNew("band > 3"),
+			rule.MustNew("cost > 1.2"),
 		},
 		},
 	}
@@ -537,7 +541,7 @@ func TestMerge(t *testing.T) {
 		},
 		RuleAssessments: []*RuleAssessment{
 			&RuleAssessment{
-				Rule: mustNewRule("band > 9"),
+				Rule: rule.MustNew("band > 9"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("5"),
 					"percentMatches": dlit.MustNew("65.3"),
@@ -547,7 +551,7 @@ func TestMerge(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: mustNewRule("band > 456"),
+				Rule: rule.MustNew("band > 456"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("50"),
@@ -557,7 +561,7 @@ func TestMerge(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: mustNewRule("band > 3"),
+				Rule: rule.MustNew("band > 3"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("4"),
 					"percentMatches": dlit.MustNew("76.3"),
@@ -567,7 +571,7 @@ func TestMerge(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: mustNewRule("cost > 1.2"),
+				Rule: rule.MustNew("cost > 1.2"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("50"),
@@ -585,7 +589,7 @@ func TestMerge(t *testing.T) {
 		},
 		RuleAssessments: []*RuleAssessment{
 			&RuleAssessment{
-				Rule: mustNewRule("band > 16"),
+				Rule: rule.MustNew("band > 16"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("8"),
 					"percentMatches": dlit.MustNew("5.3"),
@@ -595,7 +599,7 @@ func TestMerge(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: mustNewRule("team == \"Pi\""),
+				Rule: rule.MustNew("team == \"Pi\""),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("3"),
 					"percentMatches": dlit.MustNew("19"),
@@ -605,7 +609,7 @@ func TestMerge(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: mustNewRule("band > 36"),
+				Rule: rule.MustNew("band > 36"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("6.3"),
@@ -615,7 +619,7 @@ func TestMerge(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: mustNewRule("cost > 1.27"),
+				Rule: rule.MustNew("cost > 1.27"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("3"),
 					"percentMatches": dlit.MustNew("3.5"),
@@ -635,7 +639,7 @@ func TestMerge(t *testing.T) {
 		},
 		RuleAssessments: []*RuleAssessment{
 			&RuleAssessment{
-				Rule: mustNewRule("band > 9"),
+				Rule: rule.MustNew("band > 9"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("5"),
 					"percentMatches": dlit.MustNew("65.3"),
@@ -645,7 +649,7 @@ func TestMerge(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: mustNewRule("band > 456"),
+				Rule: rule.MustNew("band > 456"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("50"),
@@ -655,7 +659,7 @@ func TestMerge(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: mustNewRule("band > 3"),
+				Rule: rule.MustNew("band > 3"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("4"),
 					"percentMatches": dlit.MustNew("76.3"),
@@ -665,7 +669,7 @@ func TestMerge(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: mustNewRule("cost > 1.2"),
+				Rule: rule.MustNew("cost > 1.2"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("50"),
@@ -675,7 +679,7 @@ func TestMerge(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: mustNewRule("band > 16"),
+				Rule: rule.MustNew("band > 16"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("8"),
 					"percentMatches": dlit.MustNew("5.3"),
@@ -685,7 +689,7 @@ func TestMerge(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: mustNewRule("team == \"Pi\""),
+				Rule: rule.MustNew("team == \"Pi\""),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("3"),
 					"percentMatches": dlit.MustNew("19"),
@@ -695,7 +699,7 @@ func TestMerge(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: mustNewRule("band > 36"),
+				Rule: rule.MustNew("band > 36"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("6.3"),
@@ -705,7 +709,7 @@ func TestMerge(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: mustNewRule("cost > 1.27"),
+				Rule: rule.MustNew("cost > 1.27"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("3"),
 					"percentMatches": dlit.MustNew("3.5"),
@@ -736,7 +740,7 @@ func TestMerge_errors(t *testing.T) {
 		},
 		RuleAssessments: []*RuleAssessment{
 			&RuleAssessment{
-				Rule: mustNewRule("band > 9"),
+				Rule: rule.MustNew("band > 9"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("5"),
 					"percentMatches": dlit.MustNew("65.3"),
@@ -746,7 +750,7 @@ func TestMerge_errors(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: mustNewRule("band > 456"),
+				Rule: rule.MustNew("band > 456"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("50"),
@@ -760,7 +764,7 @@ func TestMerge_errors(t *testing.T) {
 	assessment2 := &Assessment{NumRecords: 2,
 		RuleAssessments: []*RuleAssessment{
 			&RuleAssessment{
-				Rule: mustNewRule("band > 16"),
+				Rule: rule.MustNew("band > 16"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("8"),
 					"percentMatches": dlit.MustNew("5.3"),
@@ -770,7 +774,7 @@ func TestMerge_errors(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: mustNewRule("team == \"Pi\""),
+				Rule: rule.MustNew("team == \"Pi\""),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("3"),
 					"percentMatches": dlit.MustNew("19"),
@@ -801,7 +805,7 @@ func TestRefine(t *testing.T) {
 		},
 		RuleAssessments: []*RuleAssessment{
 			&RuleAssessment{
-				Rule: mustNewRule("band > 4"),
+				Rule: rule.MustNew("band > 4"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("50"),
@@ -813,7 +817,7 @@ func TestRefine(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: mustNewRule("in(band,\"4\",\"3\",\"2\")"),
+				Rule: rule.MustNew("in(band,\"4\",\"3\",\"2\")"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("4"),
 					"percentMatches": dlit.MustNew("100"),
@@ -825,7 +829,7 @@ func TestRefine(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: mustNewRule("in(team,\"a\",\"b\")"),
+				Rule: rule.MustNew("in(team,\"a\",\"b\")"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("4"),
 					"percentMatches": dlit.MustNew("100"),
@@ -837,7 +841,7 @@ func TestRefine(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: mustNewRule("in(band,\"99\",\"23\")"),
+				Rule: rule.MustNew("in(band,\"99\",\"23\")"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("4"),
 					"percentMatches": dlit.MustNew("100"),
@@ -849,7 +853,7 @@ func TestRefine(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: mustNewRule("band > 3"),
+				Rule: rule.MustNew("band > 3"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("4"),
 					"percentMatches": dlit.MustNew("100"),
@@ -861,7 +865,7 @@ func TestRefine(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: mustNewRule("band > 9"),
+				Rule: rule.MustNew("band > 9"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("4"),
 					"percentMatches": dlit.MustNew("100"),
@@ -873,7 +877,7 @@ func TestRefine(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: mustNewRule("in(band,\"9\",\"2\")"),
+				Rule: rule.MustNew("in(band,\"9\",\"2\")"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("4"),
 					"percentMatches": dlit.MustNew("100"),
@@ -885,7 +889,7 @@ func TestRefine(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: mustNewRule("band == 7"),
+				Rule: rule.MustNew("band == 7"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("0"),
 					"percentMatches": dlit.MustNew("50"),
@@ -897,7 +901,7 @@ func TestRefine(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: mustNewRule("true()"),
+				Rule: rule.MustNew("true()"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("50"),
@@ -909,7 +913,7 @@ func TestRefine(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: mustNewRule("cost > 1.2"),
+				Rule: rule.MustNew("cost > 1.2"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("50"),
@@ -946,7 +950,7 @@ func TestRefine_panic_1(t *testing.T) {
 		NumRecords: 20,
 		RuleAssessments: []*RuleAssessment{
 			&RuleAssessment{
-				Rule: mustNewRule("band > 4"),
+				Rule: rule.MustNew("band > 4"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("50"),
@@ -954,7 +958,7 @@ func TestRefine_panic_1(t *testing.T) {
 				Goals: []*GoalAssessment{},
 			},
 			&RuleAssessment{
-				Rule: mustNewRule("true()"),
+				Rule: rule.MustNew("true()"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("4"),
 					"percentMatches": dlit.MustNew("100"),
@@ -993,7 +997,7 @@ func TestRefine_panic_2(t *testing.T) {
 		},
 		RuleAssessments: []*RuleAssessment{
 			&RuleAssessment{
-				Rule: mustNewRule("band > 4"),
+				Rule: rule.MustNew("band > 4"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("50"),
@@ -1001,7 +1005,7 @@ func TestRefine_panic_2(t *testing.T) {
 				Goals: []*GoalAssessment{},
 			},
 			&RuleAssessment{
-				Rule: mustNewRule("team > 7"),
+				Rule: rule.MustNew("team > 7"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("4"),
 					"percentMatches": dlit.MustNew("100"),
@@ -1040,7 +1044,7 @@ func TestLimitRuleAssessments(t *testing.T) {
 		},
 		RuleAssessments: []*RuleAssessment{
 			&RuleAssessment{
-				Rule: mustNewRule("band > 4"),
+				Rule: rule.MustNew("band > 4"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches": dlit.MustNew("2"),
 				},
@@ -1049,7 +1053,7 @@ func TestLimitRuleAssessments(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: mustNewRule("in(band,\"4\",\"3\",\"2\")"),
+				Rule: rule.MustNew("in(band,\"4\",\"3\",\"2\")"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches": dlit.MustNew("4"),
 				},
@@ -1058,7 +1062,7 @@ func TestLimitRuleAssessments(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: mustNewRule("in(team,\"a\",\"b\")"),
+				Rule: rule.MustNew("in(team,\"a\",\"b\")"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches": dlit.MustNew("4"),
 				},
@@ -1067,7 +1071,7 @@ func TestLimitRuleAssessments(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: mustNewRule("in(band,\"99\",\"23\")"),
+				Rule: rule.MustNew("in(band,\"99\",\"23\")"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches": dlit.MustNew("4"),
 				},
@@ -1076,7 +1080,7 @@ func TestLimitRuleAssessments(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: mustNewRule("true()"),
+				Rule: rule.MustNew("true()"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches": dlit.MustNew("2"),
 				},
@@ -1134,7 +1138,7 @@ func TestLimitRuleAssessment_panic_1(t *testing.T) {
 		NumRecords: 20,
 		RuleAssessments: []*RuleAssessment{
 			&RuleAssessment{
-				Rule: mustNewRule("band > 4"),
+				Rule: rule.MustNew("band > 4"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("50"),
@@ -1142,7 +1146,7 @@ func TestLimitRuleAssessment_panic_1(t *testing.T) {
 				Goals: []*GoalAssessment{},
 			},
 			&RuleAssessment{
-				Rule: mustNewRule("true()"),
+				Rule: rule.MustNew("true()"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("4"),
 					"percentMatches": dlit.MustNew("100"),
@@ -1181,7 +1185,7 @@ func TestLimitRuleAssessment_panic_2(t *testing.T) {
 		},
 		RuleAssessments: []*RuleAssessment{
 			&RuleAssessment{
-				Rule: mustNewRule("band > 4"),
+				Rule: rule.MustNew("band > 4"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("50"),
@@ -1189,7 +1193,7 @@ func TestLimitRuleAssessment_panic_2(t *testing.T) {
 				Goals: []*GoalAssessment{},
 			},
 			&RuleAssessment{
-				Rule: mustNewRule("true()"),
+				Rule: rule.MustNew("true()"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("4"),
 					"percentMatches": dlit.MustNew("100"),

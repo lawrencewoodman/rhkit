@@ -2,6 +2,7 @@ package rulehunter
 
 import (
 	"github.com/lawrencewoodman/dlit"
+	"github.com/vlifesystems/rulehunter/rule"
 	"regexp"
 	"sort"
 	"testing"
@@ -295,13 +296,13 @@ func TestGenerateRules_2(t *testing.T) {
 
 func TestCombinedRules(t *testing.T) {
 	cases := []struct {
-		inRules   []*Rule
+		inRules   []*rule.Rule
 		wantRules []string
 	}{
-		{[]*Rule{
-			mustNewRule("team == \"a\""),
-			mustNewRule("band > 4"),
-			mustNewRule("in(team,\"red\",\"green\",\"blue\")"),
+		{[]*rule.Rule{
+			rule.MustNew("team == \"a\""),
+			rule.MustNew("band > 4"),
+			rule.MustNew("in(team,\"red\",\"green\",\"blue\")"),
 		},
 			[]string{
 				"team == \"a\" && band > 4",
@@ -311,8 +312,8 @@ func TestCombinedRules(t *testing.T) {
 				"band > 4 && in(team,\"red\",\"green\",\"blue\")",
 				"band > 4 || in(team,\"red\",\"green\",\"blue\")",
 			}},
-		{[]*Rule{mustNewRule("team == \"a\"")}, []string{}},
-		{[]*Rule{}, []string{}},
+		{[]*rule.Rule{rule.MustNew("team == \"a\"")}, []string{}},
+		{[]*rule.Rule{}, []string{}},
 	}
 
 	for _, c := range cases {
@@ -335,7 +336,7 @@ var matchFieldInNiRegexp = regexp.MustCompile("^((in\\(|ni\\()+)([^ ,]+)(.*)$")
 var matchFieldMatchRegexp = regexp.MustCompile("^([^ (]+)( .*)$")
 
 func getFieldRules(
-	field string, rules []*Rule) []string {
+	field string, rules []*rule.Rule) []string {
 	fieldRules := make([]string, 0)
 	for _, rule := range rules {
 		ruleStr := rule.String()
@@ -348,7 +349,7 @@ func getFieldRules(
 	return fieldRules
 }
 
-func rulesToStrings(rules []*Rule) []string {
+func rulesToStrings(rules []*rule.Rule) []string {
 	r := make([]string, len(rules))
 	for i, rule := range rules {
 		r[i] = rule.String()

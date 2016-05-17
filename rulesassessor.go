@@ -26,6 +26,8 @@ import (
 	"github.com/vlifesystems/rulehunter/experiment"
 	"github.com/vlifesystems/rulehunter/input"
 	"github.com/vlifesystems/rulehunter/internal"
+	"github.com/vlifesystems/rulehunter/internal/ruleassessment"
+	"github.com/vlifesystems/rulehunter/rule"
 	"sort"
 )
 
@@ -36,7 +38,7 @@ type Assessment struct {
 }
 
 type RuleAssessment struct {
-	Rule        *Rule
+	Rule        *rule.Rule
 	Aggregators map[string]*dlit.Literal
 	Goals       []*GoalAssessment
 }
@@ -143,7 +145,7 @@ func (a *Assessment) LimitRuleAssessments(
 
 // Assess the rules using a single thread
 func AssessRules(
-	rules []*Rule,
+	rules []*rule.Rule,
 	e *experiment.Experiment,
 ) (*Assessment, error) {
 	var allAggregators []internal.Aggregator
@@ -155,9 +157,9 @@ func AssessRules(
 		return &Assessment{}, err
 	}
 
-	ruleAssessments := make([]*ruleAssessment, len(rules))
+	ruleAssessments := make([]*ruleassessment.RuleAssessment, len(rules))
 	for i, rule := range rules {
-		ruleAssessments[i] = newRuleAssessment(rule, allAggregators, e.Goals)
+		ruleAssessments[i] = ruleassessment.New(rule, allAggregators, e.Goals)
 	}
 
 	// The input must be cloned to be thread safe when AssessRules called by
@@ -190,7 +192,7 @@ type AssessRulesMPOutcome struct {
 // Goroutine to assess the rules using multiple processes and report on
 // progress through 'ec' channel
 func AssessRulesMP(
-	rules []*Rule,
+	rules []*rule.Rule,
 	e *experiment.Experiment,
 	maxProcesses int,
 	ec chan *AssessRulesMPOutcome,
@@ -278,7 +280,7 @@ type assessRulesCOutcome struct {
 	err        error
 }
 
-func assessRulesC(rules []*Rule,
+func assessRulesC(rules []*rule.Rule,
 	experiment *experiment.Experiment,
 	c chan *assessRulesCOutcome,
 ) {
@@ -379,7 +381,7 @@ func (r *RuleAssessment) isEqual(o *RuleAssessment) bool {
 }
 
 // Can optionally pass maximum number of rules to return
-func (a *Assessment) GetRules(args ...int) []*Rule {
+func (a *Assessment) GetRules(args ...int) []*rule.Rule {
 	var numRules int
 	switch len(args) {
 	case 0:
@@ -393,7 +395,7 @@ func (a *Assessment) GetRules(args ...int) []*Rule {
 		panic(fmt.Sprintf("incorrect number of arguments passed: %d", len(args)))
 	}
 
-	r := make([]*Rule, numRules)
+	r := make([]*rule.Rule, numRules)
 	for i, ruleAssessment := range a.RuleAssessments {
 		if i >= numRules {
 			break
@@ -433,7 +435,7 @@ func (sortedAssessment *Assessment) excludePoorerInNiRules(
 	niFields := make(map[string]int)
 	for _, a := range sortedAssessment.RuleAssessments {
 		rule := a.Rule
-		isInNiRule, operator, field := rule.getInNiParts()
+		isInNiRule, operator, field := rule.GetInNiParts()
 		if !isInNiRule {
 			goodRuleAssessments = append(goodRuleAssessments, a)
 		} else if operator == "in" {
@@ -466,7 +468,7 @@ func (sortedAssessment *Assessment) excludePoorerTweakableRules(
 	fieldOperatorIDs := make(map[string]int)
 	for _, a := range sortedAssessment.RuleAssessments {
 		rule := a.Rule
-		isTweakable, field, operator, _ := rule.getTweakableParts()
+		isTweakable, field, operator, _ := rule.GetTweakableParts()
 		if !isTweakable {
 			goodRuleAssessments = append(goodRuleAssessments, a)
 		} else {
@@ -486,7 +488,7 @@ func (sortedAssessment *Assessment) excludePoorerTweakableRules(
 
 func makeAssessment(
 	numRecords int64,
-	goodRuleAssessments []*ruleAssessment,
+	goodRuleAssessments []*ruleassessment.RuleAssessment,
 	goals []*internal.Goal,
 ) (*Assessment, error) {
 	ruleAssessments := make([]*RuleAssessment, len(goodRuleAssessments))
@@ -530,12 +532,12 @@ func makeAssessment(
 }
 
 func filterGoodReports(
-	ruleAssessments []*ruleAssessment,
-	numRecords int64) ([]*ruleAssessment, error) {
-	goodRuleAssessments := make([]*ruleAssessment, 0)
+	ruleAssessments []*ruleassessment.RuleAssessment,
+	numRecords int64) ([]*ruleassessment.RuleAssessment, error) {
+	goodRuleAssessments := make([]*ruleassessment.RuleAssessment, 0)
 	for _, ruleAssessment := range ruleAssessments {
 		numMatches, exists :=
-			ruleAssessment.getAggregatorValue("numMatches", numRecords)
+			ruleAssessment.GetAggregatorValue("numMatches", numRecords)
 		if !exists {
 			// TODO: Create a proper error for this?
 			err := errors.New("numMatches doesn't exist in aggregators")
@@ -555,7 +557,7 @@ func filterGoodReports(
 }
 
 func processInput(input input.Input,
-	ruleAssessments []*ruleAssessment) (int64, error) {
+	ruleAssessments []*ruleassessment.RuleAssessment) (int64, error) {
 	numRecords := int64(0)
 	// TODO: test this rewinds properly
 	if err := input.Rewind(); err != nil {
@@ -569,7 +571,7 @@ func processInput(input input.Input,
 		}
 		numRecords++
 		for _, ruleAssessment := range ruleAssessments {
-			err := ruleAssessment.nextRecord(record)
+			err := ruleAssessment.NextRecord(record)
 			if err != nil {
 				return numRecords, err
 			}

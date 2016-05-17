@@ -1,9 +1,10 @@
-package rulehunter
+package ruleassessment
 
 import (
 	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rulehunter/internal"
+	"github.com/vlifesystems/rulehunter/rule"
 	"testing"
 )
 
@@ -43,26 +44,26 @@ func TestNextRecord(t *testing.T) {
 	}
 	numRecords := int64(len(records))
 	cases := []struct {
-		rule               *Rule
+		rule               *rule.Rule
 		wantNumIncomeGt2   int64
 		wantNumBandGt4     int64
 		wantNumGoalsPassed float64
 	}{
-		{mustNewRule("band > 4"), 1, 2, 2.0},
-		{mustNewRule("band > 3"), 2, 2, 0.001},
-		{mustNewRule("cost > 1.2"), 2, 1, 0},
+		{rule.MustNew("band > 4"), 1, 2, 2.0},
+		{rule.MustNew("band > 3"), 2, 2, 0.001},
+		{rule.MustNew("cost > 1.2"), 2, 1, 0},
 	}
 	for _, c := range cases {
-		ra := newRuleAssessment(c.rule, inAggregators, goals)
+		ra := New(c.rule, inAggregators, goals)
 		for _, record := range records {
-			err := ra.nextRecord(record)
+			err := ra.NextRecord(record)
 			if err != nil {
 				t.Errorf("nextRecord(%q) rule: %s, aggregators: %q, goals: %q - err: %q",
 					record, c.rule, inAggregators, goals, err)
 			}
 		}
 		gotNumIncomeGt2, gt2Exists :=
-			ra.getAggregatorValue("numIncomeGt2", numRecords)
+			ra.GetAggregatorValue("numIncomeGt2", numRecords)
 		if !gt2Exists {
 			t.Errorf("numIncomeGt2 aggregator doesn't exist")
 		}
@@ -75,7 +76,7 @@ func TestNextRecord(t *testing.T) {
 				c.rule, inAggregators, goals, c.wantNumIncomeGt2, gotNumIncomeGt2Int)
 		}
 		gotNumBandGt4, gt4Exists :=
-			ra.getAggregatorValue("numBandGt4", numRecords)
+			ra.GetAggregatorValue("numBandGt4", numRecords)
 		if !gt4Exists {
 			t.Errorf("numBandGt4 aggregator doesn't exist")
 		}
@@ -88,7 +89,7 @@ func TestNextRecord(t *testing.T) {
 				c.rule, inAggregators, goals, c.wantNumBandGt4, gotNumBandGt4Int)
 		}
 		gotNumGoalsPassed, goalsPassedExists :=
-			ra.getAggregatorValue("numGoalsPassed", numRecords)
+			ra.GetAggregatorValue("numGoalsPassed", numRecords)
 		if !goalsPassedExists {
 			t.Errorf("numGoalsPassed aggregator doesn't exist")
 		}
@@ -112,30 +113,30 @@ func TestNextRecord_Errors(t *testing.T) {
 	}
 	goals := []*internal.Goal{internal.MustNewGoal("numIncomeGt2 == 1")}
 	cases := []struct {
-		rule        *Rule
+		rule        *rule.Rule
 		aggregators []internal.Aggregator
 		wantErr     error
 	}{
-		{mustNewRule("band > 4"),
+		{rule.MustNew("band > 4"),
 			[]internal.Aggregator{
 				internal.MustNewCountAggregator("numIncomeGt2", "fred > 2")},
 			dexpr.ErrInvalidExpr("Variable doesn't exist: fred")},
-		{mustNewRule("band > 4"),
+		{rule.MustNew("band > 4"),
 			[]internal.Aggregator{
 				internal.MustNewCountAggregator("numIncomeGt2", "income > 2")}, nil},
-		{mustNewRule("hand > 4"),
+		{rule.MustNew("hand > 4"),
 			[]internal.Aggregator{
 				internal.MustNewCountAggregator("numIncomeGt2", "income > 2")},
 			dexpr.ErrInvalidExpr("Variable doesn't exist: hand")},
-		{mustNewRule("band ^^ 4"),
+		{rule.MustNew("band ^^ 4"),
 			[]internal.Aggregator{
 				internal.MustNewCountAggregator("numIncomeGt2", "income > 2")},
 			dexpr.ErrInvalidExpr("Invalid operator: \"^\"")},
 	}
 	for _, c := range cases {
-		ra := newRuleAssessment(c.rule, c.aggregators, goals)
+		ra := New(c.rule, c.aggregators, goals)
 		for _, record := range records {
-			err := ra.nextRecord(record)
+			err := ra.NextRecord(record)
 			if !errorMatch(c.wantErr, err) {
 				t.Errorf("NextRecord(%q) rule: %q, aggregators: %q, goals: %q err: %q, wantErr: %q",
 					record, c.rule, c.aggregators, goals, err, c.wantErr)

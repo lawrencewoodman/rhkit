@@ -10,6 +10,7 @@ import (
 	"github.com/vlifesystems/rulehunter/experiment"
 	"github.com/vlifesystems/rulehunter/input"
 	"github.com/vlifesystems/rulehunter/reduceinput"
+	"github.com/vlifesystems/rulehunter/rule"
 	"path/filepath"
 	"runtime"
 	"testing"
@@ -68,7 +69,7 @@ func TestAll_reduced(t *testing.T) {
  *  Helper functions
  ****************************/
 func assessRules(
-	rules []*rulehunter.Rule,
+	rules []*rule.Rule,
 	experiment *experiment.Experiment,
 ) (*rulehunter.Assessment, error) {
 	var assessment *rulehunter.Assessment

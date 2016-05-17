@@ -16,19 +16,21 @@
 	along with Rulehunter; see the file COPYING.  If not, see
 	<http://www.gnu.org/licenses/>.
 */
+
 package rulehunter
 
 import (
 	"fmt"
 	"github.com/lawrencewoodman/dlit"
+	"github.com/vlifesystems/rulehunter/rule"
 	"sort"
 	"strings"
 )
 
 func TweakRules(
-	sortedRules []*Rule,
+	sortedRules []*rule.Rule,
 	fieldDescriptions map[string]*FieldDescription,
-) []*Rule {
+) []*rule.Rule {
 	numRulesPerGroup := 3
 	groupedRules :=
 		groupTweakableRules(sortedRules, numRulesPerGroup)
@@ -36,12 +38,12 @@ func TweakRules(
 }
 
 func groupTweakableRules(
-	sortedRules []*Rule,
+	sortedRules []*rule.Rule,
 	numPerGroup int,
-) map[string][]*Rule {
-	groups := make(map[string][]*Rule)
+) map[string][]*rule.Rule {
+	groups := make(map[string][]*rule.Rule)
 	for _, rule := range sortedRules {
-		isTweakable, fieldName, operator, _ := rule.getTweakableParts()
+		isTweakable, fieldName, operator, _ := rule.GetTweakableParts()
 		if isTweakable {
 			groupID := fmt.Sprintf("%s^%s", fieldName, operator)
 			if len(groups[groupID]) < numPerGroup {
@@ -53,16 +55,16 @@ func groupTweakableRules(
 }
 
 func tweakRules(
-	groupedRules map[string][]*Rule,
+	groupedRules map[string][]*rule.Rule,
 	fieldDescriptions map[string]*FieldDescription,
-) []*Rule {
-	newRules := make([]*Rule, 1)
-	newRules[0] = mustNewRule("true()")
+) []*rule.Rule {
+	newRules := make([]*rule.Rule, 1)
+	newRules[0] = rule.MustNew("true()")
 	for _, rules := range groupedRules {
 		firstRule := rules[0]
 		comparisonPoints := makeComparisonPoints(rules, fieldDescriptions)
 		for _, point := range comparisonPoints {
-			newRule, err := firstRule.cloneWithValue(point)
+			newRule, err := firstRule.CloneWithValue(point)
 			if err != nil {
 				panic(fmt.Sprintf("Can't tweak rule: %s - %s", firstRule, err))
 			}
@@ -85,7 +87,7 @@ func dlitInSlices(needle *dlit.Literal, haystacks ...[]*dlit.Literal) bool {
 
 // TODO: Share similar code with generaters such as generateInt
 func makeComparisonPoints(
-	rules []*Rule,
+	rules []*rule.Rule,
 	fieldDescriptions map[string]*FieldDescription,
 ) []string {
 	var minInt int64
@@ -98,7 +100,7 @@ func makeComparisonPoints(
 	numbers := make([]*dlit.Literal, len(rules))
 	newPoints := make([]*dlit.Literal, 0)
 	for i, rule := range rules {
-		_, field, _, tweakableValue = rule.getTweakableParts()
+		_, field, _, tweakableValue = rule.GetTweakableParts()
 		numbers[i] = dlit.MustNew(tweakableValue)
 	}
 
