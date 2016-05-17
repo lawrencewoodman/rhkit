@@ -135,7 +135,6 @@ func (c *CsvInput) Rewind() error {
 	return err
 }
 
-// This should only be called by Experiment.Close() ordinarily
 func (c *CsvInput) Close() error {
 	err := c.file.Close()
 	c.file = nil

@@ -11,24 +11,25 @@ import (
 )
 
 func TestAssessRules(t *testing.T) {
+	fields := []string{"income", "band", "cost"}
 	rules := []*Rule{
 		mustNewRule("band > 4"),
 		mustNewRule("band > 3"),
 		mustNewRule("cost > 1.2"),
 	}
-	inAggregators := []internal.Aggregator{
-		internal.MustNewCountAggregator("numIncomeGt2", "income > 2"),
-		internal.MustNewCountAggregator("numBandGt4", "band > 4"),
+	aggregators := []*experiment.AggregatorDesc{
+		&experiment.AggregatorDesc{"numIncomeGt2", "count", "income > 2"},
+		&experiment.AggregatorDesc{"numBandGt4", "count", "band > 4"},
 	}
-	goals := []*internal.Goal{
-		internal.MustNewGoal("numIncomeGt2 == 1"),
-		internal.MustNewGoal("numIncomeGt2 == 2"),
-		internal.MustNewGoal("numIncomeGt2 == 3"),
-		internal.MustNewGoal("numIncomeGt2 == 4"),
-		internal.MustNewGoal("numBandGt4 == 1"),
-		internal.MustNewGoal("numBandGt4 == 2"),
-		internal.MustNewGoal("numBandGt4 == 3"),
-		internal.MustNewGoal("numBandGt4 == 4"),
+	goals := []string{
+		"numIncomeGt2 == 1",
+		"numIncomeGt2 == 2",
+		"numIncomeGt2 == 3",
+		"numIncomeGt2 == 4",
+		"numBandGt4 == 1",
+		"numBandGt4 == 2",
+		"numBandGt4 == 3",
+		"numBandGt4 == 4",
 	}
 	records := []map[string]*dlit.Literal{
 		map[string]*dlit.Literal{
@@ -52,6 +53,17 @@ func TestAssessRules(t *testing.T) {
 			"band":   dlit.MustNew(9),
 		},
 	}
+	input := NewLiteralInput(records)
+	experimentDesc := &experiment.ExperimentDesc{
+		Title:         "",
+		Input:         input,
+		Fields:        fields,
+		ExcludeFields: []string{},
+		Aggregators:   aggregators,
+		Goals:         goals,
+		SortOrder:     []*experiment.SortDesc{},
+	}
+	experiment := mustNewExperiment(experimentDesc)
 	wantAssessment := Assessment{
 		NumRecords: int64(len(records)),
 		Flags: map[string]bool{
@@ -121,46 +133,50 @@ func TestAssessRules(t *testing.T) {
 			},
 		},
 	}
-	input := NewLiteralInput(records)
-	gotAssessment, err := AssessRules(rules, inAggregators, goals, input)
+	gotAssessment, err := AssessRules(rules, experiment)
 	if err != nil {
 		t.Errorf("AssessRules(%q, %q, %q, input) - err: %q",
-			rules, inAggregators, goals, err)
+			rules, aggregators, goals, err)
 	}
 
 	assessmentsEqual, msg := matchAssessments(gotAssessment, &wantAssessment)
 	if !assessmentsEqual {
 		t.Errorf("AssessRules(%q, %q, %q, input)\nassessments don't match: %s\n",
-			rules, inAggregators, goals, msg)
+			rules, aggregators, goals, msg)
 	}
 }
 
 func TestAssessRules_errors(t *testing.T) {
+	fields := []string{"income", "cost"}
 	cases := []struct {
 		rules       []*Rule
-		aggregators []internal.Aggregator
-		goals       []*internal.Goal
+		aggregators []*experiment.AggregatorDesc
+		goals       []string
 		wantErr     error
 	}{
 		{[]*Rule{mustNewRule("band ^^ 3")},
-			[]internal.Aggregator{
-				internal.MustNewCountAggregator("numIncomeGt2", "income > 2")},
-			[]*internal.Goal{internal.MustNewGoal("numIncomeGt2 == 1")},
+			[]*experiment.AggregatorDesc{
+				&experiment.AggregatorDesc{"numIncomeGt2", "count", "income > 2"},
+			},
+			[]string{"numIncomeGt2 == 1"},
 			errors.New("Invalid operator: \"^\"")},
 		{[]*Rule{mustNewRule("hand > 3")},
-			[]internal.Aggregator{
-				internal.MustNewCountAggregator("numIncomeGt2", "income > 2")},
-			[]*internal.Goal{internal.MustNewGoal("numIncomeGt2 == 1")},
+			[]*experiment.AggregatorDesc{
+				&experiment.AggregatorDesc{"numIncomeGt2", "count", "income > 2"},
+			},
+			[]string{"numIncomeGt2 == 1"},
 			errors.New("Variable doesn't exist: hand")},
 		{[]*Rule{mustNewRule("band > 3")},
-			[]internal.Aggregator{
-				internal.MustNewCountAggregator("numIncomeGt2", "bincome > 2")},
-			[]*internal.Goal{internal.MustNewGoal("numIncomeGt2 == 1")},
+			[]*experiment.AggregatorDesc{
+				&experiment.AggregatorDesc{"numIncomeGt2", "count", "bincome > 2"},
+			},
+			[]string{"numIncomeGt2 == 1"},
 			errors.New("Variable doesn't exist: bincome")},
 		{[]*Rule{mustNewRule("band > 3")},
-			[]internal.Aggregator{
-				internal.MustNewCountAggregator("numIncomeGt2", "income > 2")},
-			[]*internal.Goal{internal.MustNewGoal("numIncomeGt == 1")},
+			[]*experiment.AggregatorDesc{
+				&experiment.AggregatorDesc{"numIncomeGt2", "count", "income > 2"},
+			},
+			[]string{"numIncomeGt == 1"},
 			errors.New("Variable doesn't exist: numIncomeGt")},
 	}
 	records := []map[string]*dlit.Literal{
@@ -172,28 +188,39 @@ func TestAssessRules_errors(t *testing.T) {
 	}
 	input := NewLiteralInput(records)
 	for _, c := range cases {
-		_, err := AssessRules(c.rules, c.aggregators, c.goals, input)
+		experimentDesc := &experiment.ExperimentDesc{
+			Title:         "",
+			Input:         input,
+			Fields:        fields,
+			ExcludeFields: []string{},
+			Aggregators:   c.aggregators,
+			Goals:         c.goals,
+			SortOrder:     []*experiment.SortDesc{},
+		}
+		experiment := mustNewExperiment(experimentDesc)
+		_, err := AssessRules(c.rules, experiment)
 		if err == nil || err.Error() != c.wantErr.Error() {
-			t.Errorf("AssessRules(%q, %q, %q, input) - err: %s, wantErr: %s",
-				c.rules, c.aggregators, c.goals, err, c.wantErr)
+			t.Errorf("AssessRules(%q, %q) - err: %s, wantErr: %s",
+				c.rules, experiment, err, c.wantErr)
 		}
 	}
 }
 
 func TestAssessRulesMP(t *testing.T) {
-	inAggregators := []internal.Aggregator{
-		internal.MustNewCountAggregator("numIncomeGt2", "income > 2"),
-		internal.MustNewCountAggregator("numBandGt4", "band > 4"),
+	fields := []string{"income", "band"}
+	aggregators := []*experiment.AggregatorDesc{
+		&experiment.AggregatorDesc{"numIncomeGt2", "count", "income > 2"},
+		&experiment.AggregatorDesc{"numBandGt4", "count", "band > 4"},
 	}
-	goals := []*internal.Goal{
-		internal.MustNewGoal("numIncomeGt2 == 1"),
-		internal.MustNewGoal("numIncomeGt2 == 2"),
-		internal.MustNewGoal("numIncomeGt2 == 3"),
-		internal.MustNewGoal("numIncomeGt2 == 4"),
-		internal.MustNewGoal("numBandGt4 == 1"),
-		internal.MustNewGoal("numBandGt4 == 2"),
-		internal.MustNewGoal("numBandGt4 == 3"),
-		internal.MustNewGoal("numBandGt4 == 4"),
+	goals := []string{
+		"numIncomeGt2 == 1",
+		"numIncomeGt2 == 2",
+		"numIncomeGt2 == 3",
+		"numIncomeGt2 == 4",
+		"numBandGt4 == 1",
+		"numBandGt4 == 2",
+		"numBandGt4 == 3",
+		"numBandGt4 == 4",
 	}
 	records := []map[string]*dlit.Literal{
 		map[string]*dlit.Literal{
@@ -233,18 +260,28 @@ func TestAssessRulesMP(t *testing.T) {
 	}
 
 	input := NewLiteralInput(records)
+	experimentDesc := &experiment.ExperimentDesc{
+		Title:         "",
+		Input:         input,
+		Fields:        fields,
+		ExcludeFields: []string{},
+		Aggregators:   aggregators,
+		Goals:         goals,
+		SortOrder:     []*experiment.SortDesc{},
+	}
+	experiment := mustNewExperiment(experimentDesc)
 	maxProcesses := 4
 	for _, cs := range cases {
 		wantAssessment, err :=
-			AssessRules(cs.rules, inAggregators, goals, input)
+			AssessRules(cs.rules, experiment)
 		if err != nil {
-			t.Errorf("AssessRules(%q, %q, %q, input) - err: %q",
-				cs.rules, inAggregators, goals, err)
+			t.Errorf("AssessRules(%q, %q) - err: %q",
+				cs.rules, experiment, err)
 		}
 		c := make(chan *AssessRulesMPOutcome)
 		progress := 0.0
 		var gotAssessment *Assessment
-		go AssessRulesMP(cs.rules, inAggregators, goals, input, maxProcesses, c)
+		go AssessRulesMP(cs.rules, experiment, maxProcesses, c)
 
 		numRuns := 0
 		lastProgress := -1.0
@@ -252,29 +289,29 @@ func TestAssessRulesMP(t *testing.T) {
 			numRuns++
 			progress = o.Progress
 			if o.Err != nil {
-				t.Errorf("AssessRulesMP(%q, %q, %q, input, c) - err: %q",
-					cs.rules, inAggregators, goals, o.Err)
+				t.Errorf("AssessRulesMP(%q, %q, ...) - err: %q",
+					cs.rules, experiment, o.Err)
 			}
 			if progress <= lastProgress {
-				t.Errorf("AssessRulesMP(%q, %q, %q, input, c) - progress not increasing in order: this: %f, last: %f",
-					cs.rules, inAggregators, goals, progress, lastProgress)
+				t.Errorf("AssessRulesMP(%q, %q, ...) - progress not increasing in order: this: %f, last: %f",
+					cs.rules, experiment, progress, lastProgress)
 			}
 			if o.Finished {
 				gotAssessment = o.Assessment
 			}
 		}
 		if progress != 1.0 {
-			t.Errorf("AssessRulesMP(%q, %q, %q, input, c) - progress didn't finish at 100, but: %d",
-				cs.rules, inAggregators, goals, progress)
+			t.Errorf("AssessRulesMP(%q, %q, ...) - progress didn't finish at 100, but: %d",
+				cs.rules, experiment, progress)
 		}
 		if numRuns < len(cs.rules) {
-			t.Errorf("AssessRulesMP(%q, %q, %q, input, c) - only made %d runs",
-				cs.rules, inAggregators, goals, numRuns)
+			t.Errorf("AssessRulesMP(%q, %q, ...) - only made %d runs",
+				cs.rules, experiment, numRuns)
 		}
 		assessmentsEqual, msg := matchAssessments(gotAssessment, wantAssessment)
 		if !assessmentsEqual {
-			t.Errorf("AssessRulesMP(%q, %q, %q, input, c)\nassessments don't match: %s",
-				cs.rules, inAggregators, goals, msg)
+			t.Errorf("AssessRulesMP(%q, %q, ...)\nassessments don't match: %s",
+				cs.rules, experiment, msg)
 		}
 	}
 }
@@ -1241,4 +1278,12 @@ func matchAssessments(assessment1, assessment2 *Assessment) (bool, string) {
 		}
 	}
 	return true, ""
+}
+
+func mustNewExperiment(ed *experiment.ExperimentDesc) *experiment.Experiment {
+	e, err := experiment.New(ed)
+	if err != nil {
+		panic(fmt.Sprintf("Can't create Experiment: %s", err))
+	}
+	return e
 }

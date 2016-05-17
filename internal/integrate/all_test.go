@@ -75,14 +75,7 @@ func assessRules(
 	maxProcesses := runtime.NumCPU()
 	c := make(chan *rulehunter.AssessRulesMPOutcome)
 
-	go rulehunter.AssessRulesMP(
-		rules,
-		experiment.Aggregators,
-		experiment.Goals,
-		experiment.Input,
-		maxProcesses,
-		c,
-	)
+	go rulehunter.AssessRulesMP(rules, experiment, maxProcesses, c)
 	for o := range c {
 		if o.Err != nil {
 			return nil, o.Err

@@ -141,27 +141,33 @@ func (a *Assessment) LimitRuleAssessments(
 	return &Assessment{a.NumRecords, ruleAssessments, flags}
 }
 
-// need a progress callback and a specifier for how often to report
+// Assess the rules using a single thread
 func AssessRules(
 	rules []*Rule,
-	aggregators []internal.Aggregator,
-	goals []*internal.Goal,
-	input input.Input,
+	e *experiment.Experiment,
 ) (*Assessment, error) {
 	var allAggregators []internal.Aggregator
 	var numRecords int64
 	var err error
 
-	allAggregators, err = addDefaultAggregators(aggregators)
+	allAggregators, err = addDefaultAggregators(e.Aggregators)
 	if err != nil {
 		return &Assessment{}, err
 	}
 
 	ruleAssessments := make([]*ruleAssessment, len(rules))
 	for i, rule := range rules {
-		ruleAssessments[i] = newRuleAssessment(rule, allAggregators, goals)
+		ruleAssessments[i] = newRuleAssessment(rule, allAggregators, e.Goals)
 	}
-	numRecords, err = processInput(input, ruleAssessments)
+
+	// The input must be cloned to be thread safe when AssessRules called by
+	// AssessRulesMP
+	inputClone, err := e.Input.Clone()
+	if err != nil {
+		return &Assessment{}, err
+	}
+	defer e.Input.Close()
+	numRecords, err = processInput(inputClone, ruleAssessments)
 	if err != nil {
 		return &Assessment{}, err
 	}
@@ -170,7 +176,7 @@ func AssessRules(
 		return &Assessment{}, err
 	}
 
-	assessment, err := makeAssessment(numRecords, goodRuleAssessments, goals)
+	assessment, err := makeAssessment(numRecords, goodRuleAssessments, e.Goals)
 	return assessment, err
 }
 
@@ -181,11 +187,11 @@ type AssessRulesMPOutcome struct {
 	Finished   bool
 }
 
+// Goroutine to assess the rules using multiple processes and report on
+// progress through 'ec' channel
 func AssessRulesMP(
 	rules []*Rule,
-	aggregators []internal.Aggregator,
-	goals []*internal.Goal,
-	input input.Input,
+	e *experiment.Experiment,
 	maxProcesses int,
 	ec chan *AssessRulesMPOutcome,
 ) {
@@ -194,7 +200,7 @@ func AssessRulesMP(
 	ic := make(chan *assessRulesCOutcome)
 	numRules := len(rules)
 	if numRules < 2 {
-		assessment, err := AssessRules(rules, aggregators, goals, input)
+		assessment, err := AssessRules(rules, e)
 		ec <- &AssessRulesMPOutcome{assessment, err, 1.0, true}
 		close(ec)
 		return
@@ -213,13 +219,7 @@ func AssessRulesMP(
 			nextI = numRules
 		}
 		rulesPartial := rules[i:nextI]
-		inputClone, inputCloneError := input.Clone()
-		if inputCloneError != nil {
-			ec <- &AssessRulesMPOutcome{nil, inputCloneError, progress, false}
-			close(ec)
-			return
-		}
-		go assessRulesC(rulesPartial, aggregators, goals, inputClone, ic)
+		go assessRulesC(rulesPartial, e, ic)
 		numProcesses++
 
 		if numProcesses >= maxProcesses {
@@ -278,14 +278,11 @@ type assessRulesCOutcome struct {
 	err        error
 }
 
-func assessRulesC(
-	rules []*Rule,
-	aggregators []internal.Aggregator,
-	goals []*internal.Goal,
-	input input.Input,
+func assessRulesC(rules []*Rule,
+	experiment *experiment.Experiment,
 	c chan *assessRulesCOutcome,
 ) {
-	assessment, err := AssessRules(rules, aggregators, goals, input)
+	assessment, err := AssessRules(rules, experiment)
 	c <- &assessRulesCOutcome{assessment, err}
 }
 
