@@ -89,7 +89,6 @@ func processInput(input input.Input, fieldNames []string) error {
 	experimentDesc := &experiment.ExperimentDesc{
 		Title:         "This is a jolly nice title",
 		Input:         input,
-		Fields:        fieldNames,
 		ExcludeFields: []string{"education"},
 		Aggregators: []*experiment.AggregatorDesc{
 			&experiment.AggregatorDesc{"numSignedUp", "count", "y == \"yes\""},

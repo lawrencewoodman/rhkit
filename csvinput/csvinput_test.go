@@ -6,6 +6,7 @@ import (
 	"github.com/lawrencewoodman/dlit"
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
 )
 
@@ -33,9 +34,18 @@ func TestNew_errors(t *testing.T) {
 		fieldNames []string
 		wantErr    error
 	}{
-		{"missing.csv", []string{},
+		{"missing.csv",
+			[]string{"age", "occupation"},
 			&os.PathError{"open", "missing.csv",
 				errors.New("no such file or directory")}},
+		{filepath.Join("..", "fixtures", "bank.csv"),
+			[]string{"age"},
+			errors.New("Must specify at least two field names")},
+		{filepath.Join("..", "fixtures", "bank.csv"),
+			[]string{"age", "job", "marital", "education", "_default", "balance",
+				"housing", "loan", "contact", "day", "month", "duration", "campaign",
+				"pdays", "previous", "poutcome", "y"},
+			errors.New("Invalid field name: _default")},
 	}
 	for _, c := range cases {
 		_, err := New(c.fieldNames, c.filename, ';', false)
@@ -408,6 +418,24 @@ func TestRewind_errors(t *testing.T) {
 		if err.Error() != c.wantErr.Error() {
 			t.Errorf("Rewind() - err: %s, wantErr: %s", err, c.wantErr)
 		}
+	}
+}
+
+func TestGetFieldNames(t *testing.T) {
+	filename := filepath.Join("..", "fixtures", "bank.csv")
+	fieldNames := []string{
+		"age", "job", "marital", "education", "default", "balance",
+		"housing", "loan", "contact", "day", "month", "duration", "campaign",
+		"pdays", "previous", "poutcome", "y",
+	}
+	input, err := New(fieldNames, filename, ';', false)
+	if err != nil {
+		t.Errorf("New(%s, %s, ...) err: %q", fieldNames, filename, err)
+	}
+
+	got := input.GetFieldNames()
+	if !reflect.DeepEqual(got, fieldNames) {
+		t.Errorf("GetFieldNames() - got: %q want: %q", got, fieldNames)
 	}
 }
 

@@ -62,13 +62,20 @@ func matchRules(rules1 []string, rules2 []string) (bool, string) {
 }
 
 type LiteralInput struct {
-	records  []map[string]*dlit.Literal
-	position int
-	isClosed bool
+	records    []map[string]*dlit.Literal
+	fieldNames []string
+	position   int
+	isClosed   bool
 }
 
 func NewLiteralInput(records []map[string]*dlit.Literal) input.Input {
-	return &LiteralInput{records: records, position: -1}
+	fieldNames := make([]string, len(records[0]))
+	i := 0
+	for fieldName := range records[0] {
+		fieldNames[i] = fieldName
+		i++
+	}
+	return &LiteralInput{records: records, fieldNames: fieldNames, position: -1}
 }
 
 func (l *LiteralInput) Clone() (input.Input, error) {
@@ -99,4 +106,8 @@ func (l *LiteralInput) Err() error {
 func (l *LiteralInput) Rewind() error {
 	l.position = -1
 	return nil
+}
+
+func (l *LiteralInput) GetFieldNames() []string {
+	return l.fieldNames
 }

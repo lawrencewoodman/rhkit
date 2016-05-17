@@ -25,13 +25,11 @@ import (
 	"fmt"
 	"github.com/vlifesystems/rulehunter/input"
 	"github.com/vlifesystems/rulehunter/internal"
-	"regexp"
 )
 
 type ExperimentDesc struct {
 	Title         string
 	Input         input.Input
-	Fields        []string
 	ExcludeFields []string
 	Aggregators   []*AggregatorDesc
 	Goals         []string
@@ -52,7 +50,6 @@ type SortDesc struct {
 type Experiment struct {
 	Title             string
 	Input             input.Input
-	FieldNames        []string
 	ExcludeFieldNames []string
 	Aggregators       []internal.Aggregator
 	Goals             []*internal.Goal
@@ -106,7 +103,6 @@ func New(e *ExperimentDesc) (*Experiment, error) {
 	return &Experiment{
 		Title:             e.Title,
 		Input:             e.Input,
-		FieldNames:        e.Fields,
 		ExcludeFieldNames: e.ExcludeFields,
 		Aggregators:       aggregators,
 		Goals:             goals,
@@ -119,38 +115,16 @@ func (e *Experiment) Close() error {
 }
 
 func checkExperimentDescValid(e *ExperimentDesc) error {
-	if len(e.Fields) < 2 {
-		return errors.New("Must specify at least two field names")
-	}
-	err := checkSortDescsValid(e)
-	if err != nil {
+	if err := checkSortDescsValid(e); err != nil {
 		return err
 	}
 
-	err = checkFieldsValid(e)
-	if err != nil {
+	if err := checkExcludeFieldsValid(e); err != nil {
 		return err
 	}
 
-	err = checkExcludeFieldsValid(e)
-	if err != nil {
+	if err := checkAggregatorsValid(e); err != nil {
 		return err
-	}
-
-	err = checkAggregatorsValid(e)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-var validIdentifierRegexp = regexp.MustCompile("^[a-zA-z]([0-9a-zA-z_])*$")
-
-func checkFieldsValid(e *ExperimentDesc) error {
-	for _, field := range e.Fields {
-		if !validIdentifierRegexp.MatchString(field) {
-			return fmt.Errorf("Invalid field name: %s", field)
-		}
 	}
 	return nil
 }
@@ -180,37 +154,38 @@ func checkSortDescsValid(e *ExperimentDesc) error {
 }
 
 func checkExcludeFieldsValid(e *ExperimentDesc) error {
+	fieldNames := e.Input.GetFieldNames()
 	for _, excludeField := range e.ExcludeFields {
-		found := false
-		for _, field := range e.Fields {
-			if excludeField == field {
-				found = true
-				break
-			}
+		if !internal.IsIdentifierValid(excludeField) {
+			return fmt.Errorf("Invalid exclude field: %s", excludeField)
 		}
-		if !found {
+		if !isStringInSlice(excludeField, fieldNames) {
 			return fmt.Errorf("Invalid exclude field: %s", excludeField)
 		}
 	}
 	return nil
 }
 
+func isStringInSlice(needle string, haystack []string) bool {
+	for _, s := range haystack {
+		if needle == s {
+			return true
+		}
+	}
+	return false
+}
+
 func checkAggregatorsValid(e *ExperimentDesc) error {
+	fieldNames := e.Input.GetFieldNames()
 	for _, aggregator := range e.Aggregators {
-		if !validIdentifierRegexp.MatchString(aggregator.Name) {
+		if !internal.IsIdentifierValid(aggregator.Name) {
 			return fmt.Errorf("Invalid aggregator name: %s", aggregator.Name)
 		}
-		nameClash := false
-		for _, field := range e.Fields {
-			if aggregator.Name == field {
-				nameClash = true
-				break
-			}
-		}
-		if nameClash {
+		if isStringInSlice(aggregator.Name, fieldNames) {
 			return fmt.Errorf("Aggregator name clashes with field name: %s",
 				aggregator.Name)
-		} else if aggregator.Name == "percentMatches" ||
+		}
+		if aggregator.Name == "percentMatches" ||
 			aggregator.Name == "numMatches" ||
 			aggregator.Name == "numGoalsPassed" {
 			return fmt.Errorf("Aggregator name reserved: %s", aggregator.Name)

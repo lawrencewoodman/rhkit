@@ -78,7 +78,10 @@ func (r *ReduceInput) Rewind() error {
 	return r.err
 }
 
-// This should only be called by Experiment.Close() ordinarily
+func (r *ReduceInput) GetFieldNames() []string {
+	return r.input.GetFieldNames()
+}
+
 func (r *ReduceInput) Close() error {
 	return r.input.Close()
 }

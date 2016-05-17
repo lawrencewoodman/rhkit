@@ -8,6 +8,7 @@ import (
 	"github.com/vlifesystems/rulehunter/csvinput"
 	"github.com/vlifesystems/rulehunter/input"
 	"path/filepath"
+	"reflect"
 	"testing"
 )
 
@@ -255,6 +256,26 @@ func TestRewind_errors(t *testing.T) {
 		if err.Error() != c.wantErr.Error() {
 			t.Errorf("Rewind() - err: %s, wantErr: %s", err, c.wantErr)
 		}
+	}
+}
+
+func TestGetFieldNames(t *testing.T) {
+	filename := filepath.Join("..", "fixtures", "bank.csv")
+	fieldNames := []string{
+		"age", "job", "marital", "education", "default", "balance",
+		"housing", "loan", "contact", "day", "month", "duration", "campaign",
+		"pdays", "previous", "poutcome", "y",
+	}
+	numRecords := 3
+	input := mustNewCsvInput(fieldNames, filename, ';', false)
+	records, err := New(input, numRecords)
+	if err != nil {
+		t.Errorf("New() - filename: %s err: %s", filename, err)
+	}
+
+	got := records.GetFieldNames()
+	if !reflect.DeepEqual(got, fieldNames) {
+		t.Errorf("GetFieldNames() - got: %q want: %q", got, fieldNames)
 	}
 }
 

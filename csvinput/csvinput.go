@@ -21,8 +21,10 @@ package csvinput
 import (
 	"encoding/csv"
 	"errors"
+	"fmt"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rulehunter/input"
+	"github.com/vlifesystems/rulehunter/internal"
 	"io"
 	"os"
 )
@@ -38,8 +40,15 @@ type CsvInput struct {
 	err           error
 }
 
-func New(fieldNames []string, filename string,
-	separator rune, skipFirstLine bool) (input.Input, error) {
+func New(
+	fieldNames []string,
+	filename string,
+	separator rune,
+	skipFirstLine bool,
+) (input.Input, error) {
+	if err := checkFieldsValid(fieldNames); err != nil {
+		return nil, err
+	}
 	f, r, err := makeCsvReader(filename, separator, skipFirstLine)
 	if err != nil {
 		return nil, err
@@ -142,6 +151,10 @@ func (c *CsvInput) Close() error {
 	return err
 }
 
+func (c *CsvInput) GetFieldNames() []string {
+	return c.fieldNames
+}
+
 func makeCsvReader(filename string, separator rune,
 	skipFirstLine bool) (*os.File, *csv.Reader, error) {
 	f, err := os.Open(filename)
@@ -157,4 +170,16 @@ func makeCsvReader(filename string, separator rune,
 		}
 	}
 	return f, r, err
+}
+
+func checkFieldsValid(fieldNames []string) error {
+	if len(fieldNames) < 2 {
+		return fmt.Errorf("Must specify at least two field names")
+	}
+	for _, field := range fieldNames {
+		if !internal.IsIdentifierValid(field) {
+			return fmt.Errorf("Invalid field name: %s", field)
+		}
+	}
+	return nil
 }

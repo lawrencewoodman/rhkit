@@ -11,7 +11,6 @@ import (
 )
 
 func TestAssessRules(t *testing.T) {
-	fields := []string{"income", "band", "cost"}
 	rules := []*Rule{
 		mustNewRule("band > 4"),
 		mustNewRule("band > 3"),
@@ -57,7 +56,6 @@ func TestAssessRules(t *testing.T) {
 	experimentDesc := &experiment.ExperimentDesc{
 		Title:         "",
 		Input:         input,
-		Fields:        fields,
 		ExcludeFields: []string{},
 		Aggregators:   aggregators,
 		Goals:         goals,
@@ -147,7 +145,6 @@ func TestAssessRules(t *testing.T) {
 }
 
 func TestAssessRules_errors(t *testing.T) {
-	fields := []string{"income", "cost"}
 	cases := []struct {
 		rules       []*Rule
 		aggregators []*experiment.AggregatorDesc
@@ -191,7 +188,6 @@ func TestAssessRules_errors(t *testing.T) {
 		experimentDesc := &experiment.ExperimentDesc{
 			Title:         "",
 			Input:         input,
-			Fields:        fields,
 			ExcludeFields: []string{},
 			Aggregators:   c.aggregators,
 			Goals:         c.goals,
@@ -207,7 +203,6 @@ func TestAssessRules_errors(t *testing.T) {
 }
 
 func TestAssessRulesMP(t *testing.T) {
-	fields := []string{"income", "band"}
 	aggregators := []*experiment.AggregatorDesc{
 		&experiment.AggregatorDesc{"numIncomeGt2", "count", "income > 2"},
 		&experiment.AggregatorDesc{"numBandGt4", "count", "band > 4"},
@@ -263,7 +258,6 @@ func TestAssessRulesMP(t *testing.T) {
 	experimentDesc := &experiment.ExperimentDesc{
 		Title:         "",
 		Input:         input,
-		Fields:        fields,
 		ExcludeFields: []string{},
 		Aggregators:   aggregators,
 		Goals:         goals,

@@ -16,16 +16,13 @@
 	along with Rulehunter; see the file COPYING.  If not, see
 	<http://www.gnu.org/licenses/>.
 */
-package input
 
-import "github.com/lawrencewoodman/dlit"
+package internal
 
-type Input interface {
-	Clone() (Input, error)
-	Next() bool
-	Err() error
-	Read() (map[string]*dlit.Literal, error)
-	Rewind() error
-	GetFieldNames() []string
-	Close() error
+import "regexp"
+
+var validIdentifierRegexp = regexp.MustCompile("^[a-zA-Z]([0-9a-zA-Z_])*$")
+
+func IsIdentifierValid(identifier string) bool {
+	return validIdentifierRegexp.MatchString(identifier)
 }

@@ -26,7 +26,6 @@ func TestNew(t *testing.T) {
 				rune(';'),
 				true,
 			),
-			FieldNames:        fieldNames,
 			ExcludeFieldNames: []string{"education"},
 			Aggregators: []internal.Aggregator{
 				// num_married to check for allowed characters
@@ -58,7 +57,6 @@ func TestNew(t *testing.T) {
 				rune(';'),
 				true,
 			),
-			Fields:        fieldNames,
 			ExcludeFields: []string{"education"},
 			Aggregators: []*AggregatorDesc{
 				&AggregatorDesc{"num_married", "count", "marital == \"married\""},
@@ -111,26 +109,6 @@ func TestNew_errors(t *testing.T) {
 		{&ExperimentDesc{
 			Title:         "This is a nice title",
 			Input:         input,
-			Fields:        []string{"age"},
-			ExcludeFields: []string{},
-			Aggregators: []*AggregatorDesc{
-				&AggregatorDesc{"numSignedUp", "count", "y == \"yes\""},
-				&AggregatorDesc{"cost", "calc", "numMatches * 4.5"},
-				&AggregatorDesc{"income", "calc", "numSignedUp * 24"},
-				&AggregatorDesc{"profit", "calc", "income - cost"},
-			},
-			Goals: []string{"profit > 0"},
-			SortOrder: []*SortDesc{
-				&SortDesc{"profit", "descending"},
-				&SortDesc{"numSignedUp", "descending"},
-				&SortDesc{"cost", "ascending"},
-			}},
-			errors.New("Must specify at least two field names"),
-		},
-		{&ExperimentDesc{
-			Title:         "This is a nice title",
-			Input:         input,
-			Fields:        fieldNames,
 			ExcludeFields: []string{},
 			Aggregators: []*AggregatorDesc{
 				&AggregatorDesc{"numSignedUp", "count", "y == \"yes\""},
@@ -151,7 +129,6 @@ func TestNew_errors(t *testing.T) {
 		{&ExperimentDesc{
 			Title:         "This is a nice title",
 			Input:         input,
-			Fields:        fieldNames,
 			ExcludeFields: []string{},
 			Aggregators:   []*AggregatorDesc{},
 			Goals:         []string{"profit > 0"},
@@ -163,7 +140,6 @@ func TestNew_errors(t *testing.T) {
 		{&ExperimentDesc{
 			Title:         "This is a nice title",
 			Input:         input,
-			Fields:        fieldNames,
 			ExcludeFields: []string{},
 			Aggregators:   []*AggregatorDesc{},
 			Goals:         []string{"profit > 0"},
@@ -175,7 +151,6 @@ func TestNew_errors(t *testing.T) {
 		{&ExperimentDesc{
 			Title:         "This is a nice title",
 			Input:         input,
-			Fields:        fieldNames,
 			ExcludeFields: []string{"bob"},
 			Aggregators:   []*AggregatorDesc{},
 			Goals:         []string{"profit > 0"},
@@ -188,22 +163,20 @@ func TestNew_errors(t *testing.T) {
 		{&ExperimentDesc{
 			Title:         "This is a nice title",
 			Input:         input,
-			Fields:        []string{"month", "y", "numSignedUp"},
 			ExcludeFields: []string{},
 			Aggregators: []*AggregatorDesc{
-				&AggregatorDesc{"numSignedUp", "count", "y == \"yes\""},
+				&AggregatorDesc{"pdays", "count", "day > 2"},
 			},
 			Goals: []string{"profit > 0"},
 			SortOrder: []*SortDesc{
 				&SortDesc{"numMatches", "descending"},
 				&SortDesc{"percentMatches", "descending"},
 			}},
-			errors.New("Aggregator name clashes with field name: numSignedUp"),
+			errors.New("Aggregator name clashes with field name: pdays"),
 		},
 		{&ExperimentDesc{
 			Title:         "This is a nice title",
 			Input:         input,
-			Fields:        []string{"month", "y", "numSignedUp"},
 			ExcludeFields: []string{},
 			Aggregators: []*AggregatorDesc{
 				&AggregatorDesc{"numMatches", "count", "y == \"yes\""},
@@ -218,7 +191,6 @@ func TestNew_errors(t *testing.T) {
 		{&ExperimentDesc{
 			Title:         "This is a nice title",
 			Input:         input,
-			Fields:        []string{"month", "y", "numSignedUp"},
 			ExcludeFields: []string{},
 			Aggregators: []*AggregatorDesc{
 				&AggregatorDesc{"percentMatches", "percent", "y == \"yes\""},
@@ -233,7 +205,6 @@ func TestNew_errors(t *testing.T) {
 		{&ExperimentDesc{
 			Title:         "This is a nice title",
 			Input:         input,
-			Fields:        []string{"month", "y", "numSignedUp"},
 			ExcludeFields: []string{},
 			Aggregators: []*AggregatorDesc{
 				&AggregatorDesc{"numGoalsPassed", "count", "y == \"yes\""},
@@ -248,7 +219,6 @@ func TestNew_errors(t *testing.T) {
 		{&ExperimentDesc{
 			Title:         "This is a nice title",
 			Input:         input,
-			Fields:        []string{"month", "y", "numSignedUp"},
 			ExcludeFields: []string{},
 			Aggregators: []*AggregatorDesc{
 				&AggregatorDesc{"3numSignedUp", "count", "y == \"yes\""},
@@ -263,7 +233,6 @@ func TestNew_errors(t *testing.T) {
 		{&ExperimentDesc{
 			Title:         "This is a nice title",
 			Input:         input,
-			Fields:        []string{"month", "y", "numSignedUp"},
 			ExcludeFields: []string{},
 			Aggregators: []*AggregatorDesc{
 				&AggregatorDesc{"num-signed-up", "count", "y == \"yes\""},
@@ -274,45 +243,6 @@ func TestNew_errors(t *testing.T) {
 				&SortDesc{"percentMatches", "descending"},
 			}},
 			errors.New("Invalid aggregator name: num-signed-up"),
-		},
-		{&ExperimentDesc{
-			Title:         "This is a nice title",
-			Input:         input,
-			Fields:        []string{"month", "profit£", "numSignedUp"},
-			ExcludeFields: []string{},
-			Aggregators:   []*AggregatorDesc{},
-			Goals:         []string{"profit > 0"},
-			SortOrder: []*SortDesc{
-				&SortDesc{"numMatches", "descending"},
-				&SortDesc{"percentMatches", "descending"},
-			}},
-			errors.New("Invalid field name: profit£"),
-		},
-		{&ExperimentDesc{
-			Title:         "This is a nice title",
-			Input:         input,
-			Fields:        []string{"month", "profit", "num-said-yes"},
-			ExcludeFields: []string{},
-			Aggregators:   []*AggregatorDesc{},
-			Goals:         []string{"profit > 0"},
-			SortOrder: []*SortDesc{
-				&SortDesc{"numMatches", "descending"},
-				&SortDesc{"percentMatches", "descending"},
-			}},
-			errors.New("Invalid field name: num-said-yes"),
-		},
-		{&ExperimentDesc{
-			Title:         "This is a nice title",
-			Input:         input,
-			Fields:        []string{"month", "profit", "2pay"},
-			ExcludeFields: []string{},
-			Aggregators:   []*AggregatorDesc{},
-			Goals:         []string{"profit > 0"},
-			SortOrder: []*SortDesc{
-				&SortDesc{"numMatches", "descending"},
-				&SortDesc{"percentMatches", "descending"},
-			}},
-			errors.New("Invalid field name: 2pay"),
 		},
 	}
 	for _, c := range cases {
@@ -339,7 +269,6 @@ func TestClose(t *testing.T) {
 	experimentDesc := &ExperimentDesc{
 		Title:         "This is a nice title",
 		Input:         input,
-		Fields:        fieldNames,
 		ExcludeFields: []string{},
 		Aggregators: []*AggregatorDesc{
 			&AggregatorDesc{"numSignedUp", "count", "y == \"yes\""},
@@ -377,9 +306,6 @@ func experimentMatch(e1 *Experiment, e2 *Experiment) (bool, string) {
 	if e1.Title != e2.Title {
 		return false, fmt.Sprintf("Titles don't match",
 			e1.Title, e2.Title)
-	}
-	if !areStringArraysEqual(e1.FieldNames, e2.FieldNames) {
-		return false, "FieldNames don't match"
 	}
 	if !areStringArraysEqual(e1.ExcludeFieldNames, e2.ExcludeFieldNames) {
 		return false, "ExcludeFieldNames don't match"
