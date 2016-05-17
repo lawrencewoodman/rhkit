@@ -16,9 +16,11 @@
 	along with Rulehunter; see the file COPYING.  If not, see
 	<http://www.gnu.org/licenses/>.
 */
+
 package internal
 
 import (
+	"fmt"
 	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
 )
@@ -36,6 +38,15 @@ func NewCountAggregator(name string, expr string) (*CountAggregator, error) {
 	}
 	ca := &CountAggregator{name: name, numMatches: 0, expr: dexpr}
 	return ca, nil
+}
+
+// This should only be used for testing
+func MustNewCountAggregator(name string, expr string) *CountAggregator {
+	c, err := NewCountAggregator(name, expr)
+	if err != nil {
+		panic(fmt.Sprintf("Can't create CountAggregator: %s", err))
+	}
+	return c
 }
 
 func (a *CountAggregator) CloneNew() Aggregator {

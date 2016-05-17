@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/vlifesystems/rulehunter"
 	"github.com/vlifesystems/rulehunter/csvinput"
+	"github.com/vlifesystems/rulehunter/experiment"
 	"github.com/vlifesystems/rulehunter/input"
 	"github.com/vlifesystems/rulehunter/reduceinput"
 	"path/filepath"
@@ -68,7 +69,7 @@ func TestAll_reduced(t *testing.T) {
  ****************************/
 func assessRules(
 	rules []*rulehunter.Rule,
-	experiment *rulehunter.Experiment,
+	experiment *experiment.Experiment,
 ) (*rulehunter.Assessment, error) {
 	var assessment *rulehunter.Assessment
 	maxProcesses := runtime.NumCPU()
@@ -92,34 +93,33 @@ func assessRules(
 }
 
 func processInput(input input.Input, fieldNames []string) error {
-	experimentDesc := &rulehunter.ExperimentDesc{
+	experimentDesc := &experiment.ExperimentDesc{
 		Title:         "This is a jolly nice title",
 		Input:         input,
 		Fields:        fieldNames,
 		ExcludeFields: []string{"education"},
-		Aggregators: []*rulehunter.AggregatorDesc{
-			&rulehunter.AggregatorDesc{"numSignedUp", "count", "y == \"yes\""},
-			&rulehunter.AggregatorDesc{"cost", "calc", "numMatches * 4.5"},
-			&rulehunter.AggregatorDesc{"income", "calc", "numSignedUp * 24"},
-			&rulehunter.AggregatorDesc{"profit", "calc", "income - cost"},
-			&rulehunter.AggregatorDesc{"oddFigure", "sum", "balance - age"},
-			&rulehunter.AggregatorDesc{
+		Aggregators: []*experiment.AggregatorDesc{
+			&experiment.AggregatorDesc{"numSignedUp", "count", "y == \"yes\""},
+			&experiment.AggregatorDesc{"cost", "calc", "numMatches * 4.5"},
+			&experiment.AggregatorDesc{"income", "calc", "numSignedUp * 24"},
+			&experiment.AggregatorDesc{"profit", "calc", "income - cost"},
+			&experiment.AggregatorDesc{"oddFigure", "sum", "balance - age"},
+			&experiment.AggregatorDesc{
 				"percentMarried",
 				"percent",
 				"marital == \"married\"",
 			},
 		},
 		Goals: []string{"profit > 0"},
-		SortOrder: []*rulehunter.SortDesc{
-			&rulehunter.SortDesc{"profit", "descending"},
-			&rulehunter.SortDesc{"numSignedUp", "descending"},
-			&rulehunter.SortDesc{"numGoalsPassed", "descending"},
+		SortOrder: []*experiment.SortDesc{
+			&experiment.SortDesc{"profit", "descending"},
+			&experiment.SortDesc{"numSignedUp", "descending"},
+			&experiment.SortDesc{"numGoalsPassed", "descending"},
 		},
 	}
-	experiment, err := rulehunter.MakeExperiment(experimentDesc)
+	experiment, err := experiment.New(experimentDesc)
 	if err != nil {
-		return fmt.Errorf("rulehunter.MakeExperiment(%s) - err: %s",
-			experimentDesc, err)
+		return fmt.Errorf("experiment.New(%s) - err: %s", experimentDesc, err)
 	}
 	defer experiment.Close()
 

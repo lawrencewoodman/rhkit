@@ -16,12 +16,14 @@
 	along with Rulehunter; see the file COPYING.  If not, see
 	<http://www.gnu.org/licenses/>.
 */
+
 package rulehunter
 
 import (
 	"errors"
 	"fmt"
 	"github.com/lawrencewoodman/dlit"
+	"github.com/vlifesystems/rulehunter/experiment"
 	"github.com/vlifesystems/rulehunter/input"
 	"github.com/vlifesystems/rulehunter/internal"
 	"sort"
@@ -46,7 +48,7 @@ type GoalAssessment struct {
 
 type ErrNameConflict string
 
-func (r *Assessment) Sort(s []SortField) {
+func (r *Assessment) Sort(s []experiment.SortField) {
 	sort.Sort(by{r.RuleAssessments, s})
 	r.Flags["sorted"] = true
 }
@@ -291,7 +293,7 @@ func assessRulesC(
 // on the sortFields
 type by struct {
 	ruleAssessments []*RuleAssessment
-	sortFields      []SortField
+	sortFields      []experiment.SortField
 }
 
 func (b by) Len() int { return len(b.ruleAssessments) }
@@ -313,7 +315,7 @@ func (b by) Less(i, j int) bool {
 		}
 		c := compareDlitNums(vI, vJ)
 
-		if direction == DESCENDING {
+		if direction == experiment.DESCENDING {
 			c *= -1
 		}
 		if c < 0 {

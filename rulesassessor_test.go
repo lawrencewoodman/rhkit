@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/lawrencewoodman/dlit"
+	"github.com/vlifesystems/rulehunter/experiment"
 	"github.com/vlifesystems/rulehunter/internal"
 	"reflect"
 	"testing"
@@ -16,18 +17,18 @@ func TestAssessRules(t *testing.T) {
 		mustNewRule("cost > 1.2"),
 	}
 	inAggregators := []internal.Aggregator{
-		mustNewCountAggregator("numIncomeGt2", "income > 2"),
-		mustNewCountAggregator("numBandGt4", "band > 4"),
+		internal.MustNewCountAggregator("numIncomeGt2", "income > 2"),
+		internal.MustNewCountAggregator("numBandGt4", "band > 4"),
 	}
 	goals := []*internal.Goal{
-		mustNewGoal("numIncomeGt2 == 1"),
-		mustNewGoal("numIncomeGt2 == 2"),
-		mustNewGoal("numIncomeGt2 == 3"),
-		mustNewGoal("numIncomeGt2 == 4"),
-		mustNewGoal("numBandGt4 == 1"),
-		mustNewGoal("numBandGt4 == 2"),
-		mustNewGoal("numBandGt4 == 3"),
-		mustNewGoal("numBandGt4 == 4"),
+		internal.MustNewGoal("numIncomeGt2 == 1"),
+		internal.MustNewGoal("numIncomeGt2 == 2"),
+		internal.MustNewGoal("numIncomeGt2 == 3"),
+		internal.MustNewGoal("numIncomeGt2 == 4"),
+		internal.MustNewGoal("numBandGt4 == 1"),
+		internal.MustNewGoal("numBandGt4 == 2"),
+		internal.MustNewGoal("numBandGt4 == 3"),
+		internal.MustNewGoal("numBandGt4 == 4"),
 	}
 	records := []map[string]*dlit.Literal{
 		map[string]*dlit.Literal{
@@ -143,23 +144,23 @@ func TestAssessRules_errors(t *testing.T) {
 	}{
 		{[]*Rule{mustNewRule("band ^^ 3")},
 			[]internal.Aggregator{
-				mustNewCountAggregator("numIncomeGt2", "income > 2")},
-			[]*internal.Goal{mustNewGoal("numIncomeGt2 == 1")},
+				internal.MustNewCountAggregator("numIncomeGt2", "income > 2")},
+			[]*internal.Goal{internal.MustNewGoal("numIncomeGt2 == 1")},
 			errors.New("Invalid operator: \"^\"")},
 		{[]*Rule{mustNewRule("hand > 3")},
 			[]internal.Aggregator{
-				mustNewCountAggregator("numIncomeGt2", "income > 2")},
-			[]*internal.Goal{mustNewGoal("numIncomeGt2 == 1")},
+				internal.MustNewCountAggregator("numIncomeGt2", "income > 2")},
+			[]*internal.Goal{internal.MustNewGoal("numIncomeGt2 == 1")},
 			errors.New("Variable doesn't exist: hand")},
 		{[]*Rule{mustNewRule("band > 3")},
 			[]internal.Aggregator{
-				mustNewCountAggregator("numIncomeGt2", "bincome > 2")},
-			[]*internal.Goal{mustNewGoal("numIncomeGt2 == 1")},
+				internal.MustNewCountAggregator("numIncomeGt2", "bincome > 2")},
+			[]*internal.Goal{internal.MustNewGoal("numIncomeGt2 == 1")},
 			errors.New("Variable doesn't exist: bincome")},
 		{[]*Rule{mustNewRule("band > 3")},
 			[]internal.Aggregator{
-				mustNewCountAggregator("numIncomeGt2", "income > 2")},
-			[]*internal.Goal{mustNewGoal("numIncomeGt == 1")},
+				internal.MustNewCountAggregator("numIncomeGt2", "income > 2")},
+			[]*internal.Goal{internal.MustNewGoal("numIncomeGt == 1")},
 			errors.New("Variable doesn't exist: numIncomeGt")},
 	}
 	records := []map[string]*dlit.Literal{
@@ -181,18 +182,18 @@ func TestAssessRules_errors(t *testing.T) {
 
 func TestAssessRulesMP(t *testing.T) {
 	inAggregators := []internal.Aggregator{
-		mustNewCountAggregator("numIncomeGt2", "income > 2"),
-		mustNewCountAggregator("numBandGt4", "band > 4"),
+		internal.MustNewCountAggregator("numIncomeGt2", "income > 2"),
+		internal.MustNewCountAggregator("numBandGt4", "band > 4"),
 	}
 	goals := []*internal.Goal{
-		mustNewGoal("numIncomeGt2 == 1"),
-		mustNewGoal("numIncomeGt2 == 2"),
-		mustNewGoal("numIncomeGt2 == 3"),
-		mustNewGoal("numIncomeGt2 == 4"),
-		mustNewGoal("numBandGt4 == 1"),
-		mustNewGoal("numBandGt4 == 2"),
-		mustNewGoal("numBandGt4 == 3"),
-		mustNewGoal("numBandGt4 == 4"),
+		internal.MustNewGoal("numIncomeGt2 == 1"),
+		internal.MustNewGoal("numIncomeGt2 == 2"),
+		internal.MustNewGoal("numIncomeGt2 == 3"),
+		internal.MustNewGoal("numIncomeGt2 == 4"),
+		internal.MustNewGoal("numBandGt4 == 1"),
+		internal.MustNewGoal("numBandGt4 == 2"),
+		internal.MustNewGoal("numBandGt4 == 3"),
+		internal.MustNewGoal("numBandGt4 == 4"),
 	}
 	records := []map[string]*dlit.Literal{
 		map[string]*dlit.Literal{
@@ -368,20 +369,30 @@ func TestSort(t *testing.T) {
 		},
 	}
 	cases := []struct {
-		sortOrder []SortField
+		sortOrder []experiment.SortField
 		wantRules []string
 	}{
-		{[]SortField{SortField{"numGoalsPassed", ASCENDING}},
+		{[]experiment.SortField{
+			experiment.SortField{"numGoalsPassed", experiment.ASCENDING},
+		},
 			[]string{"band > 456", "band > 9", "band > 3", "cost > 1.2"}},
-		{[]SortField{SortField{"percentMatches", DESCENDING}},
+		{[]experiment.SortField{
+			experiment.SortField{"percentMatches", experiment.DESCENDING},
+		},
 			[]string{"band > 3", "band > 9", "cost > 1.2", "band > 456"}},
-		{[]SortField{SortField{"percentMatches", ASCENDING}},
+		{[]experiment.SortField{
+			experiment.SortField{"percentMatches", experiment.ASCENDING},
+		},
 			[]string{"cost > 1.2", "band > 456", "band > 9", "band > 3"}},
-		{[]SortField{SortField{"percentMatches", ASCENDING},
-			SortField{"numIncomeGt2", ASCENDING}},
+		{[]experiment.SortField{
+			experiment.SortField{"percentMatches", experiment.ASCENDING},
+			experiment.SortField{"numIncomeGt2", experiment.ASCENDING},
+		},
 			[]string{"band > 456", "cost > 1.2", "band > 9", "band > 3"}},
-		{[]SortField{SortField{"percentMatches", DESCENDING},
-			SortField{"numIncomeGt2", ASCENDING}},
+		{[]experiment.SortField{
+			experiment.SortField{"percentMatches", experiment.DESCENDING},
+			experiment.SortField{"numIncomeGt2", experiment.ASCENDING},
+		},
 			[]string{"band > 9", "band > 3", "cost > 1.2", "band > 456"}},
 	}
 	for _, c := range cases {

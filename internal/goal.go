@@ -16,6 +16,7 @@
 	along with Rulehunter; see the file COPYING.  If not, see
 	<http://www.gnu.org/licenses/>.
 */
+
 package internal
 
 import (
@@ -42,6 +43,15 @@ func NewGoal(exprStr string) (*Goal, error) {
 		return nil, ErrInvalidGoal(fmt.Sprintf("Invalid goal: %s", exprStr))
 	}
 	return &Goal{expr, false, false}, nil
+}
+
+// This should only be used for testing
+func MustNewGoal(expr string) *Goal {
+	g, err := NewGoal(expr)
+	if err != nil {
+		panic(fmt.Sprintf("Can't create goal: %s", err))
+	}
+	return g
 }
 
 func (g *Goal) String() string {

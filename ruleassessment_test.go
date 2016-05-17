@@ -11,8 +11,8 @@ func TestNextRecord(t *testing.T) {
 	// It is important for this test to reuse the aggregators and goals
 	// to ensure that they are cloned properly.
 	inAggregators := []internal.Aggregator{
-		mustNewCountAggregator("numIncomeGt2", "income > 2"),
-		mustNewCountAggregator("numBandGt4", "band > 4"),
+		internal.MustNewCountAggregator("numIncomeGt2", "income > 2"),
+		internal.MustNewCountAggregator("numBandGt4", "band > 4"),
 		mustNewGoalsPassedScoreAggregator("numGoalsPassed"),
 	}
 	records := [4]map[string]*dlit.Literal{
@@ -38,8 +38,8 @@ func TestNextRecord(t *testing.T) {
 		},
 	}
 	goals := []*internal.Goal{
-		mustNewGoal("numIncomeGt2 == 1"),
-		mustNewGoal("numBandGt4 == 2"),
+		internal.MustNewGoal("numIncomeGt2 == 1"),
+		internal.MustNewGoal("numBandGt4 == 2"),
 	}
 	numRecords := int64(len(records))
 	cases := []struct {
@@ -110,7 +110,7 @@ func TestNextRecord_Errors(t *testing.T) {
 		map[string]*dlit.Literal{"income": dlit.MustNew(2), "band": dlit.MustNew(4)},
 		map[string]*dlit.Literal{"income": dlit.MustNew(0), "band": dlit.MustNew(9)},
 	}
-	goals := []*internal.Goal{mustNewGoal("numIncomeGt2 == 1")}
+	goals := []*internal.Goal{internal.MustNewGoal("numIncomeGt2 == 1")}
 	cases := []struct {
 		rule        *Rule
 		aggregators []internal.Aggregator
@@ -118,18 +118,18 @@ func TestNextRecord_Errors(t *testing.T) {
 	}{
 		{mustNewRule("band > 4"),
 			[]internal.Aggregator{
-				mustNewCountAggregator("numIncomeGt2", "fred > 2")},
+				internal.MustNewCountAggregator("numIncomeGt2", "fred > 2")},
 			dexpr.ErrInvalidExpr("Variable doesn't exist: fred")},
 		{mustNewRule("band > 4"),
 			[]internal.Aggregator{
-				mustNewCountAggregator("numIncomeGt2", "income > 2")}, nil},
+				internal.MustNewCountAggregator("numIncomeGt2", "income > 2")}, nil},
 		{mustNewRule("hand > 4"),
 			[]internal.Aggregator{
-				mustNewCountAggregator("numIncomeGt2", "income > 2")},
+				internal.MustNewCountAggregator("numIncomeGt2", "income > 2")},
 			dexpr.ErrInvalidExpr("Variable doesn't exist: hand")},
 		{mustNewRule("band ^^ 4"),
 			[]internal.Aggregator{
-				mustNewCountAggregator("numIncomeGt2", "income > 2")},
+				internal.MustNewCountAggregator("numIncomeGt2", "income > 2")},
 			dexpr.ErrInvalidExpr("Invalid operator: \"^\"")},
 	}
 	for _, c := range cases {

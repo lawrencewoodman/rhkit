@@ -1,4 +1,4 @@
-package rulehunter
+package experiment
 
 import (
 	"errors"
@@ -11,7 +11,7 @@ import (
 	"testing"
 )
 
-func TestMakeExperiment(t *testing.T) {
+func TestNew(t *testing.T) {
 	// Field: 'p_1234567890outcome' is there to check allowed characters
 	fieldNames := []string{"age", "job", "marital", "education", "default",
 		"balance", "housing", "loan", "contact", "day", "month", "duration",
@@ -22,7 +22,7 @@ func TestMakeExperiment(t *testing.T) {
 			Title: "This is a jolly nice title",
 			Input: mustNewCsvInput(
 				fieldNames,
-				filepath.Join("fixtures", "bank.csv"),
+				filepath.Join("..", "fixtures", "bank.csv"),
 				rune(';'),
 				true,
 			),
@@ -30,12 +30,12 @@ func TestMakeExperiment(t *testing.T) {
 			ExcludeFieldNames: []string{"education"},
 			Aggregators: []internal.Aggregator{
 				// num_married to check for allowed characters
-				mustNewCountAggregator("num_married", "marital == \"married\""),
-				mustNewCountAggregator("numSignedUp", "y == \"yes\""),
-				mustNewCalcAggregator("cost", "numMatches * 4.5"),
-				mustNewCalcAggregator("income", "numSignedUp * 24"),
-				mustNewCalcAggregator("profit", "income - cost")},
-			Goals: []*internal.Goal{mustNewGoal("profit > 0")},
+				internal.MustNewCountAggregator("num_married", "marital == \"married\""),
+				internal.MustNewCountAggregator("numSignedUp", "y == \"yes\""),
+				internal.MustNewCalcAggregator("cost", "numMatches * 4.5"),
+				internal.MustNewCalcAggregator("income", "numSignedUp * 24"),
+				internal.MustNewCalcAggregator("profit", "income - cost")},
+			Goals: []*internal.Goal{internal.MustNewGoal("profit > 0")},
 			SortOrder: []SortField{
 				SortField{"profit", DESCENDING},
 				SortField{"numSignedUp", DESCENDING},
@@ -54,7 +54,7 @@ func TestMakeExperiment(t *testing.T) {
 			Title: "This is a jolly nice title",
 			Input: mustNewCsvInput(
 				fieldNames,
-				filepath.Join("fixtures", "bank.csv"),
+				filepath.Join("..", "fixtures", "bank.csv"),
 				rune(';'),
 				true,
 			),
@@ -80,26 +80,26 @@ func TestMakeExperiment(t *testing.T) {
 		},
 	}
 	for _, c := range cases {
-		got, err := MakeExperiment(c.experimentDesc)
+		got, err := New(c.experimentDesc)
 		if err != nil {
-			t.Errorf("MakeExperiment(%q) err: %s", c.experimentDesc, err)
+			t.Errorf("New(%q) err: %s", c.experimentDesc, err)
 		}
 		experimentsMatch, reason := experimentMatch(got, c.want)
 		if !experimentsMatch {
-			t.Errorf("MakeExperiment(%q)\n Reason: %s\n got: %q\n want: %q",
+			t.Errorf("New(%q)\n Reason: %s\n got: %q\n want: %q",
 				c.experimentDesc, reason, got, c.want)
 		}
 	}
 }
 
-func TestMakeExperiment_errors(t *testing.T) {
+func TestNew_errors(t *testing.T) {
 	fieldNames := []string{"age", "job", "marital", "education", "default",
 		"balance", "housing", "loan", "contact", "day", "month", "duration",
 		"campaign", "pdays", "previous", "poutcome", "y",
 	}
 	input := mustNewCsvInput(
 		fieldNames,
-		filepath.Join("fixtures", "bank.csv"),
+		filepath.Join("..", "fixtures", "bank.csv"),
 		rune(';'),
 		true,
 	)
@@ -316,9 +316,9 @@ func TestMakeExperiment_errors(t *testing.T) {
 		},
 	}
 	for _, c := range cases {
-		_, err := MakeExperiment(c.experimentDesc)
+		_, err := New(c.experimentDesc)
 		if err == nil || c.wantErr.Error() != err.Error() {
-			t.Errorf("MakeExperiment(%q) err: %q, wantErr: %q",
+			t.Errorf("New(%q) err: %q, wantErr: %q",
 				c.experimentDesc, err, c.wantErr)
 		}
 	}
@@ -331,7 +331,7 @@ func TestClose(t *testing.T) {
 	}
 	input := mustNewCsvInput(
 		fieldNames,
-		filepath.Join("fixtures", "bank.csv"),
+		filepath.Join("..", "fixtures", "bank.csv"),
 		rune(';'),
 		true,
 	)
@@ -354,9 +354,9 @@ func TestClose(t *testing.T) {
 			&SortDesc{"cost", "ascending"},
 		},
 	}
-	experiment, err := MakeExperiment(experimentDesc)
+	experiment, err := New(experimentDesc)
 	if err != nil {
-		t.Errorf("MakeExperiment(%q) err: %q", experimentDesc, err)
+		t.Errorf("New(%q) err: %q", experimentDesc, err)
 	}
 	if !experiment.Input.Next() {
 		t.Errorf("Next() return false on first call")

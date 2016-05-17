@@ -16,7 +16,9 @@
 	along with Rulehunter; see the file COPYING.  If not, see
 	<http://www.gnu.org/licenses/>.
 */
-package rulehunter
+
+// Package experiment handles initialization and validation of experiment
+package experiment
 
 import (
 	"errors"
@@ -76,7 +78,8 @@ func (d direction) String() string {
 	return "descending"
 }
 
-func MakeExperiment(e *ExperimentDesc) (*Experiment, error) {
+// Create a new Experiment from the description
+func New(e *ExperimentDesc) (*Experiment, error) {
 	var goals []*internal.Goal
 	var aggregators []internal.Aggregator
 	var sortOrder []SortField

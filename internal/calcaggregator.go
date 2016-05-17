@@ -16,9 +16,11 @@
 	along with Rulehunter; see the file COPYING.  If not, see
 	<http://www.gnu.org/licenses/>.
 */
+
 package internal
 
 import (
+	"fmt"
 	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
 )
@@ -35,6 +37,15 @@ func NewCalcAggregator(name string, expr string) (*CalcAggregator, error) {
 	}
 	ca := &CalcAggregator{name: name, expr: dexpr}
 	return ca, nil
+}
+
+// This should only be used for testing
+func MustNewCalcAggregator(name string, expr string) *CalcAggregator {
+	c, err := NewCalcAggregator(name, expr)
+	if err != nil {
+		panic(fmt.Sprintf("Can't create CalcAggregator: %s", err))
+	}
+	return c
 }
 
 func (a *CalcAggregator) CloneNew() Aggregator {
