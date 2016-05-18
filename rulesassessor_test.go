@@ -31,29 +31,14 @@ func TestAssessRules(t *testing.T) {
 		"numBandGt4 == 3",
 		"numBandGt4 == 4",
 	}
-	records := []map[string]*dlit.Literal{
-		map[string]*dlit.Literal{
-			"income": dlit.MustNew(3),
-			"cost":   dlit.MustNew(4.5),
-			"band":   dlit.MustNew(4),
-		},
-		map[string]*dlit.Literal{
-			"income": dlit.MustNew(3),
-			"cost":   dlit.MustNew(3.2),
-			"band":   dlit.MustNew(7),
-		},
-		map[string]*dlit.Literal{
-			"income": dlit.MustNew(2),
-			"cost":   dlit.MustNew(1.2),
-			"band":   dlit.MustNew(4),
-		},
-		map[string]*dlit.Literal{
-			"income": dlit.MustNew(0),
-			"cost":   dlit.MustNew(0),
-			"band":   dlit.MustNew(9),
-		},
+	fieldNames := []string{"income", "cost", "band"}
+	records := [][]string{
+		[]string{"3", "4.5", "4"},
+		[]string{"3", "3.2", "7"},
+		[]string{"2", "1.2", "4"},
+		[]string{"0", "0", "9"},
 	}
-	input := NewLiteralInput(records)
+	input := NewLiteralInput(fieldNames, records)
 	experimentDesc := &experiment.ExperimentDesc{
 		Title:         "",
 		Input:         input,
@@ -177,14 +162,11 @@ func TestAssessRules_errors(t *testing.T) {
 			[]string{"numIncomeGt == 1"},
 			errors.New("Variable doesn't exist: numIncomeGt")},
 	}
-	records := []map[string]*dlit.Literal{
-		map[string]*dlit.Literal{
-			"income": dlit.MustNew(3),
-			"cost":   dlit.MustNew(4.5),
-			"band":   dlit.MustNew(4),
-		},
+	fieldNames := []string{"income", "cost", "band"}
+	records := [][]string{
+		[]string{"3", "4.5", "4"},
 	}
-	input := NewLiteralInput(records)
+	input := NewLiteralInput(fieldNames, records)
 	for _, c := range cases {
 		experimentDesc := &experiment.ExperimentDesc{
 			Title:         "",
@@ -218,27 +200,12 @@ func TestAssessRulesMP(t *testing.T) {
 		"numBandGt4 == 3",
 		"numBandGt4 == 4",
 	}
-	records := []map[string]*dlit.Literal{
-		map[string]*dlit.Literal{
-			"income": dlit.MustNew(3),
-			"cost":   dlit.MustNew(4.5),
-			"band":   dlit.MustNew(4),
-		},
-		map[string]*dlit.Literal{
-			"income": dlit.MustNew(3),
-			"cost":   dlit.MustNew(3.2),
-			"band":   dlit.MustNew(7),
-		},
-		map[string]*dlit.Literal{
-			"income": dlit.MustNew(2),
-			"cost":   dlit.MustNew(1.2),
-			"band":   dlit.MustNew(4),
-		},
-		map[string]*dlit.Literal{
-			"income": dlit.MustNew(0),
-			"cost":   dlit.MustNew(0),
-			"band":   dlit.MustNew(9),
-		},
+	fieldNames := []string{"income", "cost", "band"}
+	records := [][]string{
+		[]string{"3", "4.5", "4"},
+		[]string{"3", "3.2", "7"},
+		[]string{"2", "1.2", "4"},
+		[]string{"0", "0", "9"},
 	}
 	cases := []struct {
 		rules []*rule.Rule
@@ -255,7 +222,7 @@ func TestAssessRulesMP(t *testing.T) {
 		{[]*rule.Rule{}},
 	}
 
-	input := NewLiteralInput(records)
+	input := NewLiteralInput(fieldNames, records)
 	experimentDesc := &experiment.ExperimentDesc{
 		Title:         "",
 		Input:         input,

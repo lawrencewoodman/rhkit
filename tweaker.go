@@ -22,6 +22,7 @@ package rulehunter
 import (
 	"fmt"
 	"github.com/lawrencewoodman/dlit"
+	"github.com/vlifesystems/rulehunter/input"
 	"github.com/vlifesystems/rulehunter/rule"
 	"sort"
 	"strings"
@@ -29,7 +30,7 @@ import (
 
 func TweakRules(
 	sortedRules []*rule.Rule,
-	fieldDescriptions map[string]*FieldDescription,
+	fieldDescriptions map[string]*input.FieldDescription,
 ) []*rule.Rule {
 	numRulesPerGroup := 3
 	groupedRules :=
@@ -56,7 +57,7 @@ func groupTweakableRules(
 
 func tweakRules(
 	groupedRules map[string][]*rule.Rule,
-	fieldDescriptions map[string]*FieldDescription,
+	fieldDescriptions map[string]*input.FieldDescription,
 ) []*rule.Rule {
 	newRules := make([]*rule.Rule, 1)
 	newRules[0] = rule.MustNew("true()")
@@ -88,7 +89,7 @@ func dlitInSlices(needle *dlit.Literal, haystacks ...[]*dlit.Literal) bool {
 // TODO: Share similar code with generaters such as generateInt
 func makeComparisonPoints(
 	rules []*rule.Rule,
-	fieldDescriptions map[string]*FieldDescription,
+	fieldDescriptions map[string]*input.FieldDescription,
 ) []string {
 	var minInt int64
 	var maxInt int64
@@ -107,7 +108,7 @@ func makeComparisonPoints(
 	numNumbers := len(numbers)
 	sortNumbers(numbers)
 
-	if fieldDescriptions[field].Kind == INT {
+	if fieldDescriptions[field].Kind == input.INT {
 		for numI, numJ := 0, 1; numJ < numNumbers; numI, numJ = numI+1, numJ+1 {
 			vI := numbers[numI]
 			vJ := numbers[numJ]

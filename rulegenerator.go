@@ -24,18 +24,20 @@ import (
 	"fmt"
 	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
+	"github.com/vlifesystems/rulehunter/input"
 	"github.com/vlifesystems/rulehunter/rule"
 	"regexp"
 	"sort"
 	"strings"
 )
 
-type ruleGeneratorFunc func(map[string]*FieldDescription,
+type ruleGeneratorFunc func(map[string]*input.FieldDescription,
 	[]string, string) ([]*rule.Rule, error)
 
 func GenerateRules(
-	fieldDescriptions map[string]*FieldDescription,
-	excludeFields []string) ([]*rule.Rule, error) {
+	fieldDescriptions map[string]*input.FieldDescription,
+	excludeFields []string,
+) ([]*rule.Rule, error) {
 	rules := make([]*rule.Rule, 1)
 	ruleGenerators := []ruleGeneratorFunc{
 		generateIntRules, generateFloatRules, generateStringRules,
@@ -87,12 +89,12 @@ func stringInSlice(s string, strings []string) bool {
 }
 
 func generateIntRules(
-	fieldDescriptions map[string]*FieldDescription,
+	fieldDescriptions map[string]*input.FieldDescription,
 	excludeFields []string,
 	field string,
 ) ([]*rule.Rule, error) {
 	fd := fieldDescriptions[field]
-	if fd.Kind != INT {
+	if fd.Kind != input.INT {
 		return []*rule.Rule{}, nil
 	}
 	rulesMap := make(map[string]*rule.Rule)
@@ -161,10 +163,10 @@ func floatToString(f float64, maxDP int) string {
 
 // TODO: For each rule give all dp numbers 0..maxDP
 func generateFloatRules(
-	fieldDescriptions map[string]*FieldDescription,
+	fieldDescriptions map[string]*input.FieldDescription,
 	excludeFields []string, field string) ([]*rule.Rule, error) {
 	fd := fieldDescriptions[field]
-	if fd.Kind != FLOAT {
+	if fd.Kind != input.FLOAT {
 		return []*rule.Rule{}, nil
 	}
 	rulesMap := make(map[string]*rule.Rule)
@@ -225,12 +227,12 @@ func generateFloatRules(
 }
 
 func generateCompareNumericRules(
-	fieldDescriptions map[string]*FieldDescription,
+	fieldDescriptions map[string]*input.FieldDescription,
 	excludeFields []string,
 	field string,
 ) ([]*rule.Rule, error) {
 	fd := fieldDescriptions[field]
-	if fd.Kind != INT && fd.Kind != FLOAT {
+	if fd.Kind != input.INT && fd.Kind != input.FLOAT {
 		return []*rule.Rule{}, nil
 	}
 	fieldNum := calcFieldNum(fieldDescriptions, field)
@@ -260,12 +262,12 @@ func generateCompareNumericRules(
 }
 
 func generateCompareStringRules(
-	fieldDescriptions map[string]*FieldDescription,
+	fieldDescriptions map[string]*input.FieldDescription,
 	excludeFields []string,
 	field string,
 ) ([]*rule.Rule, error) {
 	fd := fieldDescriptions[field]
-	if fd.Kind != STRING {
+	if fd.Kind != input.STRING {
 		return []*rule.Rule{}, nil
 	}
 	fieldNum := calcFieldNum(fieldDescriptions, field)
@@ -274,7 +276,7 @@ func generateCompareStringRules(
 		"%s == %s", "%s != %s",
 	}
 	for oField, oFd := range fieldDescriptions {
-		if oFd.Kind == STRING {
+		if oFd.Kind == input.STRING {
 			oFieldNum := calcFieldNum(fieldDescriptions, oField)
 			numSharedValues := calcNumSharedValues(fd, oFd)
 			if fieldNum < oFieldNum &&
@@ -295,7 +297,10 @@ func generateCompareStringRules(
 	return rules, nil
 }
 
-func calcNumSharedValues(fd1 *FieldDescription, fd2 *FieldDescription) int {
+func calcNumSharedValues(
+	fd1 *input.FieldDescription,
+	fd2 *input.FieldDescription,
+) int {
 	numShared := 0
 	for _, v1 := range fd1.Values {
 		for _, v2 := range fd2.Values {
@@ -308,10 +313,12 @@ func calcNumSharedValues(fd1 *FieldDescription, fd2 *FieldDescription) int {
 }
 
 func generateStringRules(
-	fieldDescriptions map[string]*FieldDescription,
-	excludeFields []string, field string) ([]*rule.Rule, error) {
+	fieldDescriptions map[string]*input.FieldDescription,
+	excludeFields []string,
+	field string,
+) ([]*rule.Rule, error) {
 	fd := fieldDescriptions[field]
-	if fd.Kind != STRING {
+	if fd.Kind != input.STRING {
 		return []*rule.Rule{}, nil
 	}
 	rulesMap := make(map[string]*rule.Rule)
@@ -337,12 +344,14 @@ func generateStringRules(
 	return rules, nil
 }
 
-func isNumberField(fd *FieldDescription) bool {
-	return fd.Kind == INT || fd.Kind == FLOAT
+func isNumberField(fd *input.FieldDescription) bool {
+	return fd.Kind == input.INT || fd.Kind == input.FLOAT
 }
 
 func hasComparableNumberRange(
-	fd1 *FieldDescription, fd2 *FieldDescription) bool {
+	fd1 *input.FieldDescription,
+	fd2 *input.FieldDescription,
+) bool {
 	if !isNumberField(fd1) || !isNumberField(fd2) {
 		return false
 	}
@@ -376,13 +385,15 @@ func rulesMapToArray(rulesMap map[string]*rule.Rule) []*rule.Rule {
 }
 
 func generateInNiRules(
-	fieldDescriptions map[string]*FieldDescription,
+	fieldDescriptions map[string]*input.FieldDescription,
 	excludeFields []string,
 	field string,
 ) ([]*rule.Rule, error) {
 	fd := fieldDescriptions[field]
 	numValues := len(fd.Values)
-	if fd.Kind != STRING && fd.Kind != FLOAT && fd.Kind != INT ||
+	if fd.Kind != input.STRING &&
+		fd.Kind != input.FLOAT &&
+		fd.Kind != input.INT ||
 		numValues <= 3 || numValues > 12 {
 		return []*rule.Rule{}, nil
 	}
@@ -451,7 +462,9 @@ func calcNumOnBits(i int) int {
 }
 
 func calcFieldNum(
-	fieldDescriptions map[string]*FieldDescription, fieldN string) int {
+	fieldDescriptions map[string]*input.FieldDescription,
+	fieldN string,
+) int {
 	fields := make([]string, len(fieldDescriptions))
 	i := 0
 	for field, _ := range fieldDescriptions {

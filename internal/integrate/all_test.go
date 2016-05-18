@@ -86,10 +86,10 @@ func assessRules(
 	return assessment, nil
 }
 
-func processInput(input input.Input, fieldNames []string) error {
+func processInput(records input.Input, fieldNames []string) error {
 	experimentDesc := &experiment.ExperimentDesc{
 		Title:         "This is a jolly nice title",
-		Input:         input,
+		Input:         records,
 		ExcludeFields: []string{"education"},
 		Aggregators: []*experiment.AggregatorDesc{
 			&experiment.AggregatorDesc{"numSignedUp", "count", "y == \"yes\""},
@@ -116,9 +116,9 @@ func processInput(input input.Input, fieldNames []string) error {
 	}
 	defer experiment.Close()
 
-	fieldDescriptions, err := rulehunter.DescribeInput(experiment.Input)
+	fieldDescriptions, err := input.Describe(experiment.Input)
 	if err != nil {
-		return fmt.Errorf("rulehunter.DescribeInput(experiment.input) - err: %s",
+		return fmt.Errorf("describer.DescribeInput(experiment.input) - err: %s",
 			err)
 	}
 	rules, err :=

@@ -62,24 +62,18 @@ func matchRules(rules1 []string, rules2 []string) (bool, string) {
 }
 
 type LiteralInput struct {
-	records    []map[string]*dlit.Literal
+	records    [][]string
 	fieldNames []string
 	position   int
 	isClosed   bool
 }
 
-func NewLiteralInput(records []map[string]*dlit.Literal) input.Input {
-	fieldNames := make([]string, len(records[0]))
-	i := 0
-	for fieldName := range records[0] {
-		fieldNames[i] = fieldName
-		i++
-	}
+func NewLiteralInput(fieldNames []string, records [][]string) input.Input {
 	return &LiteralInput{records: records, fieldNames: fieldNames, position: -1}
 }
 
 func (l *LiteralInput) Clone() (input.Input, error) {
-	return &LiteralInput{records: l.records, position: -1}, nil
+	return NewLiteralInput(l.fieldNames, l.records), nil
 }
 
 func (l *LiteralInput) Close() error {
@@ -95,7 +89,11 @@ func (l *LiteralInput) Next() bool {
 }
 
 func (l *LiteralInput) Read() (map[string]*dlit.Literal, error) {
-	record := l.records[l.position]
+	line := l.records[l.position]
+	record := make(map[string]*dlit.Literal, len(l.fieldNames))
+	for i, v := range line {
+		record[l.fieldNames[i]] = dlit.MustNew(v)
+	}
 	return record, nil
 }
 

@@ -2,6 +2,7 @@ package rulehunter
 
 import (
 	"github.com/lawrencewoodman/dlit"
+	"github.com/vlifesystems/rulehunter/input"
 	"github.com/vlifesystems/rulehunter/rule"
 	"regexp"
 	"sort"
@@ -10,35 +11,35 @@ import (
 
 func TestGenerateRules_1(t *testing.T) {
 	testPurpose := "Ensure generates correct rules for each field"
-	fieldDescriptions := map[string]*FieldDescription{
-		"team": &FieldDescription{
-			Kind: STRING,
+	fieldDescriptions := map[string]*input.FieldDescription{
+		"team": &input.FieldDescription{
+			Kind: input.STRING,
 			Values: []*dlit.Literal{
 				dlit.MustNew("a"), dlit.MustNew("b"), dlit.MustNew("c"),
 			},
 		},
-		"teamOut": &FieldDescription{
-			Kind: STRING,
+		"teamOut": &input.FieldDescription{
+			Kind: input.STRING,
 			Values: []*dlit.Literal{
 				dlit.MustNew("a"), dlit.MustNew("c"), dlit.MustNew("d"),
 				dlit.MustNew("e"), dlit.MustNew("f"),
 			},
 		},
-		"teamBob": &FieldDescription{
-			Kind: STRING,
+		"teamBob": &input.FieldDescription{
+			Kind: input.STRING,
 			Values: []*dlit.Literal{
 				dlit.MustNew("a"), dlit.MustNew("b"), dlit.MustNew("c"),
 			},
 		},
-		"camp": &FieldDescription{
-			Kind: STRING,
+		"camp": &input.FieldDescription{
+			Kind: input.STRING,
 			Values: []*dlit.Literal{
 				dlit.MustNew("arthur"), dlit.MustNew("offa"),
 				dlit.MustNew("richard"), dlit.MustNew("owen"),
 			},
 		},
-		"level": &FieldDescription{
-			Kind:  INT,
+		"level": &input.FieldDescription{
+			Kind:  input.INT,
 			Min:   dlit.MustNew(0),
 			Max:   dlit.MustNew(5),
 			MaxDP: 0,
@@ -47,8 +48,8 @@ func TestGenerateRules_1(t *testing.T) {
 				dlit.MustNew(3), dlit.MustNew(4), dlit.MustNew(5),
 			},
 		},
-		"levelBob": &FieldDescription{
-			Kind:  INT,
+		"levelBob": &input.FieldDescription{
+			Kind:  input.INT,
 			Min:   dlit.MustNew(0),
 			Max:   dlit.MustNew(5),
 			MaxDP: 0,
@@ -57,8 +58,8 @@ func TestGenerateRules_1(t *testing.T) {
 				dlit.MustNew(3), dlit.MustNew(4), dlit.MustNew(5),
 			},
 		},
-		"flow": &FieldDescription{
-			Kind:  FLOAT,
+		"flow": &input.FieldDescription{
+			Kind:  input.FLOAT,
 			Min:   dlit.MustNew(0),
 			Max:   dlit.MustNew(10.5),
 			MaxDP: 2,
@@ -66,8 +67,8 @@ func TestGenerateRules_1(t *testing.T) {
 				dlit.MustNew(0.0), dlit.MustNew(2.34), dlit.MustNew(10.5),
 			},
 		},
-		"position": &FieldDescription{
-			Kind:  INT,
+		"position": &input.FieldDescription{
+			Kind:  input.INT,
 			Min:   dlit.MustNew(1),
 			Max:   dlit.MustNew(13),
 			MaxDP: 0,
@@ -256,15 +257,15 @@ func TestGenerateRules_1(t *testing.T) {
 
 func TestGenerateRules_2(t *testing.T) {
 	testPurpose := "Ensure generates a 'true()' rule"
-	fieldDescriptions := map[string]*FieldDescription{
-		"team": &FieldDescription{
-			Kind: STRING,
+	fieldDescriptions := map[string]*input.FieldDescription{
+		"team": &input.FieldDescription{
+			Kind: input.STRING,
 			Values: []*dlit.Literal{
 				dlit.MustNew("a"), dlit.MustNew("b"), dlit.MustNew("c"),
 			},
 		},
-		"teamOut": &FieldDescription{
-			Kind: STRING,
+		"teamOut": &input.FieldDescription{
+			Kind: input.STRING,
 			Values: []*dlit.Literal{
 				dlit.MustNew("a"), dlit.MustNew("c"), dlit.MustNew("d"),
 				dlit.MustNew("e"), dlit.MustNew("f"),
