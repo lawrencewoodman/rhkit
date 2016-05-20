@@ -17,53 +17,45 @@
 	<http://www.gnu.org/licenses/>.
 */
 
-package internal
+package aggregators
 
 import (
-	"fmt"
 	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
+	"github.com/vlifesystems/rulehunter/goal"
+	"github.com/vlifesystems/rulehunter/internal/dexprfuncs"
 )
 
-type CountAggregator struct {
+type count struct {
 	name       string
 	numMatches int64
 	expr       *dexpr.Expr
 }
 
-func NewCountAggregator(name string, expr string) (*CountAggregator, error) {
+func newCount(name string, expr string) (*count, error) {
 	dexpr, err := dexpr.New(expr)
 	if err != nil {
 		return nil, err
 	}
-	ca := &CountAggregator{name: name, numMatches: 0, expr: dexpr}
+	ca := &count{name: name, numMatches: 0, expr: dexpr}
 	return ca, nil
 }
 
-// This should only be used for testing
-func MustNewCountAggregator(name string, expr string) *CountAggregator {
-	c, err := NewCountAggregator(name, expr)
-	if err != nil {
-		panic(fmt.Sprintf("Can't create CountAggregator: %s", err))
-	}
-	return c
+func (a *count) CloneNew() Aggregator {
+	return &count{name: a.name, numMatches: 0, expr: a.expr}
 }
 
-func (a *CountAggregator) CloneNew() Aggregator {
-	return &CountAggregator{name: a.name, numMatches: 0, expr: a.expr}
-}
-
-func (a *CountAggregator) GetName() string {
+func (a *count) GetName() string {
 	return a.name
 }
 
-func (a *CountAggregator) GetArg() string {
+func (a *count) GetArg() string {
 	return a.expr.String()
 }
 
-func (a *CountAggregator) NextRecord(record map[string]*dlit.Literal,
+func (a *count) NextRecord(record map[string]*dlit.Literal,
 	isRuleTrue bool) error {
-	countExprIsTrue, err := a.expr.EvalBool(record, CallFuncs)
+	countExprIsTrue, err := a.expr.EvalBool(record, dexprfuncs.CallFuncs)
 	if err != nil {
 		return err
 	}
@@ -73,17 +65,17 @@ func (a *CountAggregator) NextRecord(record map[string]*dlit.Literal,
 	return nil
 }
 
-func (a *CountAggregator) GetResult(
+func (a *count) GetResult(
 	aggregators []Aggregator,
-	goals []*Goal,
+	goals []*goal.Goal,
 	numRecords int64,
 ) *dlit.Literal {
 	l := dlit.MustNew(a.numMatches)
 	return l
 }
 
-func (a *CountAggregator) IsEqual(o Aggregator) bool {
-	if _, ok := o.(*CountAggregator); !ok {
+func (a *count) IsEqual(o Aggregator) bool {
+	if _, ok := o.(*count); !ok {
 		return false
 	}
 	return a.name == o.GetName() && a.GetArg() == o.GetArg()

@@ -1,4 +1,4 @@
-package internal
+package goal
 
 import (
 	"github.com/lawrencewoodman/dlit"
@@ -23,9 +23,9 @@ func TestAssess(t *testing.T) {
 		{"roundto(percentMatches,2) == 5.23", false},
 	}
 	for _, c := range cases {
-		goal, err := NewGoal(c.goalStr)
+		goal, err := New(c.goalStr)
 		if err != nil {
-			t.Errorf("NewGoal(%s) err: %s", c.goalStr, err)
+			t.Errorf("New(%s) err: %s", c.goalStr, err)
 		}
 
 		got, err := goal.Assess(aggregators)
@@ -53,9 +53,9 @@ func TestAssess_errors(t *testing.T) {
 		{"roundbob(percentMatches,2) == 5.23", "Function doesn't exist: roundbob"},
 	}
 	for _, c := range cases {
-		goal, err := NewGoal(c.goalStr)
+		goal, err := New(c.goalStr)
 		if err != nil {
-			t.Errorf("NewGoal(%s) err: %s", c.goalStr, err)
+			t.Errorf("New(%s) err: %s", c.goalStr, err)
 		}
 
 		_, err = goal.Assess(aggregators)

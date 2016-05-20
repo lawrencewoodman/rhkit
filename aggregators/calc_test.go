@@ -1,21 +1,21 @@
-package internal
+package aggregators
 
 import (
-	"fmt"
 	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
+	"github.com/vlifesystems/rulehunter/goal"
 	"testing"
 )
 
 func TestCalcGetResult(t *testing.T) {
 	aggregators := []Aggregator{
-		mustNewCalcAggregator("a", "3 + 4"),
-		mustNewCalcAggregator("b", "5 + 6"),
-		mustNewCalcAggregator("c", "a + b"),
-		mustNewCalcAggregator("2NumRecords", "numRecords * 2"),
-		mustNewCalcAggregator("d", "a + e"),
+		MustNew("a", "calc", "3 + 4"),
+		MustNew("b", "calc", "5 + 6"),
+		MustNew("c", "calc", "a + b"),
+		MustNew("2NumRecords", "calc", "numRecords * 2"),
+		MustNew("d", "calc", "a + e"),
 	}
-	goals := []*Goal{}
+	goals := []*goal.Goal{}
 	want := []*dlit.Literal{
 		dlit.MustNew(7),
 		dlit.MustNew(11),
@@ -34,11 +34,11 @@ func TestCalcGetResult(t *testing.T) {
 
 func TestCalcCloneNew(t *testing.T) {
 	aggregators := []Aggregator{
-		mustNewCalcAggregator("a", "3 + 4"),
-		mustNewCalcAggregator("b", "5 + 6"),
-		mustNewCalcAggregator("c", "a + b"),
+		MustNew("a", "calc", "3 + 4"),
+		MustNew("b", "calc", "5 + 6"),
+		MustNew("c", "calc", "a + b"),
 	}
-	goals := []*Goal{}
+	goals := []*goal.Goal{}
 	numRecords := int64(12)
 	aggregatorD := aggregators[2].CloneNew()
 	gotC := aggregators[2].GetResult(aggregators, goals, numRecords)
@@ -47,15 +47,4 @@ func TestCalcCloneNew(t *testing.T) {
 	if gotC.String() != gotD.String() && gotC.String() != "18" {
 		t.Errorf("CloneNew() gotC: %s, gotD: %s", gotC, gotD)
 	}
-}
-
-/************************
- *   Helper functions
- ************************/
-func mustNewCalcAggregator(name string, expr string) *CalcAggregator {
-	c, err := NewCalcAggregator(name, expr)
-	if err != nil {
-		panic(fmt.Sprintf("Can't create CalcAggregator: %s", err))
-	}
-	return c
 }

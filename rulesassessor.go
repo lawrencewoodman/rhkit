@@ -23,9 +23,10 @@ import (
 	"errors"
 	"fmt"
 	"github.com/lawrencewoodman/dlit"
+	"github.com/vlifesystems/rulehunter/aggregators"
 	"github.com/vlifesystems/rulehunter/experiment"
+	"github.com/vlifesystems/rulehunter/goal"
 	"github.com/vlifesystems/rulehunter/input"
-	"github.com/vlifesystems/rulehunter/internal"
 	"github.com/vlifesystems/rulehunter/internal/ruleassessment"
 	"github.com/vlifesystems/rulehunter/rule"
 	"sort"
@@ -148,7 +149,7 @@ func AssessRules(
 	rules []*rule.Rule,
 	e *experiment.Experiment,
 ) (*Assessment, error) {
-	var allAggregators []internal.Aggregator
+	var allAggregators []aggregators.Aggregator
 	var numRecords int64
 	var err error
 
@@ -489,17 +490,16 @@ func (sortedAssessment *Assessment) excludePoorerTweakableRules(
 func makeAssessment(
 	numRecords int64,
 	goodRuleAssessments []*ruleassessment.RuleAssessment,
-	goals []*internal.Goal,
+	goals []*goal.Goal,
 ) (*Assessment, error) {
 	ruleAssessments := make([]*RuleAssessment, len(goodRuleAssessments))
 	for i, ruleAssessment := range goodRuleAssessments {
 		rule := ruleAssessment.Rule
 		aggregatorsMap, err :=
-			internal.AggregatorsToMap(
+			aggregators.AggregatorsToMap(
 				ruleAssessment.Aggregators,
 				ruleAssessment.Goals,
 				numRecords,
-				"",
 			)
 		if err != nil {
 			return nil, err
@@ -582,27 +582,27 @@ func processInput(input input.Input,
 }
 
 func addDefaultAggregators(
-	aggregators []internal.Aggregator,
-) ([]internal.Aggregator, error) {
-	newAggregators := make([]internal.Aggregator, 2)
-	numMatchesAggregator, err := internal.NewCountAggregator("numMatches", "1==1")
+	_aggregators []aggregators.Aggregator,
+) ([]aggregators.Aggregator, error) {
+	newAggregators := make([]aggregators.Aggregator, 2)
+	numMatchesAggregator, err := aggregators.New("numMatches", "count", "1==1")
 	if err != nil {
 		return newAggregators, err
 	}
 	percentMatchesAggregator, err :=
-		internal.NewCalcAggregator("percentMatches",
+		aggregators.New("percentMatches", "calc",
 			"roundto(100.0 * numMatches / numRecords, 2)")
 	if err != nil {
 		return newAggregators, err
 	}
 	goalsPassedScoreAggregator, err :=
-		internal.NewGoalsPassedScoreAggregator("numGoalsPassed")
+		aggregators.New("numGoalsPassed", "goalspassedscore")
 	if err != nil {
 		return newAggregators, err
 	}
 	newAggregators[0] = numMatchesAggregator
 	newAggregators[1] = percentMatchesAggregator
-	newAggregators = append(newAggregators, aggregators...)
+	newAggregators = append(newAggregators, _aggregators...)
 	newAggregators = append(newAggregators, goalsPassedScoreAggregator)
 	return newAggregators, nil
 }

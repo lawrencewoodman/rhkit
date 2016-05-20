@@ -16,7 +16,9 @@
 	along with Rulehunter; see the file COPYING.  If not, see
 	<http://www.gnu.org/licenses/>.
 */
-package internal
+
+// Package to handle functions to be used by dexpr
+package dexprfuncs
 
 import (
 	"errors"

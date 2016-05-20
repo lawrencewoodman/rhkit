@@ -17,12 +17,14 @@
 	<http://www.gnu.org/licenses/>.
 */
 
-package internal
+// Package goal handles goal expressions and their results
+package goal
 
 import (
 	"fmt"
 	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
+	"github.com/vlifesystems/rulehunter/internal/dexprfuncs"
 )
 
 type Goal struct {
@@ -37,7 +39,7 @@ func (e ErrInvalidGoal) Error() string {
 	return string(e)
 }
 
-func NewGoal(exprStr string) (*Goal, error) {
+func New(exprStr string) (*Goal, error) {
 	expr, err := dexpr.New(exprStr)
 	if err != nil {
 		return nil, ErrInvalidGoal(fmt.Sprintf("Invalid goal: %s", exprStr))
@@ -46,8 +48,8 @@ func NewGoal(exprStr string) (*Goal, error) {
 }
 
 // This should only be used for testing
-func MustNewGoal(expr string) *Goal {
-	g, err := NewGoal(expr)
+func MustNew(expr string) *Goal {
+	g, err := New(expr)
 	if err != nil {
 		panic(fmt.Sprintf("Can't create goal: %s", err))
 	}
@@ -72,7 +74,7 @@ func (g *Goal) Assess(aggregators map[string]*dlit.Literal) (bool, error) {
 	if g.calculated {
 		return g.passed, nil
 	}
-	passed, err := g.expr.EvalBool(aggregators, CallFuncs)
+	passed, err := g.expr.EvalBool(aggregators, dexprfuncs.CallFuncs)
 	if err != nil {
 		g.passed = passed
 		g.calculated = true

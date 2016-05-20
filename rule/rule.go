@@ -24,7 +24,7 @@ import (
 	"fmt"
 	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
-	"github.com/vlifesystems/rulehunter/internal"
+	"github.com/vlifesystems/rulehunter/internal/dexprfuncs"
 	"regexp"
 )
 
@@ -82,7 +82,7 @@ func (r *Rule) GetInNiParts() (bool, string, string) {
 }
 
 func (r *Rule) IsTrue(record map[string]*dlit.Literal) (bool, error) {
-	isTrue, err := r.expr.EvalBool(record, internal.CallFuncs)
+	isTrue, err := r.expr.EvalBool(record, dexprfuncs.CallFuncs)
 	// TODO: Create an error type for rule rather than coopting the dexpr one
 	return isTrue, err
 }

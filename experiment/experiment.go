@@ -23,6 +23,8 @@ package experiment
 import (
 	"errors"
 	"fmt"
+	"github.com/vlifesystems/rulehunter/aggregators"
+	"github.com/vlifesystems/rulehunter/goal"
 	"github.com/vlifesystems/rulehunter/input"
 	"github.com/vlifesystems/rulehunter/internal"
 )
@@ -51,8 +53,8 @@ type Experiment struct {
 	Title             string
 	Input             input.Input
 	ExcludeFieldNames []string
-	Aggregators       []internal.Aggregator
-	Goals             []*internal.Goal
+	Aggregators       []aggregators.Aggregator
+	Goals             []*goal.Goal
 	SortOrder         []SortField
 }
 
@@ -77,8 +79,8 @@ func (d direction) String() string {
 
 // Create a new Experiment from the description
 func New(e *ExperimentDesc) (*Experiment, error) {
-	var goals []*internal.Goal
-	var aggregators []internal.Aggregator
+	var goals []*goal.Goal
+	var aggregators []aggregators.Aggregator
 	var sortOrder []SortField
 	var err error
 
@@ -194,17 +196,17 @@ func checkAggregatorsValid(e *ExperimentDesc) error {
 	return nil
 }
 
-func makeGoal(expr string) (*internal.Goal, error) {
-	r, err := internal.NewGoal(expr)
+func makeGoal(expr string) (*goal.Goal, error) {
+	r, err := goal.New(expr)
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("Can't make goal: %s", err))
 	}
 	return r, nil
 }
 
-func makeGoals(exprs []string) ([]*internal.Goal, error) {
+func makeGoals(exprs []string) ([]*goal.Goal, error) {
 	var err error
-	r := make([]*internal.Goal, len(exprs))
+	r := make([]*goal.Goal, len(exprs))
 	for i, s := range exprs {
 		r[i], err = makeGoal(s)
 		if err != nil {
@@ -214,42 +216,13 @@ func makeGoals(exprs []string) ([]*internal.Goal, error) {
 	return r, nil
 }
 
-func makeAggregator(name, aggType, arg string) (internal.Aggregator, error) {
-	var r internal.Aggregator
-	var err error
-	switch aggType {
-	case "accuracy":
-		r, err = internal.NewAccuracyAggregator(name, arg)
-		return r, err
-	case "calc":
-		r, err = internal.NewCalcAggregator(name, arg)
-		return r, err
-	case "count":
-		r, err = internal.NewCountAggregator(name, arg)
-		return r, err
-	case "percent":
-		r, err = internal.NewPercentAggregator(name, arg)
-		return r, err
-	case "sum":
-		r, err = internal.NewSumAggregator(name, arg)
-		return r, err
-	default:
-		err = errors.New("Unrecognized aggregator")
-	}
-	if err != nil {
-		// TODO: Make custome error type
-		err = errors.New(fmt.Sprintf("Can't make aggregator: %s", err))
-	}
-	return r, err
-}
-
 func makeAggregators(
 	eAggregators []*AggregatorDesc,
-) ([]internal.Aggregator, error) {
+) ([]aggregators.Aggregator, error) {
 	var err error
-	r := make([]internal.Aggregator, len(eAggregators))
+	r := make([]aggregators.Aggregator, len(eAggregators))
 	for i, ea := range eAggregators {
-		r[i], err = makeAggregator(ea.Name, ea.Function, ea.Arg)
+		r[i], err = aggregators.New(ea.Name, ea.Function, ea.Arg)
 		if err != nil {
 			return r, err
 		}

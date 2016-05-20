@@ -8,7 +8,6 @@ import (
 	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rulehunter/input"
-	"github.com/vlifesystems/rulehunter/internal"
 )
 
 func errorMatch(e1 error, e2 error) bool {
@@ -30,16 +29,6 @@ func mustNewDExpr(expr string) *dexpr.Expr {
 		panic(fmt.Sprintf("Can't create dexpr.Expr: %q", err))
 	}
 	return dexpr
-}
-
-func mustNewGoalsPassedScoreAggregator(
-	name string,
-) *internal.GoalsPassedScoreAggregator {
-	a, err := internal.NewGoalsPassedScoreAggregator(name)
-	if err != nil {
-		panic(fmt.Sprintf("Can't create GoalsPassedScoreAggregator: %s", err))
-	}
-	return a
 }
 
 func matchRules(rules1 []string, rules2 []string) (bool, string) {

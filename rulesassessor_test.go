@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rulehunter/experiment"
-	"github.com/vlifesystems/rulehunter/internal"
+	"github.com/vlifesystems/rulehunter/goal"
 	"github.com/vlifesystems/rulehunter/rule"
 	"reflect"
 	"testing"
@@ -1194,8 +1194,8 @@ func TestLimitRuleAssessment_panic_2(t *testing.T) {
  *  Helper functions
  ******************************/
 
-func makeGoalAssessment(expr string, passed bool) *internal.Goal {
-	g, err := internal.NewGoal(expr)
+func makeGoalAssessment(expr string, passed bool) *goal.Goal {
+	g, err := goal.New(expr)
 	if err != nil {
 		panic(fmt.Sprintf("Couldn't create goal: %s", expr))
 	}

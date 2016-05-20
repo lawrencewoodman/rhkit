@@ -22,28 +22,29 @@ package ruleassessment
 import (
 	"errors"
 	"github.com/lawrencewoodman/dlit"
-	"github.com/vlifesystems/rulehunter/internal"
+	"github.com/vlifesystems/rulehunter/aggregators"
+	"github.com/vlifesystems/rulehunter/goal"
 	"github.com/vlifesystems/rulehunter/rule"
 )
 
 type RuleAssessment struct {
 	Rule        *rule.Rule
-	Aggregators []internal.Aggregator
-	Goals       []*internal.Goal
+	Aggregators []aggregators.Aggregator
+	Goals       []*goal.Goal
 }
 
 func New(
 	rule *rule.Rule,
-	aggregators []internal.Aggregator,
-	goals []*internal.Goal,
+	_aggregators []aggregators.Aggregator,
+	goals []*goal.Goal,
 ) *RuleAssessment {
 	// Clone the aggregators and goals to ensure the results are
 	// specific to this rule
-	cloneAggregators := make([]internal.Aggregator, len(aggregators))
-	for i, a := range aggregators {
+	cloneAggregators := make([]aggregators.Aggregator, len(_aggregators))
+	for i, a := range _aggregators {
 		cloneAggregators[i] = a.CloneNew()
 	}
-	cloneGoals := make([]*internal.Goal, len(goals))
+	cloneGoals := make([]*goal.Goal, len(goals))
 	for i, g := range goals {
 		cloneGoals[i] = g.Clone()
 	}

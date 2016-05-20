@@ -1,7 +1,8 @@
-package internal
+package aggregators
 
 import (
 	"github.com/lawrencewoodman/dlit"
+	"github.com/vlifesystems/rulehunter/goal"
 	"testing"
 )
 
@@ -53,7 +54,7 @@ func TestAccuracyGetResult(t *testing.T) {
 			"band":   dlit.MustNew(9),
 		},
 	}
-	goals := []*Goal{}
+	goals := []*goal.Goal{}
 	cases := []struct {
 		records []map[string]*dlit.Literal
 		want    float64
@@ -62,9 +63,9 @@ func TestAccuracyGetResult(t *testing.T) {
 		{[]map[string]*dlit.Literal{}, 0},
 	}
 	for _, c := range cases {
-		accuracyCostGt2, err := NewAccuracyAggregator("accuracyCostGt2", "cost > 2")
+		accuracyCostGt2, err := New("accuracyCostGt2", "accuracy", "cost > 2")
 		if err != nil {
-			t.Errorf("NewAccuracyAggregator(\"accuracyCostGt2\", \"cost > 2\") err == %s",
+			t.Errorf("New(\"accuracyCostGt2\", \"accuracy\", \"cost > 2\") err == %s",
 				err)
 		}
 		aggregators := []Aggregator{accuracyCostGt2}
@@ -87,11 +88,11 @@ func TestAccuracyCloneNew(t *testing.T) {
 		"band":   dlit.MustNew(4),
 		"cost":   dlit.MustNew(4),
 	}
-	goals := []*Goal{}
+	goals := []*goal.Goal{}
 	numRecords := int64(1)
-	accuracyCostGt2, err := NewAccuracyAggregator("accuracyCostGt2", "cost > 2")
+	accuracyCostGt2, err := New("accuracyCostGt2", "accuracy", "cost > 2")
 	if err != nil {
-		t.Errorf("NewAccuracyAggregator(\"accuracyCostGt2\", \"cost > 2\") err == %s",
+		t.Errorf("New(\"accuracyCostGt2\", \"accuracy\", \"cost > 2\") err == %s",
 			err)
 	}
 	accuracyCostGt2_2 := accuracyCostGt2.CloneNew()

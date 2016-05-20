@@ -1,7 +1,8 @@
-package internal
+package aggregators
 
 import (
 	"github.com/lawrencewoodman/dlit"
+	"github.com/vlifesystems/rulehunter/goal"
 	"testing"
 )
 
@@ -43,7 +44,7 @@ func TestPercentGetResult(t *testing.T) {
 			"band":   dlit.MustNew(9),
 		},
 	}
-	goals := []*Goal{}
+	goals := []*goal.Goal{}
 	cases := []struct {
 		records []map[string]*dlit.Literal
 		want    float64
@@ -52,9 +53,9 @@ func TestPercentGetResult(t *testing.T) {
 		{[]map[string]*dlit.Literal{}, 0},
 	}
 	for _, c := range cases {
-		percentCostGt2, err := NewPercentAggregator("percentCostGt2", "cost > 2")
+		percentCostGt2, err := New("percentCostGt2", "percent", "cost > 2")
 		if err != nil {
-			t.Errorf("NewPercentAggregator(\"percentCostGt2\", \"cost > 2\") err == %s",
+			t.Errorf("New(\"percentCostGt2\", \"percent\", \"cost > 2\") err == %s",
 				err)
 		}
 		aggregators := []Aggregator{percentCostGt2}
@@ -77,11 +78,11 @@ func TestPercentCloneNew(t *testing.T) {
 		"band":   dlit.MustNew(4),
 		"cost":   dlit.MustNew(4),
 	}
-	goals := []*Goal{}
+	goals := []*goal.Goal{}
 	numRecords := int64(1)
-	percentCostGt2, err := NewPercentAggregator("percentCostGt2", "cost > 2")
+	percentCostGt2, err := New("percentCostGt2", "percent", "cost > 2")
 	if err != nil {
-		t.Errorf("NewPercentAggregator(\"percentCostGt2\", \"cost > 2\") err == %s",
+		t.Errorf("New(\"percentCostGt2\", \"percent\", \"cost > 2\") err == %s",
 			err)
 	}
 	percentCostGt2_2 := percentCostGt2.CloneNew()

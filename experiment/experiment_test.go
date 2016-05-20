@@ -3,9 +3,10 @@ package experiment
 import (
 	"errors"
 	"fmt"
+	"github.com/vlifesystems/rulehunter/aggregators"
 	"github.com/vlifesystems/rulehunter/csvinput"
+	"github.com/vlifesystems/rulehunter/goal"
 	"github.com/vlifesystems/rulehunter/input"
-	"github.com/vlifesystems/rulehunter/internal"
 	"path/filepath"
 	"reflect"
 	"testing"
@@ -27,14 +28,14 @@ func TestNew(t *testing.T) {
 				true,
 			),
 			ExcludeFieldNames: []string{"education"},
-			Aggregators: []internal.Aggregator{
+			Aggregators: []aggregators.Aggregator{
 				// num_married to check for allowed characters
-				internal.MustNewCountAggregator("num_married", "marital == \"married\""),
-				internal.MustNewCountAggregator("numSignedUp", "y == \"yes\""),
-				internal.MustNewCalcAggregator("cost", "numMatches * 4.5"),
-				internal.MustNewCalcAggregator("income", "numSignedUp * 24"),
-				internal.MustNewCalcAggregator("profit", "income - cost")},
-			Goals: []*internal.Goal{internal.MustNewGoal("profit > 0")},
+				aggregators.MustNew("num_married", "count", "marital == \"married\""),
+				aggregators.MustNew("numSignedUp", "count", "y == \"yes\""),
+				aggregators.MustNew("cost", "calc", "numMatches * 4.5"),
+				aggregators.MustNew("income", "calc", "numSignedUp * 24"),
+				aggregators.MustNew("profit", "calc", "income - cost")},
+			Goals: []*goal.Goal{goal.MustNew("profit > 0")},
 			SortOrder: []SortField{
 				SortField{"profit", DESCENDING},
 				SortField{"numSignedUp", DESCENDING},
@@ -362,7 +363,7 @@ func areStringArraysEqual(a1 []string, a2 []string) bool {
 	return true
 }
 
-func areGoalExpressionsEqual(g1 []*internal.Goal, g2 []*internal.Goal) bool {
+func areGoalExpressionsEqual(g1 []*goal.Goal, g2 []*goal.Goal) bool {
 	if len(g1) != len(g2) {
 		return false
 	}
@@ -376,8 +377,8 @@ func areGoalExpressionsEqual(g1 []*internal.Goal, g2 []*internal.Goal) bool {
 }
 
 func areAggregatorsEqual(
-	a1 []internal.Aggregator,
-	a2 []internal.Aggregator,
+	a1 []aggregators.Aggregator,
+	a2 []aggregators.Aggregator,
 ) bool {
 	if len(a1) != len(a2) {
 		return false

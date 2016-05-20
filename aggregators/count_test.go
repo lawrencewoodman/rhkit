@@ -1,7 +1,8 @@
-package internal
+package aggregators
 
 import (
 	"github.com/lawrencewoodman/dlit"
+	"github.com/vlifesystems/rulehunter/goal"
 	"testing"
 )
 
@@ -13,8 +14,8 @@ func TestCountGetResult(t *testing.T) {
 		map[string]*dlit.Literal{"income": dlit.MustNew(2), "band": dlit.MustNew(6)},
 		map[string]*dlit.Literal{"income": dlit.MustNew(0), "band": dlit.MustNew(9)},
 	}
-	goals := []*Goal{}
-	numBandGt4, err := NewCountAggregator("numBandGt4", "band > 4")
+	goals := []*goal.Goal{}
+	numBandGt4, err := New("numBandGt4", "count", "band > 4")
 	if err != nil {
 		t.Errorf("NewCount(\"numBandGt4\", \"band > 4\") err == %q",
 			err)
@@ -39,9 +40,9 @@ func TestCountCloneNew(t *testing.T) {
 		"income": dlit.MustNew(3),
 		"band":   dlit.MustNew(4),
 	}
-	goals := []*Goal{}
+	goals := []*goal.Goal{}
 	numRecords := int64(1)
-	numBandGt4, err := NewCountAggregator("numBandGt4", "band > 3")
+	numBandGt4, err := New("numBandGt4", "count", "band > 3")
 	if err != nil {
 		t.Errorf("NewCount(\"numBandGt4\", \"band > 3\") err == %q",
 			err)

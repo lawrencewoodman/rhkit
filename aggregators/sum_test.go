@@ -1,7 +1,8 @@
-package internal
+package aggregators
 
 import (
 	"github.com/lawrencewoodman/dlit"
+	"github.com/vlifesystems/rulehunter/goal"
 	"testing"
 )
 
@@ -28,10 +29,10 @@ func TestSumGetResult(t *testing.T) {
 			"band":   dlit.MustNew(9),
 		},
 	}
-	goals := []*Goal{}
-	profit, err := NewSumAggregator("profit", "income-cost")
+	goals := []*goal.Goal{}
+	profit, err := New("profit", "sum", "income-cost")
 	if err != nil {
-		t.Errorf("NewSumAggregator(\"profit\", \"income-cost\") err == %s", err)
+		t.Errorf("New(\"profit\", \"sum\", \"income-cost\") err == %s", err)
 	}
 	aggregators := []Aggregator{profit}
 
@@ -52,11 +53,11 @@ func TestSumCloneNew(t *testing.T) {
 		"income": dlit.MustNew(3),
 		"band":   dlit.MustNew(4),
 	}
-	goals := []*Goal{}
+	goals := []*goal.Goal{}
 	numRecords := int64(1)
-	totalIncome, err := NewSumAggregator("totalIncome", "income")
+	totalIncome, err := New("totalIncome", "sum", "income")
 	if err != nil {
-		t.Errorf("NewSumAggregator(\"totalIncome\", \"income\") err: %s", err)
+		t.Errorf("New(\"totalIncome\", \"sum\", \"income\") err: %s", err)
 	}
 	totalIncome_2 := totalIncome.CloneNew()
 	aggregators := []Aggregator{}

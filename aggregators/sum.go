@@ -17,69 +17,83 @@
 	<http://www.gnu.org/licenses/>.
 */
 
-package internal
+package aggregators
 
 import (
 	"fmt"
 	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
+	"github.com/vlifesystems/rulehunter/goal"
+	"github.com/vlifesystems/rulehunter/internal/dexprfuncs"
 )
 
-type CalcAggregator struct {
+type sum struct {
 	name string
+	sum  *dlit.Literal
 	expr *dexpr.Expr
 }
 
-func NewCalcAggregator(name string, expr string) (*CalcAggregator, error) {
-	dexpr, err := dexpr.New(expr)
+var sumExpr = dexpr.MustNew("sum+value")
+
+func newSum(name string, exprStr string) (*sum, error) {
+	expr, err := dexpr.New(exprStr)
 	if err != nil {
 		return nil, err
 	}
-	ca := &CalcAggregator{name: name, expr: dexpr}
+	ca := &sum{
+		name: name,
+		sum:  dlit.MustNew(0),
+		expr: expr,
+	}
 	return ca, nil
 }
 
-// This should only be used for testing
-func MustNewCalcAggregator(name string, expr string) *CalcAggregator {
-	c, err := NewCalcAggregator(name, expr)
-	if err != nil {
-		panic(fmt.Sprintf("Can't create CalcAggregator: %s", err))
+func (a *sum) CloneNew() Aggregator {
+	return &sum{
+		name: a.name,
+		sum:  dlit.MustNew(0),
+		expr: a.expr,
 	}
-	return c
 }
 
-func (a *CalcAggregator) CloneNew() Aggregator {
-	return &CalcAggregator{name: a.name, expr: a.expr}
-}
-
-func (a *CalcAggregator) GetName() string {
+func (a *sum) GetName() string {
 	return a.name
 }
 
-func (a *CalcAggregator) GetArg() string {
+func (a *sum) GetArg() string {
 	return a.expr.String()
 }
 
-func (a *CalcAggregator) NextRecord(
-	record map[string]*dlit.Literal, isRuleTrue bool) error {
+func (a *sum) NextRecord(
+	record map[string]*dlit.Literal,
+	isRuleTrue bool,
+) error {
+	if isRuleTrue {
+		exprValue := a.expr.Eval(record, dexprfuncs.CallFuncs)
+		_, valueIsFloat := exprValue.Float()
+		if !valueIsFloat {
+			return fmt.Errorf("Value isn't a float: %s", exprValue)
+		}
+
+		vars := map[string]*dlit.Literal{
+			"sum":   a.sum,
+			"value": exprValue,
+		}
+		a.sum = sumExpr.Eval(vars, dexprfuncs.CallFuncs)
+	}
 	return nil
 }
 
-func (a *CalcAggregator) GetResult(
+func (a *sum) GetResult(
 	aggregators []Aggregator,
-	goals []*Goal,
+	goals []*goal.Goal,
 	numRecords int64,
 ) *dlit.Literal {
-	aggregatorsMap, err :=
-		AggregatorsToMap(aggregators, goals, numRecords, a.name)
-	if err != nil {
-		return dlit.MustNew(err)
-	}
-	return a.expr.Eval(aggregatorsMap, CallFuncs)
+	return a.sum
 }
 
-func (a *CalcAggregator) IsEqual(o Aggregator) bool {
-	if _, ok := o.(*CalcAggregator); !ok {
+func (a *sum) IsEqual(o Aggregator) bool {
+	if _, ok := o.(*sum); !ok {
 		return false
 	}
 	return a.name == o.GetName() && a.GetArg() == o.GetArg()
