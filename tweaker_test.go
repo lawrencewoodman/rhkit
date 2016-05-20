@@ -2,7 +2,7 @@ package rulehunter
 
 import (
 	"github.com/lawrencewoodman/dlit"
-	"github.com/vlifesystems/rulehunter/input"
+	"github.com/vlifesystems/rulehunter/description"
 	"github.com/vlifesystems/rulehunter/internal"
 	"github.com/vlifesystems/rulehunter/rule"
 	"testing"
@@ -10,16 +10,18 @@ import (
 
 func TestTweakRules_1(t *testing.T) {
 	testPurposes := []string{"Ensure that results are only from tweakable rules"}
-	fieldDescriptions := map[string]*input.FieldDescription{
-		"band": &input.FieldDescription{
-			input.INT, dlit.MustNew(3), dlit.MustNew(40), 0,
-			[]*dlit.Literal{}, 0},
-		"age": &input.FieldDescription{
-			input.INT, dlit.MustNew(4), dlit.MustNew(30), 0,
-			[]*dlit.Literal{}, 0},
-		"flow": &input.FieldDescription{
-			input.FLOAT, dlit.MustNew(50), dlit.MustNew(400), 2, []*dlit.Literal{}, 0},
-	}
+	inputDescription := &description.Description{
+		map[string]*description.Field{
+			"band": &description.Field{
+				description.INT, dlit.MustNew(3), dlit.MustNew(40), 0,
+				[]*dlit.Literal{}, 0},
+			"age": &description.Field{
+				description.INT, dlit.MustNew(4), dlit.MustNew(30), 0,
+				[]*dlit.Literal{}, 0},
+			"flow": &description.Field{
+				description.FLOAT, dlit.MustNew(50), dlit.MustNew(400), 2,
+				[]*dlit.Literal{}, 0},
+		}}
 	rulesIn := []*rule.Rule{
 		rule.MustNew("band > 4"),
 		rule.MustNew("band > 20"),
@@ -32,7 +34,7 @@ func TestTweakRules_1(t *testing.T) {
 		rule.MustNew("age > band"),
 		rule.MustNew("in(stage,\"20\",\"21\",\"22\")"),
 	}
-	gotRules := TweakRules(rulesIn, fieldDescriptions)
+	gotRules := TweakRules(rulesIn, inputDescription)
 
 	numBandGtRules := 0
 	numFlowGeqRules := 0
@@ -78,18 +80,20 @@ func TestTweakRules_2(t *testing.T) {
 		"Ensure that generates a range of int numbers between current ones",
 		"Ensure only operates on first 3 in group",
 	}
-	fieldDescriptions := map[string]*input.FieldDescription{
-		"age": &input.FieldDescription{
-			input.INT, dlit.MustNew(20), dlit.MustNew(40), 0, []*dlit.Literal{}, 0,
-		},
-	}
+	inputDescription := &description.Description{
+		map[string]*description.Field{
+			"age": &description.Field{
+				description.INT, dlit.MustNew(20), dlit.MustNew(40), 0,
+				[]*dlit.Literal{}, 0,
+			},
+		}}
 	rulesIn := []*rule.Rule{
 		rule.MustNew("age <= 40"),
 		rule.MustNew("age <= 20"),
 		rule.MustNew("age <= 50"),
 		rule.MustNew("age <= 60"),
 	}
-	gotRules := TweakRules(rulesIn, fieldDescriptions)
+	gotRules := TweakRules(rulesIn, inputDescription)
 
 	num20To40 := 0
 	num40To50 := 0
@@ -141,20 +145,22 @@ func TestTweakRules_3(t *testing.T) {
 		"Ensure only operates on first 3 in group",
 		"Ensure that decimal places are no greater than maxDP for field",
 	}
-	fieldDescriptions := map[string]*input.FieldDescription{
-		"flow": &input.FieldDescription{
-			input.FLOAT, dlit.MustNew(4), dlit.MustNew(30), 6, []*dlit.Literal{}, 0,
-		},
-	}
+	inputDescription := &description.Description{
+		map[string]*description.Field{
+			"flow": &description.Field{
+				description.FLOAT, dlit.MustNew(4), dlit.MustNew(30), 6,
+				[]*dlit.Literal{}, 0,
+			},
+		}}
 	rulesIn := []*rule.Rule{
 		rule.MustNew("flow <= 40.78234"),
 		rule.MustNew("flow <= 24.89"),
 		rule.MustNew("flow <= 52.604956"),
 		rule.MustNew("flow <= 65.80"),
 	}
-	wantMaxDP := fieldDescriptions["flow"].MaxDP
+	wantMaxDP := inputDescription.Fields["flow"].MaxDP
 	wantMinDP := 0
-	gotRules := TweakRules(rulesIn, fieldDescriptions)
+	gotRules := TweakRules(rulesIn, inputDescription)
 
 	num24To41 := 0
 	num41To53 := 0
@@ -226,11 +232,13 @@ func TestTweakRules_4(t *testing.T) {
 	testPurposes := []string{
 		"Ensure that generates a 'true()' rule",
 	}
-	fieldDescriptions := map[string]*input.FieldDescription{
-		"flow": &input.FieldDescription{
-			input.FLOAT, dlit.MustNew(4), dlit.MustNew(30), 6, []*dlit.Literal{}, 0,
-		},
-	}
+	inputDescription := &description.Description{
+		map[string]*description.Field{
+			"flow": &description.Field{
+				description.FLOAT, dlit.MustNew(4), dlit.MustNew(30), 6,
+				[]*dlit.Literal{}, 0,
+			},
+		}}
 	rulesIn := []*rule.Rule{
 		rule.MustNew("flow <= 40.78234"),
 		rule.MustNew("flow <= 24.89"),
@@ -238,7 +246,7 @@ func TestTweakRules_4(t *testing.T) {
 		rule.MustNew("true()"),
 	}
 
-	gotRules := TweakRules(rulesIn, fieldDescriptions)
+	gotRules := TweakRules(rulesIn, inputDescription)
 	trueRuleFound := false
 	for _, rule := range gotRules {
 		if rule.String() == "true()" {

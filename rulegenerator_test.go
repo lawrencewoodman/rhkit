@@ -2,7 +2,7 @@ package rulehunter
 
 import (
 	"github.com/lawrencewoodman/dlit"
-	"github.com/vlifesystems/rulehunter/input"
+	"github.com/vlifesystems/rulehunter/description"
 	"github.com/vlifesystems/rulehunter/rule"
 	"regexp"
 	"sort"
@@ -11,76 +11,77 @@ import (
 
 func TestGenerateRules_1(t *testing.T) {
 	testPurpose := "Ensure generates correct rules for each field"
-	fieldDescriptions := map[string]*input.FieldDescription{
-		"team": &input.FieldDescription{
-			Kind: input.STRING,
-			Values: []*dlit.Literal{
-				dlit.MustNew("a"), dlit.MustNew("b"), dlit.MustNew("c"),
+	inputDescription := &description.Description{
+		map[string]*description.Field{
+			"team": &description.Field{
+				Kind: description.STRING,
+				Values: []*dlit.Literal{
+					dlit.MustNew("a"), dlit.MustNew("b"), dlit.MustNew("c"),
+				},
 			},
-		},
-		"teamOut": &input.FieldDescription{
-			Kind: input.STRING,
-			Values: []*dlit.Literal{
-				dlit.MustNew("a"), dlit.MustNew("c"), dlit.MustNew("d"),
-				dlit.MustNew("e"), dlit.MustNew("f"),
+			"teamOut": &description.Field{
+				Kind: description.STRING,
+				Values: []*dlit.Literal{
+					dlit.MustNew("a"), dlit.MustNew("c"), dlit.MustNew("d"),
+					dlit.MustNew("e"), dlit.MustNew("f"),
+				},
 			},
-		},
-		"teamBob": &input.FieldDescription{
-			Kind: input.STRING,
-			Values: []*dlit.Literal{
-				dlit.MustNew("a"), dlit.MustNew("b"), dlit.MustNew("c"),
+			"teamBob": &description.Field{
+				Kind: description.STRING,
+				Values: []*dlit.Literal{
+					dlit.MustNew("a"), dlit.MustNew("b"), dlit.MustNew("c"),
+				},
 			},
-		},
-		"camp": &input.FieldDescription{
-			Kind: input.STRING,
-			Values: []*dlit.Literal{
-				dlit.MustNew("arthur"), dlit.MustNew("offa"),
-				dlit.MustNew("richard"), dlit.MustNew("owen"),
+			"camp": &description.Field{
+				Kind: description.STRING,
+				Values: []*dlit.Literal{
+					dlit.MustNew("arthur"), dlit.MustNew("offa"),
+					dlit.MustNew("richard"), dlit.MustNew("owen"),
+				},
 			},
-		},
-		"level": &input.FieldDescription{
-			Kind:  input.INT,
-			Min:   dlit.MustNew(0),
-			Max:   dlit.MustNew(5),
-			MaxDP: 0,
-			Values: []*dlit.Literal{
-				dlit.MustNew(0), dlit.MustNew(1), dlit.MustNew(2),
-				dlit.MustNew(3), dlit.MustNew(4), dlit.MustNew(5),
+			"level": &description.Field{
+				Kind:  description.INT,
+				Min:   dlit.MustNew(0),
+				Max:   dlit.MustNew(5),
+				MaxDP: 0,
+				Values: []*dlit.Literal{
+					dlit.MustNew(0), dlit.MustNew(1), dlit.MustNew(2),
+					dlit.MustNew(3), dlit.MustNew(4), dlit.MustNew(5),
+				},
 			},
-		},
-		"levelBob": &input.FieldDescription{
-			Kind:  input.INT,
-			Min:   dlit.MustNew(0),
-			Max:   dlit.MustNew(5),
-			MaxDP: 0,
-			Values: []*dlit.Literal{
-				dlit.MustNew(0), dlit.MustNew(1), dlit.MustNew(2),
-				dlit.MustNew(3), dlit.MustNew(4), dlit.MustNew(5),
+			"levelBob": &description.Field{
+				Kind:  description.INT,
+				Min:   dlit.MustNew(0),
+				Max:   dlit.MustNew(5),
+				MaxDP: 0,
+				Values: []*dlit.Literal{
+					dlit.MustNew(0), dlit.MustNew(1), dlit.MustNew(2),
+					dlit.MustNew(3), dlit.MustNew(4), dlit.MustNew(5),
+				},
 			},
-		},
-		"flow": &input.FieldDescription{
-			Kind:  input.FLOAT,
-			Min:   dlit.MustNew(0),
-			Max:   dlit.MustNew(10.5),
-			MaxDP: 2,
-			Values: []*dlit.Literal{
-				dlit.MustNew(0.0), dlit.MustNew(2.34), dlit.MustNew(10.5),
+			"flow": &description.Field{
+				Kind:  description.FLOAT,
+				Min:   dlit.MustNew(0),
+				Max:   dlit.MustNew(10.5),
+				MaxDP: 2,
+				Values: []*dlit.Literal{
+					dlit.MustNew(0.0), dlit.MustNew(2.34), dlit.MustNew(10.5),
+				},
 			},
-		},
-		"position": &input.FieldDescription{
-			Kind:  input.INT,
-			Min:   dlit.MustNew(1),
-			Max:   dlit.MustNew(13),
-			MaxDP: 0,
-			Values: []*dlit.Literal{
-				dlit.MustNew(1), dlit.MustNew(2), dlit.MustNew(3),
-				dlit.MustNew(4), dlit.MustNew(5), dlit.MustNew(6),
-				dlit.MustNew(7), dlit.MustNew(8), dlit.MustNew(9),
-				dlit.MustNew(10), dlit.MustNew(11), dlit.MustNew(12),
-				dlit.MustNew(13),
+			"position": &description.Field{
+				Kind:  description.INT,
+				Min:   dlit.MustNew(1),
+				Max:   dlit.MustNew(13),
+				MaxDP: 0,
+				Values: []*dlit.Literal{
+					dlit.MustNew(1), dlit.MustNew(2), dlit.MustNew(3),
+					dlit.MustNew(4), dlit.MustNew(5), dlit.MustNew(6),
+					dlit.MustNew(7), dlit.MustNew(8), dlit.MustNew(9),
+					dlit.MustNew(10), dlit.MustNew(11), dlit.MustNew(12),
+					dlit.MustNew(13),
+				},
 			},
-		},
-	}
+		}}
 	excludeFields := []string{"teamBob", "levelBob"}
 	cases := []struct {
 		field     string
@@ -370,11 +371,11 @@ func TestGenerateRules_1(t *testing.T) {
 		}},
 	}
 
-	rules, err := GenerateRules(fieldDescriptions, excludeFields)
+	rules, err := GenerateRules(inputDescription, excludeFields)
 	if err != nil {
 		t.Errorf("Test: %s\n", testPurpose)
 		t.Errorf("GenerateRules(%q, %q) err: %q",
-			fieldDescriptions, excludeFields, err)
+			inputDescription, excludeFields, err)
 	}
 
 	for _, c := range cases {
@@ -392,28 +393,29 @@ func TestGenerateRules_1(t *testing.T) {
 
 func TestGenerateRules_2(t *testing.T) {
 	testPurpose := "Ensure generates a 'true()' rule"
-	fieldDescriptions := map[string]*input.FieldDescription{
-		"team": &input.FieldDescription{
-			Kind: input.STRING,
-			Values: []*dlit.Literal{
-				dlit.MustNew("a"), dlit.MustNew("b"), dlit.MustNew("c"),
+	inputDescription := &description.Description{
+		map[string]*description.Field{
+			"team": &description.Field{
+				Kind: description.STRING,
+				Values: []*dlit.Literal{
+					dlit.MustNew("a"), dlit.MustNew("b"), dlit.MustNew("c"),
+				},
 			},
-		},
-		"teamOut": &input.FieldDescription{
-			Kind: input.STRING,
-			Values: []*dlit.Literal{
-				dlit.MustNew("a"), dlit.MustNew("c"), dlit.MustNew("d"),
-				dlit.MustNew("e"), dlit.MustNew("f"),
+			"teamOut": &description.Field{
+				Kind: description.STRING,
+				Values: []*dlit.Literal{
+					dlit.MustNew("a"), dlit.MustNew("c"), dlit.MustNew("d"),
+					dlit.MustNew("e"), dlit.MustNew("f"),
+				},
 			},
-		},
-	}
+		}}
 	excludeFields := []string{}
 
-	rules, err := GenerateRules(fieldDescriptions, excludeFields)
+	rules, err := GenerateRules(inputDescription, excludeFields)
 	if err != nil {
 		t.Errorf("Test: %s\n", testPurpose)
 		t.Errorf("GenerateRules(%q, %q) err: %q",
-			fieldDescriptions, excludeFields, err)
+			inputDescription, excludeFields, err)
 	}
 
 	trueRuleFound := false
@@ -426,7 +428,7 @@ func TestGenerateRules_2(t *testing.T) {
 	if !trueRuleFound {
 		t.Errorf("Test: %s\n", testPurpose)
 		t.Errorf("GenerateRules(%q, %q)  - 'true()' rule missing",
-			fieldDescriptions, excludeFields)
+			inputDescription, excludeFields)
 	}
 }
 

@@ -6,9 +6,7 @@ import (
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rulehunter/assessment"
 	"github.com/vlifesystems/rulehunter/experiment"
-	"github.com/vlifesystems/rulehunter/goal"
 	"github.com/vlifesystems/rulehunter/rule"
-	"reflect"
 	"testing"
 )
 
@@ -124,7 +122,7 @@ func TestAssessRules(t *testing.T) {
 			rules, aggregators, goals, err)
 	}
 
-	if !wantAssessment.IsEqual(gotAssessment, wantAssessment) {
+	if !wantAssessment.IsEqual(gotAssessment) {
 		t.Errorf("AssessRules(%q, %q, %q, input)\nassessments don't match\n - got: %s\n - want: %s\n",
 			rules, aggregators, goals, gotAssessment, wantAssessment)
 	}

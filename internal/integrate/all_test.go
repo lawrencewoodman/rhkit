@@ -117,7 +117,7 @@ func processInput(records input.Input, fieldNames []string) error {
 	}
 	defer experiment.Close()
 
-	fieldDescriptions, err := input.Describe(experiment.Input)
+	fieldDescriptions, err := rulehunter.DescribeInput(experiment.Input)
 	if err != nil {
 		return fmt.Errorf("describer.DescribeInput(experiment.input) - err: %s",
 			err)

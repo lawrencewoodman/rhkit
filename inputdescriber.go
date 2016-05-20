@@ -17,17 +17,24 @@
 	<http://www.gnu.org/licenses/>.
 */
 
-// Package input describes the Input interface
-package input
+package rulehunter
 
-import "github.com/lawrencewoodman/dlit"
+import (
+	"github.com/vlifesystems/rulehunter/description"
+	"github.com/vlifesystems/rulehunter/input"
+)
 
-type Input interface {
-	Clone() (Input, error)
-	Next() bool
-	Err() error
-	Read() (map[string]*dlit.Literal, error)
-	Rewind() error
-	GetFieldNames() []string
-	Close() error
+func DescribeInput(input input.Input) (*description.Description, error) {
+	_description := description.New()
+	input.Rewind()
+
+	for input.Next() {
+		record, err := input.Read()
+		if err != nil {
+			return _description, err
+		}
+		_description.ProcessRecord(record)
+	}
+
+	return _description, input.Err()
 }
