@@ -6,6 +6,7 @@ package rulehunter
 import (
 	"fmt"
 	"github.com/vlifesystems/rulehunter"
+	"github.com/vlifesystems/rulehunter/assessment"
 	"github.com/vlifesystems/rulehunter/csvinput"
 	"github.com/vlifesystems/rulehunter/experiment"
 	"github.com/vlifesystems/rulehunter/input"
@@ -71,8 +72,8 @@ func TestAll_reduced(t *testing.T) {
 func assessRules(
 	rules []*rule.Rule,
 	experiment *experiment.Experiment,
-) (*rulehunter.Assessment, error) {
-	var assessment *rulehunter.Assessment
+) (*assessment.Assessment, error) {
+	var assessment *assessment.Assessment
 	maxProcesses := runtime.NumCPU()
 	c := make(chan *rulehunter.AssessRulesMPOutcome)
 

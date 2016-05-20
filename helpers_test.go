@@ -8,6 +8,7 @@ import (
 	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rulehunter/input"
+	"github.com/vlifesystems/rulehunter/rule"
 )
 
 func errorMatch(e1 error, e2 error) bool {
@@ -31,14 +32,14 @@ func mustNewDExpr(expr string) *dexpr.Expr {
 	return dexpr
 }
 
-func matchRules(rules1 []string, rules2 []string) (bool, string) {
+func matchRules(rules1 []*rule.Rule, rules2 []*rule.Rule) (bool, string) {
 	if len(rules1) != len(rules2) {
 		return false, "rules different lengths"
 	}
 	for _, rule1 := range rules1 {
 		found := false
 		for _, rule2 := range rules2 {
-			if rule1 == rule2 {
+			if rule1.String() == rule2.String() {
 				found = true
 				break
 			}
