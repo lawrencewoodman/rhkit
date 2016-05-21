@@ -5,7 +5,6 @@ package rulehunter
 
 import (
 	"fmt"
-	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rulehunter/input"
 	"github.com/vlifesystems/rulehunter/rule"
@@ -22,14 +21,6 @@ func errorMatch(e1 error, e2 error) bool {
 		return true
 	}
 	return false
-}
-
-func mustNewDExpr(expr string) *dexpr.Expr {
-	dexpr, err := dexpr.New(expr)
-	if err != nil {
-		panic(fmt.Sprintf("Can't create dexpr.Expr: %q", err))
-	}
-	return dexpr
 }
 
 func matchRules(rules1 []*rule.Rule, rules2 []*rule.Rule) (bool, string) {
