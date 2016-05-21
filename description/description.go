@@ -77,8 +77,8 @@ func (k kind) String() string {
 	panic(fmt.Sprintf("Unsupported kind: %d", k))
 }
 
-func (d *Description) ProcessRecord(record map[string]*dlit.Literal) {
-
+// Analyse this record
+func (d *Description) NextRecord(record map[string]*dlit.Literal) {
 	if len(d.Fields) == 0 {
 		for field, value := range record {
 			d.Fields[field] = &Field{Kind: UNKNOWN, Min: value, Max: value}

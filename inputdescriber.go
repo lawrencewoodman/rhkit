@@ -33,7 +33,7 @@ func DescribeInput(input input.Input) (*description.Description, error) {
 		if err != nil {
 			return _description, err
 		}
-		_description.ProcessRecord(record)
+		_description.NextRecord(record)
 	}
 
 	return _description, input.Err()
