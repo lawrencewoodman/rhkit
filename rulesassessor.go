@@ -26,7 +26,7 @@ import (
 	"github.com/vlifesystems/rulehunter/assessment"
 	"github.com/vlifesystems/rulehunter/experiment"
 	"github.com/vlifesystems/rulehunter/input"
-	"github.com/vlifesystems/rulehunter/internal/ruleassessment"
+	"github.com/vlifesystems/rulehunter/internal/ruleassessor"
 	"github.com/vlifesystems/rulehunter/rule"
 )
 
@@ -44,9 +44,9 @@ func AssessRules(
 		return &assessment.Assessment{}, err
 	}
 
-	ruleAssessments := make([]*ruleassessment.RuleAssessment, len(rules))
+	ruleAssessors := make([]*ruleassessor.RuleAssessor, len(rules))
 	for i, rule := range rules {
-		ruleAssessments[i] = ruleassessment.New(rule, allAggregators, e.Goals)
+		ruleAssessors[i] = ruleassessor.New(rule, allAggregators, e.Goals)
 	}
 
 	// The input must be cloned to be thread safe when AssessRules called by
@@ -56,16 +56,16 @@ func AssessRules(
 		return &assessment.Assessment{}, err
 	}
 	defer e.Input.Close()
-	numRecords, err = processInput(inputClone, ruleAssessments)
+	numRecords, err = processInput(inputClone, ruleAssessors)
 	if err != nil {
 		return &assessment.Assessment{}, err
 	}
-	goodRuleAssessments, err := filterGoodReports(ruleAssessments, numRecords)
+	goodRuleAssessors, err := filterGoodRuleAssessors(ruleAssessors, numRecords)
 	if err != nil {
 		return &assessment.Assessment{}, err
 	}
 
-	assessment, err := assessment.New(numRecords, goodRuleAssessments, e.Goals)
+	assessment, err := assessment.New(numRecords, goodRuleAssessors, e.Goals)
 	return assessment, err
 }
 
@@ -175,33 +175,35 @@ func assessRulesC(rules []*rule.Rule,
 	c <- &assessRulesCOutcome{assessment, err}
 }
 
-func filterGoodReports(
-	ruleAssessments []*ruleassessment.RuleAssessment,
-	numRecords int64) ([]*ruleassessment.RuleAssessment, error) {
-	goodRuleAssessments := make([]*ruleassessment.RuleAssessment, 0)
+func filterGoodRuleAssessors(
+	ruleAssessments []*ruleassessor.RuleAssessor,
+	numRecords int64,
+) ([]*ruleassessor.RuleAssessor, error) {
+	goodRuleAssessors := make([]*ruleassessor.RuleAssessor, 0)
 	for _, ruleAssessment := range ruleAssessments {
 		numMatches, exists :=
 			ruleAssessment.GetAggregatorValue("numMatches", numRecords)
 		if !exists {
 			// TODO: Create a proper error for this?
 			err := errors.New("numMatches doesn't exist in aggregators")
-			return goodRuleAssessments, err
+			return goodRuleAssessors, err
 		}
 		numMatchesInt, isInt := numMatches.Int()
 		if !isInt {
 			// TODO: Create a proper error for this?
 			err := errors.New(fmt.Sprintf("Can't cast to Int: %q", numMatches))
-			return goodRuleAssessments, err
+			return goodRuleAssessors, err
 		}
 		if numMatchesInt > 0 {
-			goodRuleAssessments = append(goodRuleAssessments, ruleAssessment)
+			goodRuleAssessors = append(goodRuleAssessors, ruleAssessment)
 		}
 	}
-	return goodRuleAssessments, nil
+	return goodRuleAssessors, nil
 }
 
 func processInput(input input.Input,
-	ruleAssessments []*ruleassessment.RuleAssessment) (int64, error) {
+	ruleAssessors []*ruleassessor.RuleAssessor,
+) (int64, error) {
 	numRecords := int64(0)
 	// TODO: test this rewinds properly
 	if err := input.Rewind(); err != nil {
@@ -214,8 +216,8 @@ func processInput(input input.Input,
 			return numRecords, err
 		}
 		numRecords++
-		for _, ruleAssessment := range ruleAssessments {
-			err := ruleAssessment.NextRecord(record)
+		for _, ruleAssessor := range ruleAssessors {
+			err := ruleAssessor.NextRecord(record)
 			if err != nil {
 				return numRecords, err
 			}

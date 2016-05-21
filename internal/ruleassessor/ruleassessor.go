@@ -17,7 +17,7 @@
 	<http://www.gnu.org/licenses/>.
 */
 
-package ruleassessment
+package ruleassessor
 
 import (
 	"errors"
@@ -27,7 +27,7 @@ import (
 	"github.com/vlifesystems/rulehunter/rule"
 )
 
-type RuleAssessment struct {
+type RuleAssessor struct {
 	Rule        *rule.Rule
 	Aggregators []aggregators.Aggregator
 	Goals       []*goal.Goal
@@ -37,7 +37,7 @@ func New(
 	rule *rule.Rule,
 	_aggregators []aggregators.Aggregator,
 	goals []*goal.Goal,
-) *RuleAssessment {
+) *RuleAssessor {
 	// Clone the aggregators and goals to ensure the results are
 	// specific to this rule
 	cloneAggregators := make([]aggregators.Aggregator, len(_aggregators))
@@ -48,11 +48,11 @@ func New(
 	for i, g := range goals {
 		cloneGoals[i] = g.Clone()
 	}
-	return &RuleAssessment{Rule: rule, Aggregators: cloneAggregators,
+	return &RuleAssessor{Rule: rule, Aggregators: cloneAggregators,
 		Goals: cloneGoals}
 }
 
-func (ra *RuleAssessment) NextRecord(record map[string]*dlit.Literal) error {
+func (ra *RuleAssessor) NextRecord(record map[string]*dlit.Literal) error {
 	var ruleIsTrue bool
 	var err error
 	for _, aggregator := range ra.Aggregators {
@@ -68,7 +68,7 @@ func (ra *RuleAssessment) NextRecord(record map[string]*dlit.Literal) error {
 	return nil
 }
 
-func (ra *RuleAssessment) GetAggregatorValue(
+func (ra *RuleAssessor) GetAggregatorValue(
 	name string,
 	numRecords int64,
 ) (*dlit.Literal, bool) {

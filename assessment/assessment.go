@@ -27,7 +27,7 @@ import (
 	"github.com/vlifesystems/rulehunter/aggregators"
 	"github.com/vlifesystems/rulehunter/experiment"
 	"github.com/vlifesystems/rulehunter/goal"
-	"github.com/vlifesystems/rulehunter/internal/ruleassessment"
+	"github.com/vlifesystems/rulehunter/internal/ruleassessor"
 	"github.com/vlifesystems/rulehunter/rule"
 	"sort"
 )
@@ -53,11 +53,11 @@ type ErrNameConflict string
 
 func New(
 	numRecords int64,
-	goodRuleAssessments []*ruleassessment.RuleAssessment,
+	goodRuleAssessors []*ruleassessor.RuleAssessor,
 	goals []*goal.Goal,
 ) (*Assessment, error) {
-	ruleAssessments := make([]*RuleAssessment, len(goodRuleAssessments))
-	for i, ruleAssessment := range goodRuleAssessments {
+	ruleAssessments := make([]*RuleAssessment, len(goodRuleAssessors))
+	for i, ruleAssessment := range goodRuleAssessors {
 		rule := ruleAssessment.Rule
 		aggregatorsMap, err :=
 			aggregators.AggregatorsToMap(
@@ -391,4 +391,8 @@ func (r *RuleAssessment) IsEqual(o *RuleAssessment) bool {
 
 func (g *GoalAssessment) IsEqual(o *GoalAssessment) bool {
 	return g.Expr == o.Expr && g.Passed == o.Passed
+}
+
+func (g *GoalAssessment) String() string {
+	return fmt.Sprintf("Expr: %s, Passed: %t", g.Expr, g.Passed)
 }

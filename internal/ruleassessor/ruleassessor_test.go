@@ -1,4 +1,4 @@
-package ruleassessment
+package ruleassessor
 
 import (
 	"github.com/lawrencewoodman/dexpr"

@@ -1,7 +1,7 @@
 /*************************
  *  Test helper functions
  *************************/
-package ruleassessment
+package ruleassessor
 
 func errorMatch(e1 error, e2 error) bool {
 	if e1 == nil && e2 == nil {
