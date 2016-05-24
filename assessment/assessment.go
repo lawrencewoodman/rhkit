@@ -30,6 +30,7 @@ import (
 	"github.com/vlifesystems/rulehunter/internal/ruleassessor"
 	"github.com/vlifesystems/rulehunter/rule"
 	"sort"
+	"strings"
 )
 
 type Assessment struct {
@@ -100,6 +101,14 @@ func (a *Assessment) Sort(s []experiment.SortField) {
 	a.Flags["sorted"] = true
 }
 
+func (a *Assessment) IsSorted() bool {
+	return a.Flags["sorted"]
+}
+
+func (a *Assessment) IsRefined() bool {
+	return a.Flags["refined"]
+}
+
 // TODO: Test this
 func (a *Assessment) IsEqual(o *Assessment) bool {
 	if a.NumRecords != o.NumRecords {
@@ -135,7 +144,7 @@ func (r *RuleAssessment) String() string {
 // Tidy up rule assessments by removing poor and poorer similar rules
 // For example this removes all rules poorer than the 'true()' rule
 func (sortedAssessment *Assessment) Refine(numSimilarRules int) {
-	if !sortedAssessment.Flags["sorted"] {
+	if !sortedAssessment.IsSorted() {
 		panic("Assessment isn't sorted")
 	}
 	sortedAssessment.excludePoorRules()
@@ -166,25 +175,29 @@ func (a *Assessment) Merge(o *Assessment) (*Assessment, error) {
 func (a *Assessment) LimitRuleAssessments(
 	numRuleAssessments int,
 ) *Assessment {
-	if !a.Flags["sorted"] {
+	if !a.IsSorted() {
 		panic("Assessment isn't sorted")
 	}
-	if !a.Flags["refined"] {
+	if !a.IsRefined() {
 		panic("Assessment isn't refined")
 	}
 	if len(a.RuleAssessments) < numRuleAssessments {
 		numRuleAssessments = len(a.RuleAssessments)
 	}
+	numNonTrueRuleAssessments := numRuleAssessments - 1
 
-	ruleAssessments := a.RuleAssessments[:numRuleAssessments]
+	ruleAssessments := make([]*RuleAssessment, numRuleAssessments)
+	for i := 0; i < numNonTrueRuleAssessments; i++ {
+		ruleAssessments[i] = a.RuleAssessments[i].clone()
+	}
 
-	if len(a.RuleAssessments) != numRuleAssessments {
+	if numRuleAssessments > 0 {
 		trueRuleAssessment := a.RuleAssessments[len(a.RuleAssessments)-1]
 		if trueRuleAssessment.Rule.String() != "true()" {
 			panic("Assessment doesn't have 'true()' rule last")
 		}
 
-		ruleAssessments = append(ruleAssessments, trueRuleAssessment)
+		ruleAssessments[numNonTrueRuleAssessments] = trueRuleAssessment
 	}
 
 	flags := map[string]bool{
@@ -333,9 +346,15 @@ func (b by) Less(i, j int) bool {
 		}
 	}
 
-	ruleLenI := len(b.ruleAssessments[i].Rule.String())
-	ruleLenJ := len(b.ruleAssessments[j].Rule.String())
-	return ruleLenI < ruleLenJ
+	ruleStrI := b.ruleAssessments[i].Rule.String()
+	ruleStrJ := b.ruleAssessments[j].Rule.String()
+	ruleLenI := len(ruleStrI)
+	ruleLenJ := len(ruleStrJ)
+	if ruleLenI != ruleLenJ {
+		return ruleLenI < ruleLenJ
+	}
+
+	return strings.Compare(ruleStrI, ruleStrJ) == -1
 }
 
 func compareDlitNums(l1 *dlit.Literal, l2 *dlit.Literal) int {
@@ -387,6 +406,10 @@ func (r *RuleAssessment) IsEqual(o *RuleAssessment) bool {
 		}
 	}
 	return true
+}
+
+func (r *RuleAssessment) clone() *RuleAssessment {
+	return &RuleAssessment{r.Rule, r.Aggregators, r.Goals}
 }
 
 func (g *GoalAssessment) IsEqual(o *GoalAssessment) bool {

@@ -1,6 +1,7 @@
 package rulehunter
 
 import (
+	"fmt"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rulehunter/description"
 	"github.com/vlifesystems/rulehunter/rule"
@@ -380,12 +381,12 @@ func TestGenerateRules_1(t *testing.T) {
 
 	for _, c := range cases {
 		gotFieldRules := getFieldRules(c.field, rules)
-		rulesMatch, msg := matchRules(gotFieldRules, c.wantRules)
+		rulesMatch, msg := matchRulesUnordered(gotFieldRules, c.wantRules)
 		if !rulesMatch {
 			gotFieldRuleStrs := rulesToSortedStrings(gotFieldRules)
 			wantRuleStrs := rulesToSortedStrings(c.wantRules)
 			t.Errorf("Test: %s\n", testPurpose)
-			t.Errorf("matchRules() rules don't match for field: %s - %s\ngot: %s\nwant: %s\n",
+			t.Errorf("matchRulesUnordered() rules don't match for field: %s - %s\ngot: %s\nwant: %s\n",
 				c.field, msg, gotFieldRuleStrs, wantRuleStrs)
 		}
 	}
@@ -456,11 +457,11 @@ func TestCombinedRules(t *testing.T) {
 
 	for _, c := range cases {
 		gotRules := CombineRules(c.inRules)
-		rulesMatch, msg := matchRules(gotRules, c.wantRules)
+		rulesMatch, msg := matchRulesUnordered(gotRules, c.wantRules)
 		if !rulesMatch {
 			gotRuleStrs := rulesToSortedStrings(gotRules)
 			wantRuleStrs := rulesToSortedStrings(c.wantRules)
-			t.Errorf("matchRules() rules don't match: %s\ngot: %s\nwant: %s\n",
+			t.Errorf("matchRulesUnordered() rules don't match: %s\ngot: %s\nwant: %s\n",
 				msg, gotRuleStrs, wantRuleStrs)
 		}
 	}
@@ -495,4 +496,26 @@ func rulesToSortedStrings(rules []*rule.Rule) []string {
 	}
 	sort.Strings(r)
 	return r
+}
+
+func matchRulesUnordered(
+	rules1 []*rule.Rule,
+	rules2 []*rule.Rule,
+) (bool, string) {
+	if len(rules1) != len(rules2) {
+		return false, "rules different lengths"
+	}
+	for _, rule1 := range rules1 {
+		found := false
+		for _, rule2 := range rules2 {
+			if rule1.String() == rule2.String() {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return false, fmt.Sprintf("rule doesn't exist: %s", rule1)
+		}
+	}
+	return true, ""
 }

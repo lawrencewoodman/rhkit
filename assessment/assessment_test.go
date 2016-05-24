@@ -2,8 +2,8 @@ package assessment
 
 import (
 	"errors"
-	"fmt"
 	"github.com/lawrencewoodman/dlit"
+	"github.com/vlifesystems/rulehunter/experiment"
 	"github.com/vlifesystems/rulehunter/rule"
 	"reflect"
 	"testing"
@@ -505,10 +505,10 @@ func TestRefine(t *testing.T) {
 	numSimilarRules := 2
 	sortedAssessment.Refine(numSimilarRules)
 	gotRules := sortedAssessment.GetRules()
-	rulesMatch, msg := matchRules(gotRules, wantRules)
-	if !rulesMatch {
-		t.Errorf("matchRules() rules don't match: %s\ngot: %s\nwant: %s\n",
-			msg, gotRules, wantRules)
+
+	if !matchRules(gotRules, wantRules) {
+		t.Errorf("matchRules() rules don't match:\ngot: %s\nwant: %s\n",
+			gotRules, wantRules)
 	}
 }
 
@@ -658,15 +658,30 @@ func TestLimitRuleAssessments(t *testing.T) {
 			},
 		},
 	}
+	// The increasing order of the numRules is important as this also checks that
+	// the ruleAssessments are cloned properly
 	cases := []struct {
 		numRules  int
 		wantRules []*rule.Rule
 	}{
+		{0,
+			[]*rule.Rule{},
+		},
+		{1,
+			[]*rule.Rule{
+				rule.MustNew("true()"),
+			},
+		},
+		{2,
+			[]*rule.Rule{
+				rule.MustNew("band > 4"),
+				rule.MustNew("true()"),
+			},
+		},
 		{3,
 			[]*rule.Rule{
 				rule.MustNew("band > 4"),
 				rule.MustNew("in(band,\"4\",\"3\",\"2\")"),
-				rule.MustNew("in(team,\"a\",\"b\")"),
 				rule.MustNew("true()"),
 			},
 		},
@@ -675,7 +690,6 @@ func TestLimitRuleAssessments(t *testing.T) {
 				rule.MustNew("band > 4"),
 				rule.MustNew("in(band,\"4\",\"3\",\"2\")"),
 				rule.MustNew("in(team,\"a\",\"b\")"),
-				rule.MustNew("in(band,\"99\",\"23\")"),
 				rule.MustNew("true()"),
 			},
 		},
@@ -688,14 +702,22 @@ func TestLimitRuleAssessments(t *testing.T) {
 				rule.MustNew("true()"),
 			},
 		},
+		{6,
+			[]*rule.Rule{
+				rule.MustNew("band > 4"),
+				rule.MustNew("in(band,\"4\",\"3\",\"2\")"),
+				rule.MustNew("in(team,\"a\",\"b\")"),
+				rule.MustNew("in(band,\"99\",\"23\")"),
+				rule.MustNew("true()"),
+			},
+		},
 	}
 	for _, c := range cases {
 		limitedAssessment := refinedAssessment.LimitRuleAssessments(c.numRules)
 		gotRules := limitedAssessment.GetRules()
-		rulesMatch, msg := matchRules(gotRules, c.wantRules)
-		if !rulesMatch {
-			t.Errorf("matchRules() rules don't match: %s\nnumRules: %d\ngot: %s\nwant: %s\n",
-				msg, c.numRules, gotRules, c.wantRules)
+		if !matchRules(gotRules, c.wantRules) {
+			t.Errorf("matchRules() rules don't match:\nnumRules: %d\ngot: %s\nwant: %s\n",
+				c.numRules, gotRules, c.wantRules)
 		}
 	}
 }
@@ -791,25 +813,180 @@ func TestLimitRuleAssessment_panic_2(t *testing.T) {
 	}
 }
 
+func TestSort(t *testing.T) {
+	assessment := Assessment{
+		NumRecords: 8,
+		Flags: map[string]bool{
+			"sorted": false,
+		},
+		RuleAssessments: []*RuleAssessment{
+			&RuleAssessment{
+				Rule: rule.MustNew("band > 9"),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("5"),
+					"percentMatches": dlit.MustNew("65.3"),
+					"numGoalsPassed": dlit.MustNew(0.003),
+					"numIncomeGt2":   dlit.MustNew("3"),
+					"numBandGt4":     dlit.MustNew("2"),
+				},
+				Goals: []*GoalAssessment{
+					&GoalAssessment{"numIncomeGt2 == 1", false},
+					&GoalAssessment{"numIncomeGt2 == 2", true},
+					&GoalAssessment{"numIncomeGt2 == 3", false},
+					&GoalAssessment{"numIncomeGt2 == 4", false},
+					&GoalAssessment{"numBandGt4 == 1", false},
+					&GoalAssessment{"numBandGt4 == 2", true},
+					&GoalAssessment{"numBandGt4 == 3", false},
+					&GoalAssessment{"numBandGt4 == 4", true},
+				},
+			},
+			&RuleAssessment{
+				Rule: rule.MustNew("band > 456"),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("2"),
+					"percentMatches": dlit.MustNew("50"),
+					"numGoalsPassed": dlit.MustNew(1.001),
+					"numIncomeGt2":   dlit.MustNew("2"),
+					"numBandGt4":     dlit.MustNew("2"),
+				},
+				Goals: []*GoalAssessment{
+					&GoalAssessment{"numIncomeGt2 == 1", true},
+					&GoalAssessment{"numIncomeGt2 == 2", false},
+					&GoalAssessment{"numIncomeGt2 == 3", false},
+					&GoalAssessment{"numIncomeGt2 == 4", false},
+					&GoalAssessment{"numBandGt4 == 1", false},
+					&GoalAssessment{"numBandGt4 == 2", true},
+					&GoalAssessment{"numBandGt4 == 3", false},
+					&GoalAssessment{"numBandGt4 == 4", false},
+				},
+			},
+			&RuleAssessment{
+				Rule: rule.MustNew("band > 3"),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("4"),
+					"percentMatches": dlit.MustNew("76.3"),
+					"numGoalsPassed": dlit.MustNew(0.002),
+					"numIncomeGt2":   dlit.MustNew("2"),
+					"numBandGt4":     dlit.MustNew("2"),
+				},
+				Goals: []*GoalAssessment{
+					&GoalAssessment{"numIncomeGt2 == 1", false},
+					&GoalAssessment{"numIncomeGt2 == 2", true},
+					&GoalAssessment{"numIncomeGt2 == 3", false},
+					&GoalAssessment{"numIncomeGt2 == 4", false},
+					&GoalAssessment{"numBandGt4 == 1", false},
+					&GoalAssessment{"numBandGt4 == 2", true},
+					&GoalAssessment{"numBandGt4 == 3", false},
+					&GoalAssessment{"numBandGt4 == 4", false},
+				},
+			},
+			&RuleAssessment{
+				Rule: rule.MustNew("cost > 1.2"),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("2"),
+					"percentMatches": dlit.MustNew("50"),
+					"numGoalsPassed": dlit.MustNew(0.002),
+					"numIncomeGt2":   dlit.MustNew("1"),
+					"numBandGt4":     dlit.MustNew("1"),
+				},
+				Goals: []*GoalAssessment{
+					&GoalAssessment{"numIncomeGt2 == 1", false},
+					&GoalAssessment{"numIncomeGt2 == 2", true},
+					&GoalAssessment{"numIncomeGt2 == 3", false},
+					&GoalAssessment{"numIncomeGt2 == 4", false},
+					&GoalAssessment{"numBandGt4 == 1", true},
+					&GoalAssessment{"numBandGt4 == 2", false},
+					&GoalAssessment{"numBandGt4 == 3", false},
+					&GoalAssessment{"numBandGt4 == 4", false},
+				},
+			},
+		},
+	}
+	cases := []struct {
+		sortOrder []experiment.SortField
+		wantRules []*rule.Rule
+	}{
+		{[]experiment.SortField{
+			experiment.SortField{"numGoalsPassed", experiment.ASCENDING},
+		},
+			[]*rule.Rule{
+				rule.MustNew("band > 3"),
+				rule.MustNew("cost > 1.2"),
+				rule.MustNew("band > 9"),
+				rule.MustNew("band > 456"),
+			}},
+		{[]experiment.SortField{
+			experiment.SortField{"percentMatches", experiment.DESCENDING},
+		},
+			[]*rule.Rule{
+				rule.MustNew("band > 3"),
+				rule.MustNew("band > 9"),
+				rule.MustNew("band > 456"),
+				rule.MustNew("cost > 1.2"),
+			}},
+		{[]experiment.SortField{
+			experiment.SortField{"percentMatches", experiment.ASCENDING},
+		},
+			[]*rule.Rule{
+				rule.MustNew("band > 456"),
+				rule.MustNew("cost > 1.2"),
+				rule.MustNew("band > 9"),
+				rule.MustNew("band > 3"),
+			}},
+		{[]experiment.SortField{
+			experiment.SortField{"percentMatches", experiment.ASCENDING},
+			experiment.SortField{"numIncomeGt2", experiment.ASCENDING},
+		},
+			[]*rule.Rule{
+				rule.MustNew("cost > 1.2"),
+				rule.MustNew("band > 456"),
+				rule.MustNew("band > 9"),
+				rule.MustNew("band > 3"),
+			}},
+		{[]experiment.SortField{
+			experiment.SortField{"percentMatches", experiment.DESCENDING},
+			experiment.SortField{"numIncomeGt2", experiment.ASCENDING},
+		},
+			[]*rule.Rule{
+				rule.MustNew("band > 3"),
+				rule.MustNew("band > 9"),
+				rule.MustNew("cost > 1.2"),
+				rule.MustNew("band > 456"),
+			}},
+		{[]experiment.SortField{},
+			[]*rule.Rule{
+				rule.MustNew("band > 3"),
+				rule.MustNew("band > 9"),
+				rule.MustNew("band > 456"),
+				rule.MustNew("cost > 1.2"),
+			}},
+	}
+	for _, c := range cases {
+		assessment.Sort(c.sortOrder)
+		if !assessment.Flags["sorted"] {
+			t.Errorf("Sort(%s) 'sorted' flag not set", c.sortOrder)
+		}
+		gotRules := assessment.GetRules()
+		if !matchRules(gotRules, c.wantRules) {
+			t.Errorf("matchRules() rules don't match:\n - sortOrder: %s\n - got: %s\n - want: %s\n",
+				c.sortOrder, gotRules, c.wantRules)
+		}
+	}
+}
+
 /******************************
  *  Helper functions
  ******************************/
 
-func matchRules(rules1 []*rule.Rule, rules2 []*rule.Rule) (bool, string) {
+// Match the rules including their order
+func matchRules(rules1 []*rule.Rule, rules2 []*rule.Rule) bool {
 	if len(rules1) != len(rules2) {
-		return false, "rules different lengths"
+		return false
 	}
-	for _, rule1 := range rules1 {
-		found := false
-		for _, rule2 := range rules2 {
-			if rule1.String() == rule2.String() {
-				found = true
-				break
-			}
-		}
-		if !found {
-			return false, fmt.Sprintf("rule doesn't exist: %s", rule1)
+	for i, rule1 := range rules1 {
+		if rule1.String() != rules2[i].String() {
+			return false
 		}
 	}
-	return true, ""
+	return true
 }

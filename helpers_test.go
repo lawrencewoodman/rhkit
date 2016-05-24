@@ -4,10 +4,8 @@
 package rulehunter
 
 import (
-	"fmt"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rulehunter/input"
-	"github.com/vlifesystems/rulehunter/rule"
 )
 
 func errorMatch(e1 error, e2 error) bool {
@@ -21,25 +19,6 @@ func errorMatch(e1 error, e2 error) bool {
 		return true
 	}
 	return false
-}
-
-func matchRules(rules1 []*rule.Rule, rules2 []*rule.Rule) (bool, string) {
-	if len(rules1) != len(rules2) {
-		return false, "rules different lengths"
-	}
-	for _, rule1 := range rules1 {
-		found := false
-		for _, rule2 := range rules2 {
-			if rule1.String() == rule2.String() {
-				found = true
-				break
-			}
-		}
-		if !found {
-			return false, fmt.Sprintf("rule doesn't exist: %s", rule1)
-		}
-	}
-	return true, ""
 }
 
 type LiteralInput struct {

@@ -268,164 +268,9 @@ func TestAssessRulesMP(t *testing.T) {
 			t.Errorf("AssessRulesMP(%q, %q, ...) - only made %d runs",
 				cs.rules, experiment, numRuns)
 		}
-		if !wantAssessment.IsEqual(gotAssessment) {
+		if !areAssessmentsEqv(wantAssessment, gotAssessment) {
 			t.Errorf("AssessRulesMP(%q, %q, ...)\nassessments don't match\n - got: %s\n - want: %s\n",
 				cs.rules, experiment, gotAssessment, wantAssessment)
-		}
-	}
-}
-
-func TestSort(t *testing.T) {
-	assessment := assessment.Assessment{
-		NumRecords: 8,
-		Flags: map[string]bool{
-			"sorted": false,
-		},
-		RuleAssessments: []*assessment.RuleAssessment{
-			&assessment.RuleAssessment{
-				Rule: rule.MustNew("band > 9"),
-				Aggregators: map[string]*dlit.Literal{
-					"numMatches":     dlit.MustNew("5"),
-					"percentMatches": dlit.MustNew("65.3"),
-					"numGoalsPassed": dlit.MustNew(0.003),
-					"numIncomeGt2":   dlit.MustNew("3"),
-					"numBandGt4":     dlit.MustNew("2"),
-				},
-				Goals: []*assessment.GoalAssessment{
-					&assessment.GoalAssessment{"numIncomeGt2 == 1", false},
-					&assessment.GoalAssessment{"numIncomeGt2 == 2", true},
-					&assessment.GoalAssessment{"numIncomeGt2 == 3", false},
-					&assessment.GoalAssessment{"numIncomeGt2 == 4", false},
-					&assessment.GoalAssessment{"numBandGt4 == 1", false},
-					&assessment.GoalAssessment{"numBandGt4 == 2", true},
-					&assessment.GoalAssessment{"numBandGt4 == 3", false},
-					&assessment.GoalAssessment{"numBandGt4 == 4", true},
-				},
-			},
-			&assessment.RuleAssessment{
-				Rule: rule.MustNew("band > 456"),
-				Aggregators: map[string]*dlit.Literal{
-					"numMatches":     dlit.MustNew("2"),
-					"percentMatches": dlit.MustNew("50"),
-					"numGoalsPassed": dlit.MustNew(1.001),
-					"numIncomeGt2":   dlit.MustNew("1"),
-					"numBandGt4":     dlit.MustNew("2"),
-				},
-				Goals: []*assessment.GoalAssessment{
-					&assessment.GoalAssessment{"numIncomeGt2 == 1", true},
-					&assessment.GoalAssessment{"numIncomeGt2 == 2", false},
-					&assessment.GoalAssessment{"numIncomeGt2 == 3", false},
-					&assessment.GoalAssessment{"numIncomeGt2 == 4", false},
-					&assessment.GoalAssessment{"numBandGt4 == 1", false},
-					&assessment.GoalAssessment{"numBandGt4 == 2", true},
-					&assessment.GoalAssessment{"numBandGt4 == 3", false},
-					&assessment.GoalAssessment{"numBandGt4 == 4", false},
-				},
-			},
-			&assessment.RuleAssessment{
-				Rule: rule.MustNew("band > 3"),
-				Aggregators: map[string]*dlit.Literal{
-					"numMatches":     dlit.MustNew("4"),
-					"percentMatches": dlit.MustNew("76.3"),
-					"numGoalsPassed": dlit.MustNew(0.002),
-					"numIncomeGt2":   dlit.MustNew("2"),
-					"numBandGt4":     dlit.MustNew("2"),
-				},
-				Goals: []*assessment.GoalAssessment{
-					&assessment.GoalAssessment{"numIncomeGt2 == 1", false},
-					&assessment.GoalAssessment{"numIncomeGt2 == 2", true},
-					&assessment.GoalAssessment{"numIncomeGt2 == 3", false},
-					&assessment.GoalAssessment{"numIncomeGt2 == 4", false},
-					&assessment.GoalAssessment{"numBandGt4 == 1", false},
-					&assessment.GoalAssessment{"numBandGt4 == 2", true},
-					&assessment.GoalAssessment{"numBandGt4 == 3", false},
-					&assessment.GoalAssessment{"numBandGt4 == 4", false},
-				},
-			},
-			&assessment.RuleAssessment{
-				Rule: rule.MustNew("cost > 1.2"),
-				Aggregators: map[string]*dlit.Literal{
-					"numMatches":     dlit.MustNew("2"),
-					"percentMatches": dlit.MustNew("50"),
-					"numGoalsPassed": dlit.MustNew(0.002),
-					"numIncomeGt2":   dlit.MustNew("2"),
-					"numBandGt4":     dlit.MustNew("1"),
-				},
-				Goals: []*assessment.GoalAssessment{
-					&assessment.GoalAssessment{"numIncomeGt2 == 1", false},
-					&assessment.GoalAssessment{"numIncomeGt2 == 2", true},
-					&assessment.GoalAssessment{"numIncomeGt2 == 3", false},
-					&assessment.GoalAssessment{"numIncomeGt2 == 4", false},
-					&assessment.GoalAssessment{"numBandGt4 == 1", true},
-					&assessment.GoalAssessment{"numBandGt4 == 2", false},
-					&assessment.GoalAssessment{"numBandGt4 == 3", false},
-					&assessment.GoalAssessment{"numBandGt4 == 4", false},
-				},
-			},
-		},
-	}
-	cases := []struct {
-		sortOrder []experiment.SortField
-		wantRules []*rule.Rule
-	}{
-		{[]experiment.SortField{
-			experiment.SortField{"numGoalsPassed", experiment.ASCENDING},
-		},
-			[]*rule.Rule{
-				rule.MustNew("band > 456"),
-				rule.MustNew("band > 9"),
-				rule.MustNew("band > 3"),
-				rule.MustNew("cost > 1.2"),
-			}},
-		{[]experiment.SortField{
-			experiment.SortField{"percentMatches", experiment.DESCENDING},
-		},
-			[]*rule.Rule{
-				rule.MustNew("band > 3"),
-				rule.MustNew("band > 9"),
-				rule.MustNew("cost > 1.2"),
-				rule.MustNew("band > 456"),
-			}},
-		{[]experiment.SortField{
-			experiment.SortField{"percentMatches", experiment.ASCENDING},
-		},
-			[]*rule.Rule{
-				rule.MustNew("cost > 1.2"),
-				rule.MustNew("band > 456"),
-				rule.MustNew("band > 9"),
-				rule.MustNew("band > 3"),
-			}},
-		{[]experiment.SortField{
-			experiment.SortField{"percentMatches", experiment.ASCENDING},
-			experiment.SortField{"numIncomeGt2", experiment.ASCENDING},
-		},
-			[]*rule.Rule{
-				rule.MustNew("band > 456"),
-				rule.MustNew("cost > 1.2"),
-				rule.MustNew("band > 9"),
-				rule.MustNew("band > 3"),
-			}},
-		{[]experiment.SortField{
-			experiment.SortField{"percentMatches", experiment.DESCENDING},
-			experiment.SortField{"numIncomeGt2", experiment.ASCENDING},
-		},
-			[]*rule.Rule{
-				rule.MustNew("band > 9"),
-				rule.MustNew("band > 3"),
-				rule.MustNew("cost > 1.2"),
-				rule.MustNew("band > 456"),
-			}},
-	}
-	for _, c := range cases {
-		assessment.Sort(c.sortOrder)
-		if !assessment.Flags["sorted"] {
-			t.Errorf("Sort(%s) 'sorted' flag not set", c.sortOrder)
-		}
-		gotRules := assessment.GetRules()
-		rulesMatch, msg := matchRules(gotRules, c.wantRules)
-		if !rulesMatch {
-			t.Errorf("matchRules() rules don't match: %s\ngot: %s\nwant: %s\n",
-				msg, gotRules, c.wantRules)
 		}
 	}
 }
@@ -440,4 +285,18 @@ func mustNewExperiment(ed *experiment.ExperimentDesc) *experiment.Experiment {
 		panic(fmt.Sprintf("Can't create Experiment: %s", err))
 	}
 	return e
+}
+
+// Are the assessments equivalent.  The ruleAssessments must match
+// but don't have to be in the same order if both assessments are
+// unsorted. If both are unsorted then this will sort the assessments
+func areAssessmentsEqv(
+	a1 *assessment.Assessment,
+	a2 *assessment.Assessment,
+) bool {
+	if !a1.IsSorted() && !a2.IsSorted() {
+		a1.Sort([]experiment.SortField{})
+		a2.Sort([]experiment.SortField{})
+	}
+	return a1.IsEqual(a2)
 }
