@@ -42,7 +42,7 @@ func TestNew(t *testing.T) {
 				SortField{"cost", ASCENDING},
 				SortField{"numMatches", DESCENDING},
 				SortField{"percentMatches", DESCENDING},
-				SortField{"numGoalsPassed", DESCENDING},
+				SortField{"goalsScore", DESCENDING},
 			},
 		},
 	}
@@ -73,7 +73,7 @@ func TestNew(t *testing.T) {
 				&SortDesc{"cost", "ascending"},
 				&SortDesc{"numMatches", "descending"},
 				&SortDesc{"percentMatches", "descending"},
-				&SortDesc{"numGoalsPassed", "descending"},
+				&SortDesc{"goalsScore", "descending"},
 			}},
 			expectedExperiments[1],
 		},
@@ -208,14 +208,14 @@ func TestNew_errors(t *testing.T) {
 			Input:         input,
 			ExcludeFields: []string{},
 			Aggregators: []*AggregatorDesc{
-				&AggregatorDesc{"numGoalsPassed", "count", "y == \"yes\""},
+				&AggregatorDesc{"goalsScore", "count", "y == \"yes\""},
 			},
 			Goals: []string{"profit > 0"},
 			SortOrder: []*SortDesc{
 				&SortDesc{"numMatches", "descending"},
 				&SortDesc{"percentMatches", "descending"},
 			}},
-			errors.New("Aggregator name reserved: numGoalsPassed"),
+			errors.New("Aggregator name reserved: goalsScore"),
 		},
 		{&ExperimentDesc{
 			Title:         "This is a nice title",

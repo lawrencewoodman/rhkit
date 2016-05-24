@@ -15,7 +15,7 @@ func TestNextRecord(t *testing.T) {
 	inAggregators := []aggregators.Aggregator{
 		aggregators.MustNew("numIncomeGt2", "count", "income > 2"),
 		aggregators.MustNew("numBandGt4", "count", "band > 4"),
-		aggregators.MustNew("numGoalsPassed", "goalspassedscore"),
+		aggregators.MustNew("goalsScore", "goalsscore"),
 	}
 	records := [4]map[string]*dlit.Literal{
 		map[string]*dlit.Literal{
@@ -45,10 +45,10 @@ func TestNextRecord(t *testing.T) {
 	}
 	numRecords := int64(len(records))
 	cases := []struct {
-		rule               *rule.Rule
-		wantNumIncomeGt2   int64
-		wantNumBandGt4     int64
-		wantNumGoalsPassed float64
+		rule             *rule.Rule
+		wantNumIncomeGt2 int64
+		wantNumBandGt4   int64
+		wantGoalsScore   float64
 	}{
 		{rule.MustNew("band > 4"), 1, 2, 2.0},
 		{rule.MustNew("band > 3"), 2, 2, 0.001},
@@ -89,18 +89,18 @@ func TestNextRecord(t *testing.T) {
 			t.Errorf("nextRecord() rule: %s, aggregators: %q, goals: %q - wantNumBandGt4: %d, got: %d",
 				c.rule, inAggregators, goals, c.wantNumBandGt4, gotNumBandGt4Int)
 		}
-		gotNumGoalsPassed, goalsPassedExists :=
-			ra.GetAggregatorValue("numGoalsPassed", numRecords)
-		if !goalsPassedExists {
-			t.Errorf("numGoalsPassed aggregator doesn't exist")
+		gotGoalsScore, goalsScoreExists :=
+			ra.GetAggregatorValue("goalsScore", numRecords)
+		if !goalsScoreExists {
+			t.Errorf("goalsScore aggregator doesn't exist")
 		}
-		gotNumGoalsPassedFloat, goalsPassedIsFloat := gotNumGoalsPassed.Float()
-		if !goalsPassedIsFloat {
-			t.Errorf("numGoalsPassed aggregator can't be float")
+		gotGoalsScoreFloat, goalsScoreIsFloat := gotGoalsScore.Float()
+		if !goalsScoreIsFloat {
+			t.Errorf("goalsScore aggregator can't be float")
 		}
-		if gotNumGoalsPassedFloat != c.wantNumGoalsPassed {
-			t.Errorf("nextRecord() rule: %s, aggregators: %q, goals: %q - wantNumGoalsPassed: %d, got: %d",
-				c.rule, inAggregators, goals, c.wantNumGoalsPassed, gotNumGoalsPassed)
+		if gotGoalsScoreFloat != c.wantGoalsScore {
+			t.Errorf("nextRecord() rule: %s, aggregators: %q, goals: %q - wantGoalsScore: %d, got: %d",
+				c.rule, inAggregators, goals, c.wantGoalsScore, gotGoalsScore)
 		}
 	}
 }

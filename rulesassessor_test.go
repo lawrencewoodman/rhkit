@@ -58,7 +58,7 @@ func TestAssessRules(t *testing.T) {
 				"percentMatches": dlit.MustNew("50"),
 				"numIncomeGt2":   dlit.MustNew("1"),
 				"numBandGt4":     dlit.MustNew("2"),
-				"numGoalsPassed": dlit.MustNew(1.001),
+				"goalsScore":     dlit.MustNew(1.001),
 			},
 			Goals: []*assessment.GoalAssessment{
 				&assessment.GoalAssessment{"numIncomeGt2 == 1", true},
@@ -78,7 +78,7 @@ func TestAssessRules(t *testing.T) {
 				"percentMatches": dlit.MustNew("100"),
 				"numIncomeGt2":   dlit.MustNew("2"),
 				"numBandGt4":     dlit.MustNew("2"),
-				"numGoalsPassed": dlit.MustNew(0.002),
+				"goalsScore":     dlit.MustNew(0.002),
 			},
 			Goals: []*assessment.GoalAssessment{
 				&assessment.GoalAssessment{"numIncomeGt2 == 1", false},
@@ -98,7 +98,7 @@ func TestAssessRules(t *testing.T) {
 				"percentMatches": dlit.MustNew("50"),
 				"numIncomeGt2":   dlit.MustNew("2"),
 				"numBandGt4":     dlit.MustNew("1"),
-				"numGoalsPassed": dlit.MustNew(0.002),
+				"goalsScore":     dlit.MustNew(0.002),
 			},
 			Goals: []*assessment.GoalAssessment{
 				&assessment.GoalAssessment{"numIncomeGt2 == 1", false},

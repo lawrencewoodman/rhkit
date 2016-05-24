@@ -825,7 +825,7 @@ func TestSort(t *testing.T) {
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("5"),
 					"percentMatches": dlit.MustNew("65.3"),
-					"numGoalsPassed": dlit.MustNew(0.003),
+					"goalsScore":     dlit.MustNew(0.003),
 					"numIncomeGt2":   dlit.MustNew("3"),
 					"numBandGt4":     dlit.MustNew("2"),
 				},
@@ -845,7 +845,7 @@ func TestSort(t *testing.T) {
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("50"),
-					"numGoalsPassed": dlit.MustNew(1.001),
+					"goalsScore":     dlit.MustNew(1.001),
 					"numIncomeGt2":   dlit.MustNew("2"),
 					"numBandGt4":     dlit.MustNew("2"),
 				},
@@ -865,7 +865,7 @@ func TestSort(t *testing.T) {
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("4"),
 					"percentMatches": dlit.MustNew("76.3"),
-					"numGoalsPassed": dlit.MustNew(0.002),
+					"goalsScore":     dlit.MustNew(0.002),
 					"numIncomeGt2":   dlit.MustNew("2"),
 					"numBandGt4":     dlit.MustNew("2"),
 				},
@@ -885,7 +885,7 @@ func TestSort(t *testing.T) {
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("50"),
-					"numGoalsPassed": dlit.MustNew(0.002),
+					"goalsScore":     dlit.MustNew(0.002),
 					"numIncomeGt2":   dlit.MustNew("1"),
 					"numBandGt4":     dlit.MustNew("1"),
 				},
@@ -907,7 +907,7 @@ func TestSort(t *testing.T) {
 		wantRules []*rule.Rule
 	}{
 		{[]experiment.SortField{
-			experiment.SortField{"numGoalsPassed", experiment.ASCENDING},
+			experiment.SortField{"goalsScore", experiment.ASCENDING},
 		},
 			[]*rule.Rule{
 				rule.MustNew("band > 3"),

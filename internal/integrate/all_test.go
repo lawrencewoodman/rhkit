@@ -108,7 +108,7 @@ func processInput(records input.Input, fieldNames []string) error {
 		SortOrder: []*experiment.SortDesc{
 			&experiment.SortDesc{"profit", "descending"},
 			&experiment.SortDesc{"numSignedUp", "descending"},
-			&experiment.SortDesc{"numGoalsPassed", "descending"},
+			&experiment.SortDesc{"goalsScore", "descending"},
 		},
 	}
 	experiment, err := experiment.New(experimentDesc)
