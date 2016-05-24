@@ -104,7 +104,7 @@ func TestGetRules(t *testing.T) {
 func TestMerge(t *testing.T) {
 	assessment1 := &Assessment{
 		NumRecords: 8,
-		Flags: map[string]bool{
+		flags: map[string]bool{
 			"sorted": true,
 		},
 		RuleAssessments: []*RuleAssessment{
@@ -152,7 +152,7 @@ func TestMerge(t *testing.T) {
 	}
 	assessment2 := &Assessment{
 		NumRecords: 8,
-		Flags: map[string]bool{
+		flags: map[string]bool{
 			"sorted": true,
 		},
 		RuleAssessments: []*RuleAssessment{
@@ -201,7 +201,7 @@ func TestMerge(t *testing.T) {
 
 	wantAssessment := &Assessment{
 		NumRecords: 8,
-		Flags: map[string]bool{
+		flags: map[string]bool{
 			"sorted":  false,
 			"refined": false,
 		},
@@ -303,7 +303,7 @@ func TestMerge(t *testing.T) {
 func TestMerge_errors(t *testing.T) {
 	assessment1 := &Assessment{
 		NumRecords: 8,
-		Flags: map[string]bool{
+		flags: map[string]bool{
 			"sorted": true,
 		},
 		RuleAssessments: []*RuleAssessment{
@@ -368,7 +368,7 @@ func TestMerge_errors(t *testing.T) {
 func TestRefine(t *testing.T) {
 	sortedAssessment := &Assessment{
 		NumRecords: 20,
-		Flags: map[string]bool{
+		flags: map[string]bool{
 			"sorted": true,
 		},
 		RuleAssessments: []*RuleAssessment{
@@ -560,7 +560,7 @@ func TestRefine_panic_2(t *testing.T) {
 	testPurpose := "Ensure panics if 'true()' rule missing"
 	sortedAssessment := &Assessment{
 		NumRecords: 20,
-		Flags: map[string]bool{
+		flags: map[string]bool{
 			"sorted": true,
 		},
 		RuleAssessments: []*RuleAssessment{
@@ -606,7 +606,7 @@ func TestRefine_panic_2(t *testing.T) {
 func TestLimitRuleAssessments(t *testing.T) {
 	refinedAssessment := &Assessment{
 		NumRecords: 20,
-		Flags: map[string]bool{
+		flags: map[string]bool{
 			"sorted":  true,
 			"refined": true,
 		},
@@ -770,7 +770,7 @@ func TestLimitRuleAssessment_panic_2(t *testing.T) {
 	testPurpose := "Ensure panics if assessment not refined"
 	unsortedAssessment := &Assessment{
 		NumRecords: 20,
-		Flags: map[string]bool{
+		flags: map[string]bool{
 			"sorted": true,
 		},
 		RuleAssessments: []*RuleAssessment{
@@ -816,7 +816,7 @@ func TestLimitRuleAssessment_panic_2(t *testing.T) {
 func TestSort(t *testing.T) {
 	assessment := Assessment{
 		NumRecords: 8,
-		Flags: map[string]bool{
+		flags: map[string]bool{
 			"sorted": false,
 		},
 		RuleAssessments: []*RuleAssessment{
@@ -963,7 +963,7 @@ func TestSort(t *testing.T) {
 	}
 	for _, c := range cases {
 		assessment.Sort(c.sortOrder)
-		if !assessment.Flags["sorted"] {
+		if !assessment.IsSorted() {
 			t.Errorf("Sort(%s) 'sorted' flag not set", c.sortOrder)
 		}
 		gotRules := assessment.GetRules()

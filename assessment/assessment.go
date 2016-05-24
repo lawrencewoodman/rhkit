@@ -36,7 +36,7 @@ import (
 type Assessment struct {
 	NumRecords      int64
 	RuleAssessments []*RuleAssessment
-	Flags           map[string]bool
+	flags           map[string]bool
 }
 
 type RuleAssessment struct {
@@ -91,22 +91,22 @@ func New(
 	assessment := &Assessment{
 		NumRecords:      numRecords,
 		RuleAssessments: ruleAssessments,
-		Flags:           flags,
+		flags:           flags,
 	}
 	return assessment, nil
 }
 
 func (a *Assessment) Sort(s []experiment.SortField) {
 	sort.Sort(by{a.RuleAssessments, s})
-	a.Flags["sorted"] = true
+	a.flags["sorted"] = true
 }
 
 func (a *Assessment) IsSorted() bool {
-	return a.Flags["sorted"]
+	return a.flags["sorted"]
 }
 
 func (a *Assessment) IsRefined() bool {
-	return a.Flags["refined"]
+	return a.flags["refined"]
 }
 
 // TODO: Test this
@@ -124,11 +124,11 @@ func (a *Assessment) IsEqual(o *Assessment) bool {
 		}
 	}
 
-	if len(a.Flags) != len(o.Flags) {
+	if len(a.flags) != len(o.flags) {
 		return false
 	}
-	for k, v := range a.Flags {
-		if v != o.Flags[k] {
+	for k, v := range a.flags {
+		if v != o.flags[k] {
 			return false
 		}
 	}
@@ -150,7 +150,7 @@ func (sortedAssessment *Assessment) Refine(numSimilarRules int) {
 	sortedAssessment.excludePoorRules()
 	sortedAssessment.excludePoorerInNiRules(numSimilarRules)
 	sortedAssessment.excludePoorerTweakableRules(numSimilarRules)
-	sortedAssessment.Flags["refined"] = true
+	sortedAssessment.flags["refined"] = true
 }
 
 func (e ErrNameConflict) Error() string {
