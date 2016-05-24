@@ -186,6 +186,6 @@ func processInput(records input.Input, fieldNames []string) error {
 	assessment5.Refine(1)
 
 	finalNumRuleAssessments := 100
-	assessment5.LimitRuleAssessments(finalNumRuleAssessments)
+	assessment5.TruncateRuleAssessments(finalNumRuleAssessments)
 	return nil
 }

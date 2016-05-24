@@ -172,7 +172,7 @@ func (a *Assessment) Merge(o *Assessment) (*Assessment, error) {
 }
 
 // Assessment must be sorted and refined first
-func (a *Assessment) LimitRuleAssessments(
+func (a *Assessment) TruncateRuleAssessments(
 	numRuleAssessments int,
 ) *Assessment {
 	if !a.IsSorted() {

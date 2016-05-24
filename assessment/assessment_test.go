@@ -603,7 +603,7 @@ func TestRefine_panic_2(t *testing.T) {
 	}
 }
 
-func TestLimitRuleAssessments(t *testing.T) {
+func TestTruncateRuleAssessments(t *testing.T) {
 	refinedAssessment := &Assessment{
 		NumRecords: 20,
 		flags: map[string]bool{
@@ -713,7 +713,7 @@ func TestLimitRuleAssessments(t *testing.T) {
 		},
 	}
 	for _, c := range cases {
-		limitedAssessment := refinedAssessment.LimitRuleAssessments(c.numRules)
+		limitedAssessment := refinedAssessment.TruncateRuleAssessments(c.numRules)
 		gotRules := limitedAssessment.GetRules()
 		if !matchRules(gotRules, c.wantRules) {
 			t.Errorf("matchRules() rules don't match:\nnumRules: %d\ngot: %s\nwant: %s\n",
@@ -722,7 +722,7 @@ func TestLimitRuleAssessments(t *testing.T) {
 	}
 }
 
-func TestLimitRuleAssessment_panic_1(t *testing.T) {
+func TestTruncateRuleAssessment_panic_1(t *testing.T) {
 	testPurpose := "Ensure panics if assessment not sorted"
 	unsortedAssessment := &Assessment{
 		NumRecords: 20,
@@ -753,20 +753,20 @@ func TestLimitRuleAssessment_panic_1(t *testing.T) {
 				paniced = true
 			} else {
 				t.Errorf("Test: %s\n", testPurpose)
-				t.Errorf("LimitRuleAssessments() - got panic: %s, wanted: %s",
+				t.Errorf("TruncateRuleAssessments() - got panic: %s, wanted: %s",
 					r, wantPanic)
 			}
 		}
 	}()
 	numRules := 1
-	unsortedAssessment.LimitRuleAssessments(numRules)
+	unsortedAssessment.TruncateRuleAssessments(numRules)
 	if !paniced {
 		t.Errorf("Test: %s\n", testPurpose)
 		t.Errorf("Refine() - failed to panic with: %s", wantPanic)
 	}
 }
 
-func TestLimitRuleAssessment_panic_2(t *testing.T) {
+func TestTruncateRuleAssessment_panic_2(t *testing.T) {
 	testPurpose := "Ensure panics if assessment not refined"
 	unsortedAssessment := &Assessment{
 		NumRecords: 20,
@@ -800,13 +800,13 @@ func TestLimitRuleAssessment_panic_2(t *testing.T) {
 				paniced = true
 			} else {
 				t.Errorf("Test: %s\n", testPurpose)
-				t.Errorf("LimitRuleAssessments() - got panic: %s, wanted: %s",
+				t.Errorf("TruncateRuleAssessments() - got panic: %s, wanted: %s",
 					r, wantPanic)
 			}
 		}
 	}()
 	numRules := 1
-	unsortedAssessment.LimitRuleAssessments(numRules)
+	unsortedAssessment.TruncateRuleAssessments(numRules)
 	if !paniced {
 		t.Errorf("Test: %s\n", testPurpose)
 		t.Errorf("Refine() - failed to panic with: %s", wantPanic)
