@@ -28,10 +28,10 @@ import (
 	"runtime"
 )
 
-func ProcessInput(experiment *experiment.Experiment) error {
-	fieldDescriptions, err := rulehunter.DescribeInput(experiment.Input)
+func ProcessDataset(experiment *experiment.Experiment) error {
+	fieldDescriptions, err := rulehunter.DescribeDataset(experiment.Dataset)
 	if err != nil {
-		return fmt.Errorf("describer.DescribeInput(experiment.input) - err: %s",
+		return fmt.Errorf("describer.DescribeDataset(experiment.dataset) - err: %s",
 			err)
 	}
 	rules, err :=
@@ -41,9 +41,11 @@ func ProcessInput(experiment *experiment.Experiment) error {
 			fieldDescriptions, experiment.ExcludeFieldNames, err)
 	}
 	if len(rules) < 2 {
-		return fmt.Errorf("rulehunter.GenerateRules(%q, %q) - not enough rules generated",
-
-			fieldDescriptions, experiment.ExcludeFieldNames)
+		return fmt.Errorf(
+			"rulehunter.GenerateRules(%q, %q) - not enough rules generated",
+			fieldDescriptions,
+			experiment.ExcludeFieldNames,
+		)
 	}
 
 	assessment, err := assessRules(rules, experiment)

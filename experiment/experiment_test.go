@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/vlifesystems/rulehunter/aggregators"
-	"github.com/vlifesystems/rulehunter/csvinput"
+	"github.com/vlifesystems/rulehunter/csvdataset"
+	"github.com/vlifesystems/rulehunter/dataset"
 	"github.com/vlifesystems/rulehunter/goal"
-	"github.com/vlifesystems/rulehunter/input"
 	"path/filepath"
 	"reflect"
 	"testing"
@@ -21,7 +21,7 @@ func TestNew(t *testing.T) {
 		&Experiment{},
 		&Experiment{
 			Title: "This is a jolly nice title",
-			Input: mustNewCsvInput(
+			Dataset: mustNewCsvDataset(
 				fieldNames,
 				filepath.Join("..", "fixtures", "bank.csv"),
 				rune(';'),
@@ -52,7 +52,7 @@ func TestNew(t *testing.T) {
 	}{
 		{&ExperimentDesc{
 			Title: "This is a jolly nice title",
-			Input: mustNewCsvInput(
+			Dataset: mustNewCsvDataset(
 				fieldNames,
 				filepath.Join("..", "fixtures", "bank.csv"),
 				rune(';'),
@@ -96,7 +96,7 @@ func TestNew_errors(t *testing.T) {
 		"balance", "housing", "loan", "contact", "day", "month", "duration",
 		"campaign", "pdays", "previous", "poutcome", "y",
 	}
-	input := mustNewCsvInput(
+	dataset := mustNewCsvDataset(
 		fieldNames,
 		filepath.Join("..", "fixtures", "bank.csv"),
 		rune(';'),
@@ -109,7 +109,7 @@ func TestNew_errors(t *testing.T) {
 	}{
 		{&ExperimentDesc{
 			Title:         "This is a nice title",
-			Input:         input,
+			Dataset:       dataset,
 			ExcludeFields: []string{},
 			Aggregators: []*AggregatorDesc{
 				&AggregatorDesc{"numSignedUp", "count", "y == \"yes\""},
@@ -129,7 +129,7 @@ func TestNew_errors(t *testing.T) {
 		},
 		{&ExperimentDesc{
 			Title:         "This is a nice title",
-			Input:         input,
+			Dataset:       dataset,
 			ExcludeFields: []string{},
 			Aggregators:   []*AggregatorDesc{},
 			Goals:         []string{"profit > 0"},
@@ -140,7 +140,7 @@ func TestNew_errors(t *testing.T) {
 		},
 		{&ExperimentDesc{
 			Title:         "This is a nice title",
-			Input:         input,
+			Dataset:       dataset,
 			ExcludeFields: []string{},
 			Aggregators:   []*AggregatorDesc{},
 			Goals:         []string{"profit > 0"},
@@ -151,7 +151,7 @@ func TestNew_errors(t *testing.T) {
 		},
 		{&ExperimentDesc{
 			Title:         "This is a nice title",
-			Input:         input,
+			Dataset:       dataset,
 			ExcludeFields: []string{"bob"},
 			Aggregators:   []*AggregatorDesc{},
 			Goals:         []string{"profit > 0"},
@@ -163,7 +163,7 @@ func TestNew_errors(t *testing.T) {
 		},
 		{&ExperimentDesc{
 			Title:         "This is a nice title",
-			Input:         input,
+			Dataset:       dataset,
 			ExcludeFields: []string{},
 			Aggregators: []*AggregatorDesc{
 				&AggregatorDesc{"pdays", "count", "day > 2"},
@@ -177,7 +177,7 @@ func TestNew_errors(t *testing.T) {
 		},
 		{&ExperimentDesc{
 			Title:         "This is a nice title",
-			Input:         input,
+			Dataset:       dataset,
 			ExcludeFields: []string{},
 			Aggregators: []*AggregatorDesc{
 				&AggregatorDesc{"numMatches", "count", "y == \"yes\""},
@@ -191,7 +191,7 @@ func TestNew_errors(t *testing.T) {
 		},
 		{&ExperimentDesc{
 			Title:         "This is a nice title",
-			Input:         input,
+			Dataset:       dataset,
 			ExcludeFields: []string{},
 			Aggregators: []*AggregatorDesc{
 				&AggregatorDesc{"percentMatches", "percent", "y == \"yes\""},
@@ -205,7 +205,7 @@ func TestNew_errors(t *testing.T) {
 		},
 		{&ExperimentDesc{
 			Title:         "This is a nice title",
-			Input:         input,
+			Dataset:       dataset,
 			ExcludeFields: []string{},
 			Aggregators: []*AggregatorDesc{
 				&AggregatorDesc{"goalsScore", "count", "y == \"yes\""},
@@ -219,7 +219,7 @@ func TestNew_errors(t *testing.T) {
 		},
 		{&ExperimentDesc{
 			Title:         "This is a nice title",
-			Input:         input,
+			Dataset:       dataset,
 			ExcludeFields: []string{},
 			Aggregators: []*AggregatorDesc{
 				&AggregatorDesc{"3numSignedUp", "count", "y == \"yes\""},
@@ -233,7 +233,7 @@ func TestNew_errors(t *testing.T) {
 		},
 		{&ExperimentDesc{
 			Title:         "This is a nice title",
-			Input:         input,
+			Dataset:       dataset,
 			ExcludeFields: []string{},
 			Aggregators: []*AggregatorDesc{
 				&AggregatorDesc{"num-signed-up", "count", "y == \"yes\""},
@@ -260,7 +260,7 @@ func TestClose(t *testing.T) {
 		"balance", "housing", "loan", "contact", "day", "month", "duration",
 		"campaign", "pdays", "previous", "poutcome", "y",
 	}
-	input := mustNewCsvInput(
+	dataset := mustNewCsvDataset(
 		fieldNames,
 		filepath.Join("..", "fixtures", "bank.csv"),
 		rune(';'),
@@ -269,7 +269,7 @@ func TestClose(t *testing.T) {
 
 	experimentDesc := &ExperimentDesc{
 		Title:         "This is a nice title",
-		Input:         input,
+		Dataset:       dataset,
 		ExcludeFields: []string{},
 		Aggregators: []*AggregatorDesc{
 			&AggregatorDesc{"numSignedUp", "count", "y == \"yes\""},
@@ -288,13 +288,13 @@ func TestClose(t *testing.T) {
 	if err != nil {
 		t.Errorf("New(%q) err: %q", experimentDesc, err)
 	}
-	if !experiment.Input.Next() {
+	if !experiment.Dataset.Next() {
 		t.Errorf("Next() return false on first call")
 	}
 	if err := experiment.Close(); err != nil {
 		t.Errorf("Close() err: %s", err)
 	}
-	if experiment.Input.Next() {
+	if experiment.Dataset.Next() {
 		t.Errorf("Next() return true on second call")
 	}
 }
@@ -320,16 +320,16 @@ func experimentMatch(e1 *Experiment, e2 *Experiment) (bool, string) {
 	if !areSortOrdersEqual(e1.SortOrder, e2.SortOrder) {
 		return false, "Sort Orders don't match"
 	}
-	inputsEqual, msg := areInputsEqual(e1.Input, e2.Input)
-	return inputsEqual, msg
+	datasetsEqual, msg := areDatasetsEqual(e1.Dataset, e2.Dataset)
+	return datasetsEqual, msg
 }
 
-func areInputsEqual(i1, i2 input.Input) (bool, string) {
+func areDatasetsEqual(i1, i2 dataset.Dataset) (bool, string) {
 	for {
 		i1Next := i1.Next()
 		i2Next := i2.Next()
 		if i1Next != i2Next {
-			return false, "Inputs don't finish at same point"
+			return false, "Datasets don't finish at same point"
 		}
 		if !i1Next {
 			break
@@ -338,15 +338,15 @@ func areInputsEqual(i1, i2 input.Input) (bool, string) {
 		i1Record, i1Err := i1.Read()
 		i2Record, i2Err := i2.Read()
 		if i1Err != i2Err {
-			return false, "Inputs don't error at same point"
+			return false, "Datasets don't error at same point"
 		} else if i1Err == nil && i2Err == nil {
 			if !reflect.DeepEqual(i1Record, i2Record) {
-				return false, "Inputs don't match"
+				return false, "Datasets don't match"
 			}
 		}
 	}
 	if i1.Err() != i2.Err() {
-		return false, "Inputs final error doesn't match"
+		return false, "Datasets final error doesn't match"
 	}
 	return true, ""
 }
@@ -404,16 +404,16 @@ func areSortOrdersEqual(so1 []SortField, so2 []SortField) bool {
 	return true
 }
 
-func mustNewCsvInput(
+func mustNewCsvDataset(
 	fieldNames []string,
 	filename string,
 	separator rune,
 	skipFirstLine bool,
-) input.Input {
-	input, err :=
-		csvinput.New(fieldNames, filename, separator, skipFirstLine)
+) dataset.Dataset {
+	dataset, err :=
+		csvdataset.New(fieldNames, filename, separator, skipFirstLine)
 	if err != nil {
-		panic(fmt.Sprintf("Couldn't create Csv Input: %s", err))
+		panic(fmt.Sprintf("Couldn't create Csv Dataset: %s", err))
 	}
-	return input
+	return dataset
 }

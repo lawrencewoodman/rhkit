@@ -1,4 +1,4 @@
-package csvinput
+package csvdataset
 
 import (
 	"encoding/csv"
@@ -113,13 +113,13 @@ func TestRead(t *testing.T) {
 				"y":         dlit.MustNew("no")}},
 	}
 	for _, c := range cases {
-		records, err := New(c.fieldNames, c.filename, ';', c.skipFirstLine)
+		dataset, err := New(c.fieldNames, c.filename, ';', c.skipFirstLine)
 		if err != nil {
 			t.Errorf("Read() - New() - filename: %q err: %q", c.filename, err)
 		}
 		gotNumRows := 0
-		for records.Next() {
-			record, err := records.Read()
+		for dataset.Next() {
+			record, err := dataset.Read()
 			if err != nil {
 				t.Errorf("Read() - filename: %q err: %q", c.filename, err)
 			}
@@ -135,7 +135,7 @@ func TestRead(t *testing.T) {
 			}
 			gotNumRows++
 		}
-		if err := records.Err(); err != nil {
+		if err := dataset.Err(); err != nil {
 			t.Errorf("Read() - filename: %q err: %s", c.filename, err)
 		}
 		if gotNumRows != c.wantNumRows {
@@ -160,16 +160,16 @@ func TestRead_errors(t *testing.T) {
 			[]string{"age", "job", "marital", "education", "default", "balance",
 				"housing", "loan", "contact", "day", "month", "duration", "campaign",
 				"pdays", "previous", "poutcome"}, 0,
-			errors.New("wrong number of field names for input")},
+			errors.New("wrong number of field names for dataset")},
 	}
 	for _, c := range cases {
-		records, err := New(c.fieldNames, c.filename, c.separator, false)
+		dataset, err := New(c.fieldNames, c.filename, c.separator, false)
 		if err != nil {
 			t.Errorf("Read() - New() - filename: %q err: %q", c.filename, err)
 		}
 		row := 0
-		for records.Next() {
-			_, err := records.Read()
+		for dataset.Next() {
+			_, err := dataset.Read()
 			if row == c.errRow {
 				if err == nil {
 					t.Errorf("Read() - filename: %q Failed to raise error", c.filename)
@@ -178,7 +178,7 @@ func TestRead_errors(t *testing.T) {
 			}
 			row++
 		}
-		if records.Err().Error() != c.wantErr.Error() {
+		if dataset.Err().Error() != c.wantErr.Error() {
 			t.Errorf("Read() - filename: %q Failed to raise error", c.filename)
 		}
 	}
@@ -195,22 +195,22 @@ func TestRead_errors2(t *testing.T) {
 			[]string{"age", "job", "marital", "education", "default", "balance",
 				"housing", "loan", "contact", "day", "month", "duration", "campaign",
 				"pdays", "previous", "poutcome", "y"},
-			errors.New("wrong number of field names for input")},
+			errors.New("wrong number of field names for dataset")},
 	}
 	for _, c := range cases {
-		records, err := New(c.fieldNames, c.filename, c.separator, false)
+		dataset, err := New(c.fieldNames, c.filename, c.separator, false)
 		if err != nil {
 			t.Errorf("Read() - New() - filename: %q err: %q", c.filename, err)
 		}
-		_, err = records.Read()
+		_, err = dataset.Read()
 		if err.Error() != c.wantErr.Error() {
 			t.Errorf("Read() - filename: %q got error: %s, want error: %s",
 				c.filename, err, c.wantErr)
 			return
 		}
-		if records.Err().Error() != c.wantErr.Error() {
+		if dataset.Err().Error() != c.wantErr.Error() {
 			t.Errorf("Read() - filename: %q got error: %s, want error: %s",
-				c.filename, records.Err().Error(), c.wantErr)
+				c.filename, dataset.Err().Error(), c.wantErr)
 		}
 	}
 }
@@ -229,30 +229,30 @@ func TestErr(t *testing.T) {
 			[]string{"age", "job", "marital", "education", "default", "balance",
 				"housing", "loan", "contact", "day", "month", "duration", "campaign",
 				"pdays", "previous", "poutcome"},
-			errors.New("wrong number of field names for input")},
+			errors.New("wrong number of field names for dataset")},
 		{filepath.Join("..", "fixtures", "bank.csv"), ';',
 			[]string{"age", "job", "marital", "education", "default", "balance",
 				"housing", "loan", "contact", "day", "month", "duration", "campaign",
 				"pdays", "previous", "poutcome", "y"}, nil},
 	}
 	for _, c := range cases {
-		records, err := New(c.fieldNames, c.filename, c.separator, false)
+		dataset, err := New(c.fieldNames, c.filename, c.separator, false)
 		if err != nil {
 			t.Errorf("Read() - New() - filename: %q err: %q", c.filename, err)
 		}
-		for records.Next() {
-			records.Read()
+		for dataset.Next() {
+			dataset.Read()
 		}
 		if c.wantErr == nil {
-			if records.Err() != nil {
+			if dataset.Err() != nil {
 				t.Errorf("Read() - filename: %q wantErr: %s, got error: %s",
-					c.filename, c.wantErr, records.Err())
+					c.filename, c.wantErr, dataset.Err())
 			}
 		} else {
-			if records.Err() == nil ||
-				records.Err().Error() != c.wantErr.Error() {
+			if dataset.Err() == nil ||
+				dataset.Err().Error() != c.wantErr.Error() {
 				t.Errorf("Read() - filename: %q wantErr: %s, got error: %s",
-					c.filename, c.wantErr, records.Err())
+					c.filename, c.wantErr, dataset.Err())
 			}
 		}
 	}
@@ -272,14 +272,14 @@ func TestNext(t *testing.T) {
 			[]string{"band", "score", "team", "points", "rating"}},
 	}
 	for _, c := range cases {
-		records, err := New(c.fieldNames, c.filename, c.separator, false)
+		dataset, err := New(c.fieldNames, c.filename, c.separator, false)
 		if err != nil {
 			t.Errorf("New() - filename: %q err: %q", c.filename, err)
 		}
-		for records.Next() {
+		for dataset.Next() {
 		}
-		if records.Next() {
-			t.Errorf("records.Next() - Return true, despite having finished")
+		if dataset.Next() {
+			t.Errorf("dataset.Next() - Return true, despite having finished")
 		}
 	}
 }
@@ -296,31 +296,32 @@ func TestNext_errors(t *testing.T) {
 			[]string{"age", "job", "marital", "education", "default", "balance",
 				"housing", "loan", "contact", "day", "month", "duration", "campaign",
 				"pdays", "previous", "poutcome"}, 2,
-			errors.New("input has been closed")},
+			errors.New("dataset has been closed")},
 	}
 	for _, c := range cases {
-		records, err := New(c.fieldNames, c.filename, c.separator, false)
+		dataset, err := New(c.fieldNames, c.filename, c.separator, false)
 		if err != nil {
 			t.Errorf("New() - filename: %q err: %q", c.filename, err)
 		}
 		i := 0
-		for records.Next() {
+		for dataset.Next() {
 			if i == c.stopRow {
-				if err := records.Close(); err != nil {
-					t.Errorf("records.Close() - Err: %d", err)
+				if err := dataset.Close(); err != nil {
+					t.Errorf("dataset.Close() - Err: %d", err)
 				}
 				break
 			}
 			i++
 		}
 		if i != c.stopRow {
-			t.Errorf("records.Next() - Not stopped at row: %d", c.stopRow)
+			t.Errorf("dataset.Next() - Not stopped at row: %d", c.stopRow)
 		}
-		if records.Next() {
-			t.Errorf("records.Next() - Return true, despite records being closed")
+		if dataset.Next() {
+			t.Errorf("dataset.Next() - Return true, despite dataset being closed")
 		}
-		if records.Err() == nil || records.Err().Error() != c.wantErr.Error() {
-			t.Errorf("records.Err() - err: %s, want err: %s", records.Err(), c.wantErr)
+		if dataset.Err() == nil || dataset.Err().Error() != c.wantErr.Error() {
+			t.Errorf("dataset.Err() - err: %s, want err: %s",
+				dataset.Err(), c.wantErr)
 		}
 	}
 }
@@ -358,14 +359,14 @@ func TestRewind(t *testing.T) {
 				"y":         dlit.MustNew("no")}},
 	}
 	for _, c := range cases {
-		input, err := New(c.fieldNames, c.filename, ';', false)
+		dataset, err := New(c.fieldNames, c.filename, ';', false)
 		if err != nil {
 			t.Errorf("Read() - New() - filename: %q err: %q", c.filename, err)
 		}
 		for i := 0; i < 5; i++ {
 			gotNumRows := 0
-			for input.Next() {
-				record, err := input.Read()
+			for dataset.Next() {
+				record, err := dataset.Read()
 				if err != nil {
 					t.Errorf("Read() - filename: %q err: %q", c.filename, err)
 				}
@@ -379,7 +380,7 @@ func TestRewind(t *testing.T) {
 					t.Errorf("Read() - filename: %q got: %q, want: %q",
 						c.filename, record, c.wantThirdRecord)
 				}
-				if err := input.Err(); err != nil {
+				if err := dataset.Err(); err != nil {
 					t.Errorf("Err() - filename: %s err: %s", c.filename, err)
 				}
 				gotNumRows++
@@ -388,7 +389,7 @@ func TestRewind(t *testing.T) {
 				t.Errorf("Read() - filename: %q gotNumRows:: %d, want: %d",
 					c.filename, gotNumRows, c.wantNumRows)
 			}
-			if err := input.Rewind(); err != nil {
+			if err := dataset.Rewind(); err != nil {
 				t.Errorf("Rewind() - filename: %s err: %s", c.filename, err)
 			}
 		}
@@ -407,14 +408,14 @@ func TestRewind_errors(t *testing.T) {
 			&csv.ParseError{102, 0, errors.New("wrong number of fields in line")}},
 	}
 	for _, c := range cases {
-		input, err := New(c.fieldNames, c.filename, c.separator, false)
+		dataset, err := New(c.fieldNames, c.filename, c.separator, false)
 		if err != nil {
 			t.Errorf("New() - filename: %q err: %q", c.filename, err)
 		}
-		for input.Next() {
-			input.Read()
+		for dataset.Next() {
+			dataset.Read()
 		}
-		err = input.Rewind()
+		err = dataset.Rewind()
 		if err.Error() != c.wantErr.Error() {
 			t.Errorf("Rewind() - err: %s, wantErr: %s", err, c.wantErr)
 		}
@@ -428,12 +429,12 @@ func TestGetFieldNames(t *testing.T) {
 		"housing", "loan", "contact", "day", "month", "duration", "campaign",
 		"pdays", "previous", "poutcome", "y",
 	}
-	input, err := New(fieldNames, filename, ';', false)
+	dataset, err := New(fieldNames, filename, ';', false)
 	if err != nil {
 		t.Errorf("New(%s, %s, ...) err: %q", fieldNames, filename, err)
 	}
 
-	got := input.GetFieldNames()
+	got := dataset.GetFieldNames()
 	if !reflect.DeepEqual(got, fieldNames) {
 		t.Errorf("GetFieldNames() - got: %q want: %q", got, fieldNames)
 	}

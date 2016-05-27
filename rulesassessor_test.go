@@ -37,10 +37,10 @@ func TestAssessRules(t *testing.T) {
 		[]string{"2", "1.2", "4"},
 		[]string{"0", "0", "9"},
 	}
-	input := NewLiteralInput(fieldNames, records)
+	dataset := NewLiteralDataset(fieldNames, records)
 	experimentDesc := &experiment.ExperimentDesc{
 		Title:         "",
-		Input:         input,
+		Dataset:       dataset,
 		ExcludeFields: []string{},
 		Aggregators:   aggregators,
 		Goals:         goals,
@@ -114,7 +114,7 @@ func TestAssessRules(t *testing.T) {
 	}
 	gotAssessment, err := AssessRules(rules, experiment)
 	if err != nil {
-		t.Errorf("AssessRules(%q, %q, %q, input) - err: %q",
+		t.Errorf("AssessRules(%q, %q, %q, dataset) - err: %q",
 			rules, aggregators, goals, err)
 	}
 
@@ -126,7 +126,7 @@ func TestAssessRules(t *testing.T) {
 		wantRuleAssessments,
 	)
 	if !assessmentsMatch {
-		t.Errorf("AssessRules(%q, %q, %q, input)\nassessments don't match\n - got: %s\n - wantRuleAssessments: %s, wantNumRecords: %d, wantIsSorted: %t, wantIsRefined: %t\n",
+		t.Errorf("AssessRules(%q, %q, %q, dataset)\nassessments don't match\n - got: %s\n - wantRuleAssessments: %s, wantNumRecords: %d, wantIsSorted: %t, wantIsRefined: %t\n",
 			rules, aggregators, goals, gotAssessment, wantRuleAssessments,
 			wantNumRecords, wantIsSorted, wantIsRefined)
 	}
@@ -168,11 +168,11 @@ func TestAssessRules_errors(t *testing.T) {
 	records := [][]string{
 		[]string{"3", "4.5", "4"},
 	}
-	input := NewLiteralInput(fieldNames, records)
+	dataset := NewLiteralDataset(fieldNames, records)
 	for _, c := range cases {
 		experimentDesc := &experiment.ExperimentDesc{
 			Title:         "",
-			Input:         input,
+			Dataset:       dataset,
 			ExcludeFields: []string{},
 			Aggregators:   c.aggregators,
 			Goals:         c.goals,
@@ -224,10 +224,10 @@ func TestAssessRulesMP(t *testing.T) {
 		{[]*rule.Rule{}},
 	}
 
-	input := NewLiteralInput(fieldNames, records)
+	dataset := NewLiteralDataset(fieldNames, records)
 	experimentDesc := &experiment.ExperimentDesc{
 		Title:         "",
-		Input:         input,
+		Dataset:       dataset,
 		ExcludeFields: []string{},
 		Aggregators:   aggregators,
 		Goals:         goals,

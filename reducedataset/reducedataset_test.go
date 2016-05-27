@@ -1,12 +1,12 @@
-package reduceinput
+package reducedataset
 
 import (
 	"encoding/csv"
 	"errors"
 	"fmt"
 	"github.com/lawrencewoodman/dlit"
-	"github.com/vlifesystems/rulehunter/csvinput"
-	"github.com/vlifesystems/rulehunter/input"
+	"github.com/vlifesystems/rulehunter/csvdataset"
+	"github.com/vlifesystems/rulehunter/dataset"
 	"path/filepath"
 	"reflect"
 	"testing"
@@ -25,8 +25,8 @@ func TestNew(t *testing.T) {
 			10},
 	}
 	for _, c := range cases {
-		cinput := mustNewCsvInput(c.fieldNames, c.filename, ';', false)
-		_, err := New(cinput, c.numRecords)
+		dataset := mustNewCsvDataset(c.fieldNames, c.filename, ';', false)
+		_, err := New(dataset, c.numRecords)
 		if err != nil {
 			t.Errorf("New(filename: %q) err: %q", c.filename, err)
 		}
@@ -50,7 +50,7 @@ func TestErr(t *testing.T) {
 				"housing", "loan", "contact", "day", "month", "duration", "campaign",
 				"pdays", "previous", "poutcome"},
 			4,
-			errors.New("wrong number of field names for input")},
+			errors.New("wrong number of field names for dataset")},
 		{filepath.Join("..", "fixtures", "bank.csv"), ';',
 			[]string{"age", "job", "marital", "education", "default", "balance",
 				"housing", "loan", "contact", "day", "month", "duration", "campaign",
@@ -58,24 +58,24 @@ func TestErr(t *testing.T) {
 			20, nil},
 	}
 	for _, c := range cases {
-		input := mustNewCsvInput(c.fieldNames, c.filename, c.separator, false)
-		records, err := New(input, c.numRecords)
+		dataset := mustNewCsvDataset(c.fieldNames, c.filename, c.separator, false)
+		reducedDataset, err := New(dataset, c.numRecords)
 		if err != nil {
 			t.Errorf("Read() - New() - filename: %q err: %q", c.filename, err)
 		}
-		for records.Next() {
-			records.Read()
+		for reducedDataset.Next() {
+			reducedDataset.Read()
 		}
 		if c.wantErr == nil {
-			if records.Err() != nil {
+			if reducedDataset.Err() != nil {
 				t.Errorf("Read() - filename: %q wantErr: %s, got error: %s",
-					c.filename, c.wantErr, records.Err())
+					c.filename, c.wantErr, reducedDataset.Err())
 			}
 		} else {
-			if records.Err() == nil ||
-				records.Err().Error() != c.wantErr.Error() {
+			if reducedDataset.Err() == nil ||
+				reducedDataset.Err().Error() != c.wantErr.Error() {
 				t.Errorf("Read() - filename: %q wantErr: %s, got error: %s",
-					c.filename, c.wantErr, records.Err())
+					c.filename, c.wantErr, reducedDataset.Err())
 			}
 		}
 	}
@@ -96,20 +96,20 @@ func TestNext(t *testing.T) {
 			[]string{"band", "score", "team", "points", "rating"}, 50},
 	}
 	for _, c := range cases {
-		input := mustNewCsvInput(c.fieldNames, c.filename, c.separator, false)
-		records, err := New(input, c.numRecords)
+		dataset := mustNewCsvDataset(c.fieldNames, c.filename, c.separator, false)
+		reducedDataset, err := New(dataset, c.numRecords)
 		if err != nil {
 			t.Errorf("New() - filename: %q err: %q", c.filename, err)
 		}
 		recordNum := -1
-		for records.Next() {
+		for reducedDataset.Next() {
 			recordNum++
 		}
-		if records.Next() {
-			t.Errorf("records.Next() - Return true, despite having finished")
+		if reducedDataset.Next() {
+			t.Errorf("reducedDataset.Next() - Return true, despite having finished")
 		}
 		if recordNum != c.numRecords {
-			t.Errorf("records.Next() - recordNum: %d, numRecords: %d",
+			t.Errorf("reducedDataset.Next() - recordNum: %d, numRecords: %d",
 				recordNum, c.numRecords)
 		}
 	}
@@ -128,32 +128,34 @@ func TestNext_errors(t *testing.T) {
 			[]string{"age", "job", "marital", "education", "default", "balance",
 				"housing", "loan", "contact", "day", "month", "duration", "campaign",
 				"pdays", "previous", "poutcome"}, 2, 4,
-			errors.New("input has been closed")},
+			errors.New("dataset has been closed")},
 	}
 	for _, c := range cases {
-		input := mustNewCsvInput(c.fieldNames, c.filename, c.separator, false)
-		records, err := New(input, c.numRecords)
+		dataset := mustNewCsvDataset(c.fieldNames, c.filename, c.separator, false)
+		reducedDataset, err := New(dataset, c.numRecords)
 		if err != nil {
 			t.Errorf("New() - filename: %q err: %q", c.filename, err)
 		}
 		i := 0
-		for records.Next() {
+		for reducedDataset.Next() {
 			if i == c.stopRow {
-				if err := records.Close(); err != nil {
-					t.Errorf("records.Close() - Err: %d", err)
+				if err := reducedDataset.Close(); err != nil {
+					t.Errorf("reducedDataset.Close() - Err: %d", err)
 				}
 				break
 			}
 			i++
 		}
 		if i != c.stopRow {
-			t.Errorf("records.Next() - Not stopped at row: %d", c.stopRow)
+			t.Errorf("reducedDataset.Next() - Not stopped at row: %d", c.stopRow)
 		}
-		if records.Next() {
-			t.Errorf("records.Next() - Return true, despite records being closed")
+		if reducedDataset.Next() {
+			t.Errorf("reducedDataset.Next() - Return true, despite reducedDataset being closed")
 		}
-		if records.Err() == nil || records.Err().Error() != c.wantErr.Error() {
-			t.Errorf("records.Err() - err: %s, want err: %s", records.Err(), c.wantErr)
+		if reducedDataset.Err() == nil ||
+			reducedDataset.Err().Error() != c.wantErr.Error() {
+			t.Errorf("reducedDataset.Err() - err: %s, want err: %s",
+				reducedDataset.Err(), c.wantErr)
 		}
 	}
 }
@@ -192,15 +194,15 @@ func TestRewind(t *testing.T) {
 				"y":         dlit.MustNew("no")}},
 	}
 	for _, c := range cases {
-		input := mustNewCsvInput(c.fieldNames, c.filename, ';', false)
-		records, err := New(input, c.numRecords)
+		dataset := mustNewCsvDataset(c.fieldNames, c.filename, ';', false)
+		reducedDataset, err := New(dataset, c.numRecords)
 		if err != nil {
 			t.Errorf("New() - filename: %q err: %q", c.filename, err)
 		}
 		for i := 0; i < 5; i++ {
 			gotNumRows := 0
-			for records.Next() {
-				record, err := records.Read()
+			for reducedDataset.Next() {
+				record, err := reducedDataset.Read()
 				if err != nil {
 					t.Errorf("Read() - filename: %q err: %q", c.filename, err)
 				}
@@ -214,7 +216,7 @@ func TestRewind(t *testing.T) {
 					t.Errorf("Read() - filename: %q got: %q, want: %q",
 						c.filename, record, c.wantThirdRecord)
 				}
-				if err := records.Err(); err != nil {
+				if err := reducedDataset.Err(); err != nil {
 					t.Errorf("Err() - filename: %s err: %s", c.filename, err)
 				}
 				gotNumRows++
@@ -223,7 +225,7 @@ func TestRewind(t *testing.T) {
 				t.Errorf("Read() - filename: %q gotNumRows:: %d, want: %d",
 					c.filename, gotNumRows, c.wantNumRows)
 			}
-			if err := records.Rewind(); err != nil {
+			if err := reducedDataset.Rewind(); err != nil {
 				t.Errorf("Rewind() - filename: %s err: %s", c.filename, err)
 			}
 		}
@@ -244,15 +246,15 @@ func TestRewind_errors(t *testing.T) {
 			&csv.ParseError{102, 0, errors.New("wrong number of fields in line")}},
 	}
 	for _, c := range cases {
-		input := mustNewCsvInput(c.fieldNames, c.filename, c.separator, false)
-		records, err := New(input, c.numRecords)
+		dataset := mustNewCsvDataset(c.fieldNames, c.filename, c.separator, false)
+		reducedDataset, err := New(dataset, c.numRecords)
 		if err != nil {
 			t.Errorf("New() - filename: %q err: %q", c.filename, err)
 		}
-		for records.Next() {
-			records.Read()
+		for reducedDataset.Next() {
+			reducedDataset.Read()
 		}
-		err = records.Rewind()
+		err = reducedDataset.Rewind()
 		if err.Error() != c.wantErr.Error() {
 			t.Errorf("Rewind() - err: %s, wantErr: %s", err, c.wantErr)
 		}
@@ -267,13 +269,13 @@ func TestGetFieldNames(t *testing.T) {
 		"pdays", "previous", "poutcome", "y",
 	}
 	numRecords := 3
-	input := mustNewCsvInput(fieldNames, filename, ';', false)
-	records, err := New(input, numRecords)
+	dataset := mustNewCsvDataset(fieldNames, filename, ';', false)
+	reducedDataset, err := New(dataset, numRecords)
 	if err != nil {
 		t.Errorf("New() - filename: %s err: %s", filename, err)
 	}
 
-	got := records.GetFieldNames()
+	got := reducedDataset.GetFieldNames()
 	if !reflect.DeepEqual(got, fieldNames) {
 		t.Errorf("GetFieldNames() - got: %q want: %q", got, fieldNames)
 	}
@@ -296,15 +298,15 @@ func matchRecords(r1 map[string]*dlit.Literal,
 	return true
 }
 
-func mustNewCsvInput(
+func mustNewCsvDataset(
 	fieldNames []string,
 	filename string,
 	separator rune,
 	skipFirstLine bool,
-) input.Input {
-	input, err := csvinput.New(fieldNames, filename, separator, skipFirstLine)
+) dataset.Dataset {
+	dataset, err := csvdataset.New(fieldNames, filename, separator, skipFirstLine)
 	if err != nil {
-		panic(fmt.Sprintf("Can't create new csvinput for filename: %s", filename))
+		panic(fmt.Sprintf("Can't create new csvdataset for filename: %s", filename))
 	}
-	return input
+	return dataset
 }

@@ -16,72 +16,72 @@
 	along with Rulehunter; see the file COPYING.  If not, see
 	<http://www.gnu.org/licenses/>.
 */
-package reduceinput
+package reducedataset
 
 import (
 	"github.com/lawrencewoodman/dlit"
-	"github.com/vlifesystems/rulehunter/input"
+	"github.com/vlifesystems/rulehunter/dataset"
 	"io"
 )
 
-type ReduceInput struct {
-	input      input.Input
+type ReduceDataset struct {
+	dataset    dataset.Dataset
 	recordNum  int
 	numRecords int
 	err        error
 }
 
-func New(input input.Input, numRecords int) (input.Input, error) {
-	return &ReduceInput{
-		input:      input,
+func New(dataset dataset.Dataset, numRecords int) (dataset.Dataset, error) {
+	return &ReduceDataset{
+		dataset:    dataset,
 		recordNum:  -1,
 		numRecords: numRecords,
 		err:        nil,
 	}, nil
 }
 
-func (r *ReduceInput) Clone() (input.Input, error) {
-	i, err := r.input.Clone()
+func (r *ReduceDataset) Clone() (dataset.Dataset, error) {
+	i, err := r.dataset.Clone()
 	return i, err
 }
 
-func (r *ReduceInput) Next() bool {
+func (r *ReduceDataset) Next() bool {
 	if r.Err() != nil {
 		return false
 	}
 	if r.recordNum < r.numRecords {
 		r.recordNum++
-		return r.input.Next()
+		return r.dataset.Next()
 	}
 	r.err = io.EOF
 	return false
 }
 
-func (r *ReduceInput) Err() error {
+func (r *ReduceDataset) Err() error {
 	if r.err == io.EOF {
 		return nil
 	}
-	return r.input.Err()
+	return r.dataset.Err()
 }
 
-func (r *ReduceInput) Read() (map[string]*dlit.Literal, error) {
-	record, err := r.input.Read()
+func (r *ReduceDataset) Read() (map[string]*dlit.Literal, error) {
+	record, err := r.dataset.Read()
 	return record, err
 }
 
-func (r *ReduceInput) Rewind() error {
+func (r *ReduceDataset) Rewind() error {
 	if r.Err() != nil {
 		return r.Err()
 	}
 	r.recordNum = -1
-	r.err = r.input.Rewind()
+	r.err = r.dataset.Rewind()
 	return r.err
 }
 
-func (r *ReduceInput) GetFieldNames() []string {
-	return r.input.GetFieldNames()
+func (r *ReduceDataset) GetFieldNames() []string {
+	return r.dataset.GetFieldNames()
 }
 
-func (r *ReduceInput) Close() error {
-	return r.input.Close()
+func (r *ReduceDataset) Close() error {
+	return r.dataset.Close()
 }

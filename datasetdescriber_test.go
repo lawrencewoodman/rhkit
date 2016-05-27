@@ -50,7 +50,7 @@ var flowRecords = [][]string{
 	[]string{"8", "15.1", "2", "9.9b", "87", "1", "c"},
 }
 
-func TestDescribeInput(t *testing.T) {
+func TestDescribeDataset(t *testing.T) {
 	fieldNames :=
 		[]string{"band", "inputA", "inputB", "version", "flow", "score", "method"}
 	expected := &description.Description{
@@ -102,13 +102,13 @@ func TestDescribeInput(t *testing.T) {
 			"method": &description.Field{description.IGNORE, nil, nil, 0,
 				[]*dlit.Literal{}, 0},
 		}}
-	records := NewLiteralInput(fieldNames, flowRecords)
-	d, err := DescribeInput(records)
+	dataset := NewLiteralDataset(fieldNames, flowRecords)
+	d, err := DescribeDataset(dataset)
 	if err != nil {
-		t.Errorf("input.Describe(records) err: %s", err)
+		t.Errorf("DescribeDataset(dataset) err: %s", err)
 	}
 	if !descriptionsEqual(d, expected) {
-		t.Errorf("DescibeInput(records) got: %s, want: %s", d, expected)
+		t.Errorf("DescibeDataset(dataset) got: %s, want: %s", d, expected)
 	}
 }
 

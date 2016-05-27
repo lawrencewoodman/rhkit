@@ -4,9 +4,9 @@
 package integrate
 
 import (
-	"github.com/vlifesystems/rulehunter/csvinput"
+	"github.com/vlifesystems/rulehunter/csvdataset"
 	"github.com/vlifesystems/rulehunter/experiment"
-	"github.com/vlifesystems/rulehunter/reduceinput"
+	"github.com/vlifesystems/rulehunter/reducedataset"
 	"path/filepath"
 	"testing"
 )
@@ -15,19 +15,19 @@ func TestAll_full(t *testing.T) {
 	fieldNames := []string{"age", "job", "marital", "education", "default",
 		"balance", "housing", "loan", "contact", "day", "month", "duration",
 		"campaign", "pdays", "previous", "poutcome", "y"}
-	records, err := csvinput.New(
+	dataset, err := csvdataset.New(
 		fieldNames,
 		filepath.Join("..", "..", "fixtures", "bank.csv"),
 		rune(';'),
 		true,
 	)
 	if err != nil {
-		t.Errorf("csvInput.New() - err: %s", err)
+		t.Errorf("csvDataset.New() - err: %s", err)
 		return
 	}
 	experimentDesc := &experiment.ExperimentDesc{
 		Title:         "This is a jolly nice title",
-		Input:         records,
+		Dataset:       dataset,
 		ExcludeFields: []string{"education"},
 		Aggregators: []*experiment.AggregatorDesc{
 			&experiment.AggregatorDesc{"numSignedUp", "count", "y == \"yes\""},
@@ -54,8 +54,8 @@ func TestAll_full(t *testing.T) {
 		return
 	}
 	defer experiment.Close()
-	if err = ProcessInput(experiment); err != nil {
-		t.Errorf("ProcessInput() - err: %s", err)
+	if err = ProcessDataset(experiment); err != nil {
+		t.Errorf("ProcessDataset() - err: %s", err)
 		return
 	}
 }
@@ -66,26 +66,26 @@ func TestAll_reduced(t *testing.T) {
 		"campaign", "pdays", "previous", "poutcome", "y"}
 	numRecords := 5
 
-	input, err := csvinput.New(
+	dataset, err := csvdataset.New(
 		fieldNames,
 		filepath.Join("..", "..", "fixtures", "bank.csv"),
 		rune(';'),
 		true,
 	)
 	if err != nil {
-		t.Errorf("csvInput.New() - err: %s", err)
+		t.Errorf("csvDataset.New() - err: %s", err)
 		return
 	}
 
-	records, err := reduceinput.New(input, numRecords)
+	reducedDataset, err := reducedataset.New(dataset, numRecords)
 	if err != nil {
-		t.Errorf("reduceInput.New() - err: %s", err)
+		t.Errorf("reduceDataset.New() - err: %s", err)
 		return
 	}
 
 	experimentDesc := &experiment.ExperimentDesc{
 		Title:         "This is a jolly nice title",
-		Input:         records,
+		Dataset:       reducedDataset,
 		ExcludeFields: []string{"education"},
 		Aggregators: []*experiment.AggregatorDesc{
 			&experiment.AggregatorDesc{"numSignedUp", "count", "y == \"yes\""},
@@ -113,8 +113,8 @@ func TestAll_reduced(t *testing.T) {
 	}
 
 	defer experiment.Close()
-	if err = ProcessInput(experiment); err != nil {
-		t.Errorf("ProcessInput() - err: %s", err)
+	if err = ProcessDataset(experiment); err != nil {
+		t.Errorf("ProcessDataset() - err: %s", err)
 		return
 	}
 }
