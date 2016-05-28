@@ -33,7 +33,7 @@ func TestAssess(t *testing.T) {
 			t.Errorf("Assess(%q) goal: %s, err: %s", aggregators, goal, err)
 		}
 		if got != c.want {
-			t.Errorf("Assess(%q) goal: %s, got: %s, want: %s",
+			t.Errorf("Assess(%q) goal: %s, got: %t, want: %t",
 				aggregators, goal, got, c.want)
 		}
 	}
@@ -60,7 +60,7 @@ func TestAssess_errors(t *testing.T) {
 
 		_, err = goal.Assess(aggregators)
 		if err == nil || err.Error() != c.wantErr {
-			t.Errorf("Assess(%s) goal: %s, wantErr, gotErr: %s",
+			t.Errorf("Assess(%s) goal: %s, wantErr: %s, gotErr: %s",
 				aggregators, goal, c.wantErr, err)
 		}
 	}

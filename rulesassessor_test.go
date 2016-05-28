@@ -265,7 +265,7 @@ func TestAssessRulesMP(t *testing.T) {
 			}
 		}
 		if progress != 1.0 {
-			t.Errorf("AssessRulesMP(%q, %q, ...) - progress didn't finish at 100, but: %d",
+			t.Errorf("AssessRulesMP(%q, %q, ...) - progress didn't finish at 100, but: %f",
 				cs.rules, experiment, progress)
 		}
 		if numRuns < len(cs.rules) {

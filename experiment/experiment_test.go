@@ -305,8 +305,7 @@ func TestClose(t *testing.T) {
 
 func experimentMatch(e1 *Experiment, e2 *Experiment) (bool, string) {
 	if e1.Title != e2.Title {
-		return false, fmt.Sprintf("Titles don't match",
-			e1.Title, e2.Title)
+		return false, "Titles don't match"
 	}
 	if !areStringArraysEqual(e1.ExcludeFieldNames, e2.ExcludeFieldNames) {
 		return false, "ExcludeFieldNames don't match"

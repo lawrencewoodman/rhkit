@@ -45,7 +45,7 @@ func TestIsTrue(t *testing.T) {
 			t.Errorf("IsTrue(%s) rule: %s err: %s", record, c.rule, err)
 		}
 		if gotIsTrue != c.wantIsTrue {
-			t.Errorf("IsTrue(%s) got: %s want: %s", record, gotIsTrue, c.wantIsTrue)
+			t.Errorf("IsTrue(%s) got: %t want: %t", record, gotIsTrue, c.wantIsTrue)
 		}
 	}
 }
@@ -85,7 +85,7 @@ func TestString(t *testing.T) {
 	for _, c := range cases {
 		got := c.rule.String()
 		if got != c.want {
-			t.Errorf("IsTrue(%s) got: %s want: %s", got, c.want)
+			t.Errorf("c.rule.String() got: %s want: %s", got, c.want)
 		}
 	}
 }
@@ -106,7 +106,7 @@ func TestGetTweakableParts(t *testing.T) {
 		gotIsTweakable, gotFieldName, gotOperator, gotValue :=
 			c.rule.GetTweakableParts()
 		if gotIsTweakable != c.wantIsTweakable {
-			t.Errorf("GetTweakableParts() rule: %s, got tweakable: %s want: %s",
+			t.Errorf("GetTweakableParts() rule: %s, got isTweakable: %t want: %t",
 				c.rule, gotIsTweakable, c.wantIsTweakable)
 		}
 		if gotFieldName != c.wantFieldName {
@@ -141,7 +141,7 @@ func TestGetInNiParts(t *testing.T) {
 	for _, c := range cases {
 		gotIsInNi, gotOperator, gotFieldName := c.rule.GetInNiParts()
 		if gotIsInNi != c.wantIsInNi {
-			t.Errorf("GetInNIParts() rule: %s, got isInNi: %s want: %s",
+			t.Errorf("GetInNIParts() rule: %s, got isInNi: %t want: %t",
 				c.rule, gotIsInNi, c.wantIsInNi)
 		}
 		if gotOperator != c.wantOperator {

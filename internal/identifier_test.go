@@ -29,7 +29,7 @@ func TestIsIdentifierValid(t *testing.T) {
 	for _, c := range cases {
 		got := IsIdentifierValid(c.id)
 		if got != c.want {
-			t.Errorf("IsIdentifierValid(%s) got: %s, want: %s", c.id, got, c.want)
+			t.Errorf("IsIdentifierValid(%s) got: %t, want: %t", c.id, got, c.want)
 		}
 	}
 }

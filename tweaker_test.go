@@ -71,7 +71,7 @@ func TestTweakRules_1(t *testing.T) {
 	if numOtherRules != 0 {
 		printTestPurposes(t, testPurposes)
 		t.Errorf("TweakRules(%q) wrong number(%d) of other rules - got: %q",
-			numOtherRules, gotRules)
+			rulesIn, numOtherRules, gotRules)
 	}
 }
 
@@ -135,7 +135,7 @@ func TestTweakRules_2(t *testing.T) {
 	if numOther != 0 {
 		printTestPurposes(t, testPurposes)
 		t.Errorf("TweakRules(%q) wrong number(%d) of other rules - got: %q",
-			numOther, gotRules)
+			rulesIn, numOther, gotRules)
 	}
 }
 

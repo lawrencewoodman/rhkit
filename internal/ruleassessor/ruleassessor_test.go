@@ -99,7 +99,7 @@ func TestNextRecord(t *testing.T) {
 			t.Errorf("goalsScore aggregator can't be float")
 		}
 		if gotGoalsScoreFloat != c.wantGoalsScore {
-			t.Errorf("nextRecord() rule: %s, aggregators: %q, goals: %q - wantGoalsScore: %d, got: %d",
+			t.Errorf("nextRecord() rule: %s, aggregators: %q, goals: %q - wantGoalsScore: %f, got: %f",
 				c.rule, inAggregators, goals, c.wantGoalsScore, gotGoalsScore)
 		}
 	}

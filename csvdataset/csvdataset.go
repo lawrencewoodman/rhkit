@@ -68,8 +68,7 @@ func New(
 }
 
 func (c *CsvDataset) Clone() (dataset.Dataset, error) {
-	newC, err :=
-		New(c.fieldNames, c.filename, c.separator, c.skipFirstLine)
+	newC, err := New(c.fieldNames, c.filename, c.separator, c.skipFirstLine)
 	return newC, err
 }
 
