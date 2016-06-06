@@ -41,8 +41,9 @@ func New(dataset dataset.Dataset, numRecords int) (dataset.Dataset, error) {
 }
 
 func (r *ReduceDataset) Clone() (dataset.Dataset, error) {
-	i, err := r.dataset.Clone()
-	return i, err
+	cDataset, err := r.dataset.Clone()
+	d, err := New(cDataset, r.numRecords)
+	return d, err
 }
 
 func (r *ReduceDataset) Next() bool {

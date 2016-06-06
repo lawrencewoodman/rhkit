@@ -83,10 +83,9 @@ func TestNew(t *testing.T) {
 		if err != nil {
 			t.Errorf("New(%q) err: %s", c.experimentDesc, err)
 		}
-		experimentsMatch, reason := experimentMatch(got, c.want)
-		if !experimentsMatch {
-			t.Errorf("New(%q)\n Reason: %s\n got: %q\n want: %q",
-				c.experimentDesc, reason, got, c.want)
+		if err := checkExperimentsMatch(got, c.want); err != nil {
+			t.Errorf("New(%q)\n experiments don't match: %s\n got: %q\n want: %q",
+				c.experimentDesc, err, got, c.want)
 		}
 	}
 }
@@ -303,32 +302,31 @@ func TestClose(t *testing.T) {
    Helper functions
 ************************/
 
-func experimentMatch(e1 *Experiment, e2 *Experiment) (bool, string) {
+func checkExperimentsMatch(e1 *Experiment, e2 *Experiment) error {
 	if e1.Title != e2.Title {
-		return false, "Titles don't match"
+		return errors.New("Titles don't match")
 	}
 	if !areStringArraysEqual(e1.ExcludeFieldNames, e2.ExcludeFieldNames) {
-		return false, "ExcludeFieldNames don't match"
+		return errors.New("ExcludeFieldNames don't match")
 	}
 	if !areGoalExpressionsEqual(e1.Goals, e2.Goals) {
-		return false, "Goals don't match"
+		return errors.New("Goals don't match")
 	}
 	if !areAggregatorsEqual(e1.Aggregators, e2.Aggregators) {
-		return false, "Aggregators don't match"
+		return errors.New("Aggregators don't match")
 	}
 	if !areSortOrdersEqual(e1.SortOrder, e2.SortOrder) {
-		return false, "Sort Orders don't match"
+		return errors.New("Sort Orders don't match")
 	}
-	datasetsEqual, msg := areDatasetsEqual(e1.Dataset, e2.Dataset)
-	return datasetsEqual, msg
+	return checkDatasetsEqual(e1.Dataset, e2.Dataset)
 }
 
-func areDatasetsEqual(i1, i2 dataset.Dataset) (bool, string) {
+func checkDatasetsEqual(i1, i2 dataset.Dataset) error {
 	for {
 		i1Next := i1.Next()
 		i2Next := i2.Next()
 		if i1Next != i2Next {
-			return false, "Datasets don't finish at same point"
+			return errors.New("Datasets don't finish at same point")
 		}
 		if !i1Next {
 			break
@@ -337,17 +335,17 @@ func areDatasetsEqual(i1, i2 dataset.Dataset) (bool, string) {
 		i1Record, i1Err := i1.Read()
 		i2Record, i2Err := i2.Read()
 		if i1Err != i2Err {
-			return false, "Datasets don't error at same point"
+			return errors.New("Datasets don't error at same point")
 		} else if i1Err == nil && i2Err == nil {
 			if !reflect.DeepEqual(i1Record, i2Record) {
-				return false, "Datasets don't match"
+				return errors.New("Datasets don't match")
 			}
 		}
 	}
 	if i1.Err() != i2.Err() {
-		return false, "Datasets final error doesn't match"
+		return errors.New("Datasets final error doesn't match")
 	}
-	return true, ""
+	return nil
 }
 
 func areStringArraysEqual(a1 []string, a2 []string) bool {

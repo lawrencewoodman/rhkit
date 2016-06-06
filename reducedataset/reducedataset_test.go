@@ -28,8 +28,30 @@ func TestNew(t *testing.T) {
 		dataset := mustNewCsvDataset(c.fieldNames, c.filename, ';', false)
 		_, err := New(dataset, c.numRecords)
 		if err != nil {
-			t.Errorf("New(filename: %q) err: %q", c.filename, err)
+			t.Errorf("New(filename: %s) err: %s", c.filename, err)
 		}
+	}
+}
+
+func TestClone(t *testing.T) {
+	filename := filepath.Join("..", "fixtures", "bank.csv")
+	fieldNames := []string{
+		"age", "job", "marital", "education", "default", "balance",
+		"housing", "loan", "contact", "day", "month", "duration", "campaign",
+		"pdays", "previous", "poutcome", "y",
+	}
+	numRecords := 5
+	dataset := mustNewCsvDataset(fieldNames, filename, ';', true)
+	rDataset, err := New(dataset, numRecords)
+	if err != nil {
+		t.Errorf("New(filename: %s) err: %s", filename, err)
+	}
+	crDataset, err := rDataset.Clone()
+	if err != nil {
+		t.Errorf("Clone() err: %q", err)
+	}
+	if err := checkDatasetsEqual(crDataset, rDataset); err != nil {
+		t.Errorf("Clone() datasets are not equal: %s", err)
 	}
 }
 
@@ -285,8 +307,37 @@ func TestGetFieldNames(t *testing.T) {
  *   Helper functions
  *************************/
 
-func matchRecords(r1 map[string]*dlit.Literal,
-	r2 map[string]*dlit.Literal) bool {
+func checkDatasetsEqual(i1, i2 dataset.Dataset) error {
+	for {
+		i1Next := i1.Next()
+		i2Next := i2.Next()
+		if i1Next != i2Next {
+			return errors.New("Datasets don't finish at same point")
+		}
+		if !i1Next {
+			break
+		}
+
+		i1Record, i1Err := i1.Read()
+		i2Record, i2Err := i2.Read()
+		if i1Err != i2Err {
+			return errors.New("Datasets don't error at same point")
+		} else if i1Err == nil && i2Err == nil {
+			if !matchRecords(i1Record, i2Record) {
+				return errors.New("Datasets don't match")
+			}
+		}
+	}
+	if i1.Err() != i2.Err() {
+		return errors.New("Datasets final error doesn't match")
+	}
+	return nil
+}
+
+func matchRecords(
+	r1 map[string]*dlit.Literal,
+	r2 map[string]*dlit.Literal,
+) bool {
 	if len(r1) != len(r2) {
 		return false
 	}
