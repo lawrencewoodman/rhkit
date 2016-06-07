@@ -103,7 +103,7 @@ func TestTweakRules_2(t *testing.T) {
 		isTweakable, field, operator, value := rule.getTweakableParts()
 		if !isTweakable && field != "age" && operator != "<=" {
 			printTestPurposes(t, testPurposes)
-			t.Errorf("TweakRules(%s) invalid rule(%s): isTweakable: %s, field: %s, operator: %s",
+			t.Errorf("TweakRules(%s) invalid rule(%s): isTweakable: %t, field: %s, operator: %s",
 				rulesIn, rule, isTweakable, field, operator)
 		}
 		l := dlit.MustNew(value)
@@ -172,7 +172,7 @@ func TestTweakRules_3(t *testing.T) {
 		isTweakable, field, operator, value := rule.getTweakableParts()
 		if !isTweakable && field != "flow" && operator != "<=" {
 			printTestPurposes(t, testPurposes)
-			t.Errorf("TweakRules(%s) invalid rule(%s): isTweakable: %s, field: %s, operator: %s",
+			t.Errorf("TweakRules(%s) invalid rule(%s): isTweakable: %t, field: %s, operator: %s",
 				rulesIn, rule, isTweakable, field, operator)
 		}
 		l := dlit.MustNew(value)

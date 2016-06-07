@@ -124,7 +124,7 @@ func TestAssessRules(t *testing.T) {
 		wantRuleAssessments,
 	)
 	if !assessmentsMatch {
-		t.Errorf("AssessRules(%q, %q, %q, dataset)\nassessments don't match\n - got: %s\n - wantRuleAssessments: %s, wantNumRecords: %d, wantIsSorted: %t, wantIsRefined: %t\n",
+		t.Errorf("AssessRules(%q, %q, %q, dataset)\nassessments don't match\n - got: %q\n - wantRuleAssessments: %q, wantNumRecords: %d, wantIsSorted: %t, wantIsRefined: %t\n",
 			rules, aggregators, goals, gotAssessment, wantRuleAssessments,
 			wantNumRecords, wantIsSorted, wantIsRefined)
 	}
@@ -278,7 +278,7 @@ func TestAssessRulesMP(t *testing.T) {
 			wantAssessment.RuleAssessments,
 		)
 		if !assessmentsMatch {
-			t.Errorf("AssessRulesMP(%q, %q, ...)\nassessments don't match\n - got: %s\n - want: %s\n",
+			t.Errorf("AssessRulesMP(%q, %q, ...)\nassessments don't match\n - got: %q\n - want: %q\n",
 				cs.rules, experiment, gotAssessment, wantAssessment)
 		}
 	}
