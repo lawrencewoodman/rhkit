@@ -58,7 +58,7 @@ func mustNewRule(exprStr string) *Rule {
 	return rule
 }
 
-func (r *Rule) GetTweakableParts() (bool, string, string, string) {
+func (r *Rule) getTweakableParts() (bool, string, string, string) {
 	ruleStr := r.String()
 	isTweakable := isTweakableRegexp.MatchString(ruleStr)
 	if !isTweakable {
@@ -70,7 +70,7 @@ func (r *Rule) GetTweakableParts() (bool, string, string, string) {
 	return isTweakable, fieldName, operator, value
 }
 
-func (r *Rule) GetInNiParts() (bool, string, string) {
+func (r *Rule) getInNiParts() (bool, string, string) {
 	ruleStr := r.String()
 	isInNi := isInNiRegexp.MatchString(ruleStr)
 	if !isInNi {
@@ -81,14 +81,14 @@ func (r *Rule) GetInNiParts() (bool, string, string) {
 	return isInNi, operator, fieldName
 }
 
-func (r *Rule) IsTrue(record dataset.Record) (bool, error) {
+func (r *Rule) isTrue(record dataset.Record) (bool, error) {
 	isTrue, err := r.expr.EvalBool(record, dexprfuncs.CallFuncs)
 	// TODO: Create an error type for rule rather than coopting the dexpr one
 	return isTrue, err
 }
 
-func (r *Rule) CloneWithValue(newValue string) (*Rule, error) {
-	isTweakable, fieldName, operator, _ := r.GetTweakableParts()
+func (r *Rule) cloneWithValue(newValue string) (*Rule, error) {
+	isTweakable, fieldName, operator, _ := r.getTweakableParts()
 	if !isTweakable {
 		return nil, errors.New(fmt.Sprintf("Can't clone non-tweakable rule: %s", r))
 	}

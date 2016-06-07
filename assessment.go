@@ -259,7 +259,7 @@ func (sortedAssessment *Assessment) excludePoorerInNiRules(
 	niFields := make(map[string]int)
 	for _, a := range sortedAssessment.RuleAssessments {
 		rule := a.Rule
-		isInNiRule, operator, field := rule.GetInNiParts()
+		isInNiRule, operator, field := rule.getInNiParts()
 		if !isInNiRule {
 			goodRuleAssessments = append(goodRuleAssessments, a)
 		} else if operator == "in" {
@@ -292,7 +292,7 @@ func (sortedAssessment *Assessment) excludePoorerTweakableRules(
 	fieldOperatorIDs := make(map[string]int)
 	for _, a := range sortedAssessment.RuleAssessments {
 		rule := a.Rule
-		isTweakable, field, operator, _ := rule.GetTweakableParts()
+		isTweakable, field, operator, _ := rule.getTweakableParts()
 		if !isTweakable {
 			goodRuleAssessments = append(goodRuleAssessments, a)
 		} else {

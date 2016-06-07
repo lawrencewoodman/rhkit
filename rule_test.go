@@ -40,12 +40,12 @@ func TestIsTrue(t *testing.T) {
 		"band": dlit.MustNew(4),
 	}
 	for _, c := range cases {
-		gotIsTrue, err := c.rule.IsTrue(record)
+		gotIsTrue, err := c.rule.isTrue(record)
 		if err != nil {
-			t.Errorf("IsTrue(%s) rule: %s err: %s", record, c.rule, err)
+			t.Errorf("isTrue(%s) rule: %s err: %s", record, c.rule, err)
 		}
 		if gotIsTrue != c.wantIsTrue {
-			t.Errorf("IsTrue(%s) got: %t want: %t", record, gotIsTrue, c.wantIsTrue)
+			t.Errorf("isTrue(%s) got: %t want: %t", record, gotIsTrue, c.wantIsTrue)
 		}
 	}
 }
@@ -63,12 +63,12 @@ func TestIsTrue_errors(t *testing.T) {
 		"length": dlit.MustNew(4),
 	}
 	for _, c := range cases {
-		_, err := c.rule.IsTrue(record)
+		_, err := c.rule.isTrue(record)
 		if err == nil {
-			t.Errorf("IsTrue(%s) no error, expected: %s", record, c.wantError)
+			t.Errorf("isTrue(%s) no error, expected: %s", record, c.wantError)
 		}
 		if err.Error() != c.wantError.Error() {
-			t.Errorf("IsTrue(%s) got error: %s, want error: %s", record,
+			t.Errorf("isTrue(%s) got error: %s, want error: %s", record,
 				err, c.wantError)
 		}
 	}
@@ -104,21 +104,21 @@ func TestGetTweakableParts(t *testing.T) {
 	}
 	for _, c := range cases {
 		gotIsTweakable, gotFieldName, gotOperator, gotValue :=
-			c.rule.GetTweakableParts()
+			c.rule.getTweakableParts()
 		if gotIsTweakable != c.wantIsTweakable {
-			t.Errorf("GetTweakableParts() rule: %s, got isTweakable: %t want: %t",
+			t.Errorf("getTweakableParts() rule: %s, got isTweakable: %t want: %t",
 				c.rule, gotIsTweakable, c.wantIsTweakable)
 		}
 		if gotFieldName != c.wantFieldName {
-			t.Errorf("GetTweakableParts() rule: %s, got fieldName: %s want: %s",
+			t.Errorf("getTweakableParts() rule: %s, got fieldName: %s want: %s",
 				c.rule, gotFieldName, c.wantFieldName)
 		}
 		if gotOperator != c.wantOperator {
-			t.Errorf("GetTweakableParts() rule: %s, got operator: %s want: %s",
+			t.Errorf("getTweakableParts() rule: %s, got operator: %s want: %s",
 				c.rule, gotOperator, c.wantOperator)
 		}
 		if gotValue != c.wantValue {
-			t.Errorf("GetTweakableParts() rule: %s, got value: %s want: %s",
+			t.Errorf("getTweakableParts() rule: %s, got value: %s want: %s",
 				c.rule, gotValue, c.wantValue)
 		}
 	}
@@ -139,17 +139,17 @@ func TestGetInNiParts(t *testing.T) {
 		{mustNewRule("ni(flow, \"4\", \"6\")"), true, "ni", "flow"},
 	}
 	for _, c := range cases {
-		gotIsInNi, gotOperator, gotFieldName := c.rule.GetInNiParts()
+		gotIsInNi, gotOperator, gotFieldName := c.rule.getInNiParts()
 		if gotIsInNi != c.wantIsInNi {
-			t.Errorf("GetInNIParts() rule: %s, got isInNi: %t want: %t",
+			t.Errorf("getInNIParts() rule: %s, got isInNi: %t want: %t",
 				c.rule, gotIsInNi, c.wantIsInNi)
 		}
 		if gotOperator != c.wantOperator {
-			t.Errorf("GetInNIParts() rule: %s, got operator: %s want: %s",
+			t.Errorf("getInNIParts() rule: %s, got operator: %s want: %s",
 				c.rule, gotOperator, c.wantOperator)
 		}
 		if gotFieldName != c.wantFieldName {
-			t.Errorf("GetInNIParts() rule: %s, got fieldName: %s want: %s",
+			t.Errorf("getInNIParts() rule: %s, got fieldName: %s want: %s",
 				c.rule, gotFieldName, c.wantFieldName)
 		}
 	}
@@ -164,12 +164,12 @@ func TestCloneWithValue(t *testing.T) {
 		{mustNewRule("band > 3"), "20", mustNewRule("band > 20")},
 	}
 	for _, c := range cases {
-		gotRule, err := c.rule.CloneWithValue(c.newValue)
+		gotRule, err := c.rule.cloneWithValue(c.newValue)
 		if err != nil {
-			t.Errorf("CloneWithValue(%s) rule: %s, err: %s", c.newValue, c.rule, err)
+			t.Errorf("cloneWithValue(%s) rule: %s, err: %s", c.newValue, c.rule, err)
 		}
 		if gotRule.String() != c.wantRule.String() {
-			t.Errorf("CloneWithValue(%s) rule: %s, got: %s, want: %s",
+			t.Errorf("cloneWithValue(%s) rule: %s, got: %s, want: %s",
 				c.newValue, c.rule, gotRule, c.wantRule)
 		}
 	}
@@ -185,13 +185,13 @@ func TestCloneWithValue_errors(t *testing.T) {
 			errors.New("Can't clone non-tweakable rule: band > 3 && band < 9")},
 	}
 	for _, c := range cases {
-		_, err := c.rule.CloneWithValue(c.newValue)
+		_, err := c.rule.cloneWithValue(c.newValue)
 		if err == nil {
-			t.Errorf("CloneWithValue(%s) rule: %s, no error, expected: %s",
+			t.Errorf("cloneWithValue(%s) rule: %s, no error, expected: %s",
 				c.newValue, c.rule, c.wantError)
 		}
 		if err.Error() != c.wantError.Error() {
-			t.Errorf("CloneWithValue(%s) rule: %s, got error: %s, want: %s",
+			t.Errorf("cloneWithValue(%s) rule: %s, got error: %s, want: %s",
 				c.newValue, c.rule, err, c.wantError)
 		}
 	}

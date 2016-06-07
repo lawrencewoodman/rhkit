@@ -59,7 +59,7 @@ func (ra *ruleAssessor) NextRecord(record dataset.Record) error {
 	var ruleIsTrue bool
 	var err error
 	for _, aggregator := range ra.Aggregators {
-		ruleIsTrue, err = ra.Rule.IsTrue(record)
+		ruleIsTrue, err = ra.Rule.isTrue(record)
 		if err != nil {
 			return err
 		}
