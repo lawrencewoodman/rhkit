@@ -49,14 +49,7 @@ func AssessRules(
 		ruleAssessors[i] = ruleassessor.New(rule, allAggregators, e.Goals)
 	}
 
-	// The dataset must be cloned to be thread safe when AssessRules called by
-	// AssessRulesMP
-	datasetClone, err := e.Dataset.Clone()
-	if err != nil {
-		return &assessment.Assessment{}, err
-	}
-	defer e.Dataset.Close()
-	numRecords, err = processDataset(datasetClone, ruleAssessors)
+	numRecords, err = processDataset(e.Dataset, ruleAssessors)
 	if err != nil {
 		return &assessment.Assessment{}, err
 	}
@@ -206,13 +199,14 @@ func processDataset(
 	ruleAssessors []*ruleassessor.RuleAssessor,
 ) (int64, error) {
 	numRecords := int64(0)
-	// TODO: test this rewinds properly
-	if err := dataset.Rewind(); err != nil {
+	conn, err := dataset.Open()
+	if err != nil {
 		return numRecords, err
 	}
+	defer conn.Close()
 
-	for dataset.Next() {
-		record, err := dataset.Read()
+	for conn.Next() {
+		record, err := conn.Read()
 		if err != nil {
 			return numRecords, err
 		}
@@ -225,7 +219,7 @@ func processDataset(
 		}
 	}
 
-	return numRecords, dataset.Err()
+	return numRecords, conn.Err()
 }
 
 func addDefaultAggregators(

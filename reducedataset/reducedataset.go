@@ -19,70 +19,70 @@
 package reducedataset
 
 import (
-	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rulehunter/dataset"
 	"io"
 )
 
 type ReduceDataset struct {
 	dataset    dataset.Dataset
-	recordNum  int
 	numRecords int
-	err        error
 }
 
-func New(dataset dataset.Dataset, numRecords int) (dataset.Dataset, error) {
+type ReduceDatasetConn struct {
+	dataset   *ReduceDataset
+	conn      dataset.Conn
+	recordNum int
+	err       error
+}
+
+func New(dataset dataset.Dataset, numRecords int) dataset.Dataset {
 	return &ReduceDataset{
 		dataset:    dataset,
-		recordNum:  -1,
 		numRecords: numRecords,
-		err:        nil,
+	}
+}
+
+func (r *ReduceDataset) Open() (dataset.Conn, error) {
+	conn, err := r.dataset.Open()
+	if err != nil {
+		return nil, err
+	}
+	return &ReduceDatasetConn{
+		dataset:   r,
+		conn:      conn,
+		recordNum: -1,
+		err:       nil,
 	}, nil
-}
-
-func (r *ReduceDataset) Clone() (dataset.Dataset, error) {
-	cDataset, err := r.dataset.Clone()
-	d, err := New(cDataset, r.numRecords)
-	return d, err
-}
-
-func (r *ReduceDataset) Next() bool {
-	if r.Err() != nil {
-		return false
-	}
-	if r.recordNum < r.numRecords {
-		r.recordNum++
-		return r.dataset.Next()
-	}
-	r.err = io.EOF
-	return false
-}
-
-func (r *ReduceDataset) Err() error {
-	if r.err == io.EOF {
-		return nil
-	}
-	return r.dataset.Err()
-}
-
-func (r *ReduceDataset) Read() (map[string]*dlit.Literal, error) {
-	record, err := r.dataset.Read()
-	return record, err
-}
-
-func (r *ReduceDataset) Rewind() error {
-	if r.Err() != nil {
-		return r.Err()
-	}
-	r.recordNum = -1
-	r.err = r.dataset.Rewind()
-	return r.err
 }
 
 func (r *ReduceDataset) GetFieldNames() []string {
 	return r.dataset.GetFieldNames()
 }
 
-func (r *ReduceDataset) Close() error {
-	return r.dataset.Close()
+func (rc *ReduceDatasetConn) Next() bool {
+	if rc.conn.Err() != nil {
+		return false
+	}
+	if rc.recordNum < rc.dataset.numRecords {
+		rc.recordNum++
+		return rc.conn.Next()
+	}
+	rc.err = io.EOF
+	return false
+}
+
+func (rc *ReduceDatasetConn) Err() error {
+	if rc.err == io.EOF {
+		return nil
+	}
+	return rc.conn.Err()
+}
+
+func (rc *ReduceDatasetConn) Read() (dataset.Record, error) {
+	record, err := rc.conn.Read()
+	return record, err
+}
+
+func (rc *ReduceDatasetConn) Close() error {
+	return rc.conn.Close()
 }

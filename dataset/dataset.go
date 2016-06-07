@@ -23,11 +23,15 @@ package dataset
 import "github.com/lawrencewoodman/dlit"
 
 type Dataset interface {
-	Clone() (Dataset, error)
+	Open() (Conn, error)
+	GetFieldNames() []string
+}
+
+type Conn interface {
 	Next() bool
 	Err() error
-	Read() (map[string]*dlit.Literal, error)
-	Rewind() error
-	GetFieldNames() []string
+	Read() (Record, error)
 	Close() error
 }
+
+type Record map[string]*dlit.Literal

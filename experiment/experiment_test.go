@@ -254,50 +254,6 @@ func TestNew_errors(t *testing.T) {
 	}
 }
 
-func TestClose(t *testing.T) {
-	fieldNames := []string{"age", "job", "marital", "education", "default",
-		"balance", "housing", "loan", "contact", "day", "month", "duration",
-		"campaign", "pdays", "previous", "poutcome", "y",
-	}
-	dataset := mustNewCsvDataset(
-		fieldNames,
-		filepath.Join("..", "fixtures", "bank.csv"),
-		rune(';'),
-		true,
-	)
-
-	experimentDesc := &ExperimentDesc{
-		Title:         "This is a nice title",
-		Dataset:       dataset,
-		ExcludeFields: []string{},
-		Aggregators: []*AggregatorDesc{
-			&AggregatorDesc{"numSignedUp", "count", "y == \"yes\""},
-			&AggregatorDesc{"cost", "calc", "numMatches * 4.5"},
-			&AggregatorDesc{"income", "calc", "numSignedUp * 24"},
-			&AggregatorDesc{"profit", "calc", "income - cost"},
-		},
-		Goals: []string{"profit > 0"},
-		SortOrder: []*SortDesc{
-			&SortDesc{"profit", "descending"},
-			&SortDesc{"numSignedUp", "descending"},
-			&SortDesc{"cost", "ascending"},
-		},
-	}
-	experiment, err := New(experimentDesc)
-	if err != nil {
-		t.Errorf("New(%q) err: %q", experimentDesc, err)
-	}
-	if !experiment.Dataset.Next() {
-		t.Errorf("Next() return false on first call")
-	}
-	if err := experiment.Close(); err != nil {
-		t.Errorf("Close() err: %s", err)
-	}
-	if experiment.Dataset.Next() {
-		t.Errorf("Next() return true on second call")
-	}
-}
-
 /***********************
    Helper functions
 ************************/
@@ -321,28 +277,36 @@ func checkExperimentsMatch(e1 *Experiment, e2 *Experiment) error {
 	return checkDatasetsEqual(e1.Dataset, e2.Dataset)
 }
 
-func checkDatasetsEqual(i1, i2 dataset.Dataset) error {
+func checkDatasetsEqual(ds1, ds2 dataset.Dataset) error {
+	conn1, err := ds1.Open()
+	if err != nil {
+		return err
+	}
+	conn2, err := ds2.Open()
+	if err != nil {
+		return err
+	}
 	for {
-		i1Next := i1.Next()
-		i2Next := i2.Next()
-		if i1Next != i2Next {
+		conn1Next := conn1.Next()
+		conn2Next := conn2.Next()
+		if conn1Next != conn2Next {
 			return errors.New("Datasets don't finish at same point")
 		}
-		if !i1Next {
+		if !conn1Next {
 			break
 		}
 
-		i1Record, i1Err := i1.Read()
-		i2Record, i2Err := i2.Read()
-		if i1Err != i2Err {
+		conn1Record, conn1Err := conn1.Read()
+		conn2Record, conn2Err := conn2.Read()
+		if conn1Err != conn2Err {
 			return errors.New("Datasets don't error at same point")
-		} else if i1Err == nil && i2Err == nil {
-			if !reflect.DeepEqual(i1Record, i2Record) {
+		} else if conn1Err == nil && conn2Err == nil {
+			if !reflect.DeepEqual(conn1Record, conn2Record) {
 				return errors.New("Datasets don't match")
 			}
 		}
 	}
-	if i1.Err() != i2.Err() {
+	if conn1.Err() != conn2.Err() {
 		return errors.New("Datasets final error doesn't match")
 	}
 	return nil

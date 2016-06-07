@@ -28,47 +28,55 @@ type LiteralDataset struct {
 	isClosed   bool
 }
 
+type LiteralDatasetConn struct {
+	dataset  *LiteralDataset
+	position int
+	isClosed bool
+}
+
 func NewLiteralDataset(
 	fieldNames []string,
 	records [][]string,
 ) dataset.Dataset {
-	return &LiteralDataset{records: records, fieldNames: fieldNames, position: -1}
+	return &LiteralDataset{
+		records:    records,
+		fieldNames: fieldNames,
+	}
 }
 
-func (l *LiteralDataset) Clone() (dataset.Dataset, error) {
-	return NewLiteralDataset(l.fieldNames, l.records), nil
+func (l *LiteralDataset) Open() (dataset.Conn, error) {
+	return &LiteralDatasetConn{
+		dataset:  l,
+		position: -1,
+		isClosed: false,
+	}, nil
 }
 
-func (l *LiteralDataset) Close() error {
+func (l *LiteralDataset) GetFieldNames() []string {
+	return l.fieldNames
+}
+
+func (lc *LiteralDatasetConn) Close() error {
 	return nil
 }
 
-func (l *LiteralDataset) Next() bool {
-	if !l.isClosed && (l.position+1) < len(l.records) {
-		l.position++
+func (lc *LiteralDatasetConn) Next() bool {
+	if !lc.isClosed && (lc.position+1) < len(lc.dataset.records) {
+		lc.position++
 		return true
 	}
 	return false
 }
 
-func (l *LiteralDataset) Read() (map[string]*dlit.Literal, error) {
-	line := l.records[l.position]
-	record := make(map[string]*dlit.Literal, len(l.fieldNames))
+func (lc *LiteralDatasetConn) Read() (dataset.Record, error) {
+	line := lc.dataset.records[lc.position]
+	record := make(dataset.Record, len(lc.dataset.fieldNames))
 	for i, v := range line {
-		record[l.fieldNames[i]] = dlit.MustNew(v)
+		record[lc.dataset.fieldNames[i]] = dlit.MustNew(v)
 	}
 	return record, nil
 }
 
-func (l *LiteralDataset) Err() error {
+func (lc *LiteralDatasetConn) Err() error {
 	return nil
-}
-
-func (l *LiteralDataset) Rewind() error {
-	l.position = -1
-	return nil
-}
-
-func (l *LiteralDataset) GetFieldNames() []string {
-	return l.fieldNames
 }

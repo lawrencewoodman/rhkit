@@ -53,7 +53,6 @@ func TestAll_full(t *testing.T) {
 		t.Errorf("experiment.New(%s) - err: %s", experimentDesc, err)
 		return
 	}
-	defer experiment.Close()
 	if err = ProcessDataset(experiment); err != nil {
 		t.Errorf("ProcessDataset() - err: %s", err)
 		return
@@ -77,11 +76,7 @@ func TestAll_reduced(t *testing.T) {
 		return
 	}
 
-	reducedDataset, err := reducedataset.New(dataset, numRecords)
-	if err != nil {
-		t.Errorf("reduceDataset.New() - err: %s", err)
-		return
-	}
+	reducedDataset := reducedataset.New(dataset, numRecords)
 
 	experimentDesc := &experiment.ExperimentDesc{
 		Title:         "This is a jolly nice title",
@@ -112,7 +107,6 @@ func TestAll_reduced(t *testing.T) {
 		return
 	}
 
-	defer experiment.Close()
 	if err = ProcessDataset(experiment); err != nil {
 		t.Errorf("ProcessDataset() - err: %s", err)
 		return
