@@ -1,11 +1,10 @@
-package ruleassessor
+package rulehunter
 
 import (
 	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rulehunter/aggregators"
 	"github.com/vlifesystems/rulehunter/goal"
-	"github.com/vlifesystems/rulehunter/rule"
 	"testing"
 )
 
@@ -45,17 +44,17 @@ func TestNextRecord(t *testing.T) {
 	}
 	numRecords := int64(len(records))
 	cases := []struct {
-		rule             *rule.Rule
+		rule             *Rule
 		wantNumIncomeGt2 int64
 		wantNumBandGt4   int64
 		wantGoalsScore   float64
 	}{
-		{rule.MustNew("band > 4"), 1, 2, 2.0},
-		{rule.MustNew("band > 3"), 2, 2, 0.001},
-		{rule.MustNew("cost > 1.2"), 2, 1, 0},
+		{mustNewRule("band > 4"), 1, 2, 2.0},
+		{mustNewRule("band > 3"), 2, 2, 0.001},
+		{mustNewRule("cost > 1.2"), 2, 1, 0},
 	}
 	for _, c := range cases {
-		ra := New(c.rule, inAggregators, goals)
+		ra := newRuleAssessor(c.rule, inAggregators, goals)
 		for _, record := range records {
 			err := ra.NextRecord(record)
 			if err != nil {
@@ -114,28 +113,28 @@ func TestNextRecord_Errors(t *testing.T) {
 	}
 	goals := []*goal.Goal{goal.MustNew("numIncomeGt2 == 1")}
 	cases := []struct {
-		rule        *rule.Rule
+		rule        *Rule
 		aggregators []aggregators.Aggregator
 		wantErr     error
 	}{
-		{rule.MustNew("band > 4"),
+		{mustNewRule("band > 4"),
 			[]aggregators.Aggregator{
 				aggregators.MustNew("numIncomeGt2", "count", "fred > 2")},
 			dexpr.ErrInvalidExpr("Variable doesn't exist: fred")},
-		{rule.MustNew("band > 4"),
+		{mustNewRule("band > 4"),
 			[]aggregators.Aggregator{
 				aggregators.MustNew("numIncomeGt2", "count", "income > 2")}, nil},
-		{rule.MustNew("hand > 4"),
+		{mustNewRule("hand > 4"),
 			[]aggregators.Aggregator{
 				aggregators.MustNew("numIncomeGt2", "count", "income > 2")},
 			dexpr.ErrInvalidExpr("Variable doesn't exist: hand")},
-		{rule.MustNew("band ^^ 4"),
+		{mustNewRule("band ^^ 4"),
 			[]aggregators.Aggregator{
 				aggregators.MustNew("numIncomeGt2", "count", "income > 2")},
 			dexpr.ErrInvalidExpr("Invalid operator: \"^\"")},
 	}
 	for _, c := range cases {
-		ra := New(c.rule, c.aggregators, goals)
+		ra := newRuleAssessor(c.rule, c.aggregators, goals)
 		for _, record := range records {
 			err := ra.NextRecord(record)
 			if !errorMatch(c.wantErr, err) {

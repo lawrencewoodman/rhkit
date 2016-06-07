@@ -22,7 +22,6 @@ package integrate
 import (
 	"fmt"
 	"github.com/vlifesystems/rulehunter"
-	"github.com/vlifesystems/rulehunter/assessment"
 	"github.com/vlifesystems/rulehunter/experiment"
 	"github.com/vlifesystems/rulehunter/rule"
 	"runtime"
@@ -107,8 +106,8 @@ func ProcessDataset(experiment *experiment.Experiment) error {
 func assessRules(
 	rules []*rule.Rule,
 	experiment *experiment.Experiment,
-) (*assessment.Assessment, error) {
-	var assessment *assessment.Assessment
+) (*rulehunter.Assessment, error) {
+	var assessment *rulehunter.Assessment
 	maxProcesses := runtime.NumCPU()
 	c := make(chan *rulehunter.AssessRulesMPOutcome)
 

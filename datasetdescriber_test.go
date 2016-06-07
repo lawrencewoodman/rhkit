@@ -2,7 +2,7 @@ package rulehunter
 
 import (
 	"github.com/lawrencewoodman/dlit"
-	"github.com/vlifesystems/rulehunter/description"
+	"github.com/vlifesystems/rulehunter/internal"
 	"testing"
 )
 
@@ -53,9 +53,9 @@ var flowRecords = [][]string{
 func TestDescribeDataset(t *testing.T) {
 	fieldNames :=
 		[]string{"band", "inputA", "inputB", "version", "flow", "score", "method"}
-	expected := &description.Description{
-		map[string]*description.Field{
-			"band": &description.Field{description.STRING, nil, nil, 0,
+	expected := &Description{
+		map[string]*fieldDescription{
+			"band": &fieldDescription{internal.STRING, nil, nil, 0,
 				[]*dlit.Literal{dlit.MustNew("a"), dlit.MustNew("b"),
 					dlit.MustNew("c"), dlit.MustNew("f"), dlit.MustNew("g"),
 					dlit.MustNew("i"), dlit.MustNew("j"), dlit.MustNew("k"),
@@ -67,39 +67,39 @@ func TestDescribeDataset(t *testing.T) {
 					dlit.MustNew("3"), dlit.MustNew("4"), dlit.MustNew("5"),
 					dlit.MustNew("6"), dlit.MustNew("7"), dlit.MustNew("8"),
 					dlit.MustNew("9"), dlit.MustNew("h")}, 0},
-			"inputA": &description.Field{
-				description.FLOAT,
+			"inputA": &fieldDescription{
+				internal.FLOAT,
 				dlit.MustNew(7),
 				dlit.MustNew(15.1),
 				1,
 				[]*dlit.Literal{dlit.MustNew(7), dlit.MustNew(7.3),
 					dlit.MustNew(9), dlit.MustNew(14), dlit.MustNew(15.1)}, 0},
-			"inputB": &description.Field{
-				description.FLOAT,
+			"inputB": &fieldDescription{
+				internal.FLOAT,
 				dlit.MustNew(2),
 				dlit.MustNew(5),
 				4,
 				[]*dlit.Literal{dlit.MustNew(2.6), dlit.MustNew(2.8789),
 					dlit.MustNew(3), dlit.MustNew(5), dlit.MustNew(2),
 					dlit.MustNew(2.8)}, 0},
-			"version": &description.Field{description.STRING, nil, nil, 0,
+			"version": &fieldDescription{internal.STRING, nil, nil, 0,
 				[]*dlit.Literal{dlit.MustNew("9.9"), dlit.MustNew("9.97"),
 					dlit.MustNew("10"), dlit.MustNew("10.94"), dlit.MustNew("9.9a"),
 					dlit.MustNew("9.9b")}, 0},
-			"flow": &description.Field{
-				description.INT,
+			"flow": &fieldDescription{
+				internal.INT,
 				dlit.MustNew(21),
 				dlit.MustNew(87),
 				0,
 				[]*dlit.Literal{}, 0},
-			"score": &description.Field{
-				description.INT,
+			"score": &fieldDescription{
+				internal.INT,
 				dlit.MustNew(1),
 				dlit.MustNew(5),
 				0,
 				[]*dlit.Literal{dlit.MustNew(1), dlit.MustNew(2), dlit.MustNew(3),
 					dlit.MustNew(4), dlit.MustNew(5)}, 0},
-			"method": &description.Field{description.IGNORE, nil, nil, 0,
+			"method": &fieldDescription{internal.IGNORE, nil, nil, 0,
 				[]*dlit.Literal{}, 0},
 		}}
 	dataset := NewLiteralDataset(fieldNames, flowRecords)
@@ -115,15 +115,13 @@ func TestDescribeDataset(t *testing.T) {
 /*************************
  *   Helper functions
  *************************/
-func descriptionsEqual(
-	d1 *description.Description,
-	d2 *description.Description,
-) bool {
-	return fieldDescriptionsEqual(d1.Fields, d2.Fields)
+func descriptionsEqual(d1 *Description, d2 *Description) bool {
+	return fieldDescriptionsEqual(d1.fields, d2.fields)
 }
+
 func fieldDescriptionsEqual(
-	fds1 map[string]*description.Field,
-	fds2 map[string]*description.Field,
+	fds1 map[string]*fieldDescription,
+	fds2 map[string]*fieldDescription,
 ) bool {
 	for field, fd1 := range fds1 {
 		fd2, ok := fds2[field]
@@ -135,26 +133,26 @@ func fieldDescriptionsEqual(
 }
 
 func fieldDescriptionEqual(
-	fd1 *description.Field,
-	fd2 *description.Field,
+	fd1 *fieldDescription,
+	fd2 *fieldDescription,
 ) bool {
-	if fd1.Kind != fd2.Kind || len(fd1.Values) != len(fd2.Values) {
+	if fd1.kind != fd2.kind || len(fd1.values) != len(fd2.values) {
 		return false
 	}
-	if fd1.Kind == description.INT || fd1.Kind == description.FLOAT {
-		if fd1.Min.String() != fd2.Min.String() ||
-			fd1.Max.String() != fd2.Max.String() {
+	if fd1.kind == internal.INT || fd1.kind == internal.FLOAT {
+		if fd1.min.String() != fd2.min.String() ||
+			fd1.max.String() != fd2.max.String() {
 			return false
 		}
 	}
-	if fd1.Kind == description.FLOAT {
-		if fd1.MaxDP != fd2.MaxDP {
+	if fd1.kind == internal.FLOAT {
+		if fd1.maxDP != fd2.maxDP {
 			return false
 		}
 	}
-	for _, fd1V := range fd1.Values {
+	for _, fd1V := range fd1.values {
 		found := false
-		for _, fd2V := range fd2.Values {
+		for _, fd2V := range fd2.values {
 			if fd1V.String() == fd2V.String() {
 				found = true
 			}

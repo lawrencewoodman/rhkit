@@ -23,47 +23,44 @@ import (
 	"errors"
 	"fmt"
 	"github.com/vlifesystems/rulehunter/aggregators"
-	"github.com/vlifesystems/rulehunter/assessment"
 	"github.com/vlifesystems/rulehunter/dataset"
 	"github.com/vlifesystems/rulehunter/experiment"
-	"github.com/vlifesystems/rulehunter/internal/ruleassessor"
-	"github.com/vlifesystems/rulehunter/rule"
 )
 
 // Assess the rules using a single thread
 func AssessRules(
-	rules []*rule.Rule,
+	rules []*Rule,
 	e *experiment.Experiment,
-) (*assessment.Assessment, error) {
+) (*Assessment, error) {
 	var allAggregators []aggregators.Aggregator
 	var numRecords int64
 	var err error
 
 	allAggregators, err = addDefaultAggregators(e.Aggregators)
 	if err != nil {
-		return &assessment.Assessment{}, err
+		return &Assessment{}, err
 	}
 
-	ruleAssessors := make([]*ruleassessor.RuleAssessor, len(rules))
+	ruleAssessors := make([]*ruleAssessor, len(rules))
 	for i, rule := range rules {
-		ruleAssessors[i] = ruleassessor.New(rule, allAggregators, e.Goals)
+		ruleAssessors[i] = newRuleAssessor(rule, allAggregators, e.Goals)
 	}
 
 	numRecords, err = processDataset(e.Dataset, ruleAssessors)
 	if err != nil {
-		return &assessment.Assessment{}, err
+		return &Assessment{}, err
 	}
 	goodRuleAssessors, err := filterGoodRuleAssessors(ruleAssessors, numRecords)
 	if err != nil {
-		return &assessment.Assessment{}, err
+		return &Assessment{}, err
 	}
 
-	assessment, err := assessment.New(numRecords, goodRuleAssessors, e.Goals)
+	assessment, err := newAssessment(numRecords, goodRuleAssessors, e.Goals)
 	return assessment, err
 }
 
 type AssessRulesMPOutcome struct {
-	Assessment *assessment.Assessment
+	Assessment *Assessment
 	Err        error
 	Progress   float64
 	Finished   bool
@@ -72,12 +69,12 @@ type AssessRulesMPOutcome struct {
 // Goroutine to assess the rules using multiple processes and report on
 // progress through 'ec' channel
 func AssessRulesMP(
-	rules []*rule.Rule,
+	rules []*Rule,
 	e *experiment.Experiment,
 	maxProcesses int,
 	ec chan *AssessRulesMPOutcome,
 ) {
-	var assessment *assessment.Assessment
+	var assessment *Assessment
 	var isError bool
 	ic := make(chan *assessRulesCOutcome)
 	numRules := len(rules)
@@ -130,10 +127,10 @@ func AssessRulesMP(
 func getCOutcome(
 	ic chan *assessRulesCOutcome,
 	ec chan *AssessRulesMPOutcome,
-	_assessment *assessment.Assessment,
+	_assessment *Assessment,
 	progress float64,
-) (*assessment.Assessment, bool) {
-	var retAssessment *assessment.Assessment
+) (*Assessment, bool) {
+	var retAssessment *Assessment
 	var err error
 	ec <- &AssessRulesMPOutcome{nil, nil, progress, false}
 	assessmentOutcome := <-ic
@@ -156,11 +153,11 @@ func getCOutcome(
 }
 
 type assessRulesCOutcome struct {
-	assessment *assessment.Assessment
+	assessment *Assessment
 	err        error
 }
 
-func assessRulesC(rules []*rule.Rule,
+func assessRulesC(rules []*Rule,
 	experiment *experiment.Experiment,
 	c chan *assessRulesCOutcome,
 ) {
@@ -169,10 +166,10 @@ func assessRulesC(rules []*rule.Rule,
 }
 
 func filterGoodRuleAssessors(
-	ruleAssessments []*ruleassessor.RuleAssessor,
+	ruleAssessments []*ruleAssessor,
 	numRecords int64,
-) ([]*ruleassessor.RuleAssessor, error) {
-	goodRuleAssessors := make([]*ruleassessor.RuleAssessor, 0)
+) ([]*ruleAssessor, error) {
+	goodRuleAssessors := make([]*ruleAssessor, 0)
 	for _, ruleAssessment := range ruleAssessments {
 		numMatches, exists :=
 			ruleAssessment.GetAggregatorValue("numMatches", numRecords)
@@ -196,7 +193,7 @@ func filterGoodRuleAssessors(
 
 func processDataset(
 	dataset dataset.Dataset,
-	ruleAssessors []*ruleassessor.RuleAssessor,
+	ruleAssessors []*ruleAssessor,
 ) (int64, error) {
 	numRecords := int64(0)
 	conn, err := dataset.Open()

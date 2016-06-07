@@ -1,4 +1,4 @@
-package rule
+package rulehunter
 
 import (
 	"errors"
@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestNew_errors(t *testing.T) {
+func TestNewRule_errors(t *testing.T) {
 	cases := []struct {
 		ruleString string
 		wantError  error
@@ -15,13 +15,13 @@ func TestNew_errors(t *testing.T) {
 		{"7 {} 3", ErrInvalidRule("Invalid rule: 7 {} 3")},
 	}
 	for _, c := range cases {
-		_, err := New(c.ruleString)
+		_, err := newRule(c.ruleString)
 		if err == nil {
-			t.Errorf("New(%s) no error, expected: %s", c.ruleString, c.wantError)
+			t.Errorf("newRule(%s) no error, expected: %s", c.ruleString, c.wantError)
 			return
 		}
 		if err.Error() != c.wantError.Error() {
-			t.Errorf("New(%s) got error: %s, want error: %s",
+			t.Errorf("newRule(%s) got error: %s, want error: %s",
 				c.ruleString, err, c.wantError)
 		}
 	}
@@ -32,8 +32,8 @@ func TestIsTrue(t *testing.T) {
 		rule       *Rule
 		wantIsTrue bool
 	}{
-		{MustNew("band > 3"), true},
-		{MustNew("band == 2"), false},
+		{mustNewRule("band > 3"), true},
+		{mustNewRule("band == 2"), false},
 	}
 	record := map[string]*dlit.Literal{
 		"cost": dlit.MustNew(4.5),
@@ -55,7 +55,7 @@ func TestIsTrue_errors(t *testing.T) {
 		rule      *Rule
 		wantError error
 	}{
-		{MustNew("band > 3"),
+		{mustNewRule("band > 3"),
 			dexpr.ErrInvalidExpr("Variable doesn't exist: band")},
 	}
 	record := map[string]*dlit.Literal{
@@ -79,8 +79,8 @@ func TestString(t *testing.T) {
 		rule *Rule
 		want string
 	}{
-		{MustNew("band > 3"), "band > 3"},
-		{MustNew("in(Band, \"a\", \"bb\")"), "in(Band, \"a\", \"bb\")"},
+		{mustNewRule("band > 3"), "band > 3"},
+		{mustNewRule("in(Band, \"a\", \"bb\")"), "in(Band, \"a\", \"bb\")"},
 	}
 	for _, c := range cases {
 		got := c.rule.String()
@@ -98,9 +98,9 @@ func TestGetTweakableParts(t *testing.T) {
 		wantOperator    string
 		wantValue       string
 	}{
-		{MustNew("band > 3"), true, "band", ">", "3"},
-		{MustNew("band == 2"), false, "", "", ""},
-		{MustNew("in(band, \"a\", \"b\")"), false, "", "", ""},
+		{mustNewRule("band > 3"), true, "band", ">", "3"},
+		{mustNewRule("band == 2"), false, "", "", ""},
+		{mustNewRule("in(band, \"a\", \"b\")"), false, "", "", ""},
 	}
 	for _, c := range cases {
 		gotIsTweakable, gotFieldName, gotOperator, gotValue :=
@@ -131,12 +131,12 @@ func TestGetInNiParts(t *testing.T) {
 		wantOperator  string
 		wantFieldName string
 	}{
-		{MustNew("band > 3"), false, "", ""},
-		{MustNew("band == 2"), false, "", ""},
-		{MustNew("in(band, \"a\", \"b\")"), true, "in", "band"},
-		{MustNew("in(flow, \"4\", \"6\")"), true, "in", "flow"},
-		{MustNew("ni(band, \"a\", \"b\")"), true, "ni", "band"},
-		{MustNew("ni(flow, \"4\", \"6\")"), true, "ni", "flow"},
+		{mustNewRule("band > 3"), false, "", ""},
+		{mustNewRule("band == 2"), false, "", ""},
+		{mustNewRule("in(band, \"a\", \"b\")"), true, "in", "band"},
+		{mustNewRule("in(flow, \"4\", \"6\")"), true, "in", "flow"},
+		{mustNewRule("ni(band, \"a\", \"b\")"), true, "ni", "band"},
+		{mustNewRule("ni(flow, \"4\", \"6\")"), true, "ni", "flow"},
 	}
 	for _, c := range cases {
 		gotIsInNi, gotOperator, gotFieldName := c.rule.GetInNiParts()
@@ -161,7 +161,7 @@ func TestCloneWithValue(t *testing.T) {
 		newValue string
 		wantRule *Rule
 	}{
-		{MustNew("band > 3"), "20", MustNew("band > 20")},
+		{mustNewRule("band > 3"), "20", mustNewRule("band > 20")},
 	}
 	for _, c := range cases {
 		gotRule, err := c.rule.CloneWithValue(c.newValue)
@@ -181,7 +181,7 @@ func TestCloneWithValue_errors(t *testing.T) {
 		newValue  string
 		wantError error
 	}{
-		{MustNew("band > 3 && band < 9"), "20",
+		{mustNewRule("band > 3 && band < 9"), "20",
 			errors.New("Can't clone non-tweakable rule: band > 3 && band < 9")},
 	}
 	for _, c := range cases {

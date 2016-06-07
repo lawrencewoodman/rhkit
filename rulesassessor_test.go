@@ -4,17 +4,15 @@ import (
 	"errors"
 	"fmt"
 	"github.com/lawrencewoodman/dlit"
-	"github.com/vlifesystems/rulehunter/assessment"
 	"github.com/vlifesystems/rulehunter/experiment"
-	"github.com/vlifesystems/rulehunter/rule"
 	"testing"
 )
 
 func TestAssessRules(t *testing.T) {
-	rules := []*rule.Rule{
-		rule.MustNew("band > 4"),
-		rule.MustNew("band > 3"),
-		rule.MustNew("cost > 1.2"),
+	rules := []*Rule{
+		mustNewRule("band > 4"),
+		mustNewRule("band > 3"),
+		mustNewRule("cost > 1.2"),
 	}
 	aggregators := []*experiment.AggregatorDesc{
 		&experiment.AggregatorDesc{"numIncomeGt2", "count", "income > 2"},
@@ -50,9 +48,9 @@ func TestAssessRules(t *testing.T) {
 	wantIsSorted := false
 	wantIsRefined := false
 	wantNumRecords := int64(len(records))
-	wantRuleAssessments := []*assessment.RuleAssessment{
-		&assessment.RuleAssessment{
-			Rule: rule.MustNew("band > 4"),
+	wantRuleAssessments := []*RuleAssessment{
+		&RuleAssessment{
+			Rule: mustNewRule("band > 4"),
 			Aggregators: map[string]*dlit.Literal{
 				"numMatches":     dlit.MustNew("2"),
 				"percentMatches": dlit.MustNew("50"),
@@ -60,19 +58,19 @@ func TestAssessRules(t *testing.T) {
 				"numBandGt4":     dlit.MustNew("2"),
 				"goalsScore":     dlit.MustNew(1.001),
 			},
-			Goals: []*assessment.GoalAssessment{
-				&assessment.GoalAssessment{"numIncomeGt2 == 1", true},
-				&assessment.GoalAssessment{"numIncomeGt2 == 2", false},
-				&assessment.GoalAssessment{"numIncomeGt2 == 3", false},
-				&assessment.GoalAssessment{"numIncomeGt2 == 4", false},
-				&assessment.GoalAssessment{"numBandGt4 == 1", false},
-				&assessment.GoalAssessment{"numBandGt4 == 2", true},
-				&assessment.GoalAssessment{"numBandGt4 == 3", false},
-				&assessment.GoalAssessment{"numBandGt4 == 4", false},
+			Goals: []*GoalAssessment{
+				&GoalAssessment{"numIncomeGt2 == 1", true},
+				&GoalAssessment{"numIncomeGt2 == 2", false},
+				&GoalAssessment{"numIncomeGt2 == 3", false},
+				&GoalAssessment{"numIncomeGt2 == 4", false},
+				&GoalAssessment{"numBandGt4 == 1", false},
+				&GoalAssessment{"numBandGt4 == 2", true},
+				&GoalAssessment{"numBandGt4 == 3", false},
+				&GoalAssessment{"numBandGt4 == 4", false},
 			},
 		},
-		&assessment.RuleAssessment{
-			Rule: rule.MustNew("band > 3"),
+		&RuleAssessment{
+			Rule: mustNewRule("band > 3"),
 			Aggregators: map[string]*dlit.Literal{
 				"numMatches":     dlit.MustNew("4"),
 				"percentMatches": dlit.MustNew("100"),
@@ -80,19 +78,19 @@ func TestAssessRules(t *testing.T) {
 				"numBandGt4":     dlit.MustNew("2"),
 				"goalsScore":     dlit.MustNew(0.002),
 			},
-			Goals: []*assessment.GoalAssessment{
-				&assessment.GoalAssessment{"numIncomeGt2 == 1", false},
-				&assessment.GoalAssessment{"numIncomeGt2 == 2", true},
-				&assessment.GoalAssessment{"numIncomeGt2 == 3", false},
-				&assessment.GoalAssessment{"numIncomeGt2 == 4", false},
-				&assessment.GoalAssessment{"numBandGt4 == 1", false},
-				&assessment.GoalAssessment{"numBandGt4 == 2", true},
-				&assessment.GoalAssessment{"numBandGt4 == 3", false},
-				&assessment.GoalAssessment{"numBandGt4 == 4", false},
+			Goals: []*GoalAssessment{
+				&GoalAssessment{"numIncomeGt2 == 1", false},
+				&GoalAssessment{"numIncomeGt2 == 2", true},
+				&GoalAssessment{"numIncomeGt2 == 3", false},
+				&GoalAssessment{"numIncomeGt2 == 4", false},
+				&GoalAssessment{"numBandGt4 == 1", false},
+				&GoalAssessment{"numBandGt4 == 2", true},
+				&GoalAssessment{"numBandGt4 == 3", false},
+				&GoalAssessment{"numBandGt4 == 4", false},
 			},
 		},
-		&assessment.RuleAssessment{
-			Rule: rule.MustNew("cost > 1.2"),
+		&RuleAssessment{
+			Rule: mustNewRule("cost > 1.2"),
 			Aggregators: map[string]*dlit.Literal{
 				"numMatches":     dlit.MustNew("2"),
 				"percentMatches": dlit.MustNew("50"),
@@ -100,15 +98,15 @@ func TestAssessRules(t *testing.T) {
 				"numBandGt4":     dlit.MustNew("1"),
 				"goalsScore":     dlit.MustNew(0.002),
 			},
-			Goals: []*assessment.GoalAssessment{
-				&assessment.GoalAssessment{"numIncomeGt2 == 1", false},
-				&assessment.GoalAssessment{"numIncomeGt2 == 2", true},
-				&assessment.GoalAssessment{"numIncomeGt2 == 3", false},
-				&assessment.GoalAssessment{"numIncomeGt2 == 4", false},
-				&assessment.GoalAssessment{"numBandGt4 == 1", true},
-				&assessment.GoalAssessment{"numBandGt4 == 2", false},
-				&assessment.GoalAssessment{"numBandGt4 == 3", false},
-				&assessment.GoalAssessment{"numBandGt4 == 4", false},
+			Goals: []*GoalAssessment{
+				&GoalAssessment{"numIncomeGt2 == 1", false},
+				&GoalAssessment{"numIncomeGt2 == 2", true},
+				&GoalAssessment{"numIncomeGt2 == 3", false},
+				&GoalAssessment{"numIncomeGt2 == 4", false},
+				&GoalAssessment{"numBandGt4 == 1", true},
+				&GoalAssessment{"numBandGt4 == 2", false},
+				&GoalAssessment{"numBandGt4 == 3", false},
+				&GoalAssessment{"numBandGt4 == 4", false},
 			},
 		},
 	}
@@ -134,30 +132,30 @@ func TestAssessRules(t *testing.T) {
 
 func TestAssessRules_errors(t *testing.T) {
 	cases := []struct {
-		rules       []*rule.Rule
+		rules       []*Rule
 		aggregators []*experiment.AggregatorDesc
 		goals       []string
 		wantErr     error
 	}{
-		{[]*rule.Rule{rule.MustNew("band ^^ 3")},
+		{[]*Rule{mustNewRule("band ^^ 3")},
 			[]*experiment.AggregatorDesc{
 				&experiment.AggregatorDesc{"numIncomeGt2", "count", "income > 2"},
 			},
 			[]string{"numIncomeGt2 == 1"},
 			errors.New("Invalid operator: \"^\"")},
-		{[]*rule.Rule{rule.MustNew("hand > 3")},
+		{[]*Rule{mustNewRule("hand > 3")},
 			[]*experiment.AggregatorDesc{
 				&experiment.AggregatorDesc{"numIncomeGt2", "count", "income > 2"},
 			},
 			[]string{"numIncomeGt2 == 1"},
 			errors.New("Variable doesn't exist: hand")},
-		{[]*rule.Rule{rule.MustNew("band > 3")},
+		{[]*Rule{mustNewRule("band > 3")},
 			[]*experiment.AggregatorDesc{
 				&experiment.AggregatorDesc{"numIncomeGt2", "count", "bincome > 2"},
 			},
 			[]string{"numIncomeGt2 == 1"},
 			errors.New("Variable doesn't exist: bincome")},
-		{[]*rule.Rule{rule.MustNew("band > 3")},
+		{[]*Rule{mustNewRule("band > 3")},
 			[]*experiment.AggregatorDesc{
 				&experiment.AggregatorDesc{"numIncomeGt2", "count", "income > 2"},
 			},
@@ -210,18 +208,18 @@ func TestAssessRulesMP(t *testing.T) {
 		[]string{"0", "0", "9"},
 	}
 	cases := []struct {
-		rules []*rule.Rule
+		rules []*Rule
 	}{
-		{[]*rule.Rule{
-			rule.MustNew("band > 4"),
-			rule.MustNew("band > 3"),
-			rule.MustNew("cost > 1.2"),
+		{[]*Rule{
+			mustNewRule("band > 4"),
+			mustNewRule("band > 3"),
+			mustNewRule("cost > 1.2"),
 		}},
-		{[]*rule.Rule{
-			rule.MustNew("band > 4"),
-			rule.MustNew("cost > 1.2"),
+		{[]*Rule{
+			mustNewRule("band > 4"),
+			mustNewRule("cost > 1.2"),
 		}},
-		{[]*rule.Rule{}},
+		{[]*Rule{}},
 	}
 
 	dataset := NewLiteralDataset(fieldNames, records)
@@ -244,7 +242,7 @@ func TestAssessRulesMP(t *testing.T) {
 		}
 		c := make(chan *AssessRulesMPOutcome)
 		progress := 0.0
-		var gotAssessment *assessment.Assessment
+		var gotAssessment *Assessment
 		go AssessRulesMP(cs.rules, experiment, maxProcesses, c)
 
 		numRuns := 0
@@ -302,11 +300,11 @@ func mustNewExperiment(ed *experiment.ExperimentDesc) *experiment.Experiment {
 // but don't have to be in the same order if both assessments are
 // unsorted. If both are unsorted then this will sort the assessments
 func areAssessmentsEqv(
-	got *assessment.Assessment,
+	got *Assessment,
 	wantNumRecords int64,
 	wantIsSorted bool,
 	wantIsRefined bool,
-	wantRuleAssessments []*assessment.RuleAssessment,
+	wantRuleAssessments []*RuleAssessment,
 ) bool {
 	if got.NumRecords != wantNumRecords {
 		return false

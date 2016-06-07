@@ -17,29 +17,32 @@
 	<http://www.gnu.org/licenses/>.
 */
 
-package rulehunter
+package internal
 
-import (
-	"github.com/vlifesystems/rulehunter/dataset"
+import "fmt"
+
+type FieldType int
+
+const (
+	UNKNOWN FieldType = iota
+	IGNORE
+	INT
+	FLOAT
+	STRING
 )
 
-func DescribeDataset(
-	dataset dataset.Dataset,
-) (*Description, error) {
-	_description := newDescription()
-	conn, err := dataset.Open()
-	if err != nil {
-		return nil, err
+func (ft FieldType) String() string {
+	switch ft {
+	case UNKNOWN:
+		return "Unknown"
+	case IGNORE:
+		return "Ignore"
+	case INT:
+		return "Int"
+	case FLOAT:
+		return "Float"
+	case STRING:
+		return "String"
 	}
-	defer conn.Close()
-
-	for conn.Next() {
-		record, err := conn.Read()
-		if err != nil {
-			return _description, err
-		}
-		_description.NextRecord(record)
-	}
-
-	return _description, conn.Err()
+	panic(fmt.Sprintf("Unsupported type: %d", ft))
 }
