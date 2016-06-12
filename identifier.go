@@ -17,14 +17,14 @@
 	<http://www.gnu.org/licenses/>.
 */
 
-package internal
+package rulehunter
 
-import "regexp"
+import (
+	"github.com/vlifesystems/rulehunter/internal"
+)
 
-var validIdentifierRegexp = regexp.MustCompile("^[a-zA-Z]([0-9a-zA-Z_])*$")
-
-// Returns whether the string can be used as an identifier for a field name or
-// for an aggregator
-func IsIdentifierValid(identifier string) bool {
-	return validIdentifierRegexp.MatchString(identifier)
+// Returns whether the string can be used as an identifier
+// for a field name or for an aggregator
+func IsIdentifierValid(s string) bool {
+	return internal.IsIdentifierValid(s)
 }
