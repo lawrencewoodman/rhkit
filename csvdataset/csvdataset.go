@@ -23,10 +23,8 @@ package csvdataset
 import (
 	"encoding/csv"
 	"errors"
-	"fmt"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rulehunter/dataset"
-	"github.com/vlifesystems/rulehunter/internal"
 	"io"
 	"os"
 )
@@ -53,7 +51,7 @@ func New(
 	separator rune,
 	skipFirstLine bool,
 ) (dataset.Dataset, error) {
-	if err := checkFieldsValid(fieldNames); err != nil {
+	if err := dataset.CheckFieldNamesValid(fieldNames); err != nil {
 		return nil, err
 	}
 
@@ -171,16 +169,4 @@ func makeCsvReader(
 		}
 	}
 	return f, r, err
-}
-
-func checkFieldsValid(fieldNames []string) error {
-	if len(fieldNames) < 2 {
-		return fmt.Errorf("Must specify at least two field names")
-	}
-	for _, field := range fieldNames {
-		if !internal.IsIdentifierValid(field) {
-			return fmt.Errorf("Invalid field name: %s", field)
-		}
-	}
-	return nil
 }

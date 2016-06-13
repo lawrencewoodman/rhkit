@@ -37,12 +37,12 @@ func TestNew_errors(t *testing.T) {
 	}{
 		{filepath.Join("..", "fixtures", "bank.csv"),
 			[]string{"age"},
-			errors.New("Must specify at least two field names")},
+			errors.New("must specify at least two field names")},
 		{filepath.Join("..", "fixtures", "bank.csv"),
 			[]string{"age", "job", "marital", "education", "_default", "balance",
 				"housing", "loan", "contact", "day", "month", "duration", "campaign",
 				"pdays", "previous", "poutcome", "y"},
-			errors.New("Invalid field name: _default")},
+			errors.New("invalid field name: _default")},
 	}
 	for _, c := range cases {
 		_, err := New(c.fieldNames, c.filename, ';', false)
