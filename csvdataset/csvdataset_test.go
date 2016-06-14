@@ -3,11 +3,13 @@ package csvdataset
 import (
 	"encoding/csv"
 	"errors"
+	"fmt"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rulehunter/dataset"
 	"os"
 	"path/filepath"
 	"reflect"
+	"syscall"
 	"testing"
 )
 
@@ -75,27 +77,18 @@ func TestOpen(t *testing.T) {
 }
 
 func TestOpen_errors(t *testing.T) {
-	cases := []struct {
-		filename   string
-		fieldNames []string
-		wantErr    error
-	}{
-		{"missing.csv",
-			[]string{"age", "occupation"},
-			&os.PathError{"open", "missing.csv",
-				errors.New("no such file or directory")}},
+	filename := "missing.csv"
+	fieldNames := []string{"age", "occupation"}
+	wantErr := &os.PathError{"open", "missing.csv", syscall.ENOENT}
+	ds, err := New(fieldNames, filename, ';', false)
+	if err != nil {
+		t.Errorf("Open() - filename: %s, err: %s", filename, err)
+		return
 	}
-	for _, c := range cases {
-		ds, err := New(c.fieldNames, c.filename, ';', false)
-		if err != nil {
-			t.Errorf("Open() - filename: %s, err: %s", c.filename, err)
-			return
-		}
-		_, err = ds.Open()
-		if err.Error() != c.wantErr.Error() {
-			t.Errorf("Open() - filename: %s, err: %s, wantErr: %s",
-				c.filename, err, c.wantErr)
-		}
+	_, err = ds.Open()
+	if err := checkPathErrorMatch(err, wantErr); err != nil {
+		t.Errorf("Open() - filename: %s - problem with error: %s",
+			filename, err)
 	}
 }
 
@@ -407,4 +400,24 @@ func errorMatch(e1 error, e2 error) bool {
 		return true
 	}
 	return false
+}
+
+func checkPathErrorMatch(
+	checkErr error,
+	wantErr *os.PathError,
+) error {
+	perr, ok := checkErr.(*os.PathError)
+	if !ok {
+		return errors.New("error isn't a os.PathError")
+	}
+	if perr.Op != wantErr.Op {
+		return fmt.Errorf("wanted perr.Op: %s, got: %s", perr.Op, wantErr.Op)
+	}
+	if filepath.Clean(perr.Path) != filepath.Clean(wantErr.Path) {
+		return fmt.Errorf("wanted perr.Path: %s, got: %s", perr.Path, wantErr.Path)
+	}
+	if perr.Err != wantErr.Err {
+		return fmt.Errorf("wanted perr.Err: %s, got: %s", perr.Err, wantErr.Err)
+	}
+	return nil
 }

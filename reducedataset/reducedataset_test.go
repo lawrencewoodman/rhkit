@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"syscall"
 	"testing"
 )
 
@@ -34,26 +35,16 @@ func TestOpen(t *testing.T) {
 }
 
 func TestOpen_errors(t *testing.T) {
-	cases := []struct {
-		filename   string
-		fieldNames []string
-		numRecords int
-		wantErr    error
-	}{
-		{"missing.csv",
-			[]string{"age", "occupation"},
-			10,
-			&os.PathError{"open", "missing.csv",
-				errors.New("no such file or directory")}},
-	}
-	for _, c := range cases {
-		ds := mustNewCsvDataset(c.fieldNames, c.filename, ';', false)
-		rds := New(ds, c.numRecords)
-		_, err := rds.Open()
-		if err.Error() != c.wantErr.Error() {
-			t.Errorf("Open() - filename: %s, err: %s, wantErr: %s",
-				c.filename, err, c.wantErr)
-		}
+	filename := "missing.csv"
+	fieldNames := []string{"age", "occupation"}
+	numRecords := 10
+	wantErr := &os.PathError{"open", "missing.csv", syscall.ENOENT}
+	ds := mustNewCsvDataset(fieldNames, filename, ';', false)
+	rds := New(ds, numRecords)
+	_, err := rds.Open()
+	if err := checkPathErrorMatch(err, wantErr); err != nil {
+		t.Errorf("Open() - filename: %s - problem with error: %s",
+			filename, err)
 	}
 }
 
@@ -258,4 +249,24 @@ func mustNewCsvDataset(
 		panic(fmt.Sprintf("Can't create new csvdataset for filename: %s", filename))
 	}
 	return dataset
+}
+
+func checkPathErrorMatch(
+	checkErr error,
+	wantErr *os.PathError,
+) error {
+	perr, ok := checkErr.(*os.PathError)
+	if !ok {
+		return errors.New("error isn't a os.PathError")
+	}
+	if perr.Op != wantErr.Op {
+		return fmt.Errorf("wanted perr.Op: %s, got: %s", perr.Op, wantErr.Op)
+	}
+	if filepath.Clean(perr.Path) != filepath.Clean(wantErr.Path) {
+		return fmt.Errorf("wanted perr.Path: %s, got: %s", perr.Path, wantErr.Path)
+	}
+	if perr.Err != wantErr.Err {
+		return fmt.Errorf("wanted perr.Err: %s, got: %s", perr.Err, wantErr.Err)
+	}
+	return nil
 }
