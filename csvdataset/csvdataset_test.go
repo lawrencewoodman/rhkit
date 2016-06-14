@@ -349,6 +349,38 @@ func TestNext_errors(t *testing.T) {
 }
 
 /*************************
+ *  Benchmarks
+ *************************/
+func BenchmarkNext(b *testing.B) {
+	filename := filepath.Join("fixtures", "debt.csv")
+	separator := ','
+	hasHeader := true
+	fieldNames := []string{
+		"name",
+		"balance",
+		"numCards",
+		"martialStatus",
+		"tertiaryEducated",
+		"success",
+	}
+	ds, err := New(fieldNames, filename, separator, hasHeader)
+	if err != nil {
+		b.Errorf("New() - filename: %s, err: %s", filename, err)
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		b.StopTimer()
+		conn, err := ds.Open()
+		if err != nil {
+			b.Errorf("Open() - filename: %s, err: %s", filename, err)
+		}
+		b.StartTimer()
+		for conn.Next() {
+		}
+	}
+}
+
+/*************************
  *   Helper functions
  *************************/
 
