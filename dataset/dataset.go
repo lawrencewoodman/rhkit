@@ -34,7 +34,7 @@ type Dataset interface {
 type Conn interface {
 	Next() bool
 	Err() error
-	Read() (Record, error)
+	Read() Record
 	Close() error
 }
 

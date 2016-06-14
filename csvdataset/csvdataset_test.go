@@ -184,10 +184,7 @@ func TestRead(t *testing.T) {
 		}
 		gotNumRows := 0
 		for conn.Next() {
-			record, err := conn.Read()
-			if err != nil {
-				t.Errorf("Read() - filename: %s, err: %s", c.filename, err)
-			}
+			record := conn.Read()
 
 			gotNumColumns := len(record)
 			if gotNumColumns != c.wantNumColumns {
@@ -206,84 +203,6 @@ func TestRead(t *testing.T) {
 		if gotNumRows != c.wantNumRows {
 			t.Errorf("Read() - filename: %s, gotNumRows: %d, want: %d",
 				c.filename, gotNumRows, c.wantNumRows)
-		}
-	}
-}
-
-func TestRead_errors(t *testing.T) {
-	cases := []struct {
-		filename   string
-		separator  rune
-		fieldNames []string
-		errRow     int
-		wantErr    error
-	}{
-		{filepath.Join("..", "fixtures", "invalid_numfields_at_102.csv"), ',',
-			[]string{"band", "score", "team", "points", "rating"}, 101,
-			&csv.ParseError{102, 0, errors.New("wrong number of fields in line")}},
-		{filepath.Join("..", "fixtures", "bank.csv"), ';',
-			[]string{"age", "job", "marital", "education", "default", "balance",
-				"housing", "loan", "contact", "day", "month", "duration", "campaign",
-				"pdays", "previous", "poutcome"}, 0,
-			errors.New("wrong number of field names for dataset")},
-	}
-	for _, c := range cases {
-		ds, err := New(c.fieldNames, c.filename, c.separator, false)
-		if err != nil {
-			t.Errorf("New() - filename: %s, err: %s", c.filename, err)
-		}
-		conn, err := ds.Open()
-		if err != nil {
-			t.Errorf("Open() - filename: %s, err: %s", c.filename, err)
-		}
-		row := 0
-		for conn.Next() {
-			_, err := conn.Read()
-			if row == c.errRow {
-				if err == nil {
-					t.Errorf("Read() - filename: %s Failed to raise error", c.filename)
-					return
-				}
-			}
-			row++
-		}
-		if conn.Err().Error() != c.wantErr.Error() {
-			t.Errorf("Err() - filename: %s Failed to raise error", c.filename)
-		}
-	}
-}
-
-func TestRead_errors2(t *testing.T) {
-	cases := []struct {
-		filename   string
-		separator  rune
-		fieldNames []string
-		wantErr    error
-	}{
-		{filepath.Join("..", "fixtures", "bank.csv"), ';',
-			[]string{"age", "job", "marital", "education", "default", "balance",
-				"housing", "loan", "contact", "day", "month", "duration", "campaign",
-				"pdays", "previous", "poutcome", "y"},
-			errors.New("wrong number of field names for dataset")},
-	}
-	for _, c := range cases {
-		ds, err := New(c.fieldNames, c.filename, c.separator, false)
-		if err != nil {
-			t.Errorf("New() - filename: %s, err: %s", c.filename, err)
-		}
-		conn, err := ds.Open()
-		if err != nil {
-			t.Errorf("Open() - filename: %s, err: %s", c.filename, err)
-		}
-		_, err = conn.Read()
-		if err.Error() != c.wantErr.Error() {
-			t.Errorf("Read() - filename: %s, got error: %s, want error: %s",
-				c.filename, err, c.wantErr)
-			return
-		}
-		if conn.Err().Error() != c.wantErr.Error() {
-			t.Errorf("Err() - filename: %s got error: %s, want error: %s",
-				c.filename, conn.Err().Error(), c.wantErr)
 		}
 	}
 }
@@ -337,19 +256,20 @@ func TestErr(t *testing.T) {
 
 func TestNext(t *testing.T) {
 	cases := []struct {
-		filename   string
-		separator  rune
-		fieldNames []string
+		filename       string
+		separator      rune
+		hasHeader      bool
+		fieldNames     []string
+		wantNumRecords int
+		wantErr        error
 	}{
-		{filepath.Join("..", "fixtures", "bank.csv"), ';',
+		{filepath.Join("..", "fixtures", "bank.csv"), ';', true,
 			[]string{"age", "job", "marital", "education", "default", "balance",
 				"housing", "loan", "contact", "day", "month", "duration", "campaign",
-				"pdays", "previous", "poutcome"}},
-		{filepath.Join("..", "fixtures", "invalid_numfields_at_102.csv"), ',',
-			[]string{"band", "score", "team", "points", "rating"}},
+				"pdays", "previous", "poutcome", "y"}, 9, nil},
 	}
 	for _, c := range cases {
-		ds, err := New(c.fieldNames, c.filename, c.separator, false)
+		ds, err := New(c.fieldNames, c.filename, c.separator, c.hasHeader)
 		if err != nil {
 			t.Errorf("New() - filename: %s, err: %s", c.filename, err)
 		}
@@ -357,10 +277,20 @@ func TestNext(t *testing.T) {
 		if err != nil {
 			t.Errorf("Open() - filename: %s, err: %s", c.filename, err)
 		}
+		numRecords := 0
 		for conn.Next() {
+			numRecords++
 		}
 		if conn.Next() {
 			t.Errorf("conn.Next() - Return true, despite having finished")
+		}
+		if !errorMatch(conn.Err(), c.wantErr) {
+			t.Errorf("conn.Err() - filename: %s, want: %s, got: %s",
+				c.filename, c.wantErr, conn.Err())
+		}
+		if numRecords != c.wantNumRecords {
+			t.Errorf("conn.Next() - filename: %s, wantNumRecords: %d, gotNumRecords: %d",
+				c.filename, c.wantNumRecords, numRecords)
 		}
 	}
 }
@@ -376,8 +306,16 @@ func TestNext_errors(t *testing.T) {
 		{filepath.Join("..", "fixtures", "bank.csv"), ';',
 			[]string{"age", "job", "marital", "education", "default", "balance",
 				"housing", "loan", "contact", "day", "month", "duration", "campaign",
-				"pdays", "previous", "poutcome"}, 2,
+				"pdays", "previous", "poutcome", "y"}, 2,
 			errors.New("connection has been closed")},
+		{filepath.Join("..", "fixtures", "bank.csv"), ';',
+			[]string{"age", "marital", "education", "default", "balance",
+				"housing", "loan", "contact", "day", "month", "duration", "campaign",
+				"pdays", "previous", "poutcome"}, 0,
+			errors.New("wrong number of field names for dataset")},
+		{filepath.Join("..", "fixtures", "invalid_numfields_at_102.csv"), ',',
+			[]string{"band", "score", "team", "points", "rating"}, 101,
+			&csv.ParseError{102, 0, errors.New("wrong number of fields in line")}},
 	}
 	for _, c := range cases {
 		ds, err := New(c.fieldNames, c.filename, c.separator, false)
@@ -404,7 +342,7 @@ func TestNext_errors(t *testing.T) {
 		if conn.Next() {
 			t.Errorf("conn.Next() - Return true, despite connection being closed")
 		}
-		if conn.Err() == nil || conn.Err().Error() != c.wantErr.Error() {
+		if !errorMatch(conn.Err(), c.wantErr) {
 			t.Errorf("conn.Err() - err: %s, want err: %s", conn.Err(), c.wantErr)
 		}
 	}
@@ -424,4 +362,17 @@ func matchRecords(r1 dataset.Record, r2 dataset.Record) bool {
 		}
 	}
 	return true
+}
+
+func errorMatch(e1 error, e2 error) bool {
+	if e1 == nil && e2 == nil {
+		return true
+	}
+	if e1 == nil || e2 == nil {
+		return false
+	}
+	if e1.Error() == e2.Error() {
+		return true
+	}
+	return false
 }

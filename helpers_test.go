@@ -68,13 +68,13 @@ func (lc *LiteralDatasetConn) Next() bool {
 	return false
 }
 
-func (lc *LiteralDatasetConn) Read() (dataset.Record, error) {
+func (lc *LiteralDatasetConn) Read() dataset.Record {
 	line := lc.dataset.records[lc.position]
 	record := make(dataset.Record, len(lc.dataset.fieldNames))
 	for i, v := range line {
 		record[lc.dataset.fieldNames[i]] = dlit.MustNew(v)
 	}
-	return record, nil
+	return record
 }
 
 func (lc *LiteralDatasetConn) Err() error {

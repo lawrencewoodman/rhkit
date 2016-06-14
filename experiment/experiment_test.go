@@ -296,14 +296,10 @@ func checkDatasetsEqual(ds1, ds2 dataset.Dataset) error {
 			break
 		}
 
-		conn1Record, conn1Err := conn1.Read()
-		conn2Record, conn2Err := conn2.Read()
-		if conn1Err != conn2Err {
-			return errors.New("Datasets don't error at same point")
-		} else if conn1Err == nil && conn2Err == nil {
-			if !reflect.DeepEqual(conn1Record, conn2Record) {
-				return errors.New("Datasets don't match")
-			}
+		conn1Record := conn1.Read()
+		conn2Record := conn2.Read()
+		if !reflect.DeepEqual(conn1Record, conn2Record) {
+			return errors.New("Datasets don't match")
 		}
 	}
 	if conn1.Err() != conn2.Err() {

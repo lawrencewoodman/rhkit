@@ -20,7 +20,6 @@ package reducedataset
 
 import (
 	"github.com/vlifesystems/rulehunter/dataset"
-	"io"
 )
 
 type ReduceDataset struct {
@@ -50,7 +49,7 @@ func (r *ReduceDataset) Open() (dataset.Conn, error) {
 	return &ReduceDatasetConn{
 		dataset:   r,
 		conn:      conn,
-		recordNum: -1,
+		recordNum: 0,
 		err:       nil,
 	}, nil
 }
@@ -67,20 +66,15 @@ func (rc *ReduceDatasetConn) Next() bool {
 		rc.recordNum++
 		return rc.conn.Next()
 	}
-	rc.err = io.EOF
 	return false
 }
 
 func (rc *ReduceDatasetConn) Err() error {
-	if rc.err == io.EOF {
-		return nil
-	}
 	return rc.conn.Err()
 }
 
-func (rc *ReduceDatasetConn) Read() (dataset.Record, error) {
-	record, err := rc.conn.Read()
-	return record, err
+func (rc *ReduceDatasetConn) Read() dataset.Record {
+	return rc.conn.Read()
 }
 
 func (rc *ReduceDatasetConn) Close() error {

@@ -124,35 +124,37 @@ func TestErr(t *testing.T) {
 
 func TestNext(t *testing.T) {
 	cases := []struct {
-		filename   string
-		separator  rune
-		fieldNames []string
-		numRecords int
+		filename       string
+		separator      rune
+		hasHeader      bool
+		fieldNames     []string
+		wantNumRecords int
 	}{
-		{filepath.Join("..", "fixtures", "bank.csv"), ';',
+		{filepath.Join("..", "fixtures", "bank.csv"), ';', true,
 			[]string{"age", "job", "marital", "education", "default", "balance",
 				"housing", "loan", "contact", "day", "month", "duration", "campaign",
-				"pdays", "previous", "poutcome"}, 4},
-		{filepath.Join("..", "fixtures", "invalid_numfields_at_102.csv"), ',',
+				"pdays", "previous", "poutcome", "y"}, 4},
+		{filepath.Join("..", "fixtures", "invalid_numfields_at_102.csv"),
+			',', false,
 			[]string{"band", "score", "team", "points", "rating"}, 50},
 	}
 	for _, c := range cases {
-		ds := mustNewCsvDataset(c.fieldNames, c.filename, c.separator, false)
-		rds := New(ds, c.numRecords)
+		ds := mustNewCsvDataset(c.fieldNames, c.filename, c.separator, c.hasHeader)
+		rds := New(ds, c.wantNumRecords)
 		conn, err := rds.Open()
 		if err != nil {
 			t.Errorf("Open() - filename: %s, err: %s", c.filename, err)
 		}
-		recordNum := -1
+		numRecords := 0
 		for conn.Next() {
-			recordNum++
+			numRecords++
 		}
 		if conn.Next() {
 			t.Errorf("conn.Next() - Return true, despite having finished")
 		}
-		if recordNum != c.numRecords {
-			t.Errorf("conn.Next() - recordNum: %d, numRecords: %d",
-				recordNum, c.numRecords)
+		if numRecords != c.wantNumRecords {
+			t.Errorf("conn.Next() - filename: %s, wantNumRecords: %d, gotNumRecords: %d",
+				c.filename, c.wantNumRecords, numRecords)
 		}
 	}
 }
@@ -161,35 +163,40 @@ func TestNext_errors(t *testing.T) {
 	cases := []struct {
 		filename   string
 		separator  rune
+		hasHeader  bool
 		fieldNames []string
 		stopRow    int
 		numRecords int
 		wantErr    error
 	}{
-		{filepath.Join("..", "fixtures", "bank.csv"), ';',
-			[]string{"age", "job", "marital", "education", "default", "balance",
-				"housing", "loan", "contact", "day", "month", "duration", "campaign",
-				"pdays", "previous", "poutcome"}, 2, 4,
-			errors.New("connection has been closed")},
+		{filename: filepath.Join("..", "fixtures", "bank.csv"),
+			separator: ';',
+			hasHeader: true,
+			fieldNames: []string{"age", "job", "marital", "education", "default",
+				"balance", "housing", "loan", "contact", "day", "month", "duration",
+				"campaign", "pdays", "previous", "poutcome", "y"},
+			stopRow:    2,
+			numRecords: 4,
+			wantErr:    errors.New("connection has been closed")},
 	}
 	for _, c := range cases {
-		ds := mustNewCsvDataset(c.fieldNames, c.filename, c.separator, false)
+		ds := mustNewCsvDataset(c.fieldNames, c.filename, c.separator, c.hasHeader)
 		rds := New(ds, c.numRecords)
 		conn, err := rds.Open()
 		if err != nil {
 			t.Errorf("Open() - filename: %s, err: %s", c.filename, err)
 		}
-		i := 0
+		recordNum := 0
 		for conn.Next() {
-			if i == c.stopRow {
+			if recordNum == c.stopRow {
 				if err := conn.Close(); err != nil {
 					t.Errorf("conn.Close() - Err: %d", err)
 				}
 				break
 			}
-			i++
+			recordNum++
 		}
-		if i != c.stopRow {
+		if recordNum != c.stopRow {
 			t.Errorf("conn.Next() - Not stopped at row: %d", c.stopRow)
 		}
 		if conn.Next() {
@@ -216,14 +223,10 @@ func checkDatasetsEqual(i1, i2 dataset.Conn) error {
 			break
 		}
 
-		i1Record, i1Err := i1.Read()
-		i2Record, i2Err := i2.Read()
-		if i1Err != i2Err {
-			return errors.New("Datasets don't error at same point")
-		} else if i1Err == nil && i2Err == nil {
-			if !matchRecords(i1Record, i2Record) {
-				return errors.New("Datasets don't match")
-			}
+		i1Record := i1.Read()
+		i2Record := i2.Read()
+		if !matchRecords(i1Record, i2Record) {
+			return errors.New("Datasets don't match")
 		}
 	}
 	if i1.Err() != i2.Err() {
