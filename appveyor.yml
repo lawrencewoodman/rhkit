@@ -5,7 +5,7 @@ platform:
   - x64
 
 environment:
-  GOPATH: %APPVEYOR_BUILD_FOLDER%
+  - GOPATH: %APPVEYOR_BUILD_FOLDER%
 
 install:
   - echo %PATH%
