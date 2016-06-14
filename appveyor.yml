@@ -1,0 +1,18 @@
+version: "{build}"
+
+platform:
+  - x86
+  - x64
+
+environment:
+  GOPATH: %APPVEYOR_BUILD_FOLDER%
+
+install:
+  - echo %PATH%
+  - echo %GOPATH%
+  - go version
+  - go env
+  - go get -v -t ./...
+
+build_script:
+  - go test -v ./...
