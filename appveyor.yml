@@ -3,13 +3,13 @@ version: "{build}"
 platform:
   - x86
   - x64
+
+clone_folder: c:\gopath\src\github.com\vlifesystems\rulehunter
+
 environment:
-  GO15VENDOREXPERIMENT: 0
+  GOPATH: c:\gopath
 
 install:
-  - set GOPATH=%APPVEYOR_BUILD_FOLDER%
-  - echo %PATH%
-  - echo %GOPATH%
   - go version
   - go env
   - go get -v -t ./...
