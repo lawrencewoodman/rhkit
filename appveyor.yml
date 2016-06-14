@@ -5,7 +5,7 @@ platform:
   - x64
 
 install:
-  - set GOPATH=%BuildFolder%
+  - set GOPATH=%APPVEYOR_BUILD_FOLDER%
   - echo %PATH%
   - echo %GOPATH%
   - go version
