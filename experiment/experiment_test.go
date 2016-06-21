@@ -2,10 +2,9 @@ package experiment
 
 import (
 	"errors"
-	"fmt"
+	"github.com/lawrencewoodman/ddataset"
+	"github.com/lawrencewoodman/ddataset/dcsv"
 	"github.com/vlifesystems/rulehunter/aggregators"
-	"github.com/vlifesystems/rulehunter/csvdataset"
-	"github.com/vlifesystems/rulehunter/dataset"
 	"github.com/vlifesystems/rulehunter/goal"
 	"path/filepath"
 	"reflect"
@@ -21,11 +20,11 @@ func TestNew(t *testing.T) {
 		&Experiment{},
 		&Experiment{
 			Title: "This is a jolly nice title",
-			Dataset: mustNewCsvDataset(
-				fieldNames,
+			Dataset: dcsv.New(
 				filepath.Join("..", "fixtures", "bank.csv"),
-				rune(';'),
 				true,
+				rune(';'),
+				fieldNames,
 			),
 			ExcludeFieldNames: []string{"education"},
 			Aggregators: []aggregators.Aggregator{
@@ -52,11 +51,11 @@ func TestNew(t *testing.T) {
 	}{
 		{&ExperimentDesc{
 			Title: "This is a jolly nice title",
-			Dataset: mustNewCsvDataset(
-				fieldNames,
+			Dataset: dcsv.New(
 				filepath.Join("..", "fixtures", "bank.csv"),
-				rune(';'),
 				true,
+				rune(';'),
+				fieldNames,
 			),
 			ExcludeFields: []string{"education"},
 			Aggregators: []*AggregatorDesc{
@@ -95,11 +94,11 @@ func TestNew_errors(t *testing.T) {
 		"balance", "housing", "loan", "contact", "day", "month", "duration",
 		"campaign", "pdays", "previous", "poutcome", "y",
 	}
-	dataset := mustNewCsvDataset(
-		fieldNames,
+	dataset := dcsv.New(
 		filepath.Join("..", "fixtures", "bank.csv"),
-		rune(';'),
 		true,
+		rune(';'),
+		fieldNames,
 	)
 
 	cases := []struct {
@@ -277,7 +276,7 @@ func checkExperimentsMatch(e1 *Experiment, e2 *Experiment) error {
 	return checkDatasetsEqual(e1.Dataset, e2.Dataset)
 }
 
-func checkDatasetsEqual(ds1, ds2 dataset.Dataset) error {
+func checkDatasetsEqual(ds1, ds2 ddataset.Dataset) error {
 	conn1, err := ds1.Open()
 	if err != nil {
 		return err
@@ -359,18 +358,4 @@ func areSortOrdersEqual(so1 []SortField, so2 []SortField) bool {
 		}
 	}
 	return true
-}
-
-func mustNewCsvDataset(
-	fieldNames []string,
-	filename string,
-	separator rune,
-	skipFirstLine bool,
-) dataset.Dataset {
-	dataset, err :=
-		csvdataset.New(fieldNames, filename, separator, skipFirstLine)
-	if err != nil {
-		panic(fmt.Sprintf("Couldn't create Csv Dataset: %s", err))
-	}
-	return dataset
 }

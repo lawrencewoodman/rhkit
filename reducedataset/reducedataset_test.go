@@ -4,8 +4,8 @@ import (
 	"encoding/csv"
 	"errors"
 	"fmt"
-	"github.com/vlifesystems/rulehunter/csvdataset"
-	"github.com/vlifesystems/rulehunter/dataset"
+	"github.com/lawrencewoodman/ddataset"
+	"github.com/lawrencewoodman/ddataset/dcsv"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -26,7 +26,7 @@ func TestOpen(t *testing.T) {
 			10},
 	}
 	for _, c := range cases {
-		ds := mustNewCsvDataset(c.fieldNames, c.filename, ';', false)
+		ds := dcsv.New(c.filename, false, ';', c.fieldNames)
 		rds := New(ds, c.numRecords)
 		if _, err := rds.Open(); err != nil {
 			t.Errorf("Open() err: %s", err)
@@ -39,7 +39,7 @@ func TestOpen_errors(t *testing.T) {
 	fieldNames := []string{"age", "occupation"}
 	numRecords := 10
 	wantErr := &os.PathError{"open", "missing.csv", syscall.ENOENT}
-	ds := mustNewCsvDataset(fieldNames, filename, ';', false)
+	ds := dcsv.New(filename, false, ';', fieldNames)
 	rds := New(ds, numRecords)
 	_, err := rds.Open()
 	if err := checkPathErrorMatch(err, wantErr); err != nil {
@@ -56,7 +56,7 @@ func TestGetFieldNames(t *testing.T) {
 		"pdays", "previous", "poutcome", "y",
 	}
 	numRecords := 3
-	ds := mustNewCsvDataset(fieldNames, filename, ';', false)
+	ds := dcsv.New(filename, false, ';', fieldNames)
 	rds := New(ds, numRecords)
 
 	got := rds.GetFieldNames()
@@ -90,7 +90,7 @@ func TestErr(t *testing.T) {
 			20, nil},
 	}
 	for _, c := range cases {
-		ds := mustNewCsvDataset(c.fieldNames, c.filename, c.separator, false)
+		ds := dcsv.New(c.filename, false, c.separator, c.fieldNames)
 		rds := New(ds, c.numRecords)
 		conn, err := rds.Open()
 		if err != nil {
@@ -130,7 +130,7 @@ func TestNext(t *testing.T) {
 			[]string{"band", "score", "team", "points", "rating"}, 50},
 	}
 	for _, c := range cases {
-		ds := mustNewCsvDataset(c.fieldNames, c.filename, c.separator, c.hasHeader)
+		ds := dcsv.New(c.filename, c.hasHeader, c.separator, c.fieldNames)
 		rds := New(ds, c.wantNumRecords)
 		conn, err := rds.Open()
 		if err != nil {
@@ -171,7 +171,7 @@ func TestNext_errors(t *testing.T) {
 			wantErr:    errors.New("connection has been closed")},
 	}
 	for _, c := range cases {
-		ds := mustNewCsvDataset(c.fieldNames, c.filename, c.separator, c.hasHeader)
+		ds := dcsv.New(c.filename, c.hasHeader, c.separator, c.fieldNames)
 		rds := New(ds, c.numRecords)
 		conn, err := rds.Open()
 		if err != nil {
@@ -203,7 +203,7 @@ func TestNext_errors(t *testing.T) {
  *   Helper functions
  *************************/
 
-func checkDatasetsEqual(i1, i2 dataset.Conn) error {
+func checkDatasetsEqual(i1, i2 ddataset.Conn) error {
 	for {
 		i1Next := i1.Next()
 		i2Next := i2.Next()
@@ -226,7 +226,7 @@ func checkDatasetsEqual(i1, i2 dataset.Conn) error {
 	return nil
 }
 
-func matchRecords(r1 dataset.Record, r2 dataset.Record) bool {
+func matchRecords(r1 ddataset.Record, r2 ddataset.Record) bool {
 	if len(r1) != len(r2) {
 		return false
 	}
@@ -236,19 +236,6 @@ func matchRecords(r1 dataset.Record, r2 dataset.Record) bool {
 		}
 	}
 	return true
-}
-
-func mustNewCsvDataset(
-	fieldNames []string,
-	filename string,
-	separator rune,
-	skipFirstLine bool,
-) dataset.Dataset {
-	dataset, err := csvdataset.New(fieldNames, filename, separator, skipFirstLine)
-	if err != nil {
-		panic(fmt.Sprintf("Can't create new csvdataset for filename: %s", filename))
-	}
-	return dataset
 }
 
 func checkPathErrorMatch(

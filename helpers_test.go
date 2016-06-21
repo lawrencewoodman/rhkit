@@ -4,8 +4,8 @@
 package rulehunter
 
 import (
+	"github.com/lawrencewoodman/ddataset"
 	"github.com/lawrencewoodman/dlit"
-	"github.com/vlifesystems/rulehunter/dataset"
 )
 
 func errorMatch(e1 error, e2 error) bool {
@@ -37,14 +37,14 @@ type LiteralDatasetConn struct {
 func NewLiteralDataset(
 	fieldNames []string,
 	records [][]string,
-) dataset.Dataset {
+) ddataset.Dataset {
 	return &LiteralDataset{
 		records:    records,
 		fieldNames: fieldNames,
 	}
 }
 
-func (l *LiteralDataset) Open() (dataset.Conn, error) {
+func (l *LiteralDataset) Open() (ddataset.Conn, error) {
 	return &LiteralDatasetConn{
 		dataset:  l,
 		position: -1,
@@ -68,9 +68,9 @@ func (lc *LiteralDatasetConn) Next() bool {
 	return false
 }
 
-func (lc *LiteralDatasetConn) Read() dataset.Record {
+func (lc *LiteralDatasetConn) Read() ddataset.Record {
 	line := lc.dataset.records[lc.position]
-	record := make(dataset.Record, len(lc.dataset.fieldNames))
+	record := make(ddataset.Record, len(lc.dataset.fieldNames))
 	for i, v := range line {
 		record[lc.dataset.fieldNames[i]] = dlit.MustNew(v)
 	}
