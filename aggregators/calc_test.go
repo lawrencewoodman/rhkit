@@ -21,7 +21,10 @@ func TestCalcGetResult(t *testing.T) {
 		dlit.MustNew(11),
 		dlit.MustNew(18),
 		dlit.MustNew(24),
-		dlit.MustNew(dexpr.ErrInvalidExpr("Variable doesn't exist: e")),
+		dlit.MustNew(dexpr.ErrInvalidExpr{
+			Expr: "a + e",
+			Err:  dexpr.ErrVarNotExist("e"),
+		}),
 	}
 	numRecords := int64(12)
 	for i, aggregator := range aggregators {

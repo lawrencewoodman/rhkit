@@ -5,6 +5,7 @@ import (
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rulehunter/aggregators"
 	"github.com/vlifesystems/rulehunter/goal"
+	"go/token"
 	"testing"
 )
 
@@ -120,18 +121,30 @@ func TestNextRecord_Errors(t *testing.T) {
 		{mustNewRule("band > 4"),
 			[]aggregators.Aggregator{
 				aggregators.MustNew("numIncomeGt2", "count", "fred > 2")},
-			dexpr.ErrInvalidExpr("Variable doesn't exist: fred")},
+			dexpr.ErrInvalidExpr{
+				Expr: "fred > 2",
+				Err:  dexpr.ErrVarNotExist("fred"),
+			},
+		},
 		{mustNewRule("band > 4"),
 			[]aggregators.Aggregator{
 				aggregators.MustNew("numIncomeGt2", "count", "income > 2")}, nil},
 		{mustNewRule("hand > 4"),
 			[]aggregators.Aggregator{
 				aggregators.MustNew("numIncomeGt2", "count", "income > 2")},
-			dexpr.ErrInvalidExpr("Variable doesn't exist: hand")},
+			dexpr.ErrInvalidExpr{
+				Expr: "hand > 4",
+				Err:  dexpr.ErrVarNotExist("hand"),
+			},
+		},
 		{mustNewRule("band ^^ 4"),
 			[]aggregators.Aggregator{
 				aggregators.MustNew("numIncomeGt2", "count", "income > 2")},
-			dexpr.ErrInvalidExpr("Invalid operator: \"^\"")},
+			dexpr.ErrInvalidExpr{
+				Expr: "band ^^ 4",
+				Err:  dexpr.ErrInvalidOp(token.XOR),
+			},
+		},
 	}
 	for _, c := range cases {
 		ra := newRuleAssessor(c.rule, c.aggregators, goals)

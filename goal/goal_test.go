@@ -1,6 +1,7 @@
 package goal
 
 import (
+	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
 	"testing"
 )
@@ -47,10 +48,20 @@ func TestAssess_errors(t *testing.T) {
 	}
 	cases := []struct {
 		goalStr string
-		wantErr string
+		wantErr error
 	}{
-		{"bob > 4999", "Variable doesn't exist: bob"},
-		{"roundbob(percentMatches,2) == 5.23", "Function doesn't exist: roundbob"},
+		{"bob > 4999",
+			dexpr.ErrInvalidExpr{
+				Expr: "bob > 4999",
+				Err:  dexpr.ErrVarNotExist("bob"),
+			},
+		},
+		{"roundbob(percentMatches,2) == 5.23",
+			dexpr.ErrInvalidExpr{
+				Expr: "roundbob(percentMatches,2) == 5.23",
+				Err:  dexpr.ErrFunctionNotExist("roundbob"),
+			},
+		},
 	}
 	for _, c := range cases {
 		goal, err := New(c.goalStr)
@@ -59,7 +70,7 @@ func TestAssess_errors(t *testing.T) {
 		}
 
 		_, err = goal.Assess(aggregators)
-		if err == nil || err.Error() != c.wantErr {
+		if err != c.wantErr {
 			t.Errorf("Assess(%s) goal: %s, wantErr: %s, gotErr: %s",
 				aggregators, goal, c.wantErr, err)
 		}

@@ -1,10 +1,11 @@
 package rulehunter
 
 import (
-	"errors"
 	"fmt"
+	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rulehunter/experiment"
+	"go/token"
 	"testing"
 )
 
@@ -142,25 +143,41 @@ func TestAssessRules_errors(t *testing.T) {
 				&experiment.AggregatorDesc{"numIncomeGt2", "count", "income > 2"},
 			},
 			[]string{"numIncomeGt2 == 1"},
-			errors.New("Invalid operator: \"^\"")},
+			dexpr.ErrInvalidExpr{
+				Expr: "band ^^ 3",
+				Err:  dexpr.ErrInvalidOp(token.XOR),
+			},
+		},
 		{[]*Rule{mustNewRule("hand > 3")},
 			[]*experiment.AggregatorDesc{
 				&experiment.AggregatorDesc{"numIncomeGt2", "count", "income > 2"},
 			},
 			[]string{"numIncomeGt2 == 1"},
-			errors.New("Variable doesn't exist: hand")},
+			dexpr.ErrInvalidExpr{
+				Expr: "hand > 3",
+				Err:  dexpr.ErrVarNotExist("hand"),
+			},
+		},
 		{[]*Rule{mustNewRule("band > 3")},
 			[]*experiment.AggregatorDesc{
 				&experiment.AggregatorDesc{"numIncomeGt2", "count", "bincome > 2"},
 			},
 			[]string{"numIncomeGt2 == 1"},
-			errors.New("Variable doesn't exist: bincome")},
+			dexpr.ErrInvalidExpr{
+				Expr: "bincome > 2",
+				Err:  dexpr.ErrVarNotExist("bincome"),
+			},
+		},
 		{[]*Rule{mustNewRule("band > 3")},
 			[]*experiment.AggregatorDesc{
 				&experiment.AggregatorDesc{"numIncomeGt2", "count", "income > 2"},
 			},
 			[]string{"numIncomeGt == 1"},
-			errors.New("Variable doesn't exist: numIncomeGt")},
+			dexpr.ErrInvalidExpr{
+				Expr: "numIncomeGt == 1",
+				Err:  dexpr.ErrVarNotExist("numIncomeGt"),
+			},
+		},
 	}
 	fieldNames := []string{"income", "cost", "band"}
 	records := [][]string{

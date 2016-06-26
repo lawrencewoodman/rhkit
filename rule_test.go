@@ -56,7 +56,11 @@ func TestIsTrue_errors(t *testing.T) {
 		wantError error
 	}{
 		{mustNewRule("band > 3"),
-			dexpr.ErrInvalidExpr("Variable doesn't exist: band")},
+			dexpr.ErrInvalidExpr{
+				Expr: "band > 3",
+				Err:  dexpr.ErrVarNotExist("band"),
+			},
+		},
 	}
 	record := map[string]*dlit.Literal{
 		"cost":   dlit.MustNew(4.5),
