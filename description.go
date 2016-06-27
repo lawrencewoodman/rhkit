@@ -138,7 +138,7 @@ func (f *fieldDescription) updateNumBoundaries(value *dlit.Literal) {
 		f.min = dlit.MustNew(math.Min(minFloat, valueFloat))
 		f.max = dlit.MustNew(math.Max(maxFloat, valueFloat))
 		f.maxDP =
-			int(maxI(int64(f.maxDP), int64(internal.NumDecPlaces(value.String()))))
+			int(maxI(int64(f.maxDP), int64(numDecPlaces(value.String()))))
 	}
 }
 

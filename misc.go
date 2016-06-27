@@ -17,13 +17,14 @@
 	<http://www.gnu.org/licenses/>.
 */
 
-package internal
+package rulehunter
 
 import "strings"
 
-func NumDecPlaces(s string) int {
+func numDecPlaces(s string) int {
 	i := strings.IndexByte(s, '.')
 	if i > -1 {
+		s = strings.TrimRight(s, "0")
 		return len(s) - i - 1
 	}
 	return 0

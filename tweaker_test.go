@@ -187,7 +187,7 @@ func TestTweakRules_3(t *testing.T) {
 		} else {
 			numOther++
 		}
-		valueDP := internal.NumDecPlaces(value)
+		valueDP := numDecPlaces(value)
 		if valueDP > gotMaxDP {
 			gotMaxDP = valueDP
 		}
