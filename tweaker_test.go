@@ -2,7 +2,6 @@ package rulehunter
 
 import (
 	"github.com/lawrencewoodman/dlit"
-	"github.com/vlifesystems/rulehunter/internal"
 	"testing"
 )
 
@@ -11,13 +10,13 @@ func TestTweakRules_1(t *testing.T) {
 	inputDescription := &Description{
 		map[string]*fieldDescription{
 			"band": &fieldDescription{
-				internal.INT, dlit.MustNew(3), dlit.MustNew(40), 0,
+				ftInt, dlit.MustNew(3), dlit.MustNew(40), 0,
 				[]*dlit.Literal{}, 0},
 			"age": &fieldDescription{
-				internal.INT, dlit.MustNew(4), dlit.MustNew(30), 0,
+				ftInt, dlit.MustNew(4), dlit.MustNew(30), 0,
 				[]*dlit.Literal{}, 0},
 			"flow": &fieldDescription{
-				internal.FLOAT, dlit.MustNew(50), dlit.MustNew(400), 2,
+				ftFloat, dlit.MustNew(50), dlit.MustNew(400), 2,
 				[]*dlit.Literal{}, 0},
 		}}
 	rulesIn := []*Rule{
@@ -81,7 +80,7 @@ func TestTweakRules_2(t *testing.T) {
 	inputDescription := &Description{
 		map[string]*fieldDescription{
 			"age": &fieldDescription{
-				internal.INT, dlit.MustNew(20), dlit.MustNew(40), 0,
+				ftInt, dlit.MustNew(20), dlit.MustNew(40), 0,
 				[]*dlit.Literal{}, 0,
 			},
 		}}
@@ -146,7 +145,7 @@ func TestTweakRules_3(t *testing.T) {
 	inputDescription := &Description{
 		map[string]*fieldDescription{
 			"flow": &fieldDescription{
-				internal.FLOAT, dlit.MustNew(4), dlit.MustNew(30), 6,
+				ftFloat, dlit.MustNew(4), dlit.MustNew(30), 6,
 				[]*dlit.Literal{}, 0,
 			},
 		}}
@@ -233,7 +232,7 @@ func TestTweakRules_4(t *testing.T) {
 	inputDescription := &Description{
 		map[string]*fieldDescription{
 			"flow": &fieldDescription{
-				internal.FLOAT, dlit.MustNew(4), dlit.MustNew(30), 6,
+				ftFloat, dlit.MustNew(4), dlit.MustNew(30), 6,
 				[]*dlit.Literal{}, 0,
 			},
 		}}

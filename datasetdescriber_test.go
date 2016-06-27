@@ -2,7 +2,6 @@ package rulehunter
 
 import (
 	"github.com/lawrencewoodman/dlit"
-	"github.com/vlifesystems/rulehunter/internal"
 	"testing"
 )
 
@@ -55,7 +54,7 @@ func TestDescribeDataset(t *testing.T) {
 		[]string{"band", "inputA", "inputB", "version", "flow", "score", "method"}
 	expected := &Description{
 		map[string]*fieldDescription{
-			"band": &fieldDescription{internal.STRING, nil, nil, 0,
+			"band": &fieldDescription{ftString, nil, nil, 0,
 				[]*dlit.Literal{dlit.MustNew("a"), dlit.MustNew("b"),
 					dlit.MustNew("c"), dlit.MustNew("f"), dlit.MustNew("g"),
 					dlit.MustNew("i"), dlit.MustNew("j"), dlit.MustNew("k"),
@@ -68,38 +67,38 @@ func TestDescribeDataset(t *testing.T) {
 					dlit.MustNew("6"), dlit.MustNew("7"), dlit.MustNew("8"),
 					dlit.MustNew("9"), dlit.MustNew("h")}, 0},
 			"inputA": &fieldDescription{
-				internal.FLOAT,
+				ftFloat,
 				dlit.MustNew(7),
 				dlit.MustNew(15.1),
 				1,
 				[]*dlit.Literal{dlit.MustNew(7), dlit.MustNew(7.3),
 					dlit.MustNew(9), dlit.MustNew(14), dlit.MustNew(15.1)}, 0},
 			"inputB": &fieldDescription{
-				internal.FLOAT,
+				ftFloat,
 				dlit.MustNew(2),
 				dlit.MustNew(5),
 				4,
 				[]*dlit.Literal{dlit.MustNew(2.6), dlit.MustNew(2.8789),
 					dlit.MustNew(3), dlit.MustNew(5), dlit.MustNew(2),
 					dlit.MustNew(2.8)}, 0},
-			"version": &fieldDescription{internal.STRING, nil, nil, 0,
+			"version": &fieldDescription{ftString, nil, nil, 0,
 				[]*dlit.Literal{dlit.MustNew("9.9"), dlit.MustNew("9.97"),
 					dlit.MustNew("10"), dlit.MustNew("10.94"), dlit.MustNew("9.9a"),
 					dlit.MustNew("9.9b")}, 0},
 			"flow": &fieldDescription{
-				internal.INT,
+				ftInt,
 				dlit.MustNew(21),
 				dlit.MustNew(87),
 				0,
 				[]*dlit.Literal{}, 0},
 			"score": &fieldDescription{
-				internal.INT,
+				ftInt,
 				dlit.MustNew(1),
 				dlit.MustNew(5),
 				0,
 				[]*dlit.Literal{dlit.MustNew(1), dlit.MustNew(2), dlit.MustNew(3),
 					dlit.MustNew(4), dlit.MustNew(5)}, 0},
-			"method": &fieldDescription{internal.IGNORE, nil, nil, 0,
+			"method": &fieldDescription{ftIgnore, nil, nil, 0,
 				[]*dlit.Literal{}, 0},
 		}}
 	dataset := NewLiteralDataset(fieldNames, flowRecords)
@@ -139,13 +138,13 @@ func fieldDescriptionEqual(
 	if fd1.kind != fd2.kind || len(fd1.values) != len(fd2.values) {
 		return false
 	}
-	if fd1.kind == internal.INT || fd1.kind == internal.FLOAT {
+	if fd1.kind == ftInt || fd1.kind == ftFloat {
 		if fd1.min.String() != fd2.min.String() ||
 			fd1.max.String() != fd2.max.String() {
 			return false
 		}
 	}
-	if fd1.kind == internal.FLOAT {
+	if fd1.kind == ftFloat {
 		if fd1.maxDP != fd2.maxDP {
 			return false
 		}

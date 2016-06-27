@@ -17,31 +17,31 @@
 	<http://www.gnu.org/licenses/>.
 */
 
-package internal
+package rulehunter
 
 import "fmt"
 
-type FieldType int
+type fieldType int
 
 const (
-	UNKNOWN FieldType = iota
-	IGNORE
-	INT
-	FLOAT
-	STRING
+	ftUnknown fieldType = iota
+	ftIgnore
+	ftInt
+	ftFloat
+	ftString
 )
 
-func (ft FieldType) String() string {
+func (ft fieldType) String() string {
 	switch ft {
-	case UNKNOWN:
+	case ftUnknown:
 		return "Unknown"
-	case IGNORE:
+	case ftIgnore:
 		return "Ignore"
-	case INT:
+	case ftInt:
 		return "Int"
-	case FLOAT:
+	case ftFloat:
 		return "Float"
-	case STRING:
+	case ftString:
 		return "String"
 	}
 	panic(fmt.Sprintf("Unsupported type: %d", ft))

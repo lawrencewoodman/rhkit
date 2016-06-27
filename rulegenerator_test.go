@@ -3,7 +3,6 @@ package rulehunter
 import (
 	"fmt"
 	"github.com/lawrencewoodman/dlit"
-	"github.com/vlifesystems/rulehunter/internal"
 	"regexp"
 	"sort"
 	"testing"
@@ -14,33 +13,33 @@ func TestGenerateRules_1(t *testing.T) {
 	inputDescription := &Description{
 		map[string]*fieldDescription{
 			"team": &fieldDescription{
-				kind: internal.STRING,
+				kind: ftString,
 				values: []*dlit.Literal{
 					dlit.MustNew("a"), dlit.MustNew("b"), dlit.MustNew("c"),
 				},
 			},
 			"teamOut": &fieldDescription{
-				kind: internal.STRING,
+				kind: ftString,
 				values: []*dlit.Literal{
 					dlit.MustNew("a"), dlit.MustNew("c"), dlit.MustNew("d"),
 					dlit.MustNew("e"), dlit.MustNew("f"),
 				},
 			},
 			"teamBob": &fieldDescription{
-				kind: internal.STRING,
+				kind: ftString,
 				values: []*dlit.Literal{
 					dlit.MustNew("a"), dlit.MustNew("b"), dlit.MustNew("c"),
 				},
 			},
 			"camp": &fieldDescription{
-				kind: internal.STRING,
+				kind: ftString,
 				values: []*dlit.Literal{
 					dlit.MustNew("arthur"), dlit.MustNew("offa"),
 					dlit.MustNew("richard"), dlit.MustNew("owen"),
 				},
 			},
 			"level": &fieldDescription{
-				kind:  internal.INT,
+				kind:  ftInt,
 				min:   dlit.MustNew(0),
 				max:   dlit.MustNew(5),
 				maxDP: 0,
@@ -50,7 +49,7 @@ func TestGenerateRules_1(t *testing.T) {
 				},
 			},
 			"levelBob": &fieldDescription{
-				kind:  internal.INT,
+				kind:  ftInt,
 				min:   dlit.MustNew(0),
 				max:   dlit.MustNew(5),
 				maxDP: 0,
@@ -60,7 +59,7 @@ func TestGenerateRules_1(t *testing.T) {
 				},
 			},
 			"flow": &fieldDescription{
-				kind:  internal.FLOAT,
+				kind:  ftFloat,
 				min:   dlit.MustNew(0),
 				max:   dlit.MustNew(10.5),
 				maxDP: 2,
@@ -69,7 +68,7 @@ func TestGenerateRules_1(t *testing.T) {
 				},
 			},
 			"position": &fieldDescription{
-				kind:  internal.INT,
+				kind:  ftInt,
 				min:   dlit.MustNew(1),
 				max:   dlit.MustNew(13),
 				maxDP: 0,
@@ -396,13 +395,13 @@ func TestGenerateRules_2(t *testing.T) {
 	inputDescription := &Description{
 		map[string]*fieldDescription{
 			"team": &fieldDescription{
-				kind: internal.STRING,
+				kind: ftString,
 				values: []*dlit.Literal{
 					dlit.MustNew("a"), dlit.MustNew("b"), dlit.MustNew("c"),
 				},
 			},
 			"teamOut": &fieldDescription{
-				kind: internal.STRING,
+				kind: ftString,
 				values: []*dlit.Literal{
 					dlit.MustNew("a"), dlit.MustNew("c"), dlit.MustNew("d"),
 					dlit.MustNew("e"), dlit.MustNew("f"),
