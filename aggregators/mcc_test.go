@@ -82,8 +82,12 @@ func TestMCCGetResult(t *testing.T) {
 			ruleExpr:  dexpr.MustNew("cost <= 2"),
 			checkExpr: dexpr.MustNew("got == -1.0"),
 		},
+		{records: records,
+			ruleExpr:  dexpr.MustNew("1 != 1"),
+			checkExpr: dexpr.MustNew("got == 0"),
+		},
 		{records: []map[string]*dlit.Literal{},
-			ruleExpr:  dexpr.MustNew("1==1"),
+			ruleExpr:  dexpr.MustNew("1 == 1"),
 			checkExpr: dexpr.MustNew("got == 0"),
 		},
 	}
@@ -110,8 +114,8 @@ func TestMCCGetResult(t *testing.T) {
 			t.Fatalf("EvalBool(%v, callFuncs) err: %v", vars, err)
 		}
 		if !isCorrect {
-			t.Errorf("EvalBool(%v, callFuncs) got: %v, want: %v",
-				vars, got, c.checkExpr)
+			t.Errorf("GetResult() (c.ruleExpr: %s) got: %v, want: %v",
+				c.ruleExpr, got, c.checkExpr)
 		}
 	}
 }

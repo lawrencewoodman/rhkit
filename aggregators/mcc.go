@@ -116,6 +116,13 @@ func (a *mcc) GetResult(
 		"fp": dlit.MustNew(a.numFalsePositives),
 		"fn": dlit.MustNew(a.numFalseNegatives),
 	}
+	sums := (a.numTruePositives + a.numFalsePositives) *
+		(a.numTruePositives + a.numFalseNegatives) *
+		(a.numTrueNegatives + a.numFalsePositives) *
+		(a.numTrueNegatives + a.numFalseNegatives)
+	if sums == 0 {
+		return dlit.MustNew(0)
+	}
 	return mccExpr.Eval(vars, dexprfuncs.CallFuncs)
 }
 
