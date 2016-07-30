@@ -77,7 +77,7 @@ func TestAccuracyGetResult(t *testing.T) {
 		got := accuracyCostGt2.GetResult(aggregators, goals, numRecords)
 		gotFloat, gotIsFloat := got.Float()
 		if !gotIsFloat || gotFloat != c.want {
-			t.Errorf("GetResult() got: %f, want: %f", got, c.want)
+			t.Errorf("GetResult() got: %v, want: %v", got, c.want)
 		}
 	}
 }
@@ -104,10 +104,10 @@ func TestAccuracyCloneNew(t *testing.T) {
 
 	gotInt1, gotIsInt1 := got1.Int()
 	if !gotIsInt1 || gotInt1 != want {
-		t.Errorf("GetResult() got: %d, want: %d", gotInt1, want)
+		t.Errorf("GetResult() got: %v, want: %d", got1, want)
 	}
 	gotInt2, gotIsInt2 := got2.Int()
 	if !gotIsInt2 || gotInt2 != 0 {
-		t.Errorf("GetResult() got: %d, want: %d", gotInt1, 0)
+		t.Errorf("GetResult() got: %v, want: %d", got2, 0)
 	}
 }
