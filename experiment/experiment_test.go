@@ -27,7 +27,7 @@ func TestNew(t *testing.T) {
 				fieldNames,
 			),
 			ExcludeFieldNames: []string{"education"},
-			Aggregators: []aggregators.Aggregator{
+			Aggregators: []aggregators.AggregatorSpec{
 				// num_married to check for allowed characters
 				aggregators.MustNew("num_married", "count", "marital == \"married\""),
 				aggregators.MustNew("numSignedUp", "count", "y == \"yes\""),
@@ -333,14 +333,16 @@ func areGoalExpressionsEqual(g1 []*goal.Goal, g2 []*goal.Goal) bool {
 }
 
 func areAggregatorsEqual(
-	a1 []aggregators.Aggregator,
-	a2 []aggregators.Aggregator,
+	a1 []aggregators.AggregatorSpec,
+	a2 []aggregators.AggregatorSpec,
 ) bool {
 	if len(a1) != len(a2) {
 		return false
 	}
-	for i, e := range a1 {
-		if !e.IsEqual(a2[i]) {
+	for i, a := range a1 {
+		if reflect.TypeOf(a) != reflect.TypeOf(a2[i]) ||
+			a.GetName() != a2[i].GetName() ||
+			a.GetArg() != a2[i].GetArg() {
 			return false
 		}
 	}

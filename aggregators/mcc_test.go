@@ -93,11 +93,12 @@ func TestMCCGetResult(t *testing.T) {
 	}
 	callFuncs := map[string]dexpr.CallFun{}
 	for _, c := range cases {
-		mccCostGt2, err := New("mccCostGt2", "mcc", "cost > 2")
+		mccCostGt2Desc, err := New("mccCostGt2", "mcc", "cost > 2")
 		if err != nil {
 			t.Fatalf("New(\"mccCostGt2\", \"mcc\", \"cost > 2\") err: %s", err)
 		}
-		aggregators := []Aggregator{mccCostGt2}
+		mccCostGt2 := mccCostGt2Desc.New()
+		instances := []AggregatorInstance{mccCostGt2}
 
 		for _, record := range c.records {
 			isTrue, err := c.ruleExpr.EvalBool(record, callFuncs)
@@ -107,7 +108,7 @@ func TestMCCGetResult(t *testing.T) {
 			mccCostGt2.NextRecord(record, isTrue)
 		}
 		numRecords := int64(len(c.records))
-		got := mccCostGt2.GetResult(aggregators, goals, numRecords)
+		got := mccCostGt2.GetResult(instances, goals, numRecords)
 		vars := map[string]*dlit.Literal{"got": got}
 		isCorrect, err := c.checkExpr.EvalBool(vars, callFuncs)
 		if err != nil {
@@ -119,34 +120,3 @@ func TestMCCGetResult(t *testing.T) {
 		}
 	}
 }
-
-/*
-func TestMCCCloneNew(t *testing.T) {
-	record := map[string]*dlit.Literal{
-		"income": dlit.MustNew(3),
-		"band":   dlit.MustNew(4),
-		"cost":   dlit.MustNew(4),
-	}
-	goals := []*goal.Goal{}
-	numRecords := int64(1)
-	mccCostGt2, err := New("mccCostGt2", "mcc", "cost > 2")
-	if err != nil {
-		t.Fatalf("New(\"mccCostGt2\", \"mcc\", \"cost > 2\") err: %s", err)
-	}
-	mccCostGt2_2 := mccCostGt2.CloneNew()
-	aggregators := []Aggregator{}
-	want := int64(100)
-	mccCostGt2.NextRecord(record, true)
-	got1 := mccCostGt2.GetResult(aggregators, goals, numRecords)
-	got2 := mccCostGt2_2.GetResult(aggregators, goals, numRecords)
-
-	gotInt1, gotIsInt1 := got1.Int()
-	if !gotIsInt1 || gotInt1 != want {
-		t.Errorf("GetResult() got: %d, want: %d", gotInt1, want)
-	}
-	gotInt2, gotIsInt2 := got2.Int()
-	if !gotIsInt2 || gotInt2 != 0 {
-		t.Errorf("GetResult() got: %d, want: %d", gotInt1, 0)
-	}
-}
-*/

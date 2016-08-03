@@ -29,20 +29,21 @@ import (
 
 type ruleAssessor struct {
 	Rule        *Rule
-	Aggregators []aggregators.Aggregator
+	Aggregators []aggregators.AggregatorInstance
 	Goals       []*goal.Goal
 }
 
 func newRuleAssessor(
 	rule *Rule,
-	_aggregators []aggregators.Aggregator,
+	aggregatorSpecs []aggregators.AggregatorSpec,
 	goals []*goal.Goal,
 ) *ruleAssessor {
 	// Clone the aggregators and goals to ensure the results are
 	// specific to this rule
-	cloneAggregators := make([]aggregators.Aggregator, len(_aggregators))
-	for i, a := range _aggregators {
-		cloneAggregators[i] = a.CloneNew()
+	aggregatorInstances :=
+		make([]aggregators.AggregatorInstance, len(aggregatorSpecs))
+	for i, ad := range aggregatorSpecs {
+		aggregatorInstances[i] = ad.New()
 	}
 	cloneGoals := make([]*goal.Goal, len(goals))
 	for i, g := range goals {
@@ -50,7 +51,7 @@ func newRuleAssessor(
 	}
 	return &ruleAssessor{
 		Rule:        rule,
-		Aggregators: cloneAggregators,
+		Aggregators: aggregatorInstances,
 		Goals:       cloneGoals,
 	}
 }

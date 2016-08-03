@@ -15,53 +15,22 @@ func TestCountGetResult(t *testing.T) {
 		map[string]*dlit.Literal{"income": dlit.MustNew(0), "band": dlit.MustNew(9)},
 	}
 	goals := []*goal.Goal{}
-	numBandGt4, err := New("numBandGt4", "count", "band > 4")
+	numBandGt4Desc, err := New("numBandGt4", "count", "band > 4")
 	if err != nil {
-		t.Errorf("NewCount(\"numBandGt4\", \"band > 4\") err == %q",
-			err)
+		t.Errorf("New(\"numBandGt4\", \"count\", \"band > 4\") err: %v", err)
 	}
-	aggregators := []Aggregator{numBandGt4}
+	numBandGt4 := numBandGt4Desc.New()
+	instances := []AggregatorInstance{numBandGt4}
 
 	for i, record := range records {
 		numBandGt4.NextRecord(record, i != 3)
 	}
 	numRecords := int64(len(records))
 	want := int64(2)
-	got := numBandGt4.GetResult(aggregators, goals, numRecords)
+	got := numBandGt4.GetResult(instances, goals, numRecords)
 	gotInt, gotIsInt := got.Int()
 	if !gotIsInt || gotInt != want {
-		t.Errorf("NewCount(\"numBandGt4\", \"band > 4\") == %q, want: %q",
+		t.Errorf("New(\"numBandGt4\", \"count\", \"band > 4\") got: %v, want: %v",
 			got, want)
-	}
-}
-
-func TestCountCloneNew(t *testing.T) {
-	record := map[string]*dlit.Literal{
-		"income": dlit.MustNew(3),
-		"band":   dlit.MustNew(4),
-	}
-	goals := []*goal.Goal{}
-	numRecords := int64(1)
-	numBandGt4, err := New("numBandGt4", "count", "band > 3")
-	if err != nil {
-		t.Errorf("NewCount(\"numBandGt4\", \"band > 3\") err == %q",
-			err)
-	}
-	numBandGt4_2 := numBandGt4.CloneNew()
-	aggregators := []Aggregator{}
-
-	numBandGt4.NextRecord(record, true)
-	got1 := numBandGt4.GetResult(aggregators, goals, numRecords)
-	got2 := numBandGt4_2.GetResult(aggregators, goals, numRecords)
-
-	gotInt1, gotIsInt1 := got1.Int()
-	if !gotIsInt1 || gotInt1 != 1 {
-		t.Errorf("NewCount(\"numBandGt4\", \"band > 4\") == %q, want: %q",
-			gotInt1, 1)
-	}
-	gotInt2, gotIsInt2 := got2.Int()
-	if !gotIsInt2 || gotInt2 != 0 {
-		t.Errorf("NewCount(\"numBandGt4\", \"band > 4\") == %q, want: %q",
-			gotInt2, 0)
 	}
 }

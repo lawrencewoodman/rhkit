@@ -6,12 +6,12 @@ import (
 	"testing"
 )
 
-func TestAggregatorsToMap(t *testing.T) {
-	aggregators := []Aggregator{
-		MustNewLitAggregator("numSignedUp", "54"),
-		MustNewLitAggregator("profit", "54.25"),
-		MustNewLitAggregator("cost", "203"),
-		MustNewLitAggregator("income", "257.25"),
+func TestInstancesToMap(t *testing.T) {
+	instances := []AggregatorInstance{
+		MustNewLitInstance("numSignedUp", "54"),
+		MustNewLitInstance("profit", "54.25"),
+		MustNewLitInstance("cost", "203"),
+		MustNewLitInstance("income", "257.25"),
 	}
 	goals := []*goal.Goal{}
 	numRecords := int64(100)
@@ -61,17 +61,17 @@ func TestAggregatorsToMap(t *testing.T) {
 	for _, c := range cases {
 		if c.thisName == "" {
 			gotResults, err =
-				AggregatorsToMap(aggregators, goals, numRecords)
+				InstancesToMap(instances, goals, numRecords)
 		} else {
 			gotResults, err =
-				AggregatorsToMap(aggregators, goals, numRecords, c.thisName)
+				InstancesToMap(instances, goals, numRecords, c.thisName)
 		}
 		if err != nil {
-			t.Errorf("AggregatorsToMap(..., %s) err: %s", c.thisName, err)
+			t.Errorf("InstancesToMap(..., %s) err: %s", c.thisName, err)
 		}
 
 		if !doAggregatorMapsMatch(gotResults, c.want) {
-			t.Errorf("AggregatorsToMap(..., %s) got: %s, want: %s",
+			t.Errorf("InstancesToMap(..., %s) got: %s, want: %s",
 				c.thisName, gotResults, c.want)
 		}
 	}
@@ -93,46 +93,30 @@ func doAggregatorMapsMatch(am1, am2 map[string]*dlit.Literal) bool {
 	return true
 }
 
-type LitAggregator struct {
+type LitInstance struct {
 	name   string
 	result string
 }
 
-func MustNewLitAggregator(name, result string) *LitAggregator {
-	return &LitAggregator{name: name, result: result}
+func MustNewLitInstance(name, result string) *LitInstance {
+	return &LitInstance{name: name, result: result}
 }
 
-func (l *LitAggregator) CloneNew() Aggregator {
-	MustNewLitAggregator(l.name, l.result)
-	return nil
+func (li *LitInstance) GetName() string {
+	return li.name
 }
 
-func (l *LitAggregator) GetName() string {
-	return l.name
-}
-
-func (l *LitAggregator) GetArg() string {
-	return ""
-}
-
-func (l *LitAggregator) NextRecord(
+func (li *LitInstance) NextRecord(
 	record map[string]*dlit.Literal,
 	isRuleTrue bool,
 ) error {
 	return nil
 }
 
-func (l *LitAggregator) GetResult(
-	aggregators []Aggregator,
+func (li *LitInstance) GetResult(
+	aggregatorInstances []AggregatorInstance,
 	goals []*goal.Goal,
 	numRecords int64,
 ) *dlit.Literal {
-	return dlit.MustNew(l.result)
-}
-
-func (l *LitAggregator) IsEqual(o Aggregator) bool {
-	if _, ok := o.(*LitAggregator); !ok {
-		return false
-	}
-	return l.name == o.GetName() && l.GetArg() == o.GetArg()
+	return dlit.MustNew(li.result)
 }

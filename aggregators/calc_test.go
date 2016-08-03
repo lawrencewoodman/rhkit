@@ -8,7 +8,7 @@ import (
 )
 
 func TestCalcGetResult(t *testing.T) {
-	aggregators := []Aggregator{
+	aggregatorSpecs := []AggregatorSpec{
 		MustNew("a", "calc", "3 + 4"),
 		MustNew("b", "calc", "5 + 6"),
 		MustNew("c", "calc", "a + b"),
@@ -27,27 +27,14 @@ func TestCalcGetResult(t *testing.T) {
 		}),
 	}
 	numRecords := int64(12)
-	for i, aggregator := range aggregators {
-		got := aggregator.GetResult(aggregators, goals, numRecords)
+	instances := make([]AggregatorInstance, len(aggregatorSpecs))
+	for i, aggregatorSpec := range aggregatorSpecs {
+		instances[i] = aggregatorSpec.New()
+	}
+	for i, instance := range instances {
+		got := instance.GetResult(instances, goals, numRecords)
 		if got.String() != want[i].String() {
 			t.Errorf("GetResult() i: %d got: %s, want: %s", i, got, want[i])
 		}
-	}
-}
-
-func TestCalcCloneNew(t *testing.T) {
-	aggregators := []Aggregator{
-		MustNew("a", "calc", "3 + 4"),
-		MustNew("b", "calc", "5 + 6"),
-		MustNew("c", "calc", "a + b"),
-	}
-	goals := []*goal.Goal{}
-	numRecords := int64(12)
-	aggregatorD := aggregators[2].CloneNew()
-	gotC := aggregators[2].GetResult(aggregators, goals, numRecords)
-	gotD := aggregatorD.GetResult(aggregators, goals, numRecords)
-
-	if gotC.String() != gotD.String() && gotC.String() != "18" {
-		t.Errorf("CloneNew() gotC: %s, gotD: %s", gotC, gotD)
 	}
 }

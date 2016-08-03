@@ -10,9 +10,9 @@ import (
 )
 
 func TestNextRecord(t *testing.T) {
-	// It is important for this test to reuse the aggregators and goals
+	// It is important for this test to reuse the goals
 	// to ensure that they are cloned properly.
-	inAggregators := []aggregators.Aggregator{
+	inAggregators := []aggregators.AggregatorSpec{
 		aggregators.MustNew("numIncomeGt2", "count", "income > 2"),
 		aggregators.MustNew("numBandGt4", "count", "band > 4"),
 		aggregators.MustNew("goalsScore", "goalsscore"),
@@ -115,11 +115,11 @@ func TestNextRecord_Errors(t *testing.T) {
 	goals := []*goal.Goal{goal.MustNew("numIncomeGt2 == 1")}
 	cases := []struct {
 		rule        *Rule
-		aggregators []aggregators.Aggregator
+		aggregators []aggregators.AggregatorSpec
 		wantErr     error
 	}{
 		{mustNewRule("band > 4"),
-			[]aggregators.Aggregator{
+			[]aggregators.AggregatorSpec{
 				aggregators.MustNew("numIncomeGt2", "count", "fred > 2")},
 			dexpr.ErrInvalidExpr{
 				Expr: "fred > 2",
@@ -127,10 +127,10 @@ func TestNextRecord_Errors(t *testing.T) {
 			},
 		},
 		{mustNewRule("band > 4"),
-			[]aggregators.Aggregator{
+			[]aggregators.AggregatorSpec{
 				aggregators.MustNew("numIncomeGt2", "count", "income > 2")}, nil},
 		{mustNewRule("hand > 4"),
-			[]aggregators.Aggregator{
+			[]aggregators.AggregatorSpec{
 				aggregators.MustNew("numIncomeGt2", "count", "income > 2")},
 			dexpr.ErrInvalidExpr{
 				Expr: "hand > 4",
@@ -138,7 +138,7 @@ func TestNextRecord_Errors(t *testing.T) {
 			},
 		},
 		{mustNewRule("band ^^ 4"),
-			[]aggregators.Aggregator{
+			[]aggregators.AggregatorSpec{
 				aggregators.MustNew("numIncomeGt2", "count", "income > 2")},
 			dexpr.ErrInvalidExpr{
 				Expr: "band ^^ 4",
