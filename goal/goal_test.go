@@ -6,6 +6,36 @@ import (
 	"testing"
 )
 
+func TestNew_errors(t *testing.T) {
+	exprStr := "543d)"
+	wantErr := InvalidGoalError(exprStr)
+	_, err := New(exprStr)
+	if err == nil || err != wantErr {
+		t.Errorf("New(%v) err: %v, want: %v", exprStr, err, wantErr)
+	}
+}
+
+func TestString(t *testing.T) {
+	exprStr := "profit > 55"
+	goal, err := New(exprStr)
+	if err != nil {
+		t.Errorf("New(%v) err: %v", exprStr, err)
+	}
+	got := goal.String()
+	if got != exprStr {
+		t.Errorf("String() got: %s, want: %s", got, exprStr)
+	}
+}
+
+func TestInvalidGoalErrorError(t *testing.T) {
+	err := InvalidGoalError("b43d)")
+	want := "invalid goal: b43d)"
+	got := err.Error()
+	if got != want {
+		t.Errorf("Error() got: %v, want: %v", got, want)
+	}
+}
+
 func TestAssess(t *testing.T) {
 	aggregators := map[string]*dlit.Literal{
 		"totalIncome":    dlit.MustNew(5000),
@@ -31,10 +61,10 @@ func TestAssess(t *testing.T) {
 
 		got, err := goal.Assess(aggregators)
 		if err != nil {
-			t.Errorf("Assess(%q) goal: %s, err: %s", aggregators, goal, err)
+			t.Errorf("Assess(%v) goal: %s, err: %s", aggregators, goal, err)
 		}
 		if got != c.want {
-			t.Errorf("Assess(%q) goal: %s, got: %t, want: %t",
+			t.Errorf("Assess(%v) goal: %s, got: %t, want: %t",
 				aggregators, goal, got, c.want)
 		}
 	}
@@ -71,7 +101,7 @@ func TestAssess_errors(t *testing.T) {
 
 		_, err = goal.Assess(aggregators)
 		if err != c.wantErr {
-			t.Errorf("Assess(%s) goal: %s, wantErr: %s, gotErr: %s",
+			t.Errorf("Assess(%v) goal: %s, wantErr: %s, gotErr: %s",
 				aggregators, goal, c.wantErr, err)
 		}
 	}

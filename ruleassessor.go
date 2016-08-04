@@ -38,21 +38,15 @@ func newRuleAssessor(
 	aggregatorSpecs []aggregators.AggregatorSpec,
 	goals []*goal.Goal,
 ) *ruleAssessor {
-	// Clone the aggregators and goals to ensure the results are
-	// specific to this rule
 	aggregatorInstances :=
 		make([]aggregators.AggregatorInstance, len(aggregatorSpecs))
 	for i, ad := range aggregatorSpecs {
 		aggregatorInstances[i] = ad.New()
 	}
-	cloneGoals := make([]*goal.Goal, len(goals))
-	for i, g := range goals {
-		cloneGoals[i] = g.Clone()
-	}
 	return &ruleAssessor{
 		Rule:        rule,
 		Aggregators: aggregatorInstances,
-		Goals:       cloneGoals,
+		Goals:       goals,
 	}
 }
 
