@@ -5,15 +5,16 @@ import (
 	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rulehunter/experiment"
+	"github.com/vlifesystems/rulehunter/rule"
 	"go/token"
 	"testing"
 )
 
 func TestAssessRules(t *testing.T) {
-	rules := []*Rule{
-		mustNewRule("band > 4"),
-		mustNewRule("band > 3"),
-		mustNewRule("cost > 1.2"),
+	rules := []rule.Rule{
+		rule.MustNewDRule("band > 4"),
+		rule.MustNewDRule("band > 3"),
+		rule.MustNewDRule("cost > 1.2"),
 	}
 	aggregators := []*experiment.AggregatorDesc{
 		&experiment.AggregatorDesc{"numIncomeGt2", "count", "income > 2"},
@@ -51,7 +52,7 @@ func TestAssessRules(t *testing.T) {
 	wantNumRecords := int64(len(records))
 	wantRuleAssessments := []*RuleAssessment{
 		&RuleAssessment{
-			Rule: mustNewRule("band > 4"),
+			Rule: rule.MustNewDRule("band > 4"),
 			Aggregators: map[string]*dlit.Literal{
 				"numMatches":     dlit.MustNew("2"),
 				"percentMatches": dlit.MustNew("50"),
@@ -71,7 +72,7 @@ func TestAssessRules(t *testing.T) {
 			},
 		},
 		&RuleAssessment{
-			Rule: mustNewRule("band > 3"),
+			Rule: rule.MustNewDRule("band > 3"),
 			Aggregators: map[string]*dlit.Literal{
 				"numMatches":     dlit.MustNew("4"),
 				"percentMatches": dlit.MustNew("100"),
@@ -91,7 +92,7 @@ func TestAssessRules(t *testing.T) {
 			},
 		},
 		&RuleAssessment{
-			Rule: mustNewRule("cost > 1.2"),
+			Rule: rule.MustNewDRule("cost > 1.2"),
 			Aggregators: map[string]*dlit.Literal{
 				"numMatches":     dlit.MustNew("2"),
 				"percentMatches": dlit.MustNew("50"),
@@ -133,12 +134,12 @@ func TestAssessRules(t *testing.T) {
 
 func TestAssessRules_errors(t *testing.T) {
 	cases := []struct {
-		rules       []*Rule
+		rules       []rule.Rule
 		aggregators []*experiment.AggregatorDesc
 		goals       []string
 		wantErr     error
 	}{
-		{[]*Rule{mustNewRule("band ^^ 3")},
+		{[]rule.Rule{rule.MustNewDRule("band ^^ 3")},
 			[]*experiment.AggregatorDesc{
 				&experiment.AggregatorDesc{"numIncomeGt2", "count", "income > 2"},
 			},
@@ -148,7 +149,7 @@ func TestAssessRules_errors(t *testing.T) {
 				Err:  dexpr.ErrInvalidOp(token.XOR),
 			},
 		},
-		{[]*Rule{mustNewRule("hand > 3")},
+		{[]rule.Rule{rule.MustNewDRule("hand > 3")},
 			[]*experiment.AggregatorDesc{
 				&experiment.AggregatorDesc{"numIncomeGt2", "count", "income > 2"},
 			},
@@ -158,7 +159,7 @@ func TestAssessRules_errors(t *testing.T) {
 				Err:  dexpr.ErrVarNotExist("hand"),
 			},
 		},
-		{[]*Rule{mustNewRule("band > 3")},
+		{[]rule.Rule{rule.MustNewDRule("band > 3")},
 			[]*experiment.AggregatorDesc{
 				&experiment.AggregatorDesc{"numIncomeGt2", "count", "bincome > 2"},
 			},
@@ -168,7 +169,7 @@ func TestAssessRules_errors(t *testing.T) {
 				Err:  dexpr.ErrVarNotExist("bincome"),
 			},
 		},
-		{[]*Rule{mustNewRule("band > 3")},
+		{[]rule.Rule{rule.MustNewDRule("band > 3")},
 			[]*experiment.AggregatorDesc{
 				&experiment.AggregatorDesc{"numIncomeGt2", "count", "income > 2"},
 			},
@@ -225,18 +226,18 @@ func TestAssessRulesMP(t *testing.T) {
 		[]string{"0", "0", "9"},
 	}
 	cases := []struct {
-		rules []*Rule
+		rules []rule.Rule
 	}{
-		{[]*Rule{
-			mustNewRule("band > 4"),
-			mustNewRule("band > 3"),
-			mustNewRule("cost > 1.2"),
+		{[]rule.Rule{
+			rule.MustNewDRule("band > 4"),
+			rule.MustNewDRule("band > 3"),
+			rule.MustNewDRule("cost > 1.2"),
 		}},
-		{[]*Rule{
-			mustNewRule("band > 4"),
-			mustNewRule("cost > 1.2"),
+		{[]rule.Rule{
+			rule.MustNewDRule("band > 4"),
+			rule.MustNewDRule("cost > 1.2"),
 		}},
-		{[]*Rule{}},
+		{[]rule.Rule{}},
 	}
 
 	dataset := NewLiteralDataset(fieldNames, records)

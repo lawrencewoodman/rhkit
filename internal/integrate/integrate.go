@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"github.com/vlifesystems/rulehunter"
 	"github.com/vlifesystems/rulehunter/experiment"
+	"github.com/vlifesystems/rulehunter/rule"
 	"runtime"
 )
 
@@ -103,7 +104,7 @@ func ProcessDataset(experiment *experiment.Experiment) error {
 }
 
 func assessRules(
-	rules []*rulehunter.Rule,
+	rules []rule.Rule,
 	experiment *experiment.Experiment,
 ) (*rulehunter.Assessment, error) {
 	var assessment *rulehunter.Assessment

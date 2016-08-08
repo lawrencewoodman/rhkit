@@ -2,6 +2,7 @@ package rulehunter
 
 import (
 	"github.com/lawrencewoodman/dlit"
+	"github.com/vlifesystems/rulehunter/rule"
 	"testing"
 )
 
@@ -19,34 +20,37 @@ func TestTweakRules_1(t *testing.T) {
 				ftFloat, dlit.MustNew(50), dlit.MustNew(400), 2,
 				[]*dlit.Literal{}, 0},
 		}}
-	rulesIn := []*Rule{
-		mustNewRule("band > 4"),
-		mustNewRule("band > 20"),
-		mustNewRule("band > team"),
-		mustNewRule("age > 7"),
-		mustNewRule("age >= 8"),
-		mustNewRule("flow >= 60.7"),
-		mustNewRule("flow >= 70.20"),
-		mustNewRule("flow > 100.5"),
-		mustNewRule("age > band"),
-		mustNewRule("in(stage,\"20\",\"21\",\"22\")"),
+	rulesIn := []rule.Rule{
+		rule.NewGEFVI("band", 4),
+		rule.NewGEFVI("band", 20),
+		rule.NewGTFF("band", "team"),
+		rule.NewGEFVI("age", 7),
+		rule.NewGEFVI("age", 8),
+		rule.NewGEFVF("flow", 60.7),
+		rule.NewGEFVF("flow", 70.20),
+		rule.NewGEFVF("flow", 100.5),
+		rule.NewGTFF("age", "band"),
+		rule.MustNewDRule("in(stage,\"20\",\"21\",\"22\")"),
 	}
 	gotRules := TweakRules(rulesIn, inputDescription)
 
 	numBandGtRules := 0
 	numFlowGeqRules := 0
 	numOtherRules := 0
-	for _, rule := range gotRules {
-		if rule.String() == "true()" {
+	for _, gotRule := range gotRules {
+		if gotRule.String() == "true()" {
 			continue
 		}
-		isTweakable, field, operator, _ := rule.getTweakableParts()
+		tRule, isTweakable := gotRule.(rule.TweakableRule)
 		if !isTweakable {
 			printTestPurposes(t, testPurposes)
-			t.Errorf("TweakRules(%s) rule isn't tweakable: %s", rulesIn, rule)
+			t.Fatalf("TweakRules(%s) rule isn't tweakable: %s", rulesIn, gotRule)
+			continue
 		}
 
-		if field == "band" && operator == ">" {
+		field, operator, _ := tRule.GetTweakableParts()
+
+		if field == "band" && operator == ">=" {
 			numBandGtRules++
 		} else if field == "flow" && operator == ">=" {
 			numFlowGeqRules++
@@ -84,32 +88,39 @@ func TestTweakRules_2(t *testing.T) {
 				[]*dlit.Literal{}, 0,
 			},
 		}}
-	rulesIn := []*Rule{
-		mustNewRule("age <= 40"),
-		mustNewRule("age <= 20"),
-		mustNewRule("age <= 50"),
-		mustNewRule("age <= 60"),
+	rulesIn := []rule.Rule{
+		rule.NewLEFVI("age", 40),
+		rule.NewLEFVI("age", 20),
+		rule.NewLEFVI("age", 50),
+		rule.NewLEFVI("age", 60),
 	}
 	gotRules := TweakRules(rulesIn, inputDescription)
 
 	num20To40 := 0
 	num40To50 := 0
 	numOther := 0
-	for _, rule := range gotRules {
-		if rule.String() == "true()" {
+	for _, gotRule := range gotRules {
+		if gotRule.String() == "true()" {
 			continue
 		}
-		isTweakable, field, operator, value := rule.getTweakableParts()
-		if !isTweakable && field != "age" && operator != "<=" {
+		tRule, isTweakable := gotRule.(rule.TweakableRule)
+		if !isTweakable {
 			printTestPurposes(t, testPurposes)
-			t.Errorf("TweakRules(%s) invalid rule(%s): isTweakable: %t, field: %s, operator: %s",
-				rulesIn, rule, isTweakable, field, operator)
+			t.Fatalf("TweakRules(%s) invalid rule(%s): isTweakable: %t",
+				rulesIn, gotRule, isTweakable)
+		}
+		field, operator, value := tRule.GetTweakableParts()
+		if field != "age" && operator != "<=" {
+			printTestPurposes(t, testPurposes)
+			t.Fatalf("TweakRules(%s) invalid rule(%s): field: %s, operator: %s",
+				rulesIn, gotRule, field, operator)
 		}
 		l := dlit.MustNew(value)
 		n, nIsInt := l.Int()
 		if !nIsInt {
 			printTestPurposes(t, testPurposes)
-			t.Errorf("TweakRules(%s) invalid rule(%s): value isn't int", rulesIn, rule)
+			t.Errorf("TweakRules(%s) invalid rule(%s): value isn't int",
+				rulesIn, gotRule)
 		} else if n >= 20 && n < 40 {
 			num20To40++
 		} else if n >= 40 && n < 50 {
@@ -149,11 +160,11 @@ func TestTweakRules_3(t *testing.T) {
 				[]*dlit.Literal{}, 0,
 			},
 		}}
-	rulesIn := []*Rule{
-		mustNewRule("flow <= 40.78234"),
-		mustNewRule("flow <= 24.89"),
-		mustNewRule("flow <= 52.604956"),
-		mustNewRule("flow <= 65.80"),
+	rulesIn := []rule.Rule{
+		rule.NewLEFVF("flow", 40.78234),
+		rule.NewLEFVF("flow", 24.89),
+		rule.NewLEFVF("flow", 52.604956),
+		rule.NewLEFVF("flow", 65.80),
 	}
 	wantMaxDP := inputDescription.fields["flow"].maxDP
 	wantMinDP := 0
@@ -164,21 +175,28 @@ func TestTweakRules_3(t *testing.T) {
 	numOther := 0
 	gotMaxDP := 0
 	gotMinDP := 100
-	for _, rule := range gotRules {
-		if rule.String() == "true()" {
+	for _, gotRule := range gotRules {
+		if gotRule.String() == "true()" {
 			continue
 		}
-		isTweakable, field, operator, value := rule.getTweakableParts()
-		if !isTweakable && field != "flow" && operator != "<=" {
+		tRule, isTweakable := gotRule.(rule.TweakableRule)
+		if !isTweakable {
 			printTestPurposes(t, testPurposes)
-			t.Errorf("TweakRules(%s) invalid rule(%s): isTweakable: %t, field: %s, operator: %s",
-				rulesIn, rule, isTweakable, field, operator)
+			t.Fatalf("TweakRules(%s) invalid rule(%s): isTweakable: %t",
+				rulesIn, gotRule, isTweakable)
+		}
+		field, operator, value := tRule.GetTweakableParts()
+		if field != "flow" && operator != "<=" {
+			printTestPurposes(t, testPurposes)
+			t.Fatalf("TweakRules(%s) invalid rule(%s): field: %s, operator: %s",
+				rulesIn, gotRule, field, operator)
 		}
 		l := dlit.MustNew(value)
 		n, nIsFloat := l.Float()
 		if !nIsFloat {
 			printTestPurposes(t, testPurposes)
-			t.Errorf("TweakRules(%s) invalid rule(%s): value isn't float", rulesIn, rule)
+			t.Errorf("TweakRules(%s) invalid rule(%s): value isn't float",
+				rulesIn, gotRule)
 		} else if n >= 24 && n < 41 {
 			num24To41++
 		} else if n >= 41 && n < 53 {
@@ -236,11 +254,11 @@ func TestTweakRules_4(t *testing.T) {
 				[]*dlit.Literal{}, 0,
 			},
 		}}
-	rulesIn := []*Rule{
-		mustNewRule("flow <= 40.78234"),
-		mustNewRule("flow <= 24.89"),
-		mustNewRule("flow <= 52.604956"),
-		mustNewRule("true()"),
+	rulesIn := []rule.Rule{
+		rule.MustNewDRule("flow <= 40.78234"),
+		rule.MustNewDRule("flow <= 24.89"),
+		rule.MustNewDRule("flow <= 52.604956"),
+		rule.MustNewDRule("true()"),
 	}
 
 	gotRules := TweakRules(rulesIn, inputDescription)

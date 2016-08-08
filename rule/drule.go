@@ -17,60 +17,40 @@
 	<http://www.gnu.org/licenses/>.
 */
 
-package rulehunter
+package rule
 
 import (
-	"errors"
-	"fmt"
 	"github.com/lawrencewoodman/ddataset"
 	"github.com/lawrencewoodman/dexpr"
 	"github.com/vlifesystems/rulehunter/internal/dexprfuncs"
 	"regexp"
 )
 
-type Rule struct {
+type DRule struct {
 	expr *dexpr.Expr
 }
 
-type ErrInvalidRule string
-
-func (e ErrInvalidRule) Error() string {
-	return string(e)
-}
-
-func (r *Rule) String() string {
-	return r.expr.String()
-}
-
-func newRule(exprStr string) (*Rule, error) {
+func NewDRule(exprStr string) (Rule, error) {
 	expr, err := dexpr.New(exprStr)
 	if err != nil {
-		return nil, ErrInvalidRule(fmt.Sprintf("Invalid rule: %s", exprStr))
+		return nil, InvalidRuleError(exprStr)
 	}
-	return &Rule{expr}, nil
+	return &DRule{expr: expr}, nil
 }
 
-func mustNewRule(exprStr string) *Rule {
-	rule, err := newRule(exprStr)
+func MustNewDRule(exprStr string) Rule {
+	rule, err := NewDRule(exprStr)
 	if err != nil {
 		panic(err)
 	}
 	return rule
 }
 
-func (r *Rule) getTweakableParts() (bool, string, string, string) {
-	ruleStr := r.String()
-	isTweakable := isTweakableRegexp.MatchString(ruleStr)
-	if !isTweakable {
-		return false, "", "", ""
-	}
-	fieldName := matchTweakablePartsRegexp.ReplaceAllString(ruleStr, "$1")
-	operator := matchTweakablePartsRegexp.ReplaceAllString(ruleStr, "$2")
-	value := matchTweakablePartsRegexp.ReplaceAllString(ruleStr, "$3")
-	return isTweakable, fieldName, operator, value
+func (r *DRule) String() string {
+	return r.expr.String()
 }
 
-func (r *Rule) getInNiParts() (bool, string, string) {
+func (r *DRule) GetInNiParts() (bool, string, string) {
 	ruleStr := r.String()
 	isInNi := isInNiRegexp.MatchString(ruleStr)
 	if !isInNi {
@@ -81,23 +61,11 @@ func (r *Rule) getInNiParts() (bool, string, string) {
 	return isInNi, operator, fieldName
 }
 
-func (r *Rule) isTrue(record ddataset.Record) (bool, error) {
+func (r *DRule) IsTrue(record ddataset.Record) (bool, error) {
 	isTrue, err := r.expr.EvalBool(record, dexprfuncs.CallFuncs)
 	// TODO: Create an error type for rule rather than coopting the dexpr one
 	return isTrue, err
 }
 
-func (r *Rule) cloneWithValue(newValue string) (*Rule, error) {
-	isTweakable, fieldName, operator, _ := r.getTweakableParts()
-	if !isTweakable {
-		return nil, errors.New(fmt.Sprintf("Can't clone non-tweakable rule: %s", r))
-	}
-	newRule, err :=
-		newRule(fmt.Sprintf("%s %s %s", fieldName, operator, newValue))
-	return newRule, err
-}
-
-var isTweakableRegexp = regexp.MustCompile("^[^( ]* (<|<=|>=|>) \\d+\\.?\\d*$")
-var matchTweakablePartsRegexp = regexp.MustCompile("^([^( ]*) (<|<=|>=|>) (\\d+\\.?\\d*)$")
 var isInNiRegexp = regexp.MustCompile("^(in|ni)(\\()([^ ,]+)(.*\\))$")
 var matchInNiPartsRegexp = regexp.MustCompile("^(in|ni)(\\()([^ ,]+)(.*\\))$")

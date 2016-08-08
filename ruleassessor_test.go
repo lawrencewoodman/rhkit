@@ -5,6 +5,7 @@ import (
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rulehunter/aggregators"
 	"github.com/vlifesystems/rulehunter/goal"
+	"github.com/vlifesystems/rulehunter/rule"
 	"go/token"
 	"testing"
 )
@@ -45,14 +46,14 @@ func TestNextRecord(t *testing.T) {
 	}
 	numRecords := int64(len(records))
 	cases := []struct {
-		rule             *Rule
+		rule             rule.Rule
 		wantNumIncomeGt2 int64
 		wantNumBandGt4   int64
 		wantGoalsScore   float64
 	}{
-		{mustNewRule("band > 4"), 1, 2, 2.0},
-		{mustNewRule("band > 3"), 2, 2, 0.001},
-		{mustNewRule("cost > 1.2"), 2, 1, 0},
+		{rule.MustNewDRule("band > 4"), 1, 2, 2.0},
+		{rule.MustNewDRule("band > 3"), 2, 2, 0.001},
+		{rule.MustNewDRule("cost > 1.2"), 2, 1, 0},
 	}
 	for _, c := range cases {
 		ra := newRuleAssessor(c.rule, inAggregators, goals)
@@ -114,11 +115,11 @@ func TestNextRecord_Errors(t *testing.T) {
 	}
 	goals := []*goal.Goal{goal.MustNew("numIncomeGt2 == 1")}
 	cases := []struct {
-		rule        *Rule
+		rule        rule.Rule
 		aggregators []aggregators.AggregatorSpec
 		wantErr     error
 	}{
-		{mustNewRule("band > 4"),
+		{rule.MustNewDRule("band > 4"),
 			[]aggregators.AggregatorSpec{
 				aggregators.MustNew("numIncomeGt2", "count", "fred > 2")},
 			dexpr.ErrInvalidExpr{
@@ -126,10 +127,10 @@ func TestNextRecord_Errors(t *testing.T) {
 				Err:  dexpr.ErrVarNotExist("fred"),
 			},
 		},
-		{mustNewRule("band > 4"),
+		{rule.MustNewDRule("band > 4"),
 			[]aggregators.AggregatorSpec{
 				aggregators.MustNew("numIncomeGt2", "count", "income > 2")}, nil},
-		{mustNewRule("hand > 4"),
+		{rule.MustNewDRule("hand > 4"),
 			[]aggregators.AggregatorSpec{
 				aggregators.MustNew("numIncomeGt2", "count", "income > 2")},
 			dexpr.ErrInvalidExpr{
@@ -137,7 +138,7 @@ func TestNextRecord_Errors(t *testing.T) {
 				Err:  dexpr.ErrVarNotExist("hand"),
 			},
 		},
-		{mustNewRule("band ^^ 4"),
+		{rule.MustNewDRule("band ^^ 4"),
 			[]aggregators.AggregatorSpec{
 				aggregators.MustNew("numIncomeGt2", "count", "income > 2")},
 			dexpr.ErrInvalidExpr{

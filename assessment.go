@@ -26,6 +26,7 @@ import (
 	"github.com/vlifesystems/rulehunter/aggregators"
 	"github.com/vlifesystems/rulehunter/experiment"
 	"github.com/vlifesystems/rulehunter/goal"
+	"github.com/vlifesystems/rulehunter/rule"
 	"sort"
 	"strings"
 )
@@ -37,7 +38,7 @@ type Assessment struct {
 }
 
 type RuleAssessment struct {
-	Rule        *Rule
+	Rule        rule.Rule
 	Aggregators map[string]*dlit.Literal
 	Goals       []*GoalAssessment
 }
@@ -205,7 +206,7 @@ func (a *Assessment) TruncateRuleAssessments(
 }
 
 // Can optionally pass maximum number of rules to return
-func (a *Assessment) GetRules(args ...int) []*Rule {
+func (a *Assessment) GetRules(args ...int) []rule.Rule {
 	var numRules int
 	switch len(args) {
 	case 0:
@@ -219,7 +220,7 @@ func (a *Assessment) GetRules(args ...int) []*Rule {
 		panic(fmt.Sprintf("incorrect number of arguments passed: %d", len(args)))
 	}
 
-	r := make([]*Rule, numRules)
+	r := make([]rule.Rule, numRules)
 	for i, ruleAssessment := range a.RuleAssessments {
 		if i >= numRules {
 			break
@@ -259,7 +260,7 @@ func (sortedAssessment *Assessment) excludePoorerInNiRules(
 	niFields := make(map[string]int)
 	for _, a := range sortedAssessment.RuleAssessments {
 		rule := a.Rule
-		isInNiRule, operator, field := rule.getInNiParts()
+		isInNiRule, operator, field := rule.GetInNiParts()
 		if !isInNiRule {
 			goodRuleAssessments = append(goodRuleAssessments, a)
 		} else if operator == "in" {
@@ -291,11 +292,8 @@ func (sortedAssessment *Assessment) excludePoorerTweakableRules(
 	goodRuleAssessments := make([]*RuleAssessment, 0)
 	fieldOperatorIDs := make(map[string]int)
 	for _, a := range sortedAssessment.RuleAssessments {
-		rule := a.Rule
-		isTweakable, field, operator, _ := rule.getTweakableParts()
-		if !isTweakable {
-			goodRuleAssessments = append(goodRuleAssessments, a)
-		} else {
+		if tRule, isTweakable := a.Rule.(rule.TweakableRule); isTweakable {
+			field, operator, _ := tRule.GetTweakableParts()
 			fieldOperatorID := fmt.Sprintf("%s^%s", field, operator)
 			n, ok := fieldOperatorIDs[fieldOperatorID]
 			if !ok {
@@ -305,6 +303,8 @@ func (sortedAssessment *Assessment) excludePoorerTweakableRules(
 				goodRuleAssessments = append(goodRuleAssessments, a)
 				fieldOperatorIDs[fieldOperatorID]++
 			}
+		} else {
+			goodRuleAssessments = append(goodRuleAssessments, a)
 		}
 	}
 	sortedAssessment.RuleAssessments = goodRuleAssessments
