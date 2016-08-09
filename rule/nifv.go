@@ -32,6 +32,9 @@ type NiFV struct {
 }
 
 func NewNiFV(field string, values []*dlit.Literal) Rule {
+	if len(values) == 0 {
+		panic("NewNiFV: Must contain at least one value")
+	}
 	return &NiFV{field: field, values: values}
 }
 

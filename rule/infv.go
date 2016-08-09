@@ -25,13 +25,16 @@ import (
 )
 
 // InFV represents a rule determening if field is equal to
-// any of the supplied values
+// any of the supplied values when represented as a string
 type InFV struct {
 	field  string
 	values []*dlit.Literal
 }
 
 func NewInFV(field string, values []*dlit.Literal) Rule {
+	if len(values) == 0 {
+		panic("NewInFV: Must contain at least one value")
+	}
 	return &InFV{field: field, values: values}
 }
 
