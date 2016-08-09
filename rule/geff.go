@@ -46,7 +46,7 @@ func (r *GEFF) IsTrue(record ddataset.Record) (bool, error) {
 	if !ok {
 		return false, InvalidRuleError(r.String())
 	}
-	rh, ok := record[r.fieldA]
+	rh, ok := record[r.fieldB]
 	if !ok {
 		return false, InvalidRuleError(r.String())
 	}

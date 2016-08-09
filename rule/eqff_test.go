@@ -1,25 +1,26 @@
 package rule
 
 import (
+	"errors"
 	"github.com/lawrencewoodman/dlit"
 	"testing"
 )
 
-func TestLTFFString(t *testing.T) {
+func TestEQFFString(t *testing.T) {
 	fieldA := "income"
 	fieldB := "cost"
-	want := "income < cost"
-	r := NewLTFF(fieldA, fieldB)
+	want := "income == cost"
+	r := NewEQFF(fieldA, fieldB)
 	got := r.String()
 	if got != want {
 		t.Errorf("String() got: %s, want: %s", got, want)
 	}
 }
 
-func TestLTFFGetInNiParts(t *testing.T) {
+func TestEQFFGetInNiParts(t *testing.T) {
 	fieldA := "income"
 	fieldB := "cost"
-	r := NewLTFF(fieldA, fieldB)
+	r := NewEQFF(fieldA, fieldB)
 	a, b, c := r.GetInNiParts()
 	if a || b != "" || c != "" {
 		t.Errorf("GetInNiParts() got: %t,\"%s\",\"%s\" - want: %t,\"\",\"\"",
@@ -27,29 +28,38 @@ func TestLTFFGetInNiParts(t *testing.T) {
 	}
 }
 
-func TestLTFFIsTrue(t *testing.T) {
+func TestEQFFIsTrue(t *testing.T) {
 	cases := []struct {
 		fieldA string
 		fieldB string
 		want   bool
 	}{
-		{"income", "cost", true},
+		{"income", "cost", false},
 		{"cost", "income", false},
-		{"income", "income", false},
-		{"flowIn", "flowOut", true},
+		{"cost", "band", false},
+		{"income", "income", true},
+		{"flowIn", "flowOut", false},
 		{"flowOut", "flowIn", false},
-		{"flowIn", "flowIn", false},
-		{"income", "flowIn", true},
+		{"flowIn", "flowIn", true},
+		{"flowIn", "band", false},
+		{"income", "flowIn", false},
 		{"flowIn", "income", false},
+		{"band", "band", true},
+		{"band", "trueA", false},
+		{"trueA", "trueB", false},
+		{"trueA", "trueA", true},
 	}
 	record := map[string]*dlit.Literal{
 		"income":  dlit.MustNew(19),
 		"cost":    dlit.MustNew(20),
 		"flowIn":  dlit.MustNew(124.564),
 		"flowOut": dlit.MustNew(124.565),
+		"band":    dlit.MustNew("alpha"),
+		"trueA":   dlit.MustNew("true"),
+		"trueB":   dlit.MustNew("TRUE"),
 	}
 	for _, c := range cases {
-		r := NewLTFF(c.fieldA, c.fieldB)
+		r := NewEQFF(c.fieldA, c.fieldB)
 		got, err := r.IsTrue(record)
 		if err != nil {
 			t.Errorf("IsTrue(record) rule: %s, err: %v", r, err)
@@ -60,46 +70,28 @@ func TestLTFFIsTrue(t *testing.T) {
 	}
 }
 
-func TestLTFFIsTrue_errors(t *testing.T) {
+func TestEQFFIsTrue_errors(t *testing.T) {
 	cases := []struct {
 		fieldA  string
 		fieldB  string
 		wantErr error
 	}{
-		{"income", "band", InvalidRuleError("income < band")},
-		{"band", "income", InvalidRuleError("band < income")},
-		{"flow", "band", InvalidRuleError("flow < band")},
-		{"band", "flow", InvalidRuleError("band < flow")},
-		{"fred", "income", InvalidRuleError("fred < income")},
-		{"income", "fred", InvalidRuleError("income < fred")},
+		{"fred", "income", InvalidRuleError("fred == income")},
+		{"income", "fred", InvalidRuleError("income == fred")},
+		{"income", "problem", InvalidRuleError("income == problem")},
+		{"problem", "income", InvalidRuleError("problem == income")},
 	}
 	record := map[string]*dlit.Literal{
-		"income": dlit.MustNew(19),
-		"flow":   dlit.MustNew(124.564),
-		"band":   dlit.NewString("alpha"),
+		"income":  dlit.MustNew(19),
+		"flow":    dlit.MustNew(124.564),
+		"band":    dlit.NewString("alpha"),
+		"problem": dlit.MustNew(errors.New("this is an error")),
 	}
 	for _, c := range cases {
-		r := NewLTFF(c.fieldA, c.fieldB)
+		r := NewEQFF(c.fieldA, c.fieldB)
 		_, err := r.IsTrue(record)
 		if err != c.wantErr {
 			t.Errorf("IsTrue(record) rule: %s, err: %v, want: %v", r, err, c.wantErr)
 		}
-	}
-}
-
-/**************************
- *  Benchmarks
- **************************/
-
-func BenchmarkLTFFIsTrue(b *testing.B) {
-	record := map[string]*dlit.Literal{
-		"band":   dlit.MustNew(23),
-		"income": dlit.MustNew(1024),
-		"cost":   dlit.MustNew(890),
-	}
-	r := NewLTFF("cost", "income")
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		_, _ = r.IsTrue(record)
 	}
 }
