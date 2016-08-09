@@ -38,7 +38,7 @@ func TestTweakRules_1(t *testing.T) {
 	numFlowGeqRules := 0
 	numOtherRules := 0
 	for _, gotRule := range gotRules {
-		if gotRule.String() == "true()" {
+		if _, ruleIsTrue := gotRule.(rule.True); ruleIsTrue {
 			continue
 		}
 		tRule, isTweakable := gotRule.(rule.TweakableRule)
@@ -100,7 +100,7 @@ func TestTweakRules_2(t *testing.T) {
 	num40To50 := 0
 	numOther := 0
 	for _, gotRule := range gotRules {
-		if gotRule.String() == "true()" {
+		if _, isRuleTrue := gotRule.(rule.True); isRuleTrue {
 			continue
 		}
 		tRule, isTweakable := gotRule.(rule.TweakableRule)
@@ -176,7 +176,7 @@ func TestTweakRules_3(t *testing.T) {
 	gotMaxDP := 0
 	gotMinDP := 100
 	for _, gotRule := range gotRules {
-		if gotRule.String() == "true()" {
+		if _, ruleIsTrue := gotRule.(rule.True); ruleIsTrue {
 			continue
 		}
 		tRule, isTweakable := gotRule.(rule.TweakableRule)
@@ -245,7 +245,7 @@ func TestTweakRules_3(t *testing.T) {
 
 func TestTweakRules_4(t *testing.T) {
 	testPurposes := []string{
-		"Ensure that generates a 'true()' rule",
+		"Ensure that generates a True rule",
 	}
 	inputDescription := &Description{
 		map[string]*fieldDescription{
@@ -258,13 +258,13 @@ func TestTweakRules_4(t *testing.T) {
 		rule.MustNewDRule("flow <= 40.78234"),
 		rule.MustNewDRule("flow <= 24.89"),
 		rule.MustNewDRule("flow <= 52.604956"),
-		rule.MustNewDRule("true()"),
+		rule.NewTrue(),
 	}
 
 	gotRules := TweakRules(rulesIn, inputDescription)
 	trueRuleFound := false
-	for _, rule := range gotRules {
-		if rule.String() == "true()" {
+	for _, r := range gotRules {
+		if _, ruleIsTrue := r.(rule.True); ruleIsTrue {
 			trueRuleFound = true
 			break
 		}

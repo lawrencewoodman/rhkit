@@ -469,7 +469,7 @@ func TestRefine(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("true()"),
+				Rule: rule.NewTrue(),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("50"),
@@ -500,7 +500,7 @@ func TestRefine(t *testing.T) {
 		rule.MustNewDRule("in(team,\"a\",\"b\")"),
 		rule.MustNewDRule("in(band,\"99\",\"23\")"),
 		rule.NewGEFVI("band", 3),
-		rule.MustNewDRule("true()"),
+		rule.NewTrue(),
 	}
 	numSimilarRules := 2
 	sortedAssessment.Refine(numSimilarRules)
@@ -526,7 +526,7 @@ func TestRefine_panic_1(t *testing.T) {
 				Goals: []*GoalAssessment{},
 			},
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("true()"),
+				Rule: rule.NewTrue(),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("4"),
 					"percentMatches": dlit.MustNew("100"),
@@ -557,7 +557,7 @@ func TestRefine_panic_1(t *testing.T) {
 }
 
 func TestRefine_panic_2(t *testing.T) {
-	testPurpose := "Ensure panics if 'true()' rule missing"
+	testPurpose := "Ensure panics if True rule missing"
 	sortedAssessment := &Assessment{
 		NumRecords: 20,
 		flags: map[string]bool{
@@ -583,7 +583,7 @@ func TestRefine_panic_2(t *testing.T) {
 		},
 	}
 	paniced := false
-	wantPanic := "No 'true()' rule found"
+	wantPanic := "No True rule found"
 	defer func() {
 		if r := recover(); r != nil {
 			if r.(string) == wantPanic {
@@ -648,7 +648,7 @@ func TestTruncateRuleAssessments(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("true()"),
+				Rule: rule.NewTrue(),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches": dlit.MustNew("2"),
 				},
@@ -669,20 +669,20 @@ func TestTruncateRuleAssessments(t *testing.T) {
 		},
 		{1,
 			[]rule.Rule{
-				rule.MustNewDRule("true()"),
+				rule.NewTrue(),
 			},
 		},
 		{2,
 			[]rule.Rule{
 				rule.MustNewDRule("band > 4"),
-				rule.MustNewDRule("true()"),
+				rule.NewTrue(),
 			},
 		},
 		{3,
 			[]rule.Rule{
 				rule.MustNewDRule("band > 4"),
 				rule.MustNewDRule("in(band,\"4\",\"3\",\"2\")"),
-				rule.MustNewDRule("true()"),
+				rule.NewTrue(),
 			},
 		},
 		{4,
@@ -690,7 +690,7 @@ func TestTruncateRuleAssessments(t *testing.T) {
 				rule.MustNewDRule("band > 4"),
 				rule.MustNewDRule("in(band,\"4\",\"3\",\"2\")"),
 				rule.MustNewDRule("in(team,\"a\",\"b\")"),
-				rule.MustNewDRule("true()"),
+				rule.NewTrue(),
 			},
 		},
 		{5,
@@ -699,7 +699,7 @@ func TestTruncateRuleAssessments(t *testing.T) {
 				rule.MustNewDRule("in(band,\"4\",\"3\",\"2\")"),
 				rule.MustNewDRule("in(team,\"a\",\"b\")"),
 				rule.MustNewDRule("in(band,\"99\",\"23\")"),
-				rule.MustNewDRule("true()"),
+				rule.NewTrue(),
 			},
 		},
 		{6,
@@ -708,7 +708,7 @@ func TestTruncateRuleAssessments(t *testing.T) {
 				rule.MustNewDRule("in(band,\"4\",\"3\",\"2\")"),
 				rule.MustNewDRule("in(team,\"a\",\"b\")"),
 				rule.MustNewDRule("in(band,\"99\",\"23\")"),
-				rule.MustNewDRule("true()"),
+				rule.NewTrue(),
 			},
 		},
 	}
@@ -736,7 +736,7 @@ func TestTruncateRuleAssessment_panic_1(t *testing.T) {
 				Goals: []*GoalAssessment{},
 			},
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("true()"),
+				Rule: rule.NewTrue(),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("4"),
 					"percentMatches": dlit.MustNew("100"),
@@ -783,7 +783,7 @@ func TestTruncateRuleAssessment_panic_2(t *testing.T) {
 				Goals: []*GoalAssessment{},
 			},
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("true()"),
+				Rule: rule.NewTrue(),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("4"),
 					"percentMatches": dlit.MustNew("100"),

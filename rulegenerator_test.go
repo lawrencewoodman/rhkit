@@ -392,7 +392,7 @@ func TestGenerateRules_1(t *testing.T) {
 }
 
 func TestGenerateRules_2(t *testing.T) {
-	testPurpose := "Ensure generates a 'true()' rule"
+	testPurpose := "Ensure generates a True rule"
 	inputDescription := &Description{
 		map[string]*fieldDescription{
 			"team": &fieldDescription{
@@ -419,15 +419,15 @@ func TestGenerateRules_2(t *testing.T) {
 	}
 
 	trueRuleFound := false
-	for _, rule := range rules {
-		if rule.String() == "true()" {
+	for _, r := range rules {
+		if _, isTrueRule := r.(rule.True); isTrueRule {
 			trueRuleFound = true
 			break
 		}
 	}
 	if !trueRuleFound {
 		t.Errorf("Test: %s\n", testPurpose)
-		t.Errorf("GenerateRules(%q, %q)  - 'true()' rule missing",
+		t.Errorf("GenerateRules(%q, %q)  - True rule missing",
 			inputDescription, excludeFields)
 	}
 }

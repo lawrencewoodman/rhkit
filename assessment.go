@@ -140,7 +140,7 @@ func (r *RuleAssessment) String() string {
 }
 
 // Tidy up rule assessments by removing poor and poorer similar rules
-// For example this removes all rules poorer than the 'true()' rule
+// For example this removes all rules poorer than the True rule
 func (sortedAssessment *Assessment) Refine(numSimilarRules int) {
 	if !sortedAssessment.IsSorted() {
 		panic("Assessment isn't sorted")
@@ -191,8 +191,8 @@ func (a *Assessment) TruncateRuleAssessments(
 
 	if numRuleAssessments > 0 {
 		trueRuleAssessment := a.RuleAssessments[len(a.RuleAssessments)-1]
-		if trueRuleAssessment.Rule.String() != "true()" {
-			panic("Assessment doesn't have 'true()' rule last")
+		if _, isTrueRule := trueRuleAssessment.Rule.(rule.True); !isTrueRule {
+			panic("Assessment doesn't have True rule last")
 		}
 
 		ruleAssessments[numNonTrueRuleAssessments] = trueRuleAssessment
@@ -241,13 +241,13 @@ func (sortedAssessment *Assessment) excludePoorRules() {
 		if numMatches > 1 {
 			goodRuleAssessments = append(goodRuleAssessments, a)
 		}
-		if a.Rule.String() == "true()" {
+		if _, isTrueRule := a.Rule.(rule.True); isTrueRule {
 			trueFound = true
 			break
 		}
 	}
 	if !trueFound {
-		panic("No 'true()' rule found")
+		panic("No True rule found")
 	}
 	sortedAssessment.RuleAssessments = goodRuleAssessments
 }

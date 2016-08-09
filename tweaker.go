@@ -58,7 +58,7 @@ func tweakRules(
 	inputDescription *Description,
 ) []rule.Rule {
 	newRules := make([]rule.Rule, 1)
-	newRules[0] = rule.MustNewDRule("true()")
+	newRules[0] = rule.NewTrue()
 	fd := inputDescription.fields
 	for _, rules := range groupedRules {
 		firstRule := rules[0]
