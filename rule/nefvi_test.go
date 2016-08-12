@@ -69,10 +69,22 @@ func TestNEFVIIsTrue_errors(t *testing.T) {
 		value   int64
 		wantErr error
 	}{
-		{"fred", 8, InvalidRuleError("fred != 8")},
-		{"band", 8, InvalidRuleError("band != 8")},
-		{"flow", 8, InvalidRuleError("flow != 8")},
-		{"problem", 8, InvalidRuleError("problem != 8")},
+		{field: "fred",
+			value:   8,
+			wantErr: InvalidRuleError{Rule: NewNEFVI("fred", 8)},
+		},
+		{field: "band",
+			value:   8,
+			wantErr: IncompatibleTypesRuleError{Rule: NewNEFVI("band", 8)},
+		},
+		{field: "flow",
+			value:   8,
+			wantErr: IncompatibleTypesRuleError{Rule: NewNEFVI("flow", 8)},
+		},
+		{field: "problem",
+			value:   8,
+			wantErr: IncompatibleTypesRuleError{Rule: NewNEFVI("problem", 8)},
+		},
 	}
 	record := map[string]*dlit.Literal{
 		"income":  dlit.MustNew(19),
@@ -82,9 +94,9 @@ func TestNEFVIIsTrue_errors(t *testing.T) {
 	}
 	for _, c := range cases {
 		r := NewNEFVI(c.field, c.value)
-		_, err := r.IsTrue(record)
-		if err != c.wantErr {
-			t.Errorf("IsTrue(record) rule: %s, err: %v, want: %v", r, err, c.wantErr)
+		_, gotErr := r.IsTrue(record)
+		if err := checkErrorMatch(gotErr, c.wantErr); err != nil {
+			t.Errorf("IsTrue(record) rule: %s - %s", r, err)
 		}
 	}
 }

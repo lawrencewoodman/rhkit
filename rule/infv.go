@@ -53,11 +53,10 @@ func (r *InFV) GetInNiParts() (bool, string, string) {
 func (r *InFV) IsTrue(record ddataset.Record) (bool, error) {
 	needle, ok := record[r.field]
 	if !ok {
-		return false, InvalidRuleError(r.String())
+		return false, InvalidRuleError{Rule: r}
 	}
 	if needle.Err() != nil {
-		// TODO: Return incompatible type
-		return false, InvalidRuleError(r.String())
+		return false, IncompatibleTypesRuleError{Rule: r}
 	}
 	for _, v := range r.values {
 		if needle.String() == v.String() {

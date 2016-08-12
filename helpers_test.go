@@ -80,3 +80,11 @@ func (lc *LiteralDatasetConn) Read() ddataset.Record {
 func (lc *LiteralDatasetConn) Err() error {
 	return nil
 }
+
+func makeStringsDlitSlice(strings ...string) []*dlit.Literal {
+	r := make([]*dlit.Literal, len(strings))
+	for i, s := range strings {
+		r[i] = dlit.NewString(s)
+	}
+	return r
+}

@@ -80,9 +80,9 @@ func TestEQFVFIsTrue_errors(t *testing.T) {
 		value   float64
 		wantErr error
 	}{
-		{"fred", 8.9, InvalidRuleError("fred == 8.9")},
-		{"band", 8.9, InvalidRuleError("band == 8.9")},
-		{"problem", 8.9, InvalidRuleError("problem == 8.9")},
+		{"fred", 8.9, InvalidRuleError{Rule: NewEQFVF("fred", 8.9)}},
+		{"band", 8.9, IncompatibleTypesRuleError{Rule: NewEQFVF("band", 8.9)}},
+		{"problem", 8.9, IncompatibleTypesRuleError{Rule: NewEQFVF("problem", 8.9)}},
 	}
 	record := map[string]*dlit.Literal{
 		"income":  dlit.MustNew(19),
@@ -92,9 +92,9 @@ func TestEQFVFIsTrue_errors(t *testing.T) {
 	}
 	for _, c := range cases {
 		r := NewEQFVF(c.field, c.value)
-		_, err := r.IsTrue(record)
-		if err != c.wantErr {
-			t.Errorf("IsTrue(record) rule: %s, err: %v, want: %v", r, err, c.wantErr)
+		_, gotErr := r.IsTrue(record)
+		if err := checkErrorMatch(gotErr, c.wantErr); err != nil {
+			t.Errorf("IsTrue(record) rule: %s - %s", r, err)
 		}
 	}
 }

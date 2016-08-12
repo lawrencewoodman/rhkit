@@ -38,10 +38,20 @@ type TweakableRule interface {
 	CloneWithValue(newValue interface{}) TweakableRule
 }
 
-type InvalidRuleError string
+type InvalidRuleError struct {
+	Rule Rule
+}
+
+type IncompatibleTypesRuleError struct {
+	Rule Rule
+}
 
 func (e InvalidRuleError) Error() string {
-	return "invalid rule: " + string(e)
+	return "invalid rule: " + e.Rule.String()
+}
+
+func (e IncompatibleTypesRuleError) Error() string {
+	return "incompatible types in rule: " + e.Rule.String()
 }
 
 func commaJoinValues(values []*dlit.Literal) string {

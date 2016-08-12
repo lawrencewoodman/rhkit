@@ -66,12 +66,30 @@ func TestGTFFIsTrue_errors(t *testing.T) {
 		fieldB  string
 		wantErr error
 	}{
-		{"income", "band", InvalidRuleError("income > band")},
-		{"band", "income", InvalidRuleError("band > income")},
-		{"flow", "band", InvalidRuleError("flow > band")},
-		{"band", "flow", InvalidRuleError("band > flow")},
-		{"fred", "income", InvalidRuleError("fred > income")},
-		{"income", "fred", InvalidRuleError("income > fred")},
+		{fieldA: "income",
+			fieldB:  "band",
+			wantErr: IncompatibleTypesRuleError{Rule: NewGTFF("income", "band")},
+		},
+		{fieldA: "band",
+			fieldB:  "income",
+			wantErr: IncompatibleTypesRuleError{Rule: NewGTFF("band", "income")},
+		},
+		{fieldA: "flow",
+			fieldB:  "band",
+			wantErr: IncompatibleTypesRuleError{Rule: NewGTFF("flow", "band")},
+		},
+		{fieldA: "band",
+			fieldB:  "flow",
+			wantErr: IncompatibleTypesRuleError{Rule: NewGTFF("band", "flow")},
+		},
+		{fieldA: "fred",
+			fieldB:  "income",
+			wantErr: InvalidRuleError{Rule: NewGTFF("fred", "income")},
+		},
+		{fieldA: "income",
+			fieldB:  "fred",
+			wantErr: InvalidRuleError{Rule: NewGTFF("income", "fred")},
+		},
 	}
 	record := map[string]*dlit.Literal{
 		"income": dlit.MustNew(19),
@@ -80,9 +98,9 @@ func TestGTFFIsTrue_errors(t *testing.T) {
 	}
 	for _, c := range cases {
 		r := NewGTFF(c.fieldA, c.fieldB)
-		_, err := r.IsTrue(record)
-		if err != c.wantErr {
-			t.Errorf("IsTrue(record) rule: %s, err: %v, want: %v", r, err, c.wantErr)
+		_, gotErr := r.IsTrue(record)
+		if err := checkErrorMatch(gotErr, c.wantErr); err != nil {
+			t.Errorf("IsTrue(record) rule: %s - %s", r, err)
 		}
 	}
 }

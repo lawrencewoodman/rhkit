@@ -6,7 +6,6 @@ import (
 	"github.com/vlifesystems/rulehunter/aggregators"
 	"github.com/vlifesystems/rulehunter/goal"
 	"github.com/vlifesystems/rulehunter/rule"
-	"go/token"
 	"testing"
 )
 
@@ -51,9 +50,9 @@ func TestNextRecord(t *testing.T) {
 		wantNumBandGt4   int64
 		wantGoalsScore   float64
 	}{
-		{rule.MustNewDRule("band > 4"), 1, 2, 2.0},
-		{rule.MustNewDRule("band > 3"), 2, 2, 0.001},
-		{rule.MustNewDRule("cost > 1.2"), 2, 1, 0},
+		{rule.NewGEFVI("band", 5), 1, 2, 2.0},
+		{rule.NewGEFVI("band", 3), 2, 2, 0.001},
+		{rule.NewGEFVF("cost", 1.3), 2, 1, 0},
 	}
 	for _, c := range cases {
 		ra := newRuleAssessor(c.rule, inAggregators, goals)
@@ -119,7 +118,7 @@ func TestNextRecord_Errors(t *testing.T) {
 		aggregators []aggregators.AggregatorSpec
 		wantErr     error
 	}{
-		{rule.MustNewDRule("band > 4"),
+		{rule.NewGEFVI("band", 4),
 			[]aggregators.AggregatorSpec{
 				aggregators.MustNew("numIncomeGt2", "count", "fred > 2")},
 			dexpr.ErrInvalidExpr{
@@ -127,24 +126,13 @@ func TestNextRecord_Errors(t *testing.T) {
 				Err:  dexpr.ErrVarNotExist("fred"),
 			},
 		},
-		{rule.MustNewDRule("band > 4"),
+		{rule.NewGEFVI("band", 4),
 			[]aggregators.AggregatorSpec{
 				aggregators.MustNew("numIncomeGt2", "count", "income > 2")}, nil},
-		{rule.MustNewDRule("hand > 4"),
+		{rule.NewGEFVI("hand", 4),
 			[]aggregators.AggregatorSpec{
 				aggregators.MustNew("numIncomeGt2", "count", "income > 2")},
-			dexpr.ErrInvalidExpr{
-				Expr: "hand > 4",
-				Err:  dexpr.ErrVarNotExist("hand"),
-			},
-		},
-		{rule.MustNewDRule("band ^^ 4"),
-			[]aggregators.AggregatorSpec{
-				aggregators.MustNew("numIncomeGt2", "count", "income > 2")},
-			dexpr.ErrInvalidExpr{
-				Expr: "band ^^ 4",
-				Err:  dexpr.ErrInvalidOp(token.XOR),
-			},
+			rule.InvalidRuleError{Rule: rule.NewGEFVI("hand", 4)},
 		},
 	}
 	for _, c := range cases {

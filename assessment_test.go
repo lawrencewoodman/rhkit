@@ -14,7 +14,7 @@ func TestGetRules(t *testing.T) {
 	assessment := Assessment{NumRecords: 8,
 		RuleAssessments: []*RuleAssessment{
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("band > 9"),
+				Rule: rule.NewGEFVI("band", 9),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("5"),
 					"percentMatches": dlit.MustNew("65.3"),
@@ -24,7 +24,7 @@ func TestGetRules(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("band > 456"),
+				Rule: rule.NewGEFVI("band", 456),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("50"),
@@ -34,7 +34,7 @@ func TestGetRules(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("band > 3"),
+				Rule: rule.NewGEFVI("band", 3),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("4"),
 					"percentMatches": dlit.MustNew("76.3"),
@@ -44,7 +44,7 @@ func TestGetRules(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("cost > 1.2"),
+				Rule: rule.NewGEFVF("cost", 1.2),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("50"),
@@ -61,30 +61,30 @@ func TestGetRules(t *testing.T) {
 		wantRules    []rule.Rule
 	}{
 		{0, true, []rule.Rule{}},
-		{1, true, []rule.Rule{rule.MustNewDRule("band > 9")}},
+		{1, true, []rule.Rule{rule.NewGEFVI("band", 9)}},
 		{2, true, []rule.Rule{
-			rule.MustNewDRule("band > 9"),
-			rule.MustNewDRule("band > 456"),
+			rule.NewGEFVI("band", 9),
+			rule.NewGEFVI("band", 456),
 		}},
 		{4, true, []rule.Rule{
-			rule.MustNewDRule("band > 9"),
-			rule.MustNewDRule("band > 456"),
-			rule.MustNewDRule("band > 3"),
-			rule.MustNewDRule("cost > 1.2"),
+			rule.NewGEFVI("band", 9),
+			rule.NewGEFVI("band", 456),
+			rule.NewGEFVI("band", 3),
+			rule.NewGEFVF("cost", 1.2),
 		},
 		},
 		{5, true, []rule.Rule{
-			rule.MustNewDRule("band > 9"),
-			rule.MustNewDRule("band > 456"),
-			rule.MustNewDRule("band > 3"),
-			rule.MustNewDRule("cost > 1.2"),
+			rule.NewGEFVI("band", 9),
+			rule.NewGEFVI("band", 456),
+			rule.NewGEFVI("band", 3),
+			rule.NewGEFVF("cost", 1.2),
 		},
 		},
 		{0, false, []rule.Rule{
-			rule.MustNewDRule("band > 9"),
-			rule.MustNewDRule("band > 456"),
-			rule.MustNewDRule("band > 3"),
-			rule.MustNewDRule("cost > 1.2"),
+			rule.NewGEFVI("band", 9),
+			rule.NewGEFVI("band", 456),
+			rule.NewGEFVI("band", 3),
+			rule.NewGEFVF("cost", 1.2),
 		},
 		},
 	}
@@ -109,7 +109,7 @@ func TestMerge(t *testing.T) {
 		},
 		RuleAssessments: []*RuleAssessment{
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("band > 9"),
+				Rule: rule.NewGEFVI("band", 9),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("5"),
 					"percentMatches": dlit.MustNew("65.3"),
@@ -119,7 +119,7 @@ func TestMerge(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("band > 456"),
+				Rule: rule.NewGEFVI("band", 456),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("50"),
@@ -129,7 +129,7 @@ func TestMerge(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("band > 3"),
+				Rule: rule.NewGEFVI("band", 3),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("4"),
 					"percentMatches": dlit.MustNew("76.3"),
@@ -139,7 +139,7 @@ func TestMerge(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("cost > 1.2"),
+				Rule: rule.NewGEFVF("cost", 1.2),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("50"),
@@ -157,7 +157,7 @@ func TestMerge(t *testing.T) {
 		},
 		RuleAssessments: []*RuleAssessment{
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("band > 16"),
+				Rule: rule.NewGEFVI("band", 16),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("8"),
 					"percentMatches": dlit.MustNew("5.3"),
@@ -167,7 +167,7 @@ func TestMerge(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("team == \"Pi\""),
+				Rule: rule.NewEQFVS("team", "Pi"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("3"),
 					"percentMatches": dlit.MustNew("19"),
@@ -177,7 +177,7 @@ func TestMerge(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("band > 36"),
+				Rule: rule.NewGEFVI("band", 36),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("6.3"),
@@ -187,7 +187,7 @@ func TestMerge(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("cost > 1.27"),
+				Rule: rule.NewGEFVF("cost", 1.27),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("3"),
 					"percentMatches": dlit.MustNew("3.5"),
@@ -207,7 +207,7 @@ func TestMerge(t *testing.T) {
 		},
 		RuleAssessments: []*RuleAssessment{
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("band > 9"),
+				Rule: rule.NewGEFVI("band", 9),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("5"),
 					"percentMatches": dlit.MustNew("65.3"),
@@ -217,7 +217,7 @@ func TestMerge(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("band > 456"),
+				Rule: rule.NewGEFVI("band", 456),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("50"),
@@ -227,7 +227,7 @@ func TestMerge(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("band > 3"),
+				Rule: rule.NewGEFVI("band", 3),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("4"),
 					"percentMatches": dlit.MustNew("76.3"),
@@ -237,7 +237,7 @@ func TestMerge(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("cost > 1.2"),
+				Rule: rule.NewGEFVF("cost", 1.2),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("50"),
@@ -247,7 +247,7 @@ func TestMerge(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("band > 16"),
+				Rule: rule.NewGEFVI("band", 16),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("8"),
 					"percentMatches": dlit.MustNew("5.3"),
@@ -257,7 +257,7 @@ func TestMerge(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("team == \"Pi\""),
+				Rule: rule.NewEQFVS("team", "Pi"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("3"),
 					"percentMatches": dlit.MustNew("19"),
@@ -267,7 +267,7 @@ func TestMerge(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("band > 36"),
+				Rule: rule.NewGEFVI("band", 36),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("6.3"),
@@ -277,7 +277,7 @@ func TestMerge(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("cost > 1.27"),
+				Rule: rule.NewGEFVF("cost", 1.27),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("3"),
 					"percentMatches": dlit.MustNew("3.5"),
@@ -308,7 +308,7 @@ func TestMerge_errors(t *testing.T) {
 		},
 		RuleAssessments: []*RuleAssessment{
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("band > 9"),
+				Rule: rule.NewGEFVI("band", 9),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("5"),
 					"percentMatches": dlit.MustNew("65.3"),
@@ -318,7 +318,7 @@ func TestMerge_errors(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("band > 456"),
+				Rule: rule.NewGEFVI("band", 456),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("50"),
@@ -332,7 +332,7 @@ func TestMerge_errors(t *testing.T) {
 	assessment2 := &Assessment{NumRecords: 2,
 		RuleAssessments: []*RuleAssessment{
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("band > 16"),
+				Rule: rule.NewGEFVI("band", 16),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("8"),
 					"percentMatches": dlit.MustNew("5.3"),
@@ -342,7 +342,7 @@ func TestMerge_errors(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("team == \"Pi\""),
+				Rule: rule.NewEQFVS("team", "Pi"),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("3"),
 					"percentMatches": dlit.MustNew("19"),
@@ -385,7 +385,7 @@ func TestRefine(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("in(band,\"4\",\"3\",\"2\")"),
+				Rule: rule.NewInFV("band", makeStringsDlitSlice("4", "3", "2")),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("4"),
 					"percentMatches": dlit.MustNew("100"),
@@ -397,7 +397,7 @@ func TestRefine(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("in(team,\"a\",\"b\")"),
+				Rule: rule.NewInFV("team", makeStringsDlitSlice("a", "b")),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("4"),
 					"percentMatches": dlit.MustNew("100"),
@@ -409,7 +409,7 @@ func TestRefine(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("in(band,\"99\",\"23\")"),
+				Rule: rule.NewInFV("band", makeStringsDlitSlice("99", "23")),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("4"),
 					"percentMatches": dlit.MustNew("100"),
@@ -445,7 +445,7 @@ func TestRefine(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("in(band,\"9\",\"2\")"),
+				Rule: rule.NewInFV("band", makeStringsDlitSlice("9", "2")),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("4"),
 					"percentMatches": dlit.MustNew("100"),
@@ -457,7 +457,7 @@ func TestRefine(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("band == 7"),
+				Rule: rule.NewEQFVI("band", 7),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("0"),
 					"percentMatches": dlit.MustNew("50"),
@@ -481,7 +481,7 @@ func TestRefine(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("cost > 1.2"),
+				Rule: rule.NewGEFVF("cost", 1.2),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("50"),
@@ -496,9 +496,9 @@ func TestRefine(t *testing.T) {
 	}
 	wantRules := []rule.Rule{
 		rule.NewGEFVI("band", 4),
-		rule.MustNewDRule("in(band,\"4\",\"3\",\"2\")"),
-		rule.MustNewDRule("in(team,\"a\",\"b\")"),
-		rule.MustNewDRule("in(band,\"99\",\"23\")"),
+		rule.NewInFV("band", makeStringsDlitSlice("4", "3", "2")),
+		rule.NewInFV("team", makeStringsDlitSlice("a", "b")),
+		rule.NewInFV("band", makeStringsDlitSlice("99", "23")),
 		rule.NewGEFVI("band", 3),
 		rule.NewTrue(),
 	}
@@ -518,7 +518,7 @@ func TestRefine_panic_1(t *testing.T) {
 		NumRecords: 20,
 		RuleAssessments: []*RuleAssessment{
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("band > 4"),
+				Rule: rule.NewGEFVI("band", 4),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("50"),
@@ -565,7 +565,7 @@ func TestRefine_panic_2(t *testing.T) {
 		},
 		RuleAssessments: []*RuleAssessment{
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("band > 4"),
+				Rule: rule.NewGEFVI("band", 4),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("50"),
@@ -573,7 +573,7 @@ func TestRefine_panic_2(t *testing.T) {
 				Goals: []*GoalAssessment{},
 			},
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("team > 7"),
+				Rule: rule.NewGEFVI("team", 7),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("4"),
 					"percentMatches": dlit.MustNew("100"),
@@ -612,7 +612,7 @@ func TestTruncateRuleAssessments(t *testing.T) {
 		},
 		RuleAssessments: []*RuleAssessment{
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("band > 4"),
+				Rule: rule.NewGEFVI("band", 4),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches": dlit.MustNew("2"),
 				},
@@ -621,7 +621,7 @@ func TestTruncateRuleAssessments(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("in(band,\"4\",\"3\",\"2\")"),
+				Rule: rule.NewInFV("band", makeStringsDlitSlice("4", "3", "2")),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches": dlit.MustNew("4"),
 				},
@@ -630,7 +630,7 @@ func TestTruncateRuleAssessments(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("in(team,\"a\",\"b\")"),
+				Rule: rule.NewInFV("team", makeStringsDlitSlice("a", "b")),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches": dlit.MustNew("4"),
 				},
@@ -639,7 +639,7 @@ func TestTruncateRuleAssessments(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("in(band,\"99\",\"23\")"),
+				Rule: rule.NewInFV("band", makeStringsDlitSlice("99", "23")),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches": dlit.MustNew("4"),
 				},
@@ -674,40 +674,40 @@ func TestTruncateRuleAssessments(t *testing.T) {
 		},
 		{2,
 			[]rule.Rule{
-				rule.MustNewDRule("band > 4"),
+				rule.NewGEFVI("band", 4),
 				rule.NewTrue(),
 			},
 		},
 		{3,
 			[]rule.Rule{
-				rule.MustNewDRule("band > 4"),
-				rule.MustNewDRule("in(band,\"4\",\"3\",\"2\")"),
+				rule.NewGEFVI("band", 4),
+				rule.NewInFV("band", makeStringsDlitSlice("4", "3", "2")),
 				rule.NewTrue(),
 			},
 		},
 		{4,
 			[]rule.Rule{
-				rule.MustNewDRule("band > 4"),
-				rule.MustNewDRule("in(band,\"4\",\"3\",\"2\")"),
-				rule.MustNewDRule("in(team,\"a\",\"b\")"),
+				rule.NewGEFVI("band", 4),
+				rule.NewInFV("band", makeStringsDlitSlice("4", "3", "2")),
+				rule.NewInFV("team", makeStringsDlitSlice("a", "b")),
 				rule.NewTrue(),
 			},
 		},
 		{5,
 			[]rule.Rule{
-				rule.MustNewDRule("band > 4"),
-				rule.MustNewDRule("in(band,\"4\",\"3\",\"2\")"),
-				rule.MustNewDRule("in(team,\"a\",\"b\")"),
-				rule.MustNewDRule("in(band,\"99\",\"23\")"),
+				rule.NewGEFVI("band", 4),
+				rule.NewInFV("band", makeStringsDlitSlice("4", "3", "2")),
+				rule.NewInFV("team", makeStringsDlitSlice("a", "b")),
+				rule.NewInFV("band", makeStringsDlitSlice("99", "23")),
 				rule.NewTrue(),
 			},
 		},
 		{6,
 			[]rule.Rule{
-				rule.MustNewDRule("band > 4"),
-				rule.MustNewDRule("in(band,\"4\",\"3\",\"2\")"),
-				rule.MustNewDRule("in(team,\"a\",\"b\")"),
-				rule.MustNewDRule("in(band,\"99\",\"23\")"),
+				rule.NewGEFVI("band", 4),
+				rule.NewInFV("band", makeStringsDlitSlice("4", "3", "2")),
+				rule.NewInFV("team", makeStringsDlitSlice("a", "b")),
+				rule.NewInFV("band", makeStringsDlitSlice("99", "23")),
 				rule.NewTrue(),
 			},
 		},
@@ -728,7 +728,7 @@ func TestTruncateRuleAssessment_panic_1(t *testing.T) {
 		NumRecords: 20,
 		RuleAssessments: []*RuleAssessment{
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("band > 4"),
+				Rule: rule.NewGEFVI("band", 4),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("50"),
@@ -775,7 +775,7 @@ func TestTruncateRuleAssessment_panic_2(t *testing.T) {
 		},
 		RuleAssessments: []*RuleAssessment{
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("band > 4"),
+				Rule: rule.NewGEFVI("band", 4),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("50"),
@@ -821,7 +821,7 @@ func TestSort(t *testing.T) {
 		},
 		RuleAssessments: []*RuleAssessment{
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("band > 9"),
+				Rule: rule.NewGEFVI("band", 9),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("5"),
 					"percentMatches": dlit.MustNew("65.3"),
@@ -841,7 +841,7 @@ func TestSort(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("band > 456"),
+				Rule: rule.NewGEFVI("band", 456),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("50"),
@@ -861,7 +861,7 @@ func TestSort(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("band > 3"),
+				Rule: rule.NewGEFVI("band", 3),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("4"),
 					"percentMatches": dlit.MustNew("76.3"),
@@ -881,7 +881,7 @@ func TestSort(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: rule.MustNewDRule("cost > 1.2"),
+				Rule: rule.NewGEFVF("cost", 1.2),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("50"),
@@ -910,55 +910,55 @@ func TestSort(t *testing.T) {
 			experiment.SortField{"goalsScore", experiment.ASCENDING},
 		},
 			[]rule.Rule{
-				rule.MustNewDRule("band > 3"),
-				rule.MustNewDRule("cost > 1.2"),
-				rule.MustNewDRule("band > 9"),
-				rule.MustNewDRule("band > 456"),
+				rule.NewGEFVI("band", 3),
+				rule.NewGEFVF("cost", 1.2),
+				rule.NewGEFVI("band", 9),
+				rule.NewGEFVI("band", 456),
 			}},
 		{[]experiment.SortField{
 			experiment.SortField{"percentMatches", experiment.DESCENDING},
 		},
 			[]rule.Rule{
-				rule.MustNewDRule("band > 3"),
-				rule.MustNewDRule("band > 9"),
-				rule.MustNewDRule("band > 456"),
-				rule.MustNewDRule("cost > 1.2"),
+				rule.NewGEFVI("band", 3),
+				rule.NewGEFVI("band", 9),
+				rule.NewGEFVI("band", 456),
+				rule.NewGEFVF("cost", 1.2),
 			}},
 		{[]experiment.SortField{
 			experiment.SortField{"percentMatches", experiment.ASCENDING},
 		},
 			[]rule.Rule{
-				rule.MustNewDRule("band > 456"),
-				rule.MustNewDRule("cost > 1.2"),
-				rule.MustNewDRule("band > 9"),
-				rule.MustNewDRule("band > 3"),
+				rule.NewGEFVI("band", 456),
+				rule.NewGEFVF("cost", 1.2),
+				rule.NewGEFVI("band", 9),
+				rule.NewGEFVI("band", 3),
 			}},
 		{[]experiment.SortField{
 			experiment.SortField{"percentMatches", experiment.ASCENDING},
 			experiment.SortField{"numIncomeGt2", experiment.ASCENDING},
 		},
 			[]rule.Rule{
-				rule.MustNewDRule("cost > 1.2"),
-				rule.MustNewDRule("band > 456"),
-				rule.MustNewDRule("band > 9"),
-				rule.MustNewDRule("band > 3"),
+				rule.NewGEFVF("cost", 1.2),
+				rule.NewGEFVI("band", 456),
+				rule.NewGEFVI("band", 9),
+				rule.NewGEFVI("band", 3),
 			}},
 		{[]experiment.SortField{
 			experiment.SortField{"percentMatches", experiment.DESCENDING},
 			experiment.SortField{"numIncomeGt2", experiment.ASCENDING},
 		},
 			[]rule.Rule{
-				rule.MustNewDRule("band > 3"),
-				rule.MustNewDRule("band > 9"),
-				rule.MustNewDRule("cost > 1.2"),
-				rule.MustNewDRule("band > 456"),
+				rule.NewGEFVI("band", 3),
+				rule.NewGEFVI("band", 9),
+				rule.NewGEFVF("cost", 1.2),
+				rule.NewGEFVI("band", 456),
 			}},
 		{[]experiment.SortField{},
 			[]rule.Rule{
-				rule.MustNewDRule("band > 3"),
-				rule.MustNewDRule("band > 9"),
-				rule.MustNewDRule("band > 456"),
-				rule.MustNewDRule("cost > 1.2"),
+				rule.NewGEFVI("band", 3),
+				rule.NewGEFVI("band", 9),
+				rule.NewGEFVI("band", 456),
+				rule.NewGEFVF("cost", 1.2),
 			}},
 	}
 	for _, c := range cases {

@@ -73,16 +73,22 @@ func TestOrIsTrue_errors(t *testing.T) {
 		wantErr error
 	}{
 		{ruleA: NewTrue(),
-			ruleB:   NewEQFF("fred", "income"),
-			wantErr: InvalidRuleError("true() || fred == income"),
+			ruleB: NewEQFF("fred", "income"),
+			wantErr: InvalidRuleError{
+				Rule: NewOr(NewTrue(), NewEQFF("fred", "income")),
+			},
 		},
 		{ruleA: NewEQFF("fred", "income"),
-			ruleB:   NewTrue(),
-			wantErr: InvalidRuleError("fred == income || true()"),
+			ruleB: NewTrue(),
+			wantErr: InvalidRuleError{
+				Rule: NewOr(NewEQFF("fred", "income"), NewTrue()),
+			},
 		},
 		{ruleA: NewEQFF("fred", "income"),
-			ruleB:   NewEQFF("bob", "cost"),
-			wantErr: InvalidRuleError("fred == income || bob == cost"),
+			ruleB: NewEQFF("bob", "cost"),
+			wantErr: InvalidRuleError{
+				Rule: NewOr(NewEQFF("fred", "income"), NewEQFF("bob", "cost")),
+			},
 		},
 	}
 	record := map[string]*dlit.Literal{
@@ -92,9 +98,9 @@ func TestOrIsTrue_errors(t *testing.T) {
 	}
 	for _, c := range cases {
 		r := NewOr(c.ruleA, c.ruleB)
-		_, err := r.IsTrue(record)
-		if err != c.wantErr {
-			t.Errorf("IsTrue(record) rule: %s, err: %v, want: %v", r, err, c.wantErr)
+		_, gotErr := r.IsTrue(record)
+		if err := checkErrorMatch(gotErr, c.wantErr); err != nil {
+			t.Errorf("IsTrue(record) rule: %s - %s", r, err)
 		}
 	}
 }

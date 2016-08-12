@@ -30,7 +30,7 @@ func TestTweakRules_1(t *testing.T) {
 		rule.NewGEFVF("flow", 70.20),
 		rule.NewGEFVF("flow", 100.5),
 		rule.NewGTFF("age", "band"),
-		rule.MustNewDRule("in(stage,\"20\",\"21\",\"22\")"),
+		rule.NewInFV("stage", makeStringsDlitSlice("20", "21", "22")),
 	}
 	gotRules := TweakRules(rulesIn, inputDescription)
 
@@ -255,9 +255,9 @@ func TestTweakRules_4(t *testing.T) {
 			},
 		}}
 	rulesIn := []rule.Rule{
-		rule.MustNewDRule("flow <= 40.78234"),
-		rule.MustNewDRule("flow <= 24.89"),
-		rule.MustNewDRule("flow <= 52.604956"),
+		rule.NewLEFVF("flow", 40.78234),
+		rule.NewLEFVF("flow", 24.89),
+		rule.NewLEFVF("flow", 52.604956),
 		rule.NewTrue(),
 	}
 

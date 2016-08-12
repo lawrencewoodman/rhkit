@@ -46,11 +46,11 @@ func (r *Or) GetInNiParts() (bool, string, string) {
 func (r *Or) IsTrue(record ddataset.Record) (bool, error) {
 	lh, err := r.ruleA.IsTrue(record)
 	if err != nil {
-		return false, InvalidRuleError(r.String())
+		return false, InvalidRuleError{Rule: r}
 	}
 	rh, err := r.ruleB.IsTrue(record)
 	if err != nil {
-		return false, InvalidRuleError(r.String())
+		return false, InvalidRuleError{Rule: r}
 	}
 	return lh || rh, nil
 }

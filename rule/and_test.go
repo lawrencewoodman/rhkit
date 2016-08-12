@@ -68,21 +68,17 @@ func TestAndIsTrue(t *testing.T) {
 
 func TestAndIsTrue_errors(t *testing.T) {
 	cases := []struct {
-		ruleA   Rule
-		ruleB   Rule
-		wantErr error
+		ruleA Rule
+		ruleB Rule
 	}{
 		{ruleA: NewTrue(),
-			ruleB:   NewEQFF("fred", "income"),
-			wantErr: InvalidRuleError("true() && fred == income"),
+			ruleB: NewEQFF("fred", "income"),
 		},
 		{ruleA: NewEQFF("fred", "income"),
-			ruleB:   NewTrue(),
-			wantErr: InvalidRuleError("fred == income && true()"),
+			ruleB: NewTrue(),
 		},
 		{ruleA: NewEQFF("fred", "income"),
-			ruleB:   NewEQFF("bob", "cost"),
-			wantErr: InvalidRuleError("fred == income && bob == cost"),
+			ruleB: NewEQFF("bob", "cost"),
 		},
 	}
 	record := map[string]*dlit.Literal{
@@ -92,9 +88,10 @@ func TestAndIsTrue_errors(t *testing.T) {
 	}
 	for _, c := range cases {
 		r := NewAnd(c.ruleA, c.ruleB)
+		wantErr := InvalidRuleError{Rule: r}
 		_, err := r.IsTrue(record)
-		if err != c.wantErr {
-			t.Errorf("IsTrue(record) rule: %s, err: %v, want: %v", r, err, c.wantErr)
+		if err != wantErr {
+			t.Errorf("IsTrue(record) rule: %s, err: %v, want: %v", r, err, wantErr)
 		}
 	}
 }

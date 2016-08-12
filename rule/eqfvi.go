@@ -45,7 +45,7 @@ func (r *EQFVI) GetInNiParts() (bool, string, string) {
 func (r *EQFVI) IsTrue(record ddataset.Record) (bool, error) {
 	lh, ok := record[r.field]
 	if !ok {
-		return false, InvalidRuleError(r.String())
+		return false, InvalidRuleError{Rule: r}
 	}
 
 	lhInt, lhIsInt := lh.Int()
@@ -53,6 +53,5 @@ func (r *EQFVI) IsTrue(record ddataset.Record) (bool, error) {
 		return lhInt == r.value, nil
 	}
 
-	// TODO: Return error saying incompatible types
-	return false, InvalidRuleError(r.String())
+	return false, IncompatibleTypesRuleError{Rule: r}
 }

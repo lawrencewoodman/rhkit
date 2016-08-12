@@ -72,9 +72,18 @@ func TestGEFVIIsTrue_errors(t *testing.T) {
 		value   int64
 		wantErr error
 	}{
-		{"fred", 7, InvalidRuleError("fred >= 7")},
-		{"band", 7894, InvalidRuleError("band >= 7894")},
-		{"flow", 7894, InvalidRuleError("flow >= 7894")},
+		{field: "fred",
+			value:   7,
+			wantErr: InvalidRuleError{Rule: NewGEFVI("fred", 7)},
+		},
+		{field: "band",
+			value:   7894,
+			wantErr: IncompatibleTypesRuleError{Rule: NewGEFVI("band", 7894)},
+		},
+		{field: "flow",
+			value:   7894,
+			wantErr: IncompatibleTypesRuleError{Rule: NewGEFVI("flow", 7894)},
+		},
 	}
 	record := map[string]*dlit.Literal{
 		"income": dlit.MustNew(19),
@@ -83,9 +92,9 @@ func TestGEFVIIsTrue_errors(t *testing.T) {
 	}
 	for _, c := range cases {
 		r := NewGEFVI(c.field, c.value)
-		_, err := r.IsTrue(record)
-		if err != c.wantErr {
-			t.Errorf("IsTrue(record) rule: %s, err: %v, want: %v", r, err, c.wantErr)
+		_, gotErr := r.IsTrue(record)
+		if err := checkErrorMatch(gotErr, c.wantErr); err != nil {
+			t.Errorf("IsTrue(record) rule: %s - %s", r, err)
 		}
 	}
 }

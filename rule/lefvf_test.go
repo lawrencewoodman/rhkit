@@ -76,8 +76,14 @@ func TestLEFVFIsTrue_errors(t *testing.T) {
 		value   float64
 		wantErr error
 	}{
-		{"fred", 7.894, InvalidRuleError("fred <= 7.894")},
-		{"band", 7.894, InvalidRuleError("band <= 7.894")},
+		{field: "fred",
+			value:   7.894,
+			wantErr: InvalidRuleError{Rule: NewLEFVF("fred", 7.894)},
+		},
+		{field: "band",
+			value:   7.894,
+			wantErr: IncompatibleTypesRuleError{Rule: NewLEFVF("band", 7.894)},
+		},
 	}
 	record := map[string]*dlit.Literal{
 		"income": dlit.MustNew(19),
@@ -86,9 +92,9 @@ func TestLEFVFIsTrue_errors(t *testing.T) {
 	}
 	for _, c := range cases {
 		r := NewLEFVF(c.field, c.value)
-		_, err := r.IsTrue(record)
-		if err != c.wantErr {
-			t.Errorf("IsTrue(record) rule: %s, err: %v, want: %v", r, err, c.wantErr)
+		_, gotErr := r.IsTrue(record)
+		if err := checkErrorMatch(gotErr, c.wantErr); err != nil {
+			t.Errorf("IsTrue(record) rule: %s - %s", r, err)
 		}
 	}
 }

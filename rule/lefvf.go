@@ -50,7 +50,7 @@ func (r *LEFVF) GetInNiParts() (bool, string, string) {
 func (r *LEFVF) IsTrue(record ddataset.Record) (bool, error) {
 	lh, ok := record[r.field]
 	if !ok {
-		return false, InvalidRuleError(r.String())
+		return false, InvalidRuleError{Rule: r}
 	}
 
 	lhFloat, lhIsFloat := lh.Float()
@@ -58,8 +58,7 @@ func (r *LEFVF) IsTrue(record ddataset.Record) (bool, error) {
 		return lhFloat <= r.value, nil
 	}
 
-	// TODO: Return error saying incompatible types
-	return false, InvalidRuleError(r.String())
+	return false, IncompatibleTypesRuleError{Rule: r}
 }
 
 func (r *LEFVF) CloneWithValue(newValue interface{}) TweakableRule {

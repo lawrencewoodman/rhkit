@@ -45,12 +45,11 @@ func (r *NEFVS) GetInNiParts() (bool, string, string) {
 func (r *NEFVS) IsTrue(record ddataset.Record) (bool, error) {
 	lh, ok := record[r.field]
 	if !ok {
-		return false, InvalidRuleError(r.String())
+		return false, InvalidRuleError{Rule: r}
 	}
 
 	if err := lh.Err(); err != nil {
-		// TODO: Return error saying incompatible types
-		return false, InvalidRuleError(r.String())
+		return false, IncompatibleTypesRuleError{Rule: r}
 	}
 	return r.value != lh.String(), nil
 }

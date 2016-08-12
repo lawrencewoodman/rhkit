@@ -76,10 +76,22 @@ func TestNEFFIsTrue_errors(t *testing.T) {
 		fieldB  string
 		wantErr error
 	}{
-		{"fred", "income", InvalidRuleError("fred != income")},
-		{"income", "fred", InvalidRuleError("income != fred")},
-		{"income", "problem", InvalidRuleError("income != problem")},
-		{"problem", "income", InvalidRuleError("problem != income")},
+		{fieldA: "fred",
+			fieldB:  "income",
+			wantErr: InvalidRuleError{NewNEFF("fred", "income")},
+		},
+		{fieldA: "income",
+			fieldB:  "fred",
+			wantErr: InvalidRuleError{NewNEFF("income", "fred")},
+		},
+		{fieldA: "income",
+			fieldB:  "problem",
+			wantErr: IncompatibleTypesRuleError{NewNEFF("income", "problem")},
+		},
+		{fieldA: "problem",
+			fieldB:  "income",
+			wantErr: IncompatibleTypesRuleError{NewNEFF("problem", "income")},
+		},
 	}
 	record := map[string]*dlit.Literal{
 		"income":  dlit.MustNew(19),
@@ -89,9 +101,9 @@ func TestNEFFIsTrue_errors(t *testing.T) {
 	}
 	for _, c := range cases {
 		r := NewNEFF(c.fieldA, c.fieldB)
-		_, err := r.IsTrue(record)
-		if err != c.wantErr {
-			t.Errorf("IsTrue(record) rule: %s, err: %v, want: %v", r, err, c.wantErr)
+		_, gotErr := r.IsTrue(record)
+		if err := checkErrorMatch(gotErr, c.wantErr); err != nil {
+			t.Errorf("IsTrue(record) rule: %s - %s", r, err)
 		}
 	}
 }

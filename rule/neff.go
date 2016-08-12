@@ -44,11 +44,11 @@ func (r *NEFF) GetInNiParts() (bool, string, string) {
 func (r *NEFF) IsTrue(record ddataset.Record) (bool, error) {
 	lh, ok := record[r.fieldA]
 	if !ok {
-		return false, InvalidRuleError(r.String())
+		return false, InvalidRuleError{Rule: r}
 	}
 	rh, ok := record[r.fieldB]
 	if !ok {
-		return false, InvalidRuleError(r.String())
+		return false, InvalidRuleError{Rule: r}
 	}
 
 	lhInt, lhIsInt := lh.Int()
@@ -69,8 +69,7 @@ func (r *NEFF) IsTrue(record ddataset.Record) (bool, error) {
 	lhErr := lh.Err()
 	rhErr := rh.Err()
 	if lhErr != nil || rhErr != nil {
-		// TODO: Return error saying incompatible types
-		return false, InvalidRuleError(r.String())
+		return false, IncompatibleTypesRuleError{Rule: r}
 	}
 
 	return lh.String() != rh.String(), nil

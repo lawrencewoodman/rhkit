@@ -171,12 +171,16 @@ func TestNiFVIsTrue_errors(t *testing.T) {
 		wantErr error
 	}{
 		{field: "fred",
-			values:  []*dlit.Literal{dlit.NewString("hello")},
-			wantErr: InvalidRuleError("ni(fred,\"hello\")"),
+			values: []*dlit.Literal{dlit.NewString("hello")},
+			wantErr: InvalidRuleError{
+				Rule: NewNiFV("fred", []*dlit.Literal{dlit.NewString("hello")}),
+			},
 		},
 		{field: "problem",
-			values:  []*dlit.Literal{dlit.NewString("hello")},
-			wantErr: InvalidRuleError("ni(problem,\"hello\")"),
+			values: []*dlit.Literal{dlit.NewString("hello")},
+			wantErr: IncompatibleTypesRuleError{
+				Rule: NewNiFV("problem", []*dlit.Literal{dlit.NewString("hello")}),
+			},
 		},
 	}
 	record := map[string]*dlit.Literal{
@@ -187,9 +191,9 @@ func TestNiFVIsTrue_errors(t *testing.T) {
 	}
 	for _, c := range cases {
 		r := NewNiFV(c.field, c.values)
-		_, err := r.IsTrue(record)
-		if err != c.wantErr {
-			t.Errorf("IsTrue(record) rule: %s, err: %v, want: %v", r, err, c.wantErr)
+		_, gotErr := r.IsTrue(record)
+		if err := checkErrorMatch(gotErr, c.wantErr); err != nil {
+			t.Errorf("IsTrue(record) rule: %s - %s", r, err)
 		}
 	}
 }
