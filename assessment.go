@@ -48,8 +48,6 @@ type GoalAssessment struct {
 	Passed bool
 }
 
-type ErrNameConflict string
-
 func newAssessment(
 	numRecords int64,
 	goodRuleAssessors []*ruleAssessor,
@@ -149,10 +147,6 @@ func (sortedAssessment *Assessment) Refine(numSimilarRules int) {
 	sortedAssessment.excludePoorerInNiRules(numSimilarRules)
 	sortedAssessment.excludePoorerTweakableRules(numSimilarRules)
 	sortedAssessment.flags["refined"] = true
-}
-
-func (e ErrNameConflict) Error() string {
-	return string(e)
 }
 
 func (a *Assessment) Merge(o *Assessment) (*Assessment, error) {
