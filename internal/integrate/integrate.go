@@ -23,8 +23,6 @@ import (
 	"fmt"
 	"github.com/vlifesystems/rulehunter"
 	"github.com/vlifesystems/rulehunter/experiment"
-	"github.com/vlifesystems/rulehunter/rule"
-	"runtime"
 )
 
 func ProcessDataset(experiment *experiment.Experiment) error {
@@ -47,9 +45,9 @@ func ProcessDataset(experiment *experiment.Experiment) error {
 		)
 	}
 
-	assessment, err := assessRules(rules, experiment)
+	assessment, err := rulehunter.AssessRules(rules, experiment)
 	if err != nil {
-		return fmt.Errorf("rulehunter.assessRules(rules, %q) - err: %s",
+		return fmt.Errorf("rulehunter.AssessRules(rules, %v) - err: %s",
 			experiment, err)
 	}
 
@@ -59,14 +57,14 @@ func ProcessDataset(experiment *experiment.Experiment) error {
 
 	tweakableRules := rulehunter.TweakRules(sortedRules, fieldDescriptions)
 	if len(tweakableRules) < 2 {
-		return fmt.Errorf("rulehunter.TweakRules(sortedRules, %q) - not enough rules generated",
+		return fmt.Errorf("rulehunter.TweakRules(sortedRules, %v) - not enough rules generated",
 
 			fieldDescriptions)
 	}
 
-	assessment2, err := assessRules(tweakableRules, experiment)
+	assessment2, err := rulehunter.AssessRules(tweakableRules, experiment)
 	if err != nil {
-		return fmt.Errorf("rulehunter.assessRules(tweakableRules, %q) - err: %s",
+		return fmt.Errorf("rulehunter.assessRules(tweakableRules, %v) - err: %s",
 			experiment, err)
 	}
 
@@ -85,9 +83,9 @@ func ProcessDataset(experiment *experiment.Experiment) error {
 		return fmt.Errorf("rulehunter.CombineRules(bestNonCombinedRules) - not enough rules generated")
 	}
 
-	assessment4, err := assessRules(combinedRules, experiment)
+	assessment4, err := rulehunter.AssessRules(combinedRules, experiment)
 	if err != nil {
-		return fmt.Errorf("rulehunter.assessRules(combinedRules, %q) - err: %s",
+		return fmt.Errorf("rulehunter.assessRules(combinedRules, %v) - err: %s",
 			experiment, err)
 	}
 
@@ -101,22 +99,4 @@ func ProcessDataset(experiment *experiment.Experiment) error {
 	finalNumRuleAssessments := 100
 	assessment5.TruncateRuleAssessments(finalNumRuleAssessments)
 	return nil
-}
-
-func assessRules(
-	rules []rule.Rule,
-	experiment *experiment.Experiment,
-) (*rulehunter.Assessment, error) {
-	var assessment *rulehunter.Assessment
-	maxProcesses := runtime.NumCPU()
-	c := make(chan *rulehunter.AssessRulesMPOutcome)
-
-	go rulehunter.AssessRulesMP(rules, experiment, maxProcesses, c)
-	for o := range c {
-		if o.Err != nil {
-			return nil, o.Err
-		}
-		assessment = o.Assessment
-	}
-	return assessment, nil
 }
