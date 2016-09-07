@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestAccuracyGetResult(t *testing.T) {
+func TestPrecisionGetResult(t *testing.T) {
 	records := []map[string]*dlit.Literal{
 		map[string]*dlit.Literal{
 			"income": dlit.MustNew(3),
@@ -59,24 +59,24 @@ func TestAccuracyGetResult(t *testing.T) {
 		records []map[string]*dlit.Literal
 		want    float64
 	}{
-		{records, 44.44},
+		{records, 0.43},
 		{[]map[string]*dlit.Literal{}, 0},
 	}
 	for _, c := range cases {
-		accuracyCostGt2Desc, err := New("accuracyCostGt2", "accuracy", "cost > 2")
+		precisionCostGt2Desc, err := New("precisionCostGt2", "precision", "cost > 2")
 		if err != nil {
-			t.Errorf("New(\"accuracyCostGt2\", \"accuracy\", \"cost > 2\") err == %s",
+			t.Errorf("New(\"precisionCostGt2\", \"precision\", \"cost > 2\") err == %s",
 				err)
 		}
 		for i := 0; i < 5; i++ {
-			accuracyCostGt2 := accuracyCostGt2Desc.New()
-			instances := []AggregatorInstance{accuracyCostGt2}
+			precisionCostGt2 := precisionCostGt2Desc.New()
+			instances := []AggregatorInstance{precisionCostGt2}
 
 			for i, record := range c.records {
-				accuracyCostGt2.NextRecord(record, i != 1 && i != 2)
+				precisionCostGt2.NextRecord(record, i != 1 && i != 2)
 			}
 			numRecords := int64(len(c.records))
-			got := accuracyCostGt2.GetResult(instances, goals, numRecords)
+			got := precisionCostGt2.GetResult(instances, goals, numRecords)
 			gotFloat, gotIsFloat := got.Float()
 			if !gotIsFloat || gotFloat != c.want {
 				t.Errorf("GetResult() got: %v, want: %v", got, c.want)
