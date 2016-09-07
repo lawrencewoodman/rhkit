@@ -26,26 +26,26 @@ import (
 	"github.com/vlifesystems/rulehunter/internal/dexprfuncs"
 )
 
-type precisionAggregator struct{}
+type recallAggregator struct{}
 
-type precisionSpec struct {
+type recallSpec struct {
 	name string
 	expr *dexpr.Expr
 }
 
-type precisionInstance struct {
-	spec  *precisionSpec
+type recallInstance struct {
+	spec  *recallSpec
 	numTP int64
-	numFP int64
+	numFN int64
 }
 
-var precisionExpr = dexpr.MustNew("roundto(numTP/(numTP+numFP),2)")
+var recallExpr = dexpr.MustNew("roundto(numTP/(numTP+numFN),2)")
 
 func init() {
-	Register("precision", &precisionAggregator{})
+	Register("recall", &recallAggregator{})
 }
 
-func (a *precisionAggregator) MakeSpec(
+func (a *recallAggregator) MakeSpec(
 	name string,
 	expr string,
 ) (AggregatorSpec, error) {
@@ -53,34 +53,34 @@ func (a *precisionAggregator) MakeSpec(
 	if err != nil {
 		return nil, err
 	}
-	d := &precisionSpec{
+	d := &recallSpec{
 		name: name,
 		expr: dexpr,
 	}
 	return d, nil
 }
 
-func (ad *precisionSpec) New() AggregatorInstance {
-	return &precisionInstance{
+func (ad *recallSpec) New() AggregatorInstance {
+	return &recallInstance{
 		spec:  ad,
 		numTP: 0,
-		numFP: 0,
+		numFN: 0,
 	}
 }
 
-func (ad *precisionSpec) GetName() string {
+func (ad *recallSpec) GetName() string {
 	return ad.name
 }
 
-func (ad *precisionSpec) GetArg() string {
+func (ad *recallSpec) GetArg() string {
 	return ad.expr.String()
 }
 
-func (ai *precisionInstance) GetName() string {
+func (ai *recallInstance) GetName() string {
 	return ai.spec.name
 }
 
-func (ai *precisionInstance) NextRecord(record map[string]*dlit.Literal,
+func (ai *recallInstance) NextRecord(record map[string]*dlit.Literal,
 	isRuleTrue bool) error {
 	matchExprIsTrue, err := ai.spec.expr.EvalBool(record, dexprfuncs.CallFuncs)
 	if err != nil {
@@ -89,14 +89,16 @@ func (ai *precisionInstance) NextRecord(record map[string]*dlit.Literal,
 	if isRuleTrue {
 		if matchExprIsTrue {
 			ai.numTP++
-		} else {
-			ai.numFP++
+		}
+	} else {
+		if matchExprIsTrue {
+			ai.numFN++
 		}
 	}
 	return nil
 }
 
-func (ai *precisionInstance) GetResult(
+func (ai *recallInstance) GetResult(
 	aggregatorInstances []AggregatorInstance,
 	goals []*goal.Goal,
 	numRecords int64,
@@ -107,7 +109,7 @@ func (ai *precisionInstance) GetResult(
 
 	vars := map[string]*dlit.Literal{
 		"numTP": dlit.MustNew(ai.numTP),
-		"numFP": dlit.MustNew(ai.numFP),
+		"numFN": dlit.MustNew(ai.numFN),
 	}
-	return precisionExpr.Eval(vars, dexprfuncs.CallFuncs)
+	return recallExpr.Eval(vars, dexprfuncs.CallFuncs)
 }
