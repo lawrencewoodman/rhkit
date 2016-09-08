@@ -39,7 +39,7 @@ type percentInstance struct {
 	numMatches int64
 }
 
-var percentExpr = dexpr.MustNew("roundto(100*numMatches/numRecords,2)")
+var percentExpr = dexpr.MustNew("roundto(numMatches/numRecords,4)")
 
 func init() {
 	Register("percent", &percentAggregator{})

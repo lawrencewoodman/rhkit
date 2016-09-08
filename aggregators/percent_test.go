@@ -50,7 +50,7 @@ func TestPercentGetResult(t *testing.T) {
 		rule    func(int) bool
 		want    float64
 	}{
-		{records, func(i int) bool { return i != 1 }, 33.33},
+		{records, func(i int) bool { return i != 1 }, 0.3333},
 		{records, func(i int) bool { return false }, 0},
 		{[]map[string]*dlit.Literal{}, func(i int) bool { return true }, 0},
 	}
