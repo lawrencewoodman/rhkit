@@ -101,7 +101,7 @@ func (ai *precisionInstance) GetResult(
 	goals []*goal.Goal,
 	numRecords int64,
 ) *dlit.Literal {
-	if numRecords == 0 {
+	if ai.numTP == 0 && ai.numFP == 0 {
 		return dlit.MustNew(0)
 	}
 

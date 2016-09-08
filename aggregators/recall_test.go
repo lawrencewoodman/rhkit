@@ -60,6 +60,7 @@ func TestRecallGetResult(t *testing.T) {
 		want    float64
 	}{
 		{records, 0.75},
+		{records[3:4], 0},
 		{[]map[string]*dlit.Literal{}, 0},
 	}
 	for _, c := range cases {

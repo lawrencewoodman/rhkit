@@ -57,10 +57,12 @@ func TestPrecisionGetResult(t *testing.T) {
 	goals := []*goal.Goal{}
 	cases := []struct {
 		records []map[string]*dlit.Literal
+		rule    func(int) bool
 		want    float64
 	}{
-		{records, 0.43},
-		{[]map[string]*dlit.Literal{}, 0},
+		{records, func(i int) bool { return i != 1 && i != 2 }, 0.43},
+		{records, func(i int) bool { return false }, 0},
+		{[]map[string]*dlit.Literal{}, func(i int) bool { return true }, 0},
 	}
 	for _, c := range cases {
 		precisionCostGt2Desc, err := New("precisionCostGt2", "precision", "cost > 2")
@@ -73,7 +75,7 @@ func TestPrecisionGetResult(t *testing.T) {
 			instances := []AggregatorInstance{precisionCostGt2}
 
 			for i, record := range c.records {
-				precisionCostGt2.NextRecord(record, i != 1 && i != 2)
+				precisionCostGt2.NextRecord(record, c.rule(i))
 			}
 			numRecords := int64(len(c.records))
 			got := precisionCostGt2.GetResult(instances, goals, numRecords)

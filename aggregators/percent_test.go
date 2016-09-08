@@ -47,10 +47,12 @@ func TestPercentGetResult(t *testing.T) {
 	goals := []*goal.Goal{}
 	cases := []struct {
 		records []map[string]*dlit.Literal
+		rule    func(int) bool
 		want    float64
 	}{
-		{records, 33.33},
-		{[]map[string]*dlit.Literal{}, 0},
+		{records, func(i int) bool { return i != 1 }, 33.33},
+		{records, func(i int) bool { return false }, 0},
+		{[]map[string]*dlit.Literal{}, func(i int) bool { return true }, 0},
 	}
 	for _, c := range cases {
 		percentCostGt2Desc, err := New("percentCostGt2", "percent", "cost > 2")
@@ -62,13 +64,13 @@ func TestPercentGetResult(t *testing.T) {
 		instances := []AggregatorInstance{percentCostGt2}
 
 		for i, record := range c.records {
-			percentCostGt2.NextRecord(record, i != 1)
+			percentCostGt2.NextRecord(record, c.rule(i))
 		}
 		numRecords := int64(len(c.records))
 		got := percentCostGt2.GetResult(instances, goals, numRecords)
 		gotFloat, gotIsFloat := got.Float()
 		if !gotIsFloat || gotFloat != c.want {
-			t.Errorf("GetResult() got: %f, want: %f", got, c.want)
+			t.Errorf("GetResult() got: %v, want: %f", got, c.want)
 		}
 	}
 }

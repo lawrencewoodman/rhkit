@@ -37,10 +37,12 @@ func TestMeanGetResult(t *testing.T) {
 	goals := []*goal.Goal{}
 	cases := []struct {
 		records []map[string]*dlit.Literal
+		rule    func(int) bool
 		want    float64
 	}{
-		{records, 2.02},
-		{[]map[string]*dlit.Literal{}, 0},
+		{records, func(i int) bool { return i != 2 }, 2.02},
+		{records, func(i int) bool { return false }, 0},
+		{[]map[string]*dlit.Literal{}, func(i int) bool { return true }, 0},
 	}
 	for _, c := range cases {
 		meanProfitDesc, err := New("meanProfit", "mean", "income-cost")
@@ -51,7 +53,7 @@ func TestMeanGetResult(t *testing.T) {
 		instances := []AggregatorInstance{meanProfit}
 
 		for i, record := range c.records {
-			meanProfit.NextRecord(record, i != 2)
+			meanProfit.NextRecord(record, c.rule(i))
 		}
 		numRecords := int64(len(records))
 		got := meanProfit.GetResult(instances, goals, numRecords)
