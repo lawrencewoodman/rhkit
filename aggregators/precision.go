@@ -39,7 +39,7 @@ type precisionInstance struct {
 	numFP int64
 }
 
-var precisionExpr = dexpr.MustNew("roundto(numTP/(numTP+numFP),2)")
+var precisionExpr = dexpr.MustNew("roundto(numTP/(numTP+numFP),4)")
 
 func init() {
 	Register("precision", &precisionAggregator{})

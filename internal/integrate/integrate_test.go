@@ -31,7 +31,7 @@ func TestAll(t *testing.T) {
 			&experiment.AggregatorDesc{"oddFigure", "sum", "balance - age"},
 			&experiment.AggregatorDesc{
 				"percentMarried",
-				"percent",
+				"precision",
 				"marital == \"married\"",
 			},
 		},

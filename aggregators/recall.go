@@ -39,7 +39,7 @@ type recallInstance struct {
 	numFN int64
 }
 
-var recallExpr = dexpr.MustNew("roundto(numTP/(numTP+numFN),2)")
+var recallExpr = dexpr.MustNew("roundto(numTP/(numTP+numFN),4)")
 
 func init() {
 	Register("recall", &recallAggregator{})
