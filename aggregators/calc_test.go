@@ -3,7 +3,7 @@ package aggregators
 import (
 	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
-	"github.com/vlifesystems/rulehunter/goal"
+	"github.com/vlifesystems/rhkit/goal"
 	"testing"
 )
 

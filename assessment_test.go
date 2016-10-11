@@ -1,10 +1,10 @@
-package rulehunter
+package rhkit
 
 import (
 	"errors"
 	"github.com/lawrencewoodman/dlit"
-	"github.com/vlifesystems/rulehunter/experiment"
-	"github.com/vlifesystems/rulehunter/rule"
+	"github.com/vlifesystems/rhkit/experiment"
+	"github.com/vlifesystems/rhkit/rule"
 	"reflect"
 	"testing"
 )

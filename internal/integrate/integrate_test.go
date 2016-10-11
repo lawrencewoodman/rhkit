@@ -5,7 +5,7 @@ package integrate
 
 import (
 	"github.com/lawrencewoodman/ddataset/dcsv"
-	"github.com/vlifesystems/rulehunter/experiment"
+	"github.com/vlifesystems/rhkit/experiment"
 	"path/filepath"
 	"testing"
 )

@@ -1,9 +1,9 @@
-package rulehunter
+package rhkit
 
 import (
 	"fmt"
 	"github.com/lawrencewoodman/dlit"
-	"github.com/vlifesystems/rulehunter/rule"
+	"github.com/vlifesystems/rhkit/rule"
 	"regexp"
 	"sort"
 	"testing"

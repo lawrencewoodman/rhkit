@@ -1,11 +1,11 @@
-package rulehunter
+package rhkit
 
 import (
 	"fmt"
 	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
-	"github.com/vlifesystems/rulehunter/experiment"
-	"github.com/vlifesystems/rulehunter/rule"
+	"github.com/vlifesystems/rhkit/experiment"
+	"github.com/vlifesystems/rhkit/rule"
 	"testing"
 )
 

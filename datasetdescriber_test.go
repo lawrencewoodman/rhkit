@@ -1,4 +1,4 @@
-package rulehunter
+package rhkit
 
 import (
 	"github.com/lawrencewoodman/dlit"

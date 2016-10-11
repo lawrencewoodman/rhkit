@@ -1,5 +1,5 @@
-rulehunter
-==========
+rhkit
+=====
 A Go package to find simple rules in data to meet user specified goals
 
 Requirements
@@ -9,12 +9,12 @@ Requirements
 
 Contributing
 ------------
-[![Build Status](https://travis-ci.org/vlifesystems/rulehunter.svg?branch=master)](https://travis-ci.org/vlifesystems/rulehunter)
-[![Build status](https://ci.appveyor.com/api/projects/status/xvo3bke1bb84oigk?svg=true)](https://ci.appveyor.com/project/LawrenceWoodman/rulehunter)
-[![Coverage Status](https://coveralls.io/repos/vlifesystems/rulehunter/badge.svg?branch=master)](https://coveralls.io/r/vlifesystems/rulehunter?branch=master)
-[![Go Report Card](https://goreportcard.com/badge/github.com/vlifesystems/rulehunter)](https://goreportcard.com/report/github.com/vlifesystems/rulehunter)
+[![Build Status](https://travis-ci.org/vlifesystems/rhkit.svg?branch=master)](https://travis-ci.org/vlifesystems/rhkit)
+[![Build status](https://ci.appveyor.com/api/projects/status/xvo3bke1bb84oigk?svg=true)](https://ci.appveyor.com/project/LawrenceWoodman/rhkit)
+[![Coverage Status](https://coveralls.io/repos/vlifesystems/rhkit/badge.svg?branch=master)](https://coveralls.io/r/vlifesystems/rhkit?branch=master)
+[![Go Report Card](https://goreportcard.com/badge/github.com/vlifesystems/rhkit)](https://goreportcard.com/report/github.com/vlifesystems/rhkit)
 
-If you want to improve this program make a pull request to the [repo](https://github.com/vlifesystems/rulehunter) on github.  Please put any pull requests in a separate branch to ease integration and add a test to prove that it works.  If you find a bug, please report it at the project's [issues tracker](https://github.com/vlifesystems/rulehunter/issues) also on github.
+If you want to improve this program make a pull request to the [repo](https://github.com/vlifesystems/rhkit) on github.  Please put any pull requests in a separate branch to ease integration and add a test to prove that it works.  If you find a bug, please report it at the project's [issues tracker](https://github.com/vlifesystems/rhkit/issues) also on github.
 
 
 Licence

@@ -1,7 +1,7 @@
 /*************************
  *  Test helper functions
  *************************/
-package rulehunter
+package rhkit
 
 import (
 	"github.com/lawrencewoodman/ddataset"

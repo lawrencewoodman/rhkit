@@ -1,11 +1,11 @@
-package rulehunter
+package rhkit
 
 import (
 	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
-	"github.com/vlifesystems/rulehunter/aggregators"
-	"github.com/vlifesystems/rulehunter/goal"
-	"github.com/vlifesystems/rulehunter/rule"
+	"github.com/vlifesystems/rhkit/aggregators"
+	"github.com/vlifesystems/rhkit/goal"
+	"github.com/vlifesystems/rhkit/rule"
 	"testing"
 )
 

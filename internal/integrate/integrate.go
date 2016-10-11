@@ -21,33 +21,33 @@ package integrate
 
 import (
 	"fmt"
-	"github.com/vlifesystems/rulehunter"
-	"github.com/vlifesystems/rulehunter/experiment"
+	"github.com/vlifesystems/rhkit"
+	"github.com/vlifesystems/rhkit/experiment"
 )
 
 func ProcessDataset(experiment *experiment.Experiment) error {
-	fieldDescriptions, err := rulehunter.DescribeDataset(experiment.Dataset)
+	fieldDescriptions, err := rhkit.DescribeDataset(experiment.Dataset)
 	if err != nil {
 		return fmt.Errorf("describer.DescribeDataset(experiment.dataset) - err: %s",
 			err)
 	}
 	rules, err :=
-		rulehunter.GenerateRules(fieldDescriptions, experiment.ExcludeFieldNames)
+		rhkit.GenerateRules(fieldDescriptions, experiment.ExcludeFieldNames)
 	if err != nil {
-		return fmt.Errorf("rulehunter.GenerateRules(%q, %q) - err: %s",
+		return fmt.Errorf("rhkit.GenerateRules(%q, %q) - err: %s",
 			fieldDescriptions, experiment.ExcludeFieldNames, err)
 	}
 	if len(rules) < 2 {
 		return fmt.Errorf(
-			"rulehunter.GenerateRules(%q, %q) - not enough rules generated",
+			"rhkit.GenerateRules(%q, %q) - not enough rules generated",
 			fieldDescriptions,
 			experiment.ExcludeFieldNames,
 		)
 	}
 
-	assessment, err := rulehunter.AssessRules(rules, experiment)
+	assessment, err := rhkit.AssessRules(rules, experiment)
 	if err != nil {
-		return fmt.Errorf("rulehunter.AssessRules(rules, %v) - err: %s",
+		return fmt.Errorf("rhkit.AssessRules(rules, %v) - err: %s",
 			experiment, err)
 	}
 
@@ -55,16 +55,16 @@ func ProcessDataset(experiment *experiment.Experiment) error {
 	assessment.Refine(3)
 	sortedRules := assessment.GetRules()
 
-	tweakableRules := rulehunter.TweakRules(sortedRules, fieldDescriptions)
+	tweakableRules := rhkit.TweakRules(sortedRules, fieldDescriptions)
 	if len(tweakableRules) < 2 {
-		return fmt.Errorf("rulehunter.TweakRules(sortedRules, %v) - not enough rules generated",
+		return fmt.Errorf("rhkit.TweakRules(sortedRules, %v) - not enough rules generated",
 
 			fieldDescriptions)
 	}
 
-	assessment2, err := rulehunter.AssessRules(tweakableRules, experiment)
+	assessment2, err := rhkit.AssessRules(tweakableRules, experiment)
 	if err != nil {
-		return fmt.Errorf("rulehunter.assessRules(tweakableRules, %v) - err: %s",
+		return fmt.Errorf("rhkit.assessRules(tweakableRules, %v) - err: %s",
 			experiment, err)
 	}
 
@@ -78,14 +78,14 @@ func ProcessDataset(experiment *experiment.Experiment) error {
 	numRulesToCombine := 50
 	bestNonCombinedRules := assessment3.GetRules(numRulesToCombine)
 	combinedRules :=
-		rulehunter.CombineRules(bestNonCombinedRules)
+		rhkit.CombineRules(bestNonCombinedRules)
 	if len(combinedRules) < 2 {
-		return fmt.Errorf("rulehunter.CombineRules(bestNonCombinedRules) - not enough rules generated")
+		return fmt.Errorf("rhkit.CombineRules(bestNonCombinedRules) - not enough rules generated")
 	}
 
-	assessment4, err := rulehunter.AssessRules(combinedRules, experiment)
+	assessment4, err := rhkit.AssessRules(combinedRules, experiment)
 	if err != nil {
-		return fmt.Errorf("rulehunter.assessRules(combinedRules, %v) - err: %s",
+		return fmt.Errorf("rhkit.assessRules(combinedRules, %v) - err: %s",
 			experiment, err)
 	}
 
