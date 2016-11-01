@@ -3,6 +3,7 @@ package rule
 import (
 	"errors"
 	"github.com/lawrencewoodman/dlit"
+	"reflect"
 	"testing"
 )
 
@@ -47,14 +48,14 @@ func TestInFVString(t *testing.T) {
 	}
 }
 
-func TestInFVGetInNiParts(t *testing.T) {
+func TestInFVGetFields(t *testing.T) {
 	field := "station"
 	values := []*dlit.Literal{dlit.MustNew(7.892)}
 	r := NewInFV(field, values)
-	a, b, c := r.GetInNiParts()
-	if !a || b != "in" || c != field {
-		t.Errorf("GetInNiParts() got: %t,\"%s\",\"%s\" - want: %t,\"\",\"\"",
-			a, b, c, true)
+	wantFields := []string{field}
+	gotFields := r.GetFields()
+	if !reflect.DeepEqual(gotFields, wantFields) {
+		t.Errorf("GetFields() got: %v, want: %v", gotFields, wantFields)
 	}
 }
 

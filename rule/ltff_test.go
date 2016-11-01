@@ -16,17 +16,6 @@ func TestLTFFString(t *testing.T) {
 	}
 }
 
-func TestLTFFGetInNiParts(t *testing.T) {
-	fieldA := "income"
-	fieldB := "cost"
-	r := NewLTFF(fieldA, fieldB)
-	a, b, c := r.GetInNiParts()
-	if a || b != "" || c != "" {
-		t.Errorf("GetInNiParts() got: %t,\"%s\",\"%s\" - want: %t,\"\",\"\"",
-			a, b, c, false)
-	}
-}
-
 func TestLTFFIsTrue(t *testing.T) {
 	cases := []struct {
 		fieldA string

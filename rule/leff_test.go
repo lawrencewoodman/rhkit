@@ -16,17 +16,6 @@ func TestLEFFString(t *testing.T) {
 	}
 }
 
-func TestLEFFGetInNiParts(t *testing.T) {
-	fieldA := "income"
-	fieldB := "cost"
-	r := NewLEFF(fieldA, fieldB)
-	a, b, c := r.GetInNiParts()
-	if a || b != "" || c != "" {
-		t.Errorf("GetInNiParts() got: %t,\"%s\",\"%s\" - want: %t,\"\",\"\"",
-			a, b, c, false)
-	}
-}
-
 func TestLEFFIsTrue(t *testing.T) {
 	cases := []struct {
 		fieldA string

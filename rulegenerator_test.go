@@ -127,26 +127,6 @@ func TestGenerateRules_1(t *testing.T) {
 			rule.NewInFV("teamOut", makeStringsDlitSlice("c", "d", "f")),
 			rule.NewInFV("teamOut", makeStringsDlitSlice("c", "e", "f")),
 			rule.NewInFV("teamOut", makeStringsDlitSlice("d", "e", "f")),
-			rule.NewNiFV("teamOut", makeStringsDlitSlice("a", "c")),
-			rule.NewNiFV("teamOut", makeStringsDlitSlice("a", "d")),
-			rule.NewNiFV("teamOut", makeStringsDlitSlice("a", "e")),
-			rule.NewNiFV("teamOut", makeStringsDlitSlice("a", "f")),
-			rule.NewNiFV("teamOut", makeStringsDlitSlice("c", "d")),
-			rule.NewNiFV("teamOut", makeStringsDlitSlice("c", "e")),
-			rule.NewNiFV("teamOut", makeStringsDlitSlice("c", "f")),
-			rule.NewNiFV("teamOut", makeStringsDlitSlice("d", "e")),
-			rule.NewNiFV("teamOut", makeStringsDlitSlice("d", "f")),
-			rule.NewNiFV("teamOut", makeStringsDlitSlice("e", "f")),
-			rule.NewNiFV("teamOut", makeStringsDlitSlice("a", "c", "d")),
-			rule.NewNiFV("teamOut", makeStringsDlitSlice("a", "c", "e")),
-			rule.NewNiFV("teamOut", makeStringsDlitSlice("a", "c", "f")),
-			rule.NewNiFV("teamOut", makeStringsDlitSlice("a", "d", "e")),
-			rule.NewNiFV("teamOut", makeStringsDlitSlice("a", "d", "f")),
-			rule.NewNiFV("teamOut", makeStringsDlitSlice("a", "e", "f")),
-			rule.NewNiFV("teamOut", makeStringsDlitSlice("c", "d", "e")),
-			rule.NewNiFV("teamOut", makeStringsDlitSlice("c", "d", "f")),
-			rule.NewNiFV("teamOut", makeStringsDlitSlice("c", "e", "f")),
-			rule.NewNiFV("teamOut", makeStringsDlitSlice("d", "e", "f")),
 		}},
 		{"level", []rule.Rule{
 			rule.NewEQFVI("level", 0),
@@ -227,56 +207,6 @@ func TestGenerateRules_1(t *testing.T) {
 			rule.NewInFV("level", makeStringsDlitSlice("1", "2", "4", "5")),
 			rule.NewInFV("level", makeStringsDlitSlice("1", "3", "4", "5")),
 			rule.NewInFV("level", makeStringsDlitSlice("2", "3", "4", "5")),
-			rule.NewNiFV("level", makeStringsDlitSlice("0", "1")),
-			rule.NewNiFV("level", makeStringsDlitSlice("0", "2")),
-			rule.NewNiFV("level", makeStringsDlitSlice("0", "3")),
-			rule.NewNiFV("level", makeStringsDlitSlice("0", "4")),
-			rule.NewNiFV("level", makeStringsDlitSlice("0", "5")),
-			rule.NewNiFV("level", makeStringsDlitSlice("1", "2")),
-			rule.NewNiFV("level", makeStringsDlitSlice("1", "3")),
-			rule.NewNiFV("level", makeStringsDlitSlice("1", "4")),
-			rule.NewNiFV("level", makeStringsDlitSlice("1", "5")),
-			rule.NewNiFV("level", makeStringsDlitSlice("2", "3")),
-			rule.NewNiFV("level", makeStringsDlitSlice("2", "4")),
-			rule.NewNiFV("level", makeStringsDlitSlice("2", "5")),
-			rule.NewNiFV("level", makeStringsDlitSlice("3", "4")),
-			rule.NewNiFV("level", makeStringsDlitSlice("3", "5")),
-			rule.NewNiFV("level", makeStringsDlitSlice("4", "5")),
-			rule.NewNiFV("level", makeStringsDlitSlice("0", "1", "2")),
-			rule.NewNiFV("level", makeStringsDlitSlice("0", "1", "3")),
-			rule.NewNiFV("level", makeStringsDlitSlice("0", "1", "4")),
-			rule.NewNiFV("level", makeStringsDlitSlice("0", "1", "5")),
-			rule.NewNiFV("level", makeStringsDlitSlice("0", "2", "3")),
-			rule.NewNiFV("level", makeStringsDlitSlice("0", "2", "4")),
-			rule.NewNiFV("level", makeStringsDlitSlice("0", "2", "5")),
-			rule.NewNiFV("level", makeStringsDlitSlice("0", "3", "4")),
-			rule.NewNiFV("level", makeStringsDlitSlice("0", "3", "5")),
-			rule.NewNiFV("level", makeStringsDlitSlice("0", "4", "5")),
-			rule.NewNiFV("level", makeStringsDlitSlice("1", "2", "3")),
-			rule.NewNiFV("level", makeStringsDlitSlice("1", "2", "4")),
-			rule.NewNiFV("level", makeStringsDlitSlice("1", "2", "5")),
-			rule.NewNiFV("level", makeStringsDlitSlice("1", "3", "4")),
-			rule.NewNiFV("level", makeStringsDlitSlice("1", "3", "5")),
-			rule.NewNiFV("level", makeStringsDlitSlice("1", "4", "5")),
-			rule.NewNiFV("level", makeStringsDlitSlice("2", "3", "4")),
-			rule.NewNiFV("level", makeStringsDlitSlice("2", "3", "5")),
-			rule.NewNiFV("level", makeStringsDlitSlice("2", "4", "5")),
-			rule.NewNiFV("level", makeStringsDlitSlice("3", "4", "5")),
-			rule.NewNiFV("level", makeStringsDlitSlice("0", "1", "2", "3")),
-			rule.NewNiFV("level", makeStringsDlitSlice("0", "1", "2", "4")),
-			rule.NewNiFV("level", makeStringsDlitSlice("0", "1", "2", "5")),
-			rule.NewNiFV("level", makeStringsDlitSlice("0", "1", "3", "4")),
-			rule.NewNiFV("level", makeStringsDlitSlice("0", "1", "3", "5")),
-			rule.NewNiFV("level", makeStringsDlitSlice("0", "1", "4", "5")),
-			rule.NewNiFV("level", makeStringsDlitSlice("0", "2", "3", "4")),
-			rule.NewNiFV("level", makeStringsDlitSlice("0", "2", "3", "5")),
-			rule.NewNiFV("level", makeStringsDlitSlice("0", "2", "4", "5")),
-			rule.NewNiFV("level", makeStringsDlitSlice("0", "3", "4", "5")),
-			rule.NewNiFV("level", makeStringsDlitSlice("1", "2", "3", "4")),
-			rule.NewNiFV("level", makeStringsDlitSlice("1", "2", "3", "5")),
-			rule.NewNiFV("level", makeStringsDlitSlice("1", "2", "4", "5")),
-			rule.NewNiFV("level", makeStringsDlitSlice("1", "3", "4", "5")),
-			rule.NewNiFV("level", makeStringsDlitSlice("2", "3", "4", "5")),
 		}},
 		{"flow", []rule.Rule{
 			rule.NewEQFVI("flow", 0),
@@ -481,7 +411,7 @@ func TestCombinedRules(t *testing.T) {
 /*************************************
  *    Helper Functions
  *************************************/
-var matchFieldInNiRegexp = regexp.MustCompile("^((in\\(|ni\\()+)([^ ,]+)(.*)$")
+var matchFieldInRegexp = regexp.MustCompile("^((in\\()+)([^ ,]+)(.*)$")
 var matchFieldMatchRegexp = regexp.MustCompile("^([^ (]+)( .*)$")
 
 func getFieldRules(
@@ -492,7 +422,7 @@ func getFieldRules(
 	for _, rule := range rules {
 		ruleStr := rule.String()
 		ruleField := matchFieldMatchRegexp.ReplaceAllString(ruleStr, "$1")
-		ruleField = matchFieldInNiRegexp.ReplaceAllString(ruleField, "$3")
+		ruleField = matchFieldInRegexp.ReplaceAllString(ruleField, "$3")
 		if field == ruleField {
 			fieldRules = append(fieldRules, rule)
 		}

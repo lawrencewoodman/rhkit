@@ -16,24 +16,13 @@ func TestGEFVIString(t *testing.T) {
 	}
 }
 
-func TestGEFVIGetInNiParts(t *testing.T) {
-	field := "income"
-	value := int64(893)
-	r := NewGEFVI(field, value)
-	a, b, c := r.GetInNiParts()
-	if a || b != "" || c != "" {
-		t.Errorf("GetInNiParts() got: %t,\"%s\",\"%s\" - want: %t,\"\",\"\"",
-			a, b, c, false)
-	}
-}
-
 func TestGEFVIGetTweakableParts(t *testing.T) {
 	field := "income"
 	value := int64(893)
 	r := NewGEFVI(field, value)
 	a, b, c := r.GetTweakableParts()
 	if a != field || b != ">=" || c != "893" {
-		t.Errorf("GetInNiParts() got: \"%s\",\"%s\",\"%s\" - want: \"%s\",\">=\",\"8.93\"",
+		t.Errorf("GetTweakableParts() got: \"%s\",\"%s\",\"%s\" - want: \"%s\",\">=\",\"8.93\"",
 			a, b, c, field)
 	}
 }

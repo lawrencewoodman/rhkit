@@ -16,17 +16,6 @@ func TestAndString(t *testing.T) {
 	}
 }
 
-func TestAndGetInNiParts(t *testing.T) {
-	ruleA := NewTrue()
-	ruleB := NewEQFF("income", "cost")
-	r := NewAnd(ruleA, ruleB)
-	a, b, c := r.GetInNiParts()
-	if a || b != "" || c != "" {
-		t.Errorf("GetInNiParts() got: %t,\"%s\",\"%s\" - want: %t,\"\",\"\"",
-			a, b, c, false)
-	}
-}
-
 func TestAndIsTrue(t *testing.T) {
 	cases := []struct {
 		ruleA Rule

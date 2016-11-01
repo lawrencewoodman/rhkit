@@ -16,17 +16,6 @@ func TestGTFFString(t *testing.T) {
 	}
 }
 
-func TestGTFFGetInNiParts(t *testing.T) {
-	fieldA := "income"
-	fieldB := "cost"
-	r := NewGTFF(fieldA, fieldB)
-	a, b, c := r.GetInNiParts()
-	if a || b != "" || c != "" {
-		t.Errorf("GetInNiParts() got: %t,\"%s\",\"%s\" - want: %t,\"\",\"\"",
-			a, b, c, false)
-	}
-}
-
 func TestGTFFIsTrue(t *testing.T) {
 	cases := []struct {
 		fieldA string

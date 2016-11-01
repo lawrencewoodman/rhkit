@@ -16,17 +16,6 @@ func TestGEFFString(t *testing.T) {
 	}
 }
 
-func TestGEFFGetInNiParts(t *testing.T) {
-	fieldA := "income"
-	fieldB := "cost"
-	r := NewGEFF(fieldA, fieldB)
-	a, b, c := r.GetInNiParts()
-	if a || b != "" || c != "" {
-		t.Errorf("GetInNiParts() got: %t,\"%s\",\"%s\" - want: %t,\"\",\"\"",
-			a, b, c, false)
-	}
-}
-
 func TestGEFFIsTrue(t *testing.T) {
 	cases := []struct {
 		fieldA string

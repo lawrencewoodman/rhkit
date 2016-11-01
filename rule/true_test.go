@@ -14,15 +14,6 @@ func TestTrueString(t *testing.T) {
 	}
 }
 
-func TestTrueGetInNiParts(t *testing.T) {
-	r := NewTrue()
-	a, b, c := r.GetInNiParts()
-	if a || b != "" || c != "" {
-		t.Errorf("GetInNiParts() got: %t,\"%s\",\"%s\" - want: %t,\"\",\"\"",
-			a, b, c, false)
-	}
-}
-
 func TestTrueIsTrue(t *testing.T) {
 	record := map[string]*dlit.Literal{
 		"station": dlit.MustNew("harry"),

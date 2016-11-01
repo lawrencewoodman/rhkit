@@ -17,17 +17,6 @@ func TestEQFFString(t *testing.T) {
 	}
 }
 
-func TestEQFFGetInNiParts(t *testing.T) {
-	fieldA := "income"
-	fieldB := "cost"
-	r := NewEQFF(fieldA, fieldB)
-	a, b, c := r.GetInNiParts()
-	if a || b != "" || c != "" {
-		t.Errorf("GetInNiParts() got: %t,\"%s\",\"%s\" - want: %t,\"\",\"\"",
-			a, b, c, false)
-	}
-}
-
 func TestEQFFIsTrue(t *testing.T) {
 	cases := []struct {
 		fieldA string

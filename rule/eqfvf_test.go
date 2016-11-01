@@ -31,17 +31,6 @@ func TestEQFVFString(t *testing.T) {
 	}
 }
 
-func TestEQFVFGetInNiParts(t *testing.T) {
-	field := "income"
-	value := 29.3
-	r := NewEQFVF(field, value)
-	a, b, c := r.GetInNiParts()
-	if a || b != "" || c != "" {
-		t.Errorf("GetInNiParts() got: %t,\"%s\",\"%s\" - want: %t,\"\",\"\"",
-			a, b, c, false)
-	}
-}
-
 func TestEQFVFIsTrue(t *testing.T) {
 	cases := []struct {
 		field string

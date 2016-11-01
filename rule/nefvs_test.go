@@ -27,17 +27,6 @@ func TestNEFVSString(t *testing.T) {
 	}
 }
 
-func TestNEFVSGetInNiParts(t *testing.T) {
-	field := "name"
-	value := "borris"
-	r := NewNEFVS(field, value)
-	a, b, c := r.GetInNiParts()
-	if a || b != "" || c != "" {
-		t.Errorf("GetInNiParts() got: %t,\"%s\",\"%s\" - want: %t,\"\",\"\"",
-			a, b, c, false)
-	}
-}
-
 func TestNEFVSIsTrue(t *testing.T) {
 	cases := []struct {
 		field string
