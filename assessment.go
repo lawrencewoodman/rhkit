@@ -144,6 +144,7 @@ func (sortedAssessment *Assessment) Refine(numSimilarRules int) {
 		panic("Assessment isn't sorted")
 	}
 	sortedAssessment.excludePoorRules()
+	sortedAssessment.excludeSameRecordsRules()
 	sortedAssessment.excludePoorerInRules(numSimilarRules)
 	sortedAssessment.excludePoorerTweakableRules(numSimilarRules)
 	sortedAssessment.flags["refined"] = true
@@ -222,6 +223,40 @@ func (a *Assessment) GetRules(args ...int) []rule.Rule {
 		r[i] = ruleAssessment.Rule
 	}
 	return r
+}
+
+func (sortedAssessment *Assessment) excludeSameRecordsRules() {
+	if len(sortedAssessment.RuleAssessments) < 2 {
+		return
+	}
+	lastAggregators := sortedAssessment.RuleAssessments[1].Aggregators
+	if len(lastAggregators) <= 3 {
+		return
+	}
+
+	goodRuleAssessments := make([]*RuleAssessment, 1)
+	goodRuleAssessments[0] = sortedAssessment.RuleAssessments[0]
+	for _, a := range sortedAssessment.RuleAssessments[1:] {
+		aggregatorsMatch := true
+		for k, v := range lastAggregators {
+			if a.Aggregators[k].String() != v.String() {
+				aggregatorsMatch = false
+			}
+		}
+		_, isTrueRule := a.Rule.(rule.True)
+		if isTrueRule {
+			if aggregatorsMatch {
+				goodRuleAssessments[len(goodRuleAssessments)-1] = a
+			} else {
+				goodRuleAssessments = append(goodRuleAssessments, a)
+			}
+			break
+		} else if !aggregatorsMatch {
+			goodRuleAssessments = append(goodRuleAssessments, a)
+		}
+		lastAggregators = a.Aggregators
+	}
+	sortedAssessment.RuleAssessments = goodRuleAssessments
 }
 
 func (sortedAssessment *Assessment) excludePoorRules() {
