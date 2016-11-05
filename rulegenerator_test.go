@@ -82,7 +82,7 @@ func TestGenerateRules_1(t *testing.T) {
 				},
 			},
 		}}
-	excludeFields := []string{"teamBob", "levelBob"}
+	ruleFields := []string{"team", "teamOut", "camp", "level", "flow", "position"}
 	cases := []struct {
 		field     string
 		wantRules []rule.Rule
@@ -301,11 +301,10 @@ func TestGenerateRules_1(t *testing.T) {
 		}},
 	}
 
-	rules, err := GenerateRules(inputDescription, excludeFields)
+	rules, err := GenerateRules(inputDescription, ruleFields)
 	if err != nil {
 		t.Errorf("Test: %s\n", testPurpose)
-		t.Errorf("GenerateRules(%q, %q) err: %q",
-			inputDescription, excludeFields, err)
+		t.Errorf("GenerateRules(%v, %v) err: %v", inputDescription, ruleFields, err)
 	}
 
 	for _, c := range cases {
@@ -339,13 +338,12 @@ func TestGenerateRules_2(t *testing.T) {
 				},
 			},
 		}}
-	excludeFields := []string{}
+	ruleFields := []string{"team", "teamOut"}
 
-	rules, err := GenerateRules(inputDescription, excludeFields)
+	rules, err := GenerateRules(inputDescription, ruleFields)
 	if err != nil {
 		t.Errorf("Test: %s\n", testPurpose)
-		t.Errorf("GenerateRules(%q, %q) err: %q",
-			inputDescription, excludeFields, err)
+		t.Errorf("GenerateRules(%v, %v) err: %v", inputDescription, ruleFields, err)
 	}
 
 	trueRuleFound := false
@@ -357,8 +355,8 @@ func TestGenerateRules_2(t *testing.T) {
 	}
 	if !trueRuleFound {
 		t.Errorf("Test: %s\n", testPurpose)
-		t.Errorf("GenerateRules(%q, %q)  - True rule missing",
-			inputDescription, excludeFields)
+		t.Errorf("GenerateRules(%v, %v)  - True rule missing",
+			inputDescription, ruleFields)
 	}
 }
 

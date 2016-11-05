@@ -38,12 +38,12 @@ func TestAssessRules(t *testing.T) {
 	}
 	dataset := NewLiteralDataset(fieldNames, records)
 	experimentDesc := &experiment.ExperimentDesc{
-		Title:         "",
-		Dataset:       dataset,
-		ExcludeFields: []string{},
-		Aggregators:   aggregators,
-		Goals:         goals,
-		SortOrder:     []*experiment.SortDesc{},
+		Title:       "",
+		Dataset:     dataset,
+		RuleFields:  []string{"income", "cost", "band"},
+		Aggregators: aggregators,
+		Goals:       goals,
+		SortOrder:   []*experiment.SortDesc{},
 	}
 	experiment := mustNewExperiment(experimentDesc)
 	wantIsSorted := false
@@ -173,12 +173,12 @@ func TestAssessRules_errors(t *testing.T) {
 	dataset := NewLiteralDataset(fieldNames, records)
 	for _, c := range cases {
 		experimentDesc := &experiment.ExperimentDesc{
-			Title:         "",
-			Dataset:       dataset,
-			ExcludeFields: []string{},
-			Aggregators:   c.aggregators,
-			Goals:         c.goals,
-			SortOrder:     []*experiment.SortDesc{},
+			Title:       "",
+			Dataset:     dataset,
+			RuleFields:  []string{"income", "cost", "band"},
+			Aggregators: c.aggregators,
+			Goals:       c.goals,
+			SortOrder:   []*experiment.SortDesc{},
 		}
 		experiment := mustNewExperiment(experimentDesc)
 		_, err := AssessRules(c.rules, experiment)

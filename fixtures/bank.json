@@ -5,7 +5,9 @@
   "fieldNames": ["age", "job", "marital", "education", "default", "balance",
                  "housing", "loan", "contact", "day", "month", "duration",
                  "campaign", "pdays", "previous", "poutcome", "y"],
-  "excludeFieldNames": ["education"],
+  "ruleNames": ["age", "job", "marital", "default", "balance",
+                 "housing", "loan", "contact", "day", "month", "duration",
+                 "campaign", "pdays", "previous", "poutcome", "y"],
   "isFirstLineFieldNames": true,
   "separator":  ";",
   "aggregators": [

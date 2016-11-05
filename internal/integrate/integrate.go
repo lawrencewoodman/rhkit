@@ -32,16 +32,16 @@ func ProcessDataset(experiment *experiment.Experiment) error {
 			err)
 	}
 	rules, err :=
-		rhkit.GenerateRules(fieldDescriptions, experiment.ExcludeFieldNames)
+		rhkit.GenerateRules(fieldDescriptions, experiment.RuleFieldNames)
 	if err != nil {
-		return fmt.Errorf("rhkit.GenerateRules(%q, %q) - err: %s",
-			fieldDescriptions, experiment.ExcludeFieldNames, err)
+		return fmt.Errorf("rhkit.GenerateRules(%v, %v) - err: %s",
+			fieldDescriptions, experiment.RuleFieldNames, err)
 	}
 	if len(rules) < 2 {
 		return fmt.Errorf(
-			"rhkit.GenerateRules(%q, %q) - not enough rules generated",
+			"rhkit.GenerateRules(%v, %v) - not enough rules generated",
 			fieldDescriptions,
-			experiment.ExcludeFieldNames,
+			experiment.RuleFieldNames,
 		)
 	}
 

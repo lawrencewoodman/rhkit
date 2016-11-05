@@ -3,7 +3,7 @@
   "title": "This is a jolly nice title",
   "inputFilename": "/tmp/bank.csv",
   "fieldNames": ["age"],
-  "excludeFieldNames": ["education"],
+  "ruleNames": ["age"],
   "isFirstLineFieldNames": true,
   "separator":  ";",
   "aggregators": [

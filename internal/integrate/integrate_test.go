@@ -22,7 +22,10 @@ func TestAll(t *testing.T) {
 			rune(';'),
 			fieldNames,
 		),
-		ExcludeFields: []string{"education"},
+		RuleFields: []string{"age", "job", "marital", "default",
+			"balance", "housing", "loan", "contact", "day", "month", "duration",
+			"campaign", "pdays", "previous", "poutcome", "y",
+		},
 		Aggregators: []*experiment.AggregatorDesc{
 			&experiment.AggregatorDesc{"numSignedUp", "count", "y == \"yes\""},
 			&experiment.AggregatorDesc{"cost", "calc", "numMatches * 4.5"},

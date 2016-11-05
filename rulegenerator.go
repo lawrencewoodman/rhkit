@@ -39,7 +39,7 @@ type ruleGeneratorFunc func(
 
 func GenerateRules(
 	inputDescription *Description,
-	excludeFields []string,
+	ruleFields []string,
 ) ([]rule.Rule, error) {
 	rules := make([]rule.Rule, 1)
 	ruleGenerators := []ruleGeneratorFunc{
@@ -49,9 +49,9 @@ func GenerateRules(
 	}
 	rules[0] = rule.NewTrue()
 	for field, _ := range inputDescription.fields {
-		if !stringInSlice(field, excludeFields) {
+		if stringInSlice(field, ruleFields) {
 			for _, ruleGenerator := range ruleGenerators {
-				newRules, err := ruleGenerator(inputDescription, excludeFields, field)
+				newRules, err := ruleGenerator(inputDescription, ruleFields, field)
 				if err != nil {
 					return nil, err
 				}
@@ -91,7 +91,7 @@ func stringInSlice(s string, strings []string) bool {
 
 func generateIntRules(
 	inputDescription *Description,
-	excludeFields []string,
+	ruleFields []string,
 	field string,
 ) ([]rule.Rule, error) {
 	fd := inputDescription.fields[field]
@@ -154,7 +154,9 @@ func truncateFloat(f float64, maxDP int) float64 {
 // TODO: For each rule give all dp numbers 0..maxDP
 func generateFloatRules(
 	inputDescription *Description,
-	excludeFields []string, field string) ([]rule.Rule, error) {
+	ruleFields []string,
+	field string,
+) ([]rule.Rule, error) {
 	fd := inputDescription.fields[field]
 	if fd.kind != ftFloat {
 		return []rule.Rule{}, nil
@@ -199,7 +201,7 @@ func generateFloatRules(
 
 func generateCompareNumericRules(
 	inputDescription *Description,
-	excludeFields []string,
+	ruleFields []string,
 	field string,
 ) ([]rule.Rule, error) {
 	fd := inputDescription.fields[field]
@@ -220,9 +222,8 @@ func generateCompareNumericRules(
 	for oField, oFd := range inputDescription.fields {
 		oFieldNum := calcFieldNum(inputDescription.fields, oField)
 		isComparable := hasComparableNumberRange(fd, oFd)
-		if fieldNum < oFieldNum &&
-			isComparable &&
-			!stringInSlice(oField, excludeFields) {
+		if fieldNum < oFieldNum && isComparable &&
+			stringInSlice(oField, ruleFields) {
 			for _, ruleNewFunc := range ruleNewFuncs {
 				r := ruleNewFunc(field, oField)
 				rulesMap[r.String()] = r
@@ -235,7 +236,7 @@ func generateCompareNumericRules(
 
 func generateCompareStringRules(
 	inputDescription *Description,
-	excludeFields []string,
+	ruleFields []string,
 	field string,
 ) ([]rule.Rule, error) {
 	fd := inputDescription.fields[field]
@@ -252,9 +253,8 @@ func generateCompareStringRules(
 		if oFd.kind == ftString {
 			oFieldNum := calcFieldNum(inputDescription.fields, oField)
 			numSharedValues := calcNumSharedValues(fd, oFd)
-			if fieldNum < oFieldNum &&
-				numSharedValues >= 2 &&
-				!stringInSlice(oField, excludeFields) {
+			if fieldNum < oFieldNum && numSharedValues >= 2 &&
+				stringInSlice(oField, ruleFields) {
 				for _, ruleNewFunc := range ruleNewFuncs {
 					r := ruleNewFunc(field, oField)
 					rulesMap[r.String()] = r
@@ -283,7 +283,7 @@ func calcNumSharedValues(
 
 func generateStringRules(
 	inputDescription *Description,
-	excludeFields []string,
+	ruleFields []string,
 	field string,
 ) ([]rule.Rule, error) {
 	fd := inputDescription.fields[field]
@@ -347,7 +347,7 @@ func rulesMapToArray(rulesMap map[string]rule.Rule) []rule.Rule {
 
 func generateInRules(
 	inputDescription *Description,
-	excludeFields []string,
+	ruleFields []string,
 	field string,
 ) ([]rule.Rule, error) {
 	fd := inputDescription.fields[field]

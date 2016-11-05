@@ -26,7 +26,10 @@ func TestNew(t *testing.T) {
 				rune(';'),
 				fieldNames,
 			),
-			ExcludeFieldNames: []string{"education"},
+			RuleFieldNames: []string{"age", "job", "marital", "default",
+				"balance", "housing", "loan", "contact", "day", "month", "duration",
+				"campaign", "pdays", "previous", "p_1234567890outcome", "y",
+			},
 			Aggregators: []aggregators.AggregatorSpec{
 				// num_married to check for allowed characters
 				aggregators.MustNew("num_married", "count", "marital == \"married\""),
@@ -57,7 +60,10 @@ func TestNew(t *testing.T) {
 				rune(';'),
 				fieldNames,
 			),
-			ExcludeFields: []string{"education"},
+			RuleFields: []string{"age", "job", "marital", "default",
+				"balance", "housing", "loan", "contact", "day", "month", "duration",
+				"campaign", "pdays", "previous", "p_1234567890outcome", "y",
+			},
 			Aggregators: []*AggregatorDesc{
 				&AggregatorDesc{"num_married", "count", "marital == \"married\""},
 				&AggregatorDesc{"numSignedUp", "count", "y == \"yes\""},
@@ -106,9 +112,12 @@ func TestNew_errors(t *testing.T) {
 		wantErr        error
 	}{
 		{&ExperimentDesc{
-			Title:         "This is a nice title",
-			Dataset:       dataset,
-			ExcludeFields: []string{},
+			Title:   "This is a nice title",
+			Dataset: dataset,
+			RuleFields: []string{"age", "job", "marital", "education", "default",
+				"balance", "housing", "loan", "contact", "day", "month", "duration",
+				"campaign", "pdays", "previous", "poutcome", "y",
+			},
 			Aggregators: []*AggregatorDesc{
 				&AggregatorDesc{"numSignedUp", "count", "y == \"yes\""},
 				&AggregatorDesc{"cost", "calc", "numMatches * 4.5"},
@@ -126,43 +135,67 @@ func TestNew_errors(t *testing.T) {
 			errors.New("Invalid sort field: age"),
 		},
 		{&ExperimentDesc{
-			Title:         "This is a nice title",
-			Dataset:       dataset,
-			ExcludeFields: []string{},
-			Aggregators:   []*AggregatorDesc{},
-			Goals:         []string{"profit > 0"},
+			Title:   "This is a nice title",
+			Dataset: dataset,
+			RuleFields: []string{"age", "job", "marital", "education", "default",
+				"balance", "housing", "loan", "contact", "day", "month", "duration",
+				"campaign", "pdays", "previous", "poutcome", "y",
+			},
+			Aggregators: []*AggregatorDesc{},
+			Goals:       []string{"profit > 0"},
 			SortOrder: []*SortDesc{
 				&SortDesc{"numMatches", "Descending"},
 			}},
 			errors.New("Invalid sort direction: Descending, for field: numMatches"),
 		},
 		{&ExperimentDesc{
-			Title:         "This is a nice title",
-			Dataset:       dataset,
-			ExcludeFields: []string{},
-			Aggregators:   []*AggregatorDesc{},
-			Goals:         []string{"profit > 0"},
+			Title:   "This is a nice title",
+			Dataset: dataset,
+			RuleFields: []string{"age", "job", "marital", "education", "default",
+				"balance", "housing", "loan", "contact", "day", "month", "duration",
+				"campaign", "pdays", "previous", "poutcome", "y",
+			},
+			Aggregators: []*AggregatorDesc{},
+			Goals:       []string{"profit > 0"},
 			SortOrder: []*SortDesc{
 				&SortDesc{"percentMatches", "Ascending"},
 			}},
 			errors.New("Invalid sort direction: Ascending, for field: percentMatches"),
 		},
 		{&ExperimentDesc{
-			Title:         "This is a nice title",
-			Dataset:       dataset,
-			ExcludeFields: []string{"bob"},
-			Aggregators:   []*AggregatorDesc{},
-			Goals:         []string{"profit > 0"},
+			Title:       "This is a nice title",
+			Dataset:     dataset,
+			RuleFields:  []string{},
+			Aggregators: []*AggregatorDesc{},
+			Goals:       []string{"profit > 0"},
 			SortOrder: []*SortDesc{
 				&SortDesc{"numMatches", "descending"},
 				&SortDesc{"percentMatches", "descending"},
 			}},
-			errors.New("Invalid exclude field: bob"),
+			errors.New("No rule fields specified"),
 		},
 		{&ExperimentDesc{
-			Title:         "This is a nice title",
-			Dataset:       dataset,
-			ExcludeFields: []string{},
+			Title:   "This is a nice title",
+			Dataset: dataset,
+			RuleFields: []string{"age", "bob", "job", "education", "default",
+				"balance", "housing", "loan", "contact", "day", "month", "duration",
+				"campaign", "pdays", "previous", "poutcome", "y",
+			},
+			Aggregators: []*AggregatorDesc{},
+			Goals:       []string{"profit > 0"},
+			SortOrder: []*SortDesc{
+				&SortDesc{"numMatches", "descending"},
+				&SortDesc{"percentMatches", "descending"},
+			}},
+			errors.New("Invalid rule field: bob"),
+		},
+		{&ExperimentDesc{
+			Title:   "This is a nice title",
+			Dataset: dataset,
+			RuleFields: []string{"age", "job", "marital", "education", "default",
+				"balance", "housing", "loan", "contact", "day", "month", "duration",
+				"campaign", "pdays", "previous", "poutcome", "y",
+			},
 			Aggregators: []*AggregatorDesc{
 				&AggregatorDesc{"pdays", "count", "day > 2"},
 			},
@@ -174,9 +207,12 @@ func TestNew_errors(t *testing.T) {
 			errors.New("Aggregator name clashes with field name: pdays"),
 		},
 		{&ExperimentDesc{
-			Title:         "This is a nice title",
-			Dataset:       dataset,
-			ExcludeFields: []string{},
+			Title:   "This is a nice title",
+			Dataset: dataset,
+			RuleFields: []string{"age", "job", "marital", "education", "default",
+				"balance", "housing", "loan", "contact", "day", "month", "duration",
+				"campaign", "pdays", "previous", "poutcome", "y",
+			},
 			Aggregators: []*AggregatorDesc{
 				&AggregatorDesc{"numMatches", "count", "y == \"yes\""},
 			},
@@ -188,9 +224,12 @@ func TestNew_errors(t *testing.T) {
 			errors.New("Aggregator name reserved: numMatches"),
 		},
 		{&ExperimentDesc{
-			Title:         "This is a nice title",
-			Dataset:       dataset,
-			ExcludeFields: []string{},
+			Title:   "This is a nice title",
+			Dataset: dataset,
+			RuleFields: []string{"age", "job", "marital", "education", "default",
+				"balance", "housing", "loan", "contact", "day", "month", "duration",
+				"campaign", "pdays", "previous", "poutcome", "y",
+			},
 			Aggregators: []*AggregatorDesc{
 				&AggregatorDesc{"percentMatches", "percent", "y == \"yes\""},
 			},
@@ -202,9 +241,12 @@ func TestNew_errors(t *testing.T) {
 			errors.New("Aggregator name reserved: percentMatches"),
 		},
 		{&ExperimentDesc{
-			Title:         "This is a nice title",
-			Dataset:       dataset,
-			ExcludeFields: []string{},
+			Title:   "This is a nice title",
+			Dataset: dataset,
+			RuleFields: []string{"age", "job", "marital", "education", "default",
+				"balance", "housing", "loan", "contact", "day", "month", "duration",
+				"campaign", "pdays", "previous", "poutcome", "y",
+			},
 			Aggregators: []*AggregatorDesc{
 				&AggregatorDesc{"goalsScore", "count", "y == \"yes\""},
 			},
@@ -216,9 +258,12 @@ func TestNew_errors(t *testing.T) {
 			errors.New("Aggregator name reserved: goalsScore"),
 		},
 		{&ExperimentDesc{
-			Title:         "This is a nice title",
-			Dataset:       dataset,
-			ExcludeFields: []string{},
+			Title:   "This is a nice title",
+			Dataset: dataset,
+			RuleFields: []string{"age", "job", "marital", "education", "default",
+				"balance", "housing", "loan", "contact", "day", "month", "duration",
+				"campaign", "pdays", "previous", "poutcome", "y",
+			},
 			Aggregators: []*AggregatorDesc{
 				&AggregatorDesc{"3numSignedUp", "count", "y == \"yes\""},
 			},
@@ -230,9 +275,12 @@ func TestNew_errors(t *testing.T) {
 			errors.New("Invalid aggregator name: 3numSignedUp"),
 		},
 		{&ExperimentDesc{
-			Title:         "This is a nice title",
-			Dataset:       dataset,
-			ExcludeFields: []string{},
+			Title:   "This is a nice title",
+			Dataset: dataset,
+			RuleFields: []string{"age", "job", "marital", "education", "default",
+				"balance", "housing", "loan", "contact", "day", "month", "duration",
+				"campaign", "pdays", "previous", "poutcome", "y",
+			},
 			Aggregators: []*AggregatorDesc{
 				&AggregatorDesc{"num-signed-up", "count", "y == \"yes\""},
 			},
@@ -261,8 +309,8 @@ func checkExperimentsMatch(e1 *Experiment, e2 *Experiment) error {
 	if e1.Title != e2.Title {
 		return errors.New("Titles don't match")
 	}
-	if !areStringArraysEqual(e1.ExcludeFieldNames, e2.ExcludeFieldNames) {
-		return errors.New("ExcludeFieldNames don't match")
+	if !areStringArraysEqual(e1.RuleFieldNames, e2.RuleFieldNames) {
+		return errors.New("RuleFieldNames don't match")
 	}
 	if !areGoalExpressionsEqual(e1.Goals, e2.Goals) {
 		return errors.New("Goals don't match")
