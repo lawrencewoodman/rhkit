@@ -6,13 +6,46 @@ import (
 )
 
 func TestOrString(t *testing.T) {
-	ruleA := NewTrue()
-	ruleB := NewEQFF("income", "cost")
-	want := "true() || income == cost"
-	r := NewOr(ruleA, ruleB)
-	got := r.String()
-	if got != want {
-		t.Errorf("String() got: %s, want: %s", got, want)
+	cases := []struct {
+		ruleA Rule
+		ruleB Rule
+		want  string
+	}{
+		{ruleA: NewTrue(),
+			ruleB: NewEQFF("income", "cost"),
+			want:  "true() || income == cost",
+		},
+		{ruleA: NewAnd(NewTrue(), NewTrue()),
+			ruleB: NewEQFF("income", "cost"),
+			want:  "(true() && true()) || income == cost",
+		},
+		{ruleA: NewOr(NewTrue(), NewTrue()),
+			ruleB: NewEQFF("income", "cost"),
+			want:  "(true() || true()) || income == cost",
+		},
+		{ruleA: NewEQFF("income", "cost"),
+			ruleB: NewAnd(NewTrue(), NewTrue()),
+			want:  "income == cost || (true() && true())",
+		},
+		{ruleA: NewEQFF("income", "cost"),
+			ruleB: NewOr(NewTrue(), NewTrue()),
+			want:  "income == cost || (true() || true())",
+		},
+		{ruleA: NewAnd(NewEQFVI("income", 5), NewTrue()),
+			ruleB: NewAnd(NewEQFVI("cost", 6), NewTrue()),
+			want:  "(income == 5 && true()) || (cost == 6 && true())",
+		},
+		{ruleA: NewOr(NewEQFVI("income", 5), NewTrue()),
+			ruleB: NewOr(NewEQFVI("cost", 6), NewTrue()),
+			want:  "(income == 5 || true()) || (cost == 6 || true())",
+		},
+	}
+	for _, c := range cases {
+		r := NewOr(c.ruleA, c.ruleB)
+		got := r.String()
+		if got != c.want {
+			t.Errorf("String() got: %s, want: %s", got, c.want)
+		}
 	}
 }
 
