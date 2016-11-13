@@ -68,6 +68,96 @@ func TestSqrt_errors(t *testing.T) {
 	}
 }
 
+func TestPow(t *testing.T) {
+	cases := []struct {
+		in   []*dlit.Literal
+		want *dlit.Literal
+	}{
+		{in: []*dlit.Literal{dlit.MustNew(0), dlit.MustNew(3)},
+			want: dlit.MustNew(0),
+		},
+		{in: []*dlit.Literal{dlit.MustNew(0), dlit.MustNew(1.23)},
+			want: dlit.MustNew(0),
+		},
+		{in: []*dlit.Literal{dlit.MustNew(0), dlit.MustNew(0)},
+			want: dlit.MustNew(1),
+		},
+		{in: []*dlit.Literal{dlit.MustNew(2), dlit.MustNew(3)},
+			want: dlit.MustNew(8),
+		},
+		{in: []*dlit.Literal{dlit.MustNew(4), dlit.MustNew(4.5)},
+			want: dlit.MustNew(512),
+		},
+		{in: []*dlit.Literal{dlit.MustNew(2.5), dlit.MustNew(3)},
+			want: dlit.MustNew(15.625),
+		},
+	}
+
+	for _, c := range cases {
+		got, err := pow(c.in)
+		if err != nil {
+			t.Errorf("pow(%v) err: %v", c.in, err)
+		}
+		if got.String() != c.want.String() {
+			t.Errorf("pow(%v) got: %s, want: %s", c.in, got, c.want)
+		}
+	}
+}
+
+func TestPow_errors(t *testing.T) {
+	cases := []struct {
+		in   []*dlit.Literal
+		want *dlit.Literal
+		err  error
+	}{
+		{in: []*dlit.Literal{},
+			want: dlit.MustNew(WrongNumOfArgsError{Got: 0, Want: 2}),
+			err:  WrongNumOfArgsError{Got: 0, Want: 2},
+		},
+		{in: []*dlit.Literal{dlit.MustNew(23)},
+			want: dlit.MustNew(WrongNumOfArgsError{Got: 1, Want: 2}),
+			err:  WrongNumOfArgsError{Got: 1, Want: 2},
+		},
+		{in: []*dlit.Literal{dlit.MustNew(23), dlit.MustNew(4), dlit.MustNew(5)},
+			want: dlit.MustNew(WrongNumOfArgsError{Got: 3, Want: 2}),
+			err:  WrongNumOfArgsError{Got: 3, Want: 2},
+		},
+		{in: []*dlit.Literal{
+			dlit.MustNew(errThisIsAnError),
+			dlit.MustNew(errThisIsAnError),
+		},
+			want: dlit.MustNew(errThisIsAnError),
+			err:  errThisIsAnError,
+		},
+		{in: []*dlit.Literal{dlit.NewString("hello"), dlit.MustNew(4)},
+			want: dlit.MustNew(
+				CantConvertToTypeError{Kind: "float", Value: dlit.NewString("hello")},
+			),
+			err: CantConvertToTypeError{
+				Kind:  "float",
+				Value: dlit.NewString("hello"),
+			},
+		},
+		{in: []*dlit.Literal{dlit.MustNew(4), dlit.NewString("hello")},
+			want: dlit.MustNew(
+				CantConvertToTypeError{Kind: "float", Value: dlit.NewString("hello")},
+			),
+			err: CantConvertToTypeError{
+				Kind:  "float",
+				Value: dlit.NewString("hello"),
+			},
+		},
+	}
+
+	for _, c := range cases {
+		got, err := pow(c.in)
+		checkErrorMatch(t, fmt.Sprintf("pow(%v)", c.in), err, c.err)
+		if got.String() != c.want.String() {
+			t.Errorf("pow(%v) got: %s, want: %s", c.in, got, c.want)
+		}
+	}
+}
+
 /*************************************
  *  Helper functions
  *************************************/
