@@ -34,11 +34,7 @@ func AssessRules(
 	rules []rule.Rule,
 	e *experiment.Experiment,
 ) (*Assessment, error) {
-	var allAggregatorSpecs []aggregators.AggregatorSpec
-	var numRecords int64
-	var err error
-
-	allAggregatorSpecs, err = addDefaultAggregators(e.Aggregators)
+	allAggregatorSpecs, err := addDefaultAggregators(e.Aggregators)
 	if err != nil {
 		return &Assessment{}, err
 	}
@@ -48,7 +44,7 @@ func AssessRules(
 		ruleAssessors[i] = newRuleAssessor(rule, allAggregatorSpecs, e.Goals)
 	}
 
-	numRecords, err = processDataset(e.Dataset, ruleAssessors)
+	numRecords, err := processDataset(e.Dataset, ruleAssessors)
 	if err != nil {
 		return &Assessment{}, err
 	}
