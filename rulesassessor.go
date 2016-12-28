@@ -20,7 +20,6 @@
 package rhkit
 
 import (
-	"errors"
 	"fmt"
 	"github.com/lawrencewoodman/ddataset"
 	"github.com/vlifesystems/rhkit/experiment"
@@ -42,11 +41,7 @@ func AssessRules(
 	if err != nil {
 		return &Assessment{}, err
 	}
-	goodRuleAssessors, err := filterGoodRuleAssessors(ruleAssessors, numRecords)
-	if err != nil {
-		return &Assessment{}, err
-	}
-
+	goodRuleAssessors := filterGoodRuleAssessors(ruleAssessors, numRecords)
 	assessment, err := newAssessment(numRecords, goodRuleAssessors, e.Goals)
 	return assessment, err
 }
@@ -54,27 +49,23 @@ func AssessRules(
 func filterGoodRuleAssessors(
 	ruleAssessments []*ruleAssessor,
 	numRecords int64,
-) ([]*ruleAssessor, error) {
+) []*ruleAssessor {
 	goodRuleAssessors := make([]*ruleAssessor, 0)
 	for _, ruleAssessment := range ruleAssessments {
 		numMatches, exists :=
 			ruleAssessment.GetAggregatorValue("numMatches", numRecords)
 		if !exists {
-			// TODO: Create a proper error for this?
-			err := errors.New("numMatches doesn't exist in aggregators")
-			return goodRuleAssessors, err
+			panic("numMatches doesn't exist in aggregators")
 		}
 		numMatchesInt, isInt := numMatches.Int()
 		if !isInt {
-			// TODO: Create a proper error for this?
-			err := errors.New(fmt.Sprintf("Can't cast to Int: %q", numMatches))
-			return goodRuleAssessors, err
+			panic(fmt.Sprintf("can't cast numMatches to Int: %s", numMatches))
 		}
 		if numMatchesInt > 0 {
 			goodRuleAssessors = append(goodRuleAssessors, ruleAssessment)
 		}
 	}
-	return goodRuleAssessors, nil
+	return goodRuleAssessors
 }
 
 func processDataset(
