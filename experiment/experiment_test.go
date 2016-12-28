@@ -31,12 +31,17 @@ func TestNew(t *testing.T) {
 				"campaign", "pdays", "previous", "p_1234567890outcome", "y",
 			},
 			Aggregators: []aggregators.AggregatorSpec{
+				aggregators.MustNew("numMatches", "count", "1==1"),
+				aggregators.MustNew("percentMatches", "calc",
+					"roundto(100.0 * numMatches / numRecords, 2)"),
 				// num_married to check for allowed characters
 				aggregators.MustNew("num_married", "count", "marital == \"married\""),
 				aggregators.MustNew("numSignedUp", "count", "y == \"yes\""),
 				aggregators.MustNew("cost", "calc", "numMatches * 4.5"),
 				aggregators.MustNew("income", "calc", "numSignedUp * 24"),
-				aggregators.MustNew("profit", "calc", "income - cost")},
+				aggregators.MustNew("profit", "calc", "income - cost"),
+				aggregators.MustNew("goalsScore", "goalsscore"),
+			},
 			Goals: []*goal.Goal{goal.MustNew("profit > 0")},
 			SortOrder: []SortField{
 				SortField{"profit", DESCENDING},

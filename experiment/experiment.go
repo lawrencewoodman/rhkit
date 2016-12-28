@@ -226,7 +226,34 @@ func makeAggregators(
 			return r, err
 		}
 	}
-	return r, nil
+	r, err = addDefaultAggregators(r)
+	return r, err
+}
+
+func addDefaultAggregators(
+	aggregatorSpecs []aggregators.AggregatorSpec,
+) ([]aggregators.AggregatorSpec, error) {
+	newAggregatorSpecs := make([]aggregators.AggregatorSpec, 2)
+	numMatchesAggregatorSpec, err := aggregators.New("numMatches", "count", "1==1")
+	if err != nil {
+		return aggregatorSpecs, err
+	}
+	percentMatchesAggregatorSpec, err :=
+		aggregators.New("percentMatches", "calc",
+			"roundto(100.0 * numMatches / numRecords, 2)")
+	if err != nil {
+		return aggregatorSpecs, err
+	}
+	goalsScoreAggregatorSpec, err :=
+		aggregators.New("goalsScore", "goalsscore")
+	if err != nil {
+		return aggregatorSpecs, err
+	}
+	newAggregatorSpecs[0] = numMatchesAggregatorSpec
+	newAggregatorSpecs[1] = percentMatchesAggregatorSpec
+	newAggregatorSpecs = append(newAggregatorSpecs, aggregatorSpecs...)
+	newAggregatorSpecs = append(newAggregatorSpecs, goalsScoreAggregatorSpec)
+	return newAggregatorSpecs, nil
 }
 
 func makeSortOrder(eSortOrder []*SortDesc) ([]SortField, error) {

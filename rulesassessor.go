@@ -23,7 +23,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/lawrencewoodman/ddataset"
-	"github.com/vlifesystems/rhkit/aggregators"
 	"github.com/vlifesystems/rhkit/experiment"
 	"github.com/vlifesystems/rhkit/rule"
 )
@@ -34,14 +33,9 @@ func AssessRules(
 	rules []rule.Rule,
 	e *experiment.Experiment,
 ) (*Assessment, error) {
-	allAggregatorSpecs, err := addDefaultAggregators(e.Aggregators)
-	if err != nil {
-		return &Assessment{}, err
-	}
-
 	ruleAssessors := make([]*ruleAssessor, len(rules))
 	for i, rule := range rules {
-		ruleAssessors[i] = newRuleAssessor(rule, allAggregatorSpecs, e.Goals)
+		ruleAssessors[i] = newRuleAssessor(rule, e.Aggregators, e.Goals)
 	}
 
 	numRecords, err := processDataset(e.Dataset, ruleAssessors)
@@ -106,31 +100,4 @@ func processDataset(
 	}
 
 	return numRecords, conn.Err()
-}
-
-// TODO: Do this when creating the experiment, not here
-func addDefaultAggregators(
-	aggregatorSpecs []aggregators.AggregatorSpec,
-) ([]aggregators.AggregatorSpec, error) {
-	newAggregatorSpecs := make([]aggregators.AggregatorSpec, 2)
-	numMatchesAggregatorSpec, err := aggregators.New("numMatches", "count", "1==1")
-	if err != nil {
-		return aggregatorSpecs, err
-	}
-	percentMatchesAggregatorSpec, err :=
-		aggregators.New("percentMatches", "calc",
-			"roundto(100.0 * numMatches / numRecords, 2)")
-	if err != nil {
-		return aggregatorSpecs, err
-	}
-	goalsScoreAggregatorSpec, err :=
-		aggregators.New("goalsScore", "goalsscore")
-	if err != nil {
-		return aggregatorSpecs, err
-	}
-	newAggregatorSpecs[0] = numMatchesAggregatorSpec
-	newAggregatorSpecs[1] = percentMatchesAggregatorSpec
-	newAggregatorSpecs = append(newAggregatorSpecs, aggregatorSpecs...)
-	newAggregatorSpecs = append(newAggregatorSpecs, goalsScoreAggregatorSpec)
-	return newAggregatorSpecs, nil
 }
