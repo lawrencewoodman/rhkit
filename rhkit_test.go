@@ -1,31 +1,67 @@
 /*
-	Copyright (C) 2016 vLife Systems Ltd <http://vlifesystems.com>
-	This file is part of rhkit.
-
-	rhkit is free software: you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
-
-	rhkit is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details.
-
-	You should have received a copy of the GNU General Public License
-	along with rhkit; see the file COPYING.  If not, see
-	<http://www.gnu.org/licenses/>.
-*/
-
-package integrate
+ *   Integration test for package
+ */
+package rhkit_test
 
 import (
 	"fmt"
+	"github.com/lawrencewoodman/ddataset/dcsv"
 	"github.com/vlifesystems/rhkit"
 	"github.com/vlifesystems/rhkit/experiment"
+	"path/filepath"
+	"testing"
 )
 
-func ProcessDataset(experiment *experiment.Experiment) error {
+func TestAll(t *testing.T) {
+	fieldNames := []string{"age", "job", "marital", "education", "default",
+		"balance", "housing", "loan", "contact", "day", "month", "duration",
+		"campaign", "pdays", "previous", "poutcome", "y"}
+	experimentDesc := &experiment.ExperimentDesc{
+		Title: "This is a jolly nice title",
+		Dataset: dcsv.New(
+			filepath.Join("fixtures", "bank.csv"),
+			true,
+			rune(';'),
+			fieldNames,
+		),
+		RuleFields: []string{"age", "job", "marital", "default",
+			"balance", "housing", "loan", "contact", "day", "month", "duration",
+			"campaign", "pdays", "previous", "poutcome", "y",
+		},
+		Aggregators: []*experiment.AggregatorDesc{
+			&experiment.AggregatorDesc{"numSignedUp", "count", "y == \"yes\""},
+			&experiment.AggregatorDesc{"cost", "calc", "numMatches * 4.5"},
+			&experiment.AggregatorDesc{"income", "calc", "numSignedUp * 24"},
+			&experiment.AggregatorDesc{"profit", "calc", "income - cost"},
+			&experiment.AggregatorDesc{"oddFigure", "sum", "balance - age"},
+			&experiment.AggregatorDesc{
+				"percentMarried",
+				"precision",
+				"marital == \"married\"",
+			},
+		},
+		Goals: []string{"profit > 0"},
+		SortOrder: []*experiment.SortDesc{
+			&experiment.SortDesc{"profit", "descending"},
+			&experiment.SortDesc{"numSignedUp", "descending"},
+			&experiment.SortDesc{"goalsScore", "descending"},
+		},
+	}
+	experiment, err := experiment.New(experimentDesc)
+	if err != nil {
+		t.Errorf("experiment.New(%s) - err: %s", experimentDesc, err)
+		return
+	}
+	if err = processDataset(experiment); err != nil {
+		t.Errorf("processDataset() - err: %s", err)
+		return
+	}
+}
+
+/******************************
+ *  Helper functions
+ ******************************/
+func processDataset(experiment *experiment.Experiment) error {
 	fieldDescriptions, err := rhkit.DescribeDataset(experiment.Dataset)
 	if err != nil {
 		return fmt.Errorf("describer.DescribeDataset(experiment.dataset) - err: %s",
