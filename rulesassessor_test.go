@@ -115,8 +115,7 @@ func TestAssessRules(t *testing.T) {
 	}
 	gotAssessment, err := AssessRules(rules, experiment)
 	if err != nil {
-		t.Errorf("AssessRules(%q, %q, %q, dataset) - err: %q",
-			rules, aggregators, goals, err)
+		t.Errorf("AssessRules(%v, %v) - err: %v", rules, experiment, err)
 	}
 
 	assessmentsMatch := areAssessmentsEqv(
@@ -127,8 +126,8 @@ func TestAssessRules(t *testing.T) {
 		wantRuleAssessments,
 	)
 	if !assessmentsMatch {
-		t.Errorf("AssessRules(%q, %q, %q, dataset)\nassessments don't match\n - got: %q\n - wantRuleAssessments: %q, wantNumRecords: %d, wantIsSorted: %t, wantIsRefined: %t\n",
-			rules, aggregators, goals, gotAssessment, wantRuleAssessments,
+		t.Errorf("AssessRules(%v, %v)\nassessments don't match\n - got: %v\n - wantRuleAssessments: %v, wantNumRecords: %d, wantIsSorted: %t, wantIsRefined: %t\n",
+			rules, experiment, gotAssessment, wantRuleAssessments,
 			wantNumRecords, wantIsSorted, wantIsRefined)
 	}
 }
@@ -185,7 +184,7 @@ func TestAssessRules_errors(t *testing.T) {
 		experiment := mustNewExperiment(experimentDesc)
 		_, err := AssessRules(c.rules, experiment)
 		if err == nil || err.Error() != c.wantErr.Error() {
-			t.Errorf("AssessRules(%q, %q) - err: %s, wantErr: %s",
+			t.Errorf("AssessRules(%v, %v) - err: %s, wantErr: %s",
 				c.rules, experiment, err, c.wantErr)
 		}
 	}

@@ -59,7 +59,7 @@ func TestNextRecord(t *testing.T) {
 		for _, record := range records {
 			err := ra.NextRecord(record)
 			if err != nil {
-				t.Errorf("nextRecord(%q) rule: %s, aggregators: %q, goals: %q - err: %q",
+				t.Errorf("nextRecord(%v) rule: %s, aggregators: %v, goals: %v - err: %v",
 					record, c.rule, inAggregators, goals, err)
 			}
 		}
@@ -73,7 +73,7 @@ func TestNextRecord(t *testing.T) {
 			t.Errorf("numIncomeGt2 aggregator can't be int")
 		}
 		if gotNumIncomeGt2Int != c.wantNumIncomeGt2 {
-			t.Errorf("nextRecord() rule: %s, aggregators: %q, goals: %q - wantNumIncomeGt2: %d, got: %d",
+			t.Errorf("nextRecord() rule: %s, aggregators: %v, goals: %v - wantNumIncomeGt2: %d, got: %d",
 				c.rule, inAggregators, goals, c.wantNumIncomeGt2, gotNumIncomeGt2Int)
 		}
 		gotNumBandGt4, gt4Exists :=
@@ -86,7 +86,7 @@ func TestNextRecord(t *testing.T) {
 			t.Errorf("numBandGt4 aggregator can't be int")
 		}
 		if gotNumBandGt4Int != c.wantNumBandGt4 {
-			t.Errorf("nextRecord() rule: %s, aggregators: %q, goals: %q - wantNumBandGt4: %d, got: %d",
+			t.Errorf("nextRecord() rule: %s, aggregators: %v, goals: %v - wantNumBandGt4: %d, got: %d",
 				c.rule, inAggregators, goals, c.wantNumBandGt4, gotNumBandGt4Int)
 		}
 		gotGoalsScore, goalsScoreExists :=
@@ -99,7 +99,7 @@ func TestNextRecord(t *testing.T) {
 			t.Errorf("goalsScore aggregator can't be float")
 		}
 		if gotGoalsScoreFloat != c.wantGoalsScore {
-			t.Errorf("nextRecord() rule: %s, aggregators: %q, goals: %q - wantGoalsScore: %f, got: %f",
+			t.Errorf("nextRecord() rule: %s, aggregators: %v, goals: %v - wantGoalsScore: %f, got: %f",
 				c.rule, inAggregators, goals, c.wantGoalsScore, gotGoalsScore)
 		}
 	}
@@ -140,7 +140,7 @@ func TestNextRecord_Errors(t *testing.T) {
 		for _, record := range records {
 			err := ra.NextRecord(record)
 			if !errorMatch(c.wantErr, err) {
-				t.Errorf("NextRecord(%q) rule: %q, aggregators: %q, goals: %q err: %q, wantErr: %q",
+				t.Errorf("NextRecord(%v) rule: %v, aggregators: %v, goals: %v err: %v, wantErr: %v",
 					record, c.rule, c.aggregators, goals, err, c.wantErr)
 				return
 			}

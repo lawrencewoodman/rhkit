@@ -295,7 +295,7 @@ func TestMerge(t *testing.T) {
 	}
 
 	if !gotAssessment.IsEqual(wantAssessment) {
-		t.Errorf("Merge() assessments don't match\n - got: %q\n - want: %q\n",
+		t.Errorf("Merge() assessments don't match\n - got: %v\n - want: %v\n",
 			gotAssessment, wantAssessment)
 	}
 }

@@ -61,17 +61,17 @@ func TestTweakRules_1(t *testing.T) {
 
 	if numBandGtRules < 10 {
 		printTestPurposes(t, testPurposes)
-		t.Errorf("TweakRules(%q) wrong number(%d) of rules: band > ? - got: %q",
+		t.Errorf("TweakRules(%v) wrong number(%d) of rules: band > ? - got: %v",
 			rulesIn, numBandGtRules, gotRules)
 	}
 	if numFlowGeqRules < 9 {
 		printTestPurposes(t, testPurposes)
-		t.Errorf("TweakRules(%q) wrong number(%d) of rules: flow >= ? - got: %q",
+		t.Errorf("TweakRules(%v) wrong number(%d) of rules: flow >= ? - got: %v",
 			rulesIn, numFlowGeqRules, gotRules)
 	}
 	if numOtherRules != 0 {
 		printTestPurposes(t, testPurposes)
-		t.Errorf("TweakRules(%q) wrong number(%d) of other rules - got: %q",
+		t.Errorf("TweakRules(%v) wrong number(%d) of other rules - got: %v",
 			rulesIn, numOtherRules, gotRules)
 	}
 }
@@ -132,17 +132,17 @@ func TestTweakRules_2(t *testing.T) {
 
 	if num20To40 < 9 {
 		printTestPurposes(t, testPurposes)
-		t.Errorf("TweakRules(%q) wrong number(%d) of rules 20 to 40, got: %q",
+		t.Errorf("TweakRules(%v) wrong number(%d) of rules 20 to 40, got: %v",
 			rulesIn, num20To40, gotRules)
 	}
 	if num40To50 < 9 {
 		printTestPurposes(t, testPurposes)
-		t.Errorf("TweakRules(%q) wrong number(%d) of rules 40 to 50, got: %q",
+		t.Errorf("TweakRules(%v) wrong number(%d) of rules 40 to 50, got: %v",
 			rulesIn, num40To50, gotRules)
 	}
 	if numOther != 0 {
 		printTestPurposes(t, testPurposes)
-		t.Errorf("TweakRules(%q) wrong number(%d) of other rules - got: %q",
+		t.Errorf("TweakRules(%v) wrong number(%d) of other rules - got: %v",
 			rulesIn, numOther, gotRules)
 	}
 }
@@ -215,30 +215,30 @@ func TestTweakRules_3(t *testing.T) {
 
 	if num24To41 < 9 {
 		printTestPurposes(t, testPurposes)
-		t.Errorf("TweakRules(%q) wrong number(%d) of rules 24 to 41, got: %q",
+		t.Errorf("TweakRules(%v) wrong number(%d) of rules 24 to 41, got: %v",
 			rulesIn, num24To41, gotRules)
 	}
 	if num41To53 < 9 {
 		printTestPurposes(t, testPurposes)
-		t.Errorf("TweakRules(%q) wrong number(%d) of rules 41 to 53, got: %q",
+		t.Errorf("TweakRules(%v) wrong number(%d) of rules 41 to 53, got: %v",
 
 			rulesIn, num41To53, gotRules)
 	}
 
 	if numOther != 0 {
 		printTestPurposes(t, testPurposes)
-		t.Errorf("TweakRules(%q) wrong number(%d) of other rules - got: %q",
+		t.Errorf("TweakRules(%v) wrong number(%d) of other rules - got: %v",
 			rulesIn, numOther, gotRules)
 	}
 
 	if gotMinDP != wantMinDP {
 		printTestPurposes(t, testPurposes)
-		t.Errorf("TweakRules(%q) maxDP for rules to big got, %d, want: %d, rules: %q",
+		t.Errorf("TweakRules(%v) maxDP for rules to big got, %d, want: %d, rules: %v",
 			rulesIn, gotMinDP, wantMinDP, gotRules)
 	}
 	if gotMaxDP != wantMaxDP {
 		printTestPurposes(t, testPurposes)
-		t.Errorf("TweakRules(%q) maxDP for rules to big got, %d, want: %d, rules: %q",
+		t.Errorf("TweakRules(%v) maxDP for rules to big got, %d, want: %d, rules: %v",
 			rulesIn, gotMaxDP, wantMaxDP, gotRules)
 	}
 }

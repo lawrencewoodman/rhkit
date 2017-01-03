@@ -91,10 +91,10 @@ func TestNew(t *testing.T) {
 	for _, c := range cases {
 		got, err := New(c.experimentDesc)
 		if err != nil {
-			t.Errorf("New(%q) err: %s", c.experimentDesc, err)
+			t.Errorf("New(%v) err: %s", c.experimentDesc, err)
 		}
 		if err := checkExperimentsMatch(got, c.want); err != nil {
-			t.Errorf("New(%q)\n experiments don't match: %s\n got: %q\n want: %q",
+			t.Errorf("New(%v)\n experiments don't match: %s\n got: %v\n want: %v",
 				c.experimentDesc, err, got, c.want)
 		}
 	}
@@ -300,7 +300,7 @@ func TestNew_errors(t *testing.T) {
 	for _, c := range cases {
 		_, err := New(c.experimentDesc)
 		if err == nil || c.wantErr.Error() != err.Error() {
-			t.Errorf("New(%q) err: %q, wantErr: %q",
+			t.Errorf("New(%v) err: %v, wantErr: %v",
 				c.experimentDesc, err, c.wantErr)
 		}
 	}
