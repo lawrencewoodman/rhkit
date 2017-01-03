@@ -152,9 +152,9 @@ func TestAssessRules_errors(t *testing.T) {
 				&experiment.AggregatorDesc{"numIncomeGt2", "count", "bincome > 2"},
 			},
 			[]string{"numIncomeGt2 == 1"},
-			dexpr.ErrInvalidExpr{
+			dexpr.InvalidExprError{
 				Expr: "bincome > 2",
-				Err:  dexpr.ErrVarNotExist("bincome"),
+				Err:  dexpr.VarNotExistError("bincome"),
 			},
 		},
 		{[]rule.Rule{rule.NewGEFVI("band", 3)},
@@ -162,9 +162,9 @@ func TestAssessRules_errors(t *testing.T) {
 				&experiment.AggregatorDesc{"numIncomeGt2", "count", "income > 2"},
 			},
 			[]string{"numIncomeGt == 1"},
-			dexpr.ErrInvalidExpr{
+			dexpr.InvalidExprError{
 				Expr: "numIncomeGt == 1",
-				Err:  dexpr.ErrVarNotExist("numIncomeGt"),
+				Err:  dexpr.VarNotExistError("numIncomeGt"),
 			},
 		},
 	}

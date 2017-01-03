@@ -21,9 +21,9 @@ func TestCalcGetResult(t *testing.T) {
 		dlit.MustNew(11),
 		dlit.MustNew(18),
 		dlit.MustNew(24),
-		dlit.MustNew(dexpr.ErrInvalidExpr{
+		dlit.MustNew(dexpr.InvalidExprError{
 			Expr: "a + e",
-			Err:  dexpr.ErrVarNotExist("e"),
+			Err:  dexpr.VarNotExistError("e"),
 		}),
 	}
 	numRecords := int64(12)

@@ -121,9 +121,9 @@ func TestNextRecord_Errors(t *testing.T) {
 		{rule.NewGEFVI("band", 4),
 			[]aggregators.AggregatorSpec{
 				aggregators.MustNew("numIncomeGt2", "count", "fred > 2")},
-			dexpr.ErrInvalidExpr{
+			dexpr.InvalidExprError{
 				Expr: "fred > 2",
-				Err:  dexpr.ErrVarNotExist("fred"),
+				Err:  dexpr.VarNotExistError("fred"),
 			},
 		},
 		{rule.NewGEFVI("band", 4),

@@ -81,15 +81,15 @@ func TestAssess_errors(t *testing.T) {
 		wantErr error
 	}{
 		{"bob > 4999",
-			dexpr.ErrInvalidExpr{
+			dexpr.InvalidExprError{
 				Expr: "bob > 4999",
-				Err:  dexpr.ErrVarNotExist("bob"),
+				Err:  dexpr.VarNotExistError("bob"),
 			},
 		},
 		{"roundbob(percentMatches,2) == 5.23",
-			dexpr.ErrInvalidExpr{
+			dexpr.InvalidExprError{
 				Expr: "roundbob(percentMatches,2) == 5.23",
-				Err:  dexpr.ErrFunctionNotExist("roundbob"),
+				Err:  dexpr.FunctionNotExistError("roundbob"),
 			},
 		},
 	}
