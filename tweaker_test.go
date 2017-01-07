@@ -12,13 +12,13 @@ func TestTweakRules_1(t *testing.T) {
 		map[string]*fieldDescription{
 			"band": &fieldDescription{
 				ftInt, dlit.MustNew(3), dlit.MustNew(40), 0,
-				[]*dlit.Literal{}, 0},
+				map[string]valueDescription{}, 0},
 			"age": &fieldDescription{
 				ftInt, dlit.MustNew(4), dlit.MustNew(30), 0,
-				[]*dlit.Literal{}, 0},
+				map[string]valueDescription{}, 0},
 			"flow": &fieldDescription{
 				ftFloat, dlit.MustNew(50), dlit.MustNew(400), 2,
-				[]*dlit.Literal{}, 0},
+				map[string]valueDescription{}, 0},
 		}}
 	rulesIn := []rule.Rule{
 		rule.NewGEFVI("band", 4),
@@ -85,7 +85,7 @@ func TestTweakRules_2(t *testing.T) {
 		map[string]*fieldDescription{
 			"age": &fieldDescription{
 				ftInt, dlit.MustNew(20), dlit.MustNew(40), 0,
-				[]*dlit.Literal{}, 0,
+				map[string]valueDescription{}, 0,
 			},
 		}}
 	rulesIn := []rule.Rule{
@@ -157,7 +157,7 @@ func TestTweakRules_3(t *testing.T) {
 		map[string]*fieldDescription{
 			"flow": &fieldDescription{
 				ftFloat, dlit.MustNew(4), dlit.MustNew(30), 6,
-				[]*dlit.Literal{}, 0,
+				map[string]valueDescription{}, 0,
 			},
 		}}
 	rulesIn := []rule.Rule{
@@ -251,7 +251,7 @@ func TestTweakRules_4(t *testing.T) {
 		map[string]*fieldDescription{
 			"flow": &fieldDescription{
 				ftFloat, dlit.MustNew(4), dlit.MustNew(30), 6,
-				[]*dlit.Literal{}, 0,
+				map[string]valueDescription{}, 0,
 			},
 		}}
 	rulesIn := []rule.Rule{
