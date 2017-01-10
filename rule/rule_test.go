@@ -21,3 +21,27 @@ func TestIncompatibleTypesRuleErrorError(t *testing.T) {
 		t.Errorf("Error() got: %s, want: %s", got, want)
 	}
 }
+
+func TestSort(t *testing.T) {
+	in := []Rule{
+		NewEQFVS("band", "b"),
+		NewGEFVI("flow", 3),
+		NewEQFVS("band", "a"),
+		NewGEFVI("flow", 2),
+	}
+	want := []Rule{
+		NewEQFVS("band", "a"),
+		NewEQFVS("band", "b"),
+		NewGEFVI("flow", 2),
+		NewGEFVI("flow", 3),
+	}
+	Sort(in)
+	if len(in) != len(want) {
+		t.Fatalf("Sort - len(in) != len(want)")
+	}
+	for i, r := range want {
+		if in[i].String() != r.String() {
+			t.Fatalf("Sort - got: %v, want: %v", in, want)
+		}
+	}
+}
