@@ -349,11 +349,7 @@ func TestGenerateRules_1(t *testing.T) {
 		}},
 	}
 
-	rules, err := GenerateRules(inputDescription, ruleFields)
-	if err != nil {
-		t.Errorf("Test: %s\n", testPurpose)
-		t.Errorf("GenerateRules(%v, %v) err: %v", inputDescription, ruleFields, err)
-	}
+	rules := GenerateRules(inputDescription, ruleFields)
 
 	for _, c := range cases {
 		gotFieldRules := getFieldRules(c.field, rules)
@@ -393,11 +389,7 @@ func TestGenerateRules_2(t *testing.T) {
 		}}
 	ruleFields := []string{"team", "teamOut"}
 
-	rules, err := GenerateRules(inputDescription, ruleFields)
-	if err != nil {
-		t.Errorf("Test: %s\n", testPurpose)
-		t.Errorf("GenerateRules(%v, %v) err: %v", inputDescription, ruleFields, err)
-	}
+	rules := GenerateRules(inputDescription, ruleFields)
 
 	trueRuleFound := false
 	for _, r := range rules {
@@ -504,13 +496,7 @@ func TestGenerateRules_3(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		rules, err := GenerateRules(inputDescription, ruleFields)
-		if err != nil {
-			t.Errorf("Test: %s\n", testPurpose)
-			t.Fatalf("GenerateRules(%v, %v) err: %v",
-				inputDescription, ruleFields, err)
-		}
-
+		rules := GenerateRules(inputDescription, ruleFields)
 		gotFieldRules := getFieldRules(c.field, rules)
 		rulesMatch, msg := matchRulesUnordered(gotFieldRules, c.wantRules)
 		if !rulesMatch {
