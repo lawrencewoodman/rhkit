@@ -459,5 +459,5 @@ func calcFieldNum(
 		}
 		j++
 	}
-	panic("Can't field field in fieldDescriptions")
+	panic("can't find field in fieldDescriptions")
 }
