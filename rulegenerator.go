@@ -25,7 +25,6 @@ import (
 	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/rule"
-	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -212,15 +211,6 @@ func generateIntRules(
 	return rules, nil
 }
 
-var matchTrailingZerosRegexp = regexp.MustCompile("^(\\d+.[^ 0])(0+)$")
-var matchAllZerosRegexp = regexp.MustCompile("^(0)(.0+)$")
-
-func floatToString(f float64, maxDP int) string {
-	fStr := fmt.Sprintf("%.*f", maxDP, f)
-	fStr = matchTrailingZerosRegexp.ReplaceAllString(fStr, "$1")
-	return matchAllZerosRegexp.ReplaceAllString(fStr, "0")
-}
-
 func truncateFloat(f float64, maxDP int) float64 {
 	v := fmt.Sprintf("%.*f", maxDP, f)
 	nf, _ := strconv.ParseFloat(v, 64)
@@ -379,58 +369,6 @@ func rulesMapToArray(rulesMap map[string]rule.Rule) []rule.Rule {
 		i++
 	}
 	return rules
-}
-
-func generateCombineRules(
-	inputDescription *Description,
-	ruleFields []string,
-	field string,
-) ([]rule.Rule, error) {
-	if len(ruleFields) != 2 {
-		return []rule.Rule{}, nil
-	}
-	otherField := getOtherField(ruleFields, field)
-	rulesMap := make(map[string]rule.Rule)
-	firstInRules, err := generateInRules(inputDescription, ruleFields, field)
-	if err != nil {
-		return []rule.Rule{}, err
-	}
-	firstValueRules, err := generateValueRules(inputDescription, ruleFields, field)
-	if err != nil {
-		return []rule.Rule{}, err
-	}
-	firstRules := append(firstInRules, firstValueRules...)
-	for _, firstRule := range firstRules {
-		otherInRules, err :=
-			generateInRules(inputDescription, ruleFields, otherField)
-		if err != nil {
-			return []rule.Rule{}, err
-		}
-		otherValueRules, err :=
-			generateValueRules(inputDescription, ruleFields, otherField)
-		if err != nil {
-			return []rule.Rule{}, err
-		}
-		if len(otherInRules) == 0 && len(otherValueRules) == 0 {
-			break
-		}
-		otherRules := append(otherInRules, otherValueRules...)
-		for _, otherRule := range otherRules {
-			r := rule.NewAnd(firstRule, otherRule)
-			rulesMap[r.String()] = r
-		}
-	}
-	rules := rulesMapToArray(rulesMap)
-	return rules, nil
-}
-
-func getOtherField(ruleFields []string, field string) string {
-	for _, f := range ruleFields {
-		if f != field {
-			return f
-		}
-	}
-	panic(fmt.Sprintf("can't find other field than: %s", field))
 }
 
 func generateInRules(
