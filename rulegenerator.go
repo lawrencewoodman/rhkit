@@ -45,7 +45,7 @@ func GenerateRules(
 	ruleGenerators := []ruleGeneratorFunc{
 		generateIntRules, generateFloatRules, generateValueRules,
 		generateCompareNumericRules, generateCompareStringRules,
-		generateInRules, generateCombineRules,
+		generateInRules,
 	}
 	rules[0] = rule.NewTrue()
 	for field, _ := range inputDescription.fields {
@@ -59,25 +59,54 @@ func GenerateRules(
 			}
 		}
 	}
+
+	if len(ruleFields) == 2 {
+		cRules := CombineRules(rules)
+		rules = append(rules, cRules...)
+	}
+	rule.Sort(rules)
 	return rules, nil
 }
 
 func CombineRules(rules []rule.Rule) []rule.Rule {
+	rule.Sort(rules)
 	combinedRules := make([]rule.Rule, 0)
 	numRules := len(rules)
 	for i := 0; i < numRules-1; i++ {
 		for j := i + 1; j < numRules; j++ {
-			_, ruleIIsTrue := rules[i].(rule.True)
-			_, ruleJIsTrue := rules[j].(rule.True)
-			if !ruleIIsTrue && !ruleJIsTrue {
+			andOk, orOk := areValidCombineRules(rules[i], rules[j])
+			if andOk {
 				andRule := rule.NewAnd(rules[i], rules[j])
-				orRule := rule.NewOr(rules[i], rules[j])
 				combinedRules = append(combinedRules, andRule)
+			}
+			if orOk {
+				orRule := rule.NewOr(rules[i], rules[j])
 				combinedRules = append(combinedRules, orRule)
 			}
 		}
 	}
 	return combinedRules
+}
+
+// areValidCombineRules returns whether suitable for (And, Or)
+func areValidCombineRules(ruleA, ruleB rule.Rule) (andOk bool, orOk bool) {
+	_, ruleAIsTrue := ruleA.(rule.True)
+	_, ruleBIsTrue := ruleB.(rule.True)
+	if ruleAIsTrue || ruleBIsTrue {
+		return false, false
+	}
+	tRuleA, ruleAIsTweakable := ruleA.(rule.TweakableRule)
+	tRuleB, ruleBIsTweakable := ruleB.(rule.TweakableRule)
+	if !ruleAIsTweakable || !ruleBIsTweakable {
+		return true, true
+	}
+
+	fieldA, opA, vA := tRuleA.GetTweakableParts()
+	fieldB, opB, vB := tRuleB.GetTweakableParts()
+	if (fieldA == fieldB && opA == opB) || (fieldA == fieldB && vA == vB) {
+		return false, true
+	}
+	return true, true
 }
 
 func stringInSlice(s string, strings []string) bool {
