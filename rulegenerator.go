@@ -186,12 +186,6 @@ func generateIntRules(
 	if step == 0 {
 		step = 1
 	}
-	// i set to 0 to make more tweakable
-	for i := int64(0); i < diff; i += step {
-		n := min + i
-		r := rule.NewGEFVI(field, n)
-		rulesMap[r.String()] = r
-	}
 
 	for i := step; i <= diff; i += step {
 		n := min + i
@@ -199,8 +193,16 @@ func generateIntRules(
 		rulesMap[r.String()] = r
 	}
 
+	// i set to 0 to make more tweakable
+	for i := int64(0); i < diff; i += step {
+		n := min + i
+		r := rule.NewGEFVI(field, n)
+		rulesMap[r.String()] = r
+	}
+
 	rules := rulesMapToArray(rulesMap)
-	return rules
+	cRules := CombineRules(rules)
+	return append(rules, cRules...)
 }
 
 func truncateFloat(f float64, maxDP int) float64 {
@@ -240,7 +242,8 @@ func generateFloatRules(
 	}
 
 	rules := rulesMapToArray(rulesMap)
-	return rules
+	cRules := CombineRules(rules)
+	return append(rules, cRules...)
 }
 
 func generateCompareNumericRules(
@@ -358,6 +361,7 @@ func rulesMapToArray(rulesMap map[string]rule.Rule) []rule.Rule {
 	return rules
 }
 
+// TODO: Allow more numValues if only two ruleFields
 func generateInRules(
 	inputDescription *Description,
 	ruleFields []string,
