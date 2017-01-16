@@ -94,9 +94,14 @@ func areValidCombineRules(ruleA, ruleB rule.Rule) (andOk bool, orOk bool) {
 
 	fieldA, opA, vA := tRuleA.GetTweakableParts()
 	fieldB, opB, vB := tRuleB.GetTweakableParts()
-	if (fieldA == fieldB && opA == opB) || (fieldA == fieldB && vA == vB) {
-		return false, true
+	if fieldA == fieldB {
+		if (opA == opB) ||
+			(opA == "<=" && opB == ">=" && vB >= vA) ||
+			(opA == ">=" && opB == "<=" && vB <= vA) {
+			return false, true
+		}
 	}
+
 	return true, true
 }
 
