@@ -65,6 +65,39 @@ func TestNewOr_errors(t *testing.T) {
 	}
 }
 
+func TestMustNewOr(t *testing.T) {
+	ruleA := NewEQFF("flow", "rate")
+	ruleB := NewEQFF("income", "cost")
+	defer func() {
+		if r := recover(); r != nil {
+			t.Errorf("MustNewOr(%s, %s) panic: %s", ruleA, ruleB, r)
+		}
+	}()
+	MustNewOr(ruleA, ruleB)
+}
+
+func TestMustNewOr_panic(t *testing.T) {
+	ruleA := NewTrue()
+	ruleB := NewEQFF("income", "cost")
+	paniced := false
+	wantPanic := "can't Or rule: true(), with: income == cost"
+	defer func() {
+		if r := recover(); r != nil {
+			if r.(error).Error() == wantPanic {
+				paniced = true
+			} else {
+				t.Errorf("MustNewOr(%s, %s) - got panic: %s, want: %s",
+					ruleA, ruleB, r, wantPanic)
+			}
+		}
+	}()
+	MustNewOr(ruleA, ruleB)
+	if !paniced {
+		t.Errorf("MustNewOr(%s, %s) - failed to panic with: %s",
+			ruleA, ruleB, wantPanic)
+	}
+}
+
 func TestOrString(t *testing.T) {
 	cases := []struct {
 		ruleA Rule
