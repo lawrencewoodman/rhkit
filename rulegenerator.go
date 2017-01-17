@@ -65,44 +65,15 @@ func CombineRules(rules []rule.Rule) []rule.Rule {
 	numRules := len(rules)
 	for i := 0; i < numRules-1; i++ {
 		for j := i + 1; j < numRules; j++ {
-			andOk, orOk := areValidCombineRules(rules[i], rules[j])
-			if andOk {
-				andRule := rule.NewAnd(rules[i], rules[j])
+			if andRule, err := rule.NewAnd(rules[i], rules[j]); err == nil {
 				combinedRules = append(combinedRules, andRule)
 			}
-			if orOk {
-				orRule := rule.NewOr(rules[i], rules[j])
+			if orRule, err := rule.NewOr(rules[i], rules[j]); err == nil {
 				combinedRules = append(combinedRules, orRule)
 			}
 		}
 	}
 	return combinedRules
-}
-
-// areValidCombineRules returns whether suitable for (And, Or)
-func areValidCombineRules(ruleA, ruleB rule.Rule) (andOk bool, orOk bool) {
-	_, ruleAIsTrue := ruleA.(rule.True)
-	_, ruleBIsTrue := ruleB.(rule.True)
-	if ruleAIsTrue || ruleBIsTrue {
-		return false, false
-	}
-	tRuleA, ruleAIsTweakable := ruleA.(rule.TweakableRule)
-	tRuleB, ruleBIsTweakable := ruleB.(rule.TweakableRule)
-	if !ruleAIsTweakable || !ruleBIsTweakable {
-		return true, true
-	}
-
-	fieldA, opA, vA := tRuleA.GetTweakableParts()
-	fieldB, opB, vB := tRuleB.GetTweakableParts()
-	if fieldA == fieldB {
-		if (opA == opB) ||
-			(opA == "<=" && opB == ">=" && vB >= vA) ||
-			(opA == ">=" && opB == "<=" && vB <= vA) {
-			return false, true
-		}
-	}
-
-	return true, true
 }
 
 func stringInSlice(s string, strings []string) bool {

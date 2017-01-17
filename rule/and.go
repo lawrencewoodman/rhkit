@@ -30,8 +30,36 @@ type And struct {
 	ruleB Rule
 }
 
-func NewAnd(ruleA Rule, ruleB Rule) Rule {
-	return &And{ruleA: ruleA, ruleB: ruleB}
+func NewAnd(ruleA Rule, ruleB Rule) (Rule, error) {
+	_, ruleAIsTrue := ruleA.(True)
+	_, ruleBIsTrue := ruleB.(True)
+	if ruleAIsTrue || ruleBIsTrue {
+		return nil, fmt.Errorf("can't And rule: %s, with: %s", ruleA, ruleB)
+	}
+	tRuleA, ruleAIsTweakable := ruleA.(TweakableRule)
+	tRuleB, ruleBIsTweakable := ruleB.(TweakableRule)
+	if !ruleAIsTweakable || !ruleBIsTweakable {
+		return &And{ruleA: ruleA, ruleB: ruleB}, nil
+	}
+
+	fieldA, opA, vA := tRuleA.GetTweakableParts()
+	fieldB, opB, vB := tRuleB.GetTweakableParts()
+	if fieldA == fieldB {
+		if (opA == opB) ||
+			(opA == "<=" && opB == ">=" && vB >= vA) ||
+			(opA == ">=" && opB == "<=" && vB <= vA) {
+			return nil, fmt.Errorf("can't And rule: %s, with: %s", ruleA, ruleB)
+		}
+	}
+	return &And{ruleA: ruleA, ruleB: ruleB}, nil
+}
+
+func MustNewAnd(ruleA Rule, ruleB Rule) Rule {
+	r, err := NewAnd(ruleA, ruleB)
+	if err != nil {
+		panic(err)
+	}
+	return r
 }
 
 func (r *And) String() string {

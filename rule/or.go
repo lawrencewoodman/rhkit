@@ -30,8 +30,21 @@ type Or struct {
 	ruleB Rule
 }
 
-func NewOr(ruleA Rule, ruleB Rule) Rule {
-	return &Or{ruleA: ruleA, ruleB: ruleB}
+func NewOr(ruleA Rule, ruleB Rule) (Rule, error) {
+	_, ruleAIsTrue := ruleA.(True)
+	_, ruleBIsTrue := ruleB.(True)
+	if ruleAIsTrue || ruleBIsTrue {
+		return nil, fmt.Errorf("can't Or rule: %s, with: %s", ruleA, ruleB)
+	}
+	return &Or{ruleA: ruleA, ruleB: ruleB}, nil
+}
+
+func MustNewOr(ruleA Rule, ruleB Rule) Rule {
+	r, err := NewOr(ruleA, ruleB)
+	if err != nil {
+		panic(err)
+	}
+	return r
 }
 
 func (r *Or) String() string {
