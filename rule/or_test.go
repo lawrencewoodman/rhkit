@@ -2,6 +2,8 @@ package rule
 
 import (
 	"github.com/lawrencewoodman/dlit"
+	"reflect"
+	"sort"
 	"testing"
 )
 
@@ -216,6 +218,41 @@ func TestOrIsTrue_errors(t *testing.T) {
 		_, gotErr := r.IsTrue(record)
 		if err := checkErrorMatch(gotErr, c.wantErr); err != nil {
 			t.Errorf("IsTrue(record) rule: %s - %s", r, err)
+		}
+	}
+}
+
+func TestOrGetFields(t *testing.T) {
+	cases := []struct {
+		ruleA Rule
+		ruleB Rule
+		want  []string
+	}{
+		{ruleA: NewEQFF("flow", "flow"),
+			ruleB: NewEQFF("income", "cost"),
+			want:  []string{"flow", "income", "cost"},
+		},
+		{ruleA: MustNewAnd(NewEQFF("flowIn", "flowOut"), NewEQFF("rate", "flow")),
+			ruleB: NewEQFF("income", "cost"),
+			want:  []string{"flow", "flowIn", "flowOut", "rate", "income", "cost"},
+		},
+		{
+			ruleA: NewEQFF("income", "cost"),
+			ruleB: MustNewAnd(NewEQFF("flowIn", "flowOut"), NewEQFF("rate", "flow")),
+			want:  []string{"flow", "flowIn", "flowOut", "rate", "income", "cost"},
+		},
+		{ruleA: NewEQFF("income", "cost"),
+			ruleB: MustNewOr(NewEQFF("flowIn", "flowOut"), NewEQFF("rate", "flow")),
+			want:  []string{"flow", "flowIn", "flowOut", "rate", "income", "cost"},
+		},
+	}
+	for _, c := range cases {
+		r := MustNewOr(c.ruleA, c.ruleB)
+		got := r.GetFields()
+		sort.Strings(got)
+		sort.Strings(c.want)
+		if !reflect.DeepEqual(got, c.want) {
+			t.Errorf("GetFields() got: %s, want: %s", got, c.want)
 		}
 	}
 }

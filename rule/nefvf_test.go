@@ -3,6 +3,7 @@ package rule
 import (
 	"errors"
 	"github.com/lawrencewoodman/dlit"
+	"reflect"
 	"testing"
 )
 
@@ -94,5 +95,14 @@ func TestNEFVFIsTrue_errors(t *testing.T) {
 		if err := checkErrorMatch(gotErr, c.wantErr); err != nil {
 			t.Errorf("IsTrue(record) rule: %s - %s", r, err)
 		}
+	}
+}
+
+func TestNEFVFGetFields(t *testing.T) {
+	r := NewNEFVF("income", 5.5)
+	want := []string{"income"}
+	got := r.GetFields()
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("GetFields() got: %s, want: %s", got, want)
 	}
 }

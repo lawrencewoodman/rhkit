@@ -67,3 +67,7 @@ func (r *GEFVF) CloneWithValue(newValue interface{}) TweakableRule {
 		newValue, newValue,
 	))
 }
+
+func (r *GEFVF) GetFields() []string {
+	return []string{r.field}
+}

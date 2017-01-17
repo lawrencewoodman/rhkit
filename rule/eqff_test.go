@@ -3,6 +3,7 @@ package rule
 import (
 	"errors"
 	"github.com/lawrencewoodman/dlit"
+	"reflect"
 	"testing"
 )
 
@@ -94,5 +95,14 @@ func TestEQFFIsTrue_errors(t *testing.T) {
 		if err := checkErrorMatch(gotErr, c.wantErr); err != nil {
 			t.Errorf("IsTrue(record) rule: %s - %s", r, err)
 		}
+	}
+}
+
+func TestEQFFGetFields(t *testing.T) {
+	r := NewEQFF("income", "cost")
+	want := []string{"income", "cost"}
+	got := r.GetFields()
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("GetFields() got: %s, want: %s", got, want)
 	}
 }

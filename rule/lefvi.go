@@ -66,3 +66,7 @@ func (r *LEFVI) CloneWithValue(newValue interface{}) TweakableRule {
 		newValue, newValue,
 	))
 }
+
+func (r *LEFVI) GetFields() []string {
+	return []string{r.field}
+}

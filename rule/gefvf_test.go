@@ -2,6 +2,7 @@ package rule
 
 import (
 	"github.com/lawrencewoodman/dlit"
+	"reflect"
 	"testing"
 )
 
@@ -114,4 +115,13 @@ func TestGEFVFCloneWithValue_panics(t *testing.T) {
 	value := 8.93
 	r := NewGEFVF(field, value)
 	r.CloneWithValue("fred")
+}
+
+func TestGEFVFGetFields(t *testing.T) {
+	r := NewGEFVF("income", 5.5)
+	want := []string{"income"}
+	got := r.GetFields()
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("GetFields() got: %s, want: %s", got, want)
+	}
 }

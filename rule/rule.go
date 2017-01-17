@@ -31,6 +31,7 @@ import (
 type Rule interface {
 	fmt.Stringer
 	IsTrue(record ddataset.Record) (bool, error)
+	GetFields() []string
 }
 
 type TweakableRule interface {

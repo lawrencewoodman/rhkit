@@ -1147,7 +1147,7 @@ func TestCombineRules(t *testing.T) {
 		want []rule.Rule
 	}{
 		{in: []rule.Rule{
-			rule.NewEQFVS("team", "a"),
+			rule.NewEQFVS("group", "a"),
 			rule.NewGEFVI("band", 4),
 			rule.NewInFV("team", makeStringsDlitSlice("red", "green", "blue")),
 		},
@@ -1158,7 +1158,7 @@ func TestCombineRules(t *testing.T) {
 				),
 				rule.MustNewAnd(
 					rule.NewGEFVI("band", 4),
-					rule.NewEQFVS("team", "a"),
+					rule.NewEQFVS("group", "a"),
 				),
 				rule.MustNewOr(
 					rule.NewGEFVI("band", 4),
@@ -1166,15 +1166,15 @@ func TestCombineRules(t *testing.T) {
 				),
 				rule.MustNewOr(
 					rule.NewGEFVI("band", 4),
-					rule.NewEQFVS("team", "a"),
+					rule.NewEQFVS("group", "a"),
 				),
 				rule.MustNewAnd(
+					rule.NewEQFVS("group", "a"),
 					rule.NewInFV("team", makeStringsDlitSlice("red", "green", "blue")),
-					rule.NewEQFVS("team", "a"),
 				),
 				rule.MustNewOr(
+					rule.NewEQFVS("group", "a"),
 					rule.NewInFV("team", makeStringsDlitSlice("red", "green", "blue")),
-					rule.NewEQFVS("team", "a"),
 				),
 			},
 		},
@@ -1207,7 +1207,7 @@ func TestCombineRules(t *testing.T) {
 		if err := matchRulesUnordered(gotRules, c.want); err != nil {
 			gotRuleStrs := rulesToSortedStrings(gotRules)
 			wantRuleStrs := rulesToSortedStrings(c.want)
-			t.Errorf("matchRulesUnordered() rules don't match: %s\n got: %s\nwant: %s\n",
+			t.Errorf("matchRulesUnordered() rules don't match: %s\n got: %s\n want: %s\n",
 				err, gotRuleStrs, wantRuleStrs)
 		}
 	}

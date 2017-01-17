@@ -29,3 +29,11 @@ func TestTrueIsTrue(t *testing.T) {
 		t.Errorf("IsTrue(record) (rule: %s) got: %t, want: %t", r, got, want)
 	}
 }
+
+func TestTrueGetFields(t *testing.T) {
+	r := NewTrue()
+	got := r.GetFields()
+	if len(got) != 0 {
+		t.Errorf("GetFields() got: %s, want: {}", got)
+	}
+}

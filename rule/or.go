@@ -77,3 +77,21 @@ func (r *Or) IsTrue(record ddataset.Record) (bool, error) {
 	}
 	return lh || rh, nil
 }
+
+func (r *Or) GetFields() []string {
+	results := []string{}
+	mResults := map[string]interface{}{}
+	for _, f := range r.ruleA.GetFields() {
+		if _, ok := mResults[f]; !ok {
+			mResults[f] = nil
+			results = append(results, f)
+		}
+	}
+	for _, f := range r.ruleB.GetFields() {
+		if _, ok := mResults[f]; !ok {
+			mResults[f] = nil
+			results = append(results, f)
+		}
+	}
+	return results
+}

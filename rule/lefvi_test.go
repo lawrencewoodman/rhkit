@@ -2,6 +2,7 @@ package rule
 
 import (
 	"github.com/lawrencewoodman/dlit"
+	"reflect"
 	"testing"
 )
 
@@ -114,4 +115,13 @@ func TestLEFVICloneWithValue_panics(t *testing.T) {
 	value := int64(893)
 	r := NewLEFVI(field, value)
 	r.CloneWithValue("fred")
+}
+
+func TestLEFVIGetFields(t *testing.T) {
+	r := NewLEFVI("income", 5)
+	want := []string{"income"}
+	got := r.GetFields()
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("GetFields() got: %s, want: %s", got, want)
+	}
 }

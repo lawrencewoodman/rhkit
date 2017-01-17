@@ -3,6 +3,7 @@ package rule
 import (
 	"errors"
 	"github.com/lawrencewoodman/dlit"
+	"reflect"
 	"testing"
 )
 
@@ -87,5 +88,14 @@ func TestEQFVSIsTrue_errors(t *testing.T) {
 		if err := checkErrorMatch(gotErr, c.wantErr); err != nil {
 			t.Errorf("IsTrue(record) rule: %s - %s", r, err)
 		}
+	}
+}
+
+func TestEQFVSGetFields(t *testing.T) {
+	r := NewEQFVS("group", "ace")
+	want := []string{"group"}
+	got := r.GetFields()
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("GetFields() got: %s, want: %s", got, want)
 	}
 }

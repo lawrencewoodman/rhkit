@@ -2,6 +2,7 @@ package rule
 
 import (
 	"github.com/lawrencewoodman/dlit"
+	"reflect"
 	"testing"
 )
 
@@ -91,5 +92,14 @@ func TestLEFFIsTrue_errors(t *testing.T) {
 		if err := checkErrorMatch(gotErr, c.wantErr); err != nil {
 			t.Errorf("IsTrue(record) rule: %s - %s", r, err)
 		}
+	}
+}
+
+func TestLEFFGetFields(t *testing.T) {
+	r := NewLEFF("income", "cost")
+	want := []string{"income", "cost"}
+	got := r.GetFields()
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("GetFields() got: %s, want: %s", got, want)
 	}
 }

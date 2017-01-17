@@ -2,6 +2,8 @@ package rule
 
 import (
 	"github.com/lawrencewoodman/dlit"
+	"reflect"
+	"sort"
 	"testing"
 )
 
@@ -16,14 +18,57 @@ func TestNewAnd(t *testing.T) {
 		{ruleA: NewLEFVF("rate", 1.05), ruleB: NewLEFVF("flow", 2.70)},
 		{ruleA: NewLEFVF("rate", 1.05), ruleB: NewGEFVF("flow", 1.05)},
 		{ruleA: NewGEFVF("flow", 1.05), ruleB: NewLEFVF("flow", 2.1)},
+		{ruleA: NewInFV("group", []*dlit.Literal{
+			dlit.NewString("bob"),
+			dlit.NewString("fred"),
+			dlit.NewString("albert"),
+		}),
+			ruleB: NewEQFF("team", "group"),
+		},
+		{ruleA: NewEQFF("team", "group"),
+			ruleB: NewInFV("group", []*dlit.Literal{
+				dlit.NewString("bob"),
+				dlit.NewString("fred"),
+				dlit.NewString("albert"),
+			}),
+		},
+		{ruleA: NewInFV("group", []*dlit.Literal{
+			dlit.NewString("bob"),
+			dlit.NewString("fred"),
+			dlit.NewString("albert"),
+		}),
+			ruleB: NewEQFF("group", "team"),
+		},
+		{ruleA: NewEQFF("group", "team"),
+			ruleB: NewInFV("group", []*dlit.Literal{
+				dlit.NewString("bob"),
+				dlit.NewString("fred"),
+				dlit.NewString("albert"),
+			}),
+		},
+		{ruleA: MustNewAnd(NewEQFF("team", "group"), NewEQFF("flow", "rate")),
+			ruleB: NewInFV("group", []*dlit.Literal{
+				dlit.NewString("bob"),
+				dlit.NewString("fred"),
+				dlit.NewString("albert"),
+			}),
+		},
+		{ruleA: NewInFV("group", []*dlit.Literal{
+			dlit.NewString("bob"),
+			dlit.NewString("fred"),
+			dlit.NewString("albert"),
+		}),
+			ruleB: MustNewAnd(NewEQFF("team", "group"), NewEQFF("flow", "rate")),
+		},
 	}
 	for _, c := range cases {
 		r, err := NewAnd(c.ruleA, c.ruleB)
-		if r == nil {
-			t.Errorf("NewAnd(%s, %s) rule got: nil, want: !nil", c.ruleA, c.ruleB)
-		}
 		if err != nil {
 			t.Errorf("NewAnd(%s, %s) got err: %s", c.ruleA, c.ruleB, err)
+			continue
+		}
+		if r == nil {
+			t.Errorf("NewAnd(%s, %s) rule got: nil, want: !nil", c.ruleA, c.ruleB)
 		}
 	}
 }
@@ -61,6 +106,22 @@ func TestNewAnd_errors(t *testing.T) {
 		{ruleA: NewGEFVF("flow", 2.1),
 			ruleB:      NewLEFVF("flow", 2.1),
 			wantErrStr: "can't And rule: flow >= 2.1, with: flow <= 2.1",
+		},
+		{ruleA: NewInFV("group", []*dlit.Literal{
+			dlit.NewString("bob"),
+			dlit.NewString("fred"),
+			dlit.NewString("albert"),
+		}),
+			ruleB:      NewEQFVS("group", "norris"),
+			wantErrStr: "can't And rule: in(group,\"bob\",\"fred\",\"albert\"), with: group == \"norris\"",
+		},
+		{ruleA: NewEQFVS("group", "norris"),
+			ruleB: NewInFV("group", []*dlit.Literal{
+				dlit.NewString("bob"),
+				dlit.NewString("fred"),
+				dlit.NewString("albert"),
+			}),
+			wantErrStr: "can't And rule: group == \"norris\", with: in(group,\"bob\",\"fred\",\"albert\")",
 		},
 		{ruleA: NewTrue(),
 			ruleB:      NewEQFF("flow", "rate"),
@@ -228,6 +289,41 @@ func TestAndIsTrue_errors(t *testing.T) {
 		_, err := r.IsTrue(record)
 		if err != wantErr {
 			t.Errorf("IsTrue(record) rule: %s, err: %v, want: %v", r, err, wantErr)
+		}
+	}
+}
+
+func TestAndGetFields(t *testing.T) {
+	cases := []struct {
+		ruleA Rule
+		ruleB Rule
+		want  []string
+	}{
+		{ruleA: NewEQFF("flow", "flow"),
+			ruleB: NewEQFF("income", "cost"),
+			want:  []string{"flow", "income", "cost"},
+		},
+		{ruleA: MustNewAnd(NewEQFF("flowIn", "flowOut"), NewEQFF("rate", "flow")),
+			ruleB: NewEQFF("income", "cost"),
+			want:  []string{"flow", "flowIn", "flowOut", "rate", "income", "cost"},
+		},
+		{
+			ruleA: NewEQFF("income", "cost"),
+			ruleB: MustNewAnd(NewEQFF("flowIn", "flowOut"), NewEQFF("rate", "flow")),
+			want:  []string{"flow", "flowIn", "flowOut", "rate", "income", "cost"},
+		},
+		{ruleA: NewEQFF("income", "cost"),
+			ruleB: MustNewOr(NewEQFF("flowIn", "flowOut"), NewEQFF("rate", "flow")),
+			want:  []string{"flow", "flowIn", "flowOut", "rate", "income", "cost"},
+		},
+	}
+	for _, c := range cases {
+		r := MustNewAnd(c.ruleA, c.ruleB)
+		got := r.GetFields()
+		sort.Strings(got)
+		sort.Strings(c.want)
+		if !reflect.DeepEqual(got, c.want) {
+			t.Errorf("GetFields() got: %s, want: %s", got, c.want)
 		}
 	}
 }

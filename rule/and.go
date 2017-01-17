@@ -39,7 +39,20 @@ func NewAnd(ruleA Rule, ruleB Rule) (Rule, error) {
 	tRuleA, ruleAIsTweakable := ruleA.(TweakableRule)
 	tRuleB, ruleBIsTweakable := ruleB.(TweakableRule)
 	if !ruleAIsTweakable || !ruleBIsTweakable {
-		return &And{ruleA: ruleA, ruleB: ruleB}, nil
+		_, ruleAIsIn := ruleA.(*InFV)
+		_, ruleBIsIn := ruleB.(*InFV)
+		ruleAFields := ruleA.GetFields()
+		ruleBFields := ruleB.GetFields()
+		if (ruleAIsIn &&
+			len(ruleBFields) == 1 &&
+			ruleAFields[0] == ruleBFields[0]) ||
+			(ruleBIsIn &&
+				len(ruleAFields) == 1 &&
+				ruleAFields[0] == ruleBFields[0]) {
+			return nil, fmt.Errorf("can't And rule: %s, with: %s", ruleA, ruleB)
+		} else {
+			return &And{ruleA: ruleA, ruleB: ruleB}, nil
+		}
 	}
 
 	fieldA, opA, vA := tRuleA.GetTweakableParts()
@@ -91,4 +104,22 @@ func (r *And) IsTrue(record ddataset.Record) (bool, error) {
 		return false, InvalidRuleError{Rule: r}
 	}
 	return lh && rh, nil
+}
+
+func (r *And) GetFields() []string {
+	results := []string{}
+	mResults := map[string]interface{}{}
+	for _, f := range r.ruleA.GetFields() {
+		if _, ok := mResults[f]; !ok {
+			mResults[f] = nil
+			results = append(results, f)
+		}
+	}
+	for _, f := range r.ruleB.GetFields() {
+		if _, ok := mResults[f]; !ok {
+			mResults[f] = nil
+			results = append(results, f)
+		}
+	}
+	return results
 }
