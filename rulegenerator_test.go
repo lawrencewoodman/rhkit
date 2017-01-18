@@ -1198,6 +1198,30 @@ func TestCombineRules(t *testing.T) {
 				rule.MustNewOr(rule.NewGEFVI("flow", 6), rule.NewEQFVS("team", "a")),
 			},
 		},
+		{in: []rule.Rule{
+			rule.NewInFV("team", makeStringsDlitSlice("pink", "yellow", "blue")),
+			rule.NewInFV("team", makeStringsDlitSlice("red", "green", "blue")),
+		},
+			want: []rule.Rule{
+				rule.NewInFV("team",
+					makeStringsDlitSlice("pink", "yellow", "blue", "red", "green")),
+			},
+		},
+		{in: []rule.Rule{
+			rule.NewInFV("team", makeStringsDlitSlice("pink", "yellow", "blue")),
+			rule.NewInFV("group", makeStringsDlitSlice("red", "green", "blue")),
+		},
+			want: []rule.Rule{
+				rule.MustNewAnd(
+					rule.NewInFV("group", makeStringsDlitSlice("red", "green", "blue")),
+					rule.NewInFV("team", makeStringsDlitSlice("pink", "yellow", "blue")),
+				),
+				rule.MustNewOr(
+					rule.NewInFV("group", makeStringsDlitSlice("red", "green", "blue")),
+					rule.NewInFV("team", makeStringsDlitSlice("pink", "yellow", "blue")),
+				),
+			},
+		},
 		{in: []rule.Rule{rule.NewEQFVS("team", "a")}, want: []rule.Rule{}},
 		{in: []rule.Rule{}, want: []rule.Rule{}},
 	}

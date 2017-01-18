@@ -22,6 +22,7 @@ package rule
 import (
 	"fmt"
 	"github.com/lawrencewoodman/ddataset"
+	"github.com/lawrencewoodman/dlit"
 )
 
 // Or represents a rule determening if ruleA OR ruleB
@@ -36,7 +37,34 @@ func NewOr(ruleA Rule, ruleB Rule) (Rule, error) {
 	if ruleAIsTrue || ruleBIsTrue {
 		return nil, fmt.Errorf("can't Or rule: %s, with: %s", ruleA, ruleB)
 	}
+	inRuleA, ruleAIsIn := ruleA.(*InFV)
+	inRuleB, ruleBIsIn := ruleB.(*InFV)
+	if ruleAIsIn && ruleBIsIn {
+		return handleInRules(inRuleA, inRuleB), nil
+	}
+
 	return &Or{ruleA: ruleA, ruleB: ruleB}, nil
+}
+
+func handleInRules(ruleA, ruleB *InFV) Rule {
+	if ruleA.GetFields()[0] != ruleB.GetFields()[0] {
+		return &Or{ruleA: ruleA, ruleB: ruleB}
+	}
+	newValues := []*dlit.Literal{}
+	mNewValues := map[string]interface{}{}
+	for _, v := range ruleA.GetValues() {
+		if _, ok := mNewValues[v.String()]; !ok {
+			mNewValues[v.String()] = nil
+			newValues = append(newValues, v)
+		}
+	}
+	for _, v := range ruleB.GetValues() {
+		if _, ok := mNewValues[v.String()]; !ok {
+			mNewValues[v.String()] = nil
+			newValues = append(newValues, v)
+		}
+	}
+	return NewInFV(ruleA.GetFields()[0], newValues)
 }
 
 func MustNewOr(ruleA Rule, ruleB Rule) Rule {

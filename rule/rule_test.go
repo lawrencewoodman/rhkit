@@ -45,3 +45,28 @@ func TestSort(t *testing.T) {
 		}
 	}
 }
+
+func TestUniq(t *testing.T) {
+	in := []Rule{
+		NewEQFVS("band", "b"),
+		NewEQFVS("band", "a"),
+		NewGEFVI("flow", 3),
+		NewEQFVS("band", "a"),
+		NewGEFVI("flow", 2),
+	}
+	want := []Rule{
+		NewEQFVS("band", "b"),
+		NewEQFVS("band", "a"),
+		NewGEFVI("flow", 3),
+		NewGEFVI("flow", 2),
+	}
+	got := Uniq(in)
+	if len(got) != len(want) {
+		t.Fatalf("Sort - len(got) != len(want)")
+	}
+	for i, r := range want {
+		if got[i].String() != r.String() {
+			t.Fatalf("Sort - got: %v, want: %v", got, want)
+		}
+	}
+}

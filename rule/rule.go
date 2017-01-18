@@ -61,6 +61,19 @@ func Sort(rules []Rule) {
 	sort.Sort(byString(rules))
 }
 
+// Uniq returns the slices of Rules with duplicates removed
+func Uniq(rules []Rule) []Rule {
+	results := []Rule{}
+	mResults := map[string]interface{}{}
+	for _, r := range rules {
+		if _, ok := mResults[r.String()]; !ok {
+			mResults[r.String()] = nil
+			results = append(results, r)
+		}
+	}
+	return results
+}
+
 func commaJoinValues(values []*dlit.Literal) string {
 	str := fmt.Sprintf("\"%s\"", values[0].String())
 	for _, v := range values[1:] {

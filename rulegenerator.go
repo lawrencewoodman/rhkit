@@ -73,7 +73,7 @@ func CombineRules(rules []rule.Rule) []rule.Rule {
 			}
 		}
 	}
-	return combinedRules
+	return rule.Uniq(combinedRules)
 }
 
 func stringInSlice(s string, strings []string) bool {

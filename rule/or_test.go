@@ -25,6 +25,17 @@ func TestNewOr(t *testing.T) {
 		{ruleA: NewGEFVF("flow", 2.1), ruleB: NewLEFVF("flow", 1.05)},
 		{ruleA: NewGEFVF("flow", 2.1), ruleB: NewLEFVF("flow", 2.1)},
 		{ruleA: NewGEFVF("flow", 1.05), ruleB: NewLEFVF("flow", 2.1)},
+		{ruleA: NewInFV("group",
+			[]*dlit.Literal{
+				dlit.NewString("collingwood"), dlit.NewString("drake"),
+			},
+		),
+			ruleB: NewInFV("group",
+				[]*dlit.Literal{
+					dlit.NewString("nelson"), dlit.NewString("mountbatten"),
+				},
+			),
+		},
 	}
 	for _, c := range cases {
 		r, err := NewOr(c.ruleA, c.ruleB)
@@ -134,6 +145,32 @@ func TestOrString(t *testing.T) {
 			ruleB: MustNewOr(NewEQFVI("cost", 6), NewEQFF("flow", "flow")),
 			want:  "(income == 5 || flow == flow) || (cost == 6 || flow == flow)",
 		},
+		{ruleA: NewInFV("group",
+			[]*dlit.Literal{
+				dlit.NewString("collingwood"), dlit.NewString("drake"),
+				dlit.NewString("nelson"),
+			},
+		),
+			ruleB: NewInFV("group",
+				[]*dlit.Literal{
+					dlit.NewString("nelson"), dlit.NewString("mountbatten"),
+				},
+			),
+			want: "in(group,\"collingwood\",\"drake\",\"nelson\",\"mountbatten\")",
+		},
+		{ruleA: NewInFV("team",
+			[]*dlit.Literal{
+				dlit.NewString("collingwood"), dlit.NewString("drake"),
+				dlit.NewString("nelson"),
+			},
+		),
+			ruleB: NewInFV("group",
+				[]*dlit.Literal{
+					dlit.NewString("nelson"), dlit.NewString("mountbatten"),
+				},
+			),
+			want: "in(team,\"collingwood\",\"drake\",\"nelson\") || in(group,\"nelson\",\"mountbatten\")",
+		},
 	}
 	for _, c := range cases {
 		r := MustNewOr(c.ruleA, c.ruleB)
@@ -166,10 +203,64 @@ func TestOrIsTrue(t *testing.T) {
 			ruleB: NewNEFF("income", "income"),
 			want:  false,
 		},
+		{ruleA: NewInFV("group",
+			[]*dlit.Literal{
+				dlit.NewString("collingwood"), dlit.NewString("drake"),
+				dlit.NewString("nelson"),
+			},
+		),
+			ruleB: NewInFV("group",
+				[]*dlit.Literal{
+					dlit.NewString("nelson"), dlit.NewString("mountbatten"),
+				},
+			),
+			want: true,
+		},
+		{ruleA: NewInFV("group",
+			[]*dlit.Literal{
+				dlit.NewString("mountbatten"), dlit.NewString("drake"),
+				dlit.NewString("nelson"),
+			},
+		),
+			ruleB: NewInFV("group",
+				[]*dlit.Literal{
+					dlit.NewString("nelson"), dlit.NewString("collingwood"),
+				},
+			),
+			want: true,
+		},
+		{ruleA: NewInFV("team",
+			[]*dlit.Literal{
+				dlit.NewString("first"), dlit.NewString("second"),
+				dlit.NewString("third"),
+			},
+		),
+			ruleB: NewInFV("group",
+				[]*dlit.Literal{
+					dlit.NewString("nelson"), dlit.NewString("mountbatten"),
+				},
+			),
+			want: true,
+		},
+		{ruleA: NewInFV("team",
+			[]*dlit.Literal{
+				dlit.NewString("first"), dlit.NewString("second"),
+				dlit.NewString("third"),
+			},
+		),
+			ruleB: NewInFV("group",
+				[]*dlit.Literal{
+					dlit.NewString("collingwood"), dlit.NewString("nelson"),
+				},
+			),
+			want: false,
+		},
 	}
 	record := map[string]*dlit.Literal{
 		"income": dlit.MustNew(19),
 		"cost":   dlit.MustNew(20),
+		"group":  dlit.NewString("mountbatten"),
+		"team":   dlit.NewString("ace"),
 	}
 	for _, c := range cases {
 		r := MustNewOr(c.ruleA, c.ruleB)
