@@ -43,6 +43,16 @@ func NewOr(ruleA Rule, ruleB Rule) (Rule, error) {
 		return handleInRules(inRuleA, inRuleB), nil
 	}
 
+	tRuleA, ruleAIsTweakable := ruleA.(TweakableRule)
+	tRuleB, ruleBIsTweakable := ruleB.(TweakableRule)
+	if ruleAIsTweakable && ruleBIsTweakable {
+		fieldA, opA, _ := tRuleA.GetTweakableParts()
+		fieldB, opB, _ := tRuleB.GetTweakableParts()
+		if fieldA == fieldB && opA == opB {
+			return nil, fmt.Errorf("can't Or rule: %s, with: %s", ruleA, ruleB)
+		}
+	}
+
 	return &Or{ruleA: ruleA, ruleB: ruleB}, nil
 }
 

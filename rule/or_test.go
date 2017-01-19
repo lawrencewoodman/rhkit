@@ -15,7 +15,6 @@ func TestNewOr(t *testing.T) {
 		{ruleA: NewLEFVF("flow", 1.05), ruleB: NewGEFVF("flow", 0.0)},
 		{ruleA: NewLEFVF("flow", 1.05), ruleB: NewEQFF("flow", "rate")},
 		{ruleA: NewEQFF("flow", "rate"), ruleB: NewLEFVF("flow", 1.05)},
-		{ruleA: NewLEFVF("flow", 1.05), ruleB: NewLEFVF("flow", 2.70)},
 		{ruleA: NewLEFVF("rate", 1.05), ruleB: NewLEFVF("flow", 2.70)},
 		{ruleA: NewLEFVF("flow", 1.05), ruleB: NewGEFVF("flow", 1.05)},
 		{ruleA: NewLEFVF("rate", 1.05), ruleB: NewGEFVF("flow", 1.05)},
@@ -25,6 +24,7 @@ func TestNewOr(t *testing.T) {
 		{ruleA: NewGEFVF("flow", 2.1), ruleB: NewLEFVF("flow", 1.05)},
 		{ruleA: NewGEFVF("flow", 2.1), ruleB: NewLEFVF("flow", 2.1)},
 		{ruleA: NewGEFVF("flow", 1.05), ruleB: NewLEFVF("flow", 2.1)},
+		{ruleA: NewGEFVF("flow", 1.05), ruleB: NewGEFVF("rate", 2.07)},
 		{ruleA: NewInFV("group",
 			[]*dlit.Literal{
 				dlit.NewString("collingwood"), dlit.NewString("drake"),
@@ -61,6 +61,14 @@ func TestNewOr_errors(t *testing.T) {
 		{ruleA: NewTrue(),
 			ruleB:      NewLEFVF("flow", 1.05),
 			wantErrStr: "can't Or rule: true(), with: flow <= 1.05",
+		},
+		{ruleA: NewLEFVF("flow", 1.05),
+			ruleB:      NewLEFVF("flow", 2.07),
+			wantErrStr: "can't Or rule: flow <= 1.05, with: flow <= 2.07",
+		},
+		{ruleA: NewGEFVF("flow", 1.05),
+			ruleB:      NewGEFVF("flow", 2.07),
+			wantErrStr: "can't Or rule: flow >= 1.05, with: flow >= 2.07",
 		},
 	}
 	for _, c := range cases {
