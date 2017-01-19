@@ -249,7 +249,7 @@ func TestGenerateIntRules(t *testing.T) {
 			"flow": &fieldDescription{
 				kind:   ftInt,
 				min:    dlit.MustNew(1),
-				max:    dlit.MustNew(4),
+				max:    dlit.MustNew(20),
 				values: map[string]valueDescription{},
 			},
 		},
@@ -277,6 +277,8 @@ func TestGenerateIntRules(t *testing.T) {
 		rule.MustNewOr(rule.NewLEFVI("flow", 4), rule.NewGEFVI("flow", 1)),
 		rule.MustNewOr(rule.NewLEFVI("flow", 4), rule.NewGEFVI("flow", 2)),
 		rule.MustNewOr(rule.NewLEFVI("flow", 4), rule.NewGEFVI("flow", 3)),
+		rule.NewLEFVI("flow", 20),
+		rule.MustNewOr(rule.NewLEFVI("flow", 20), rule.NewGEFVI("flow", 19)),
 
 		rule.NewGEFVI("flow", 1), /* TODO: This is a pointless rule */
 		rule.MustNewOr(rule.NewGEFVI("flow", 1), rule.NewGEFVI("flow", 2)),
@@ -284,15 +286,19 @@ func TestGenerateIntRules(t *testing.T) {
 
 		rule.NewGEFVI("flow", 2),
 		rule.MustNewOr(rule.NewGEFVI("flow", 2), rule.NewGEFVI("flow", 3)),
+		rule.MustNewOr(rule.NewGEFVI("flow", 19), rule.NewGEFVI("flow", 2)),
 		rule.NewGEFVI("flow", 3),
+		rule.MustNewOr(rule.NewGEFVI("flow", 18), rule.NewGEFVI("flow", 19)),
+		rule.NewGEFVI("flow", 19),
 	}
 
 	got := generateIntRules(inputDescription, ruleFields, "flow")
-	if err := matchRulesUnordered(got, wantRules); err != nil {
-		gotRuleStrs := rulesToSortedStrings(got)
-		wantRuleStrs := rulesToSortedStrings(wantRules)
-		t.Errorf("matchRulesUnordered() rules don't match: %s\ngot: %s\nwant: %s\n",
-			err, gotRuleStrs, wantRuleStrs)
+	if err := rulesContain(got, wantRules); err != nil {
+		t.Errorf("GenerateIntRules: %s, got: %s", err, got)
+	}
+	if len(got) <= len(wantRules) {
+		t.Errorf("GenerateIntRules: There should be more rules generated: %d",
+			len(got))
 	}
 }
 
@@ -548,14 +554,12 @@ func TestGenerateFloatRules(t *testing.T) {
 	}
 
 	got := generateFloatRules(inputDescription, ruleFields, "flow")
-	if err := matchRulesUnordered(got, wantRules); err != nil {
-		gotRuleStrs := rulesToSortedStrings(got)
-		wantRuleStrs := rulesToSortedStrings(wantRules)
-		t.Errorf("matchRulesUnordered() rules don't match: %s\ngot: %s\nwant: %s\n",
-			err, gotRuleStrs, wantRuleStrs)
-		for i, r := range gotRuleStrs {
-			t.Errorf("got[%d]: %s", i, r)
-		}
+	if err := rulesContain(got, wantRules); err != nil {
+		t.Errorf("GenerateFloatRules: %s", err)
+	}
+	if len(got) <= len(wantRules) {
+		t.Errorf("GenerateFloatRules: There should be more rules generated: %d",
+			len(got))
 	}
 }
 

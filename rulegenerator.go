@@ -158,7 +158,7 @@ func generateIntRules(
 	min, _ := fd.min.Int()
 	max, _ := fd.max.Int()
 	diff := max - min
-	step := diff / 10
+	step := diff / 20
 	if step == 0 {
 		step = 1
 	}
@@ -187,7 +187,6 @@ func truncateFloat(f float64, maxDP int) float64 {
 	return nf
 }
 
-// TODO: For each rule give all dp numbers 0..maxDP
 func generateFloatRules(
 	inputDescription *Description,
 	ruleFields []string,
@@ -202,7 +201,7 @@ func generateFloatRules(
 	max, _ := fd.max.Float()
 	maxDP := fd.maxDP
 	diff := max - min
-	step := diff / 10.0
+	step := diff / 20.0
 
 	// i set to 0 to make more tweakable
 	for i := float64(0); i < diff; i += step {
