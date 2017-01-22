@@ -46,35 +46,11 @@ func NewOr(ruleA Rule, ruleB Rule) (Rule, error) {
 	tRuleA, ruleAIsTweakable := ruleA.(TweakableRule)
 	tRuleB, ruleBIsTweakable := ruleB.(TweakableRule)
 	if ruleAIsTweakable && ruleBIsTweakable {
-		fieldA, opA, _ := tRuleA.GetTweakableParts()
-		fieldB, opB, _ := tRuleB.GetTweakableParts()
-		if fieldA == fieldB && opA == opB {
-			return nil, fmt.Errorf("can't Or rule: %s, with: %s", ruleA, ruleB)
-		}
+		r, err := joinTweakableRulesOutside(tRuleA, tRuleB)
+		return r, err
 	}
 
 	return &Or{ruleA: ruleA, ruleB: ruleB}, nil
-}
-
-func handleInRules(ruleA, ruleB *InFV) Rule {
-	if ruleA.GetFields()[0] != ruleB.GetFields()[0] {
-		return &Or{ruleA: ruleA, ruleB: ruleB}
-	}
-	newValues := []*dlit.Literal{}
-	mNewValues := map[string]interface{}{}
-	for _, v := range ruleA.GetValues() {
-		if _, ok := mNewValues[v.String()]; !ok {
-			mNewValues[v.String()] = nil
-			newValues = append(newValues, v)
-		}
-	}
-	for _, v := range ruleB.GetValues() {
-		if _, ok := mNewValues[v.String()]; !ok {
-			mNewValues[v.String()] = nil
-			newValues = append(newValues, v)
-		}
-	}
-	return NewInFV(ruleA.GetFields()[0], newValues)
 }
 
 func MustNewOr(ruleA Rule, ruleB Rule) Rule {
@@ -132,4 +108,78 @@ func (r *Or) GetFields() []string {
 		}
 	}
 	return results
+}
+
+func joinTweakableRulesOutside(
+	ruleA TweakableRule,
+	ruleB TweakableRule,
+) (Rule, error) {
+	var r Rule
+	var err error
+	fieldA := ruleA.GetFields()[0]
+	fieldB := ruleB.GetFields()[0]
+
+	if fieldA == fieldB {
+		GEFVIRuleA, ruleAIsGEFVI := ruleA.(*GEFVI)
+		LEFVIRuleA, ruleAIsLEFVI := ruleA.(*LEFVI)
+		GEFVIRuleB, ruleBIsGEFVI := ruleB.(*GEFVI)
+		LEFVIRuleB, ruleBIsLEFVI := ruleB.(*LEFVI)
+		GEFVFRuleA, ruleAIsGEFVF := ruleA.(*GEFVF)
+		LEFVFRuleA, ruleAIsLEFVF := ruleA.(*LEFVF)
+		GEFVFRuleB, ruleBIsGEFVF := ruleB.(*GEFVF)
+		LEFVFRuleB, ruleBIsLEFVF := ruleB.(*LEFVF)
+		if ruleAIsGEFVI && ruleBIsLEFVI {
+			r, err = NewOutsideFVI(
+				fieldA,
+				LEFVIRuleB.GetValue(),
+				GEFVIRuleA.GetValue(),
+			)
+		} else if ruleAIsLEFVI && ruleBIsGEFVI {
+			r, err = NewOutsideFVI(
+				fieldA,
+				LEFVIRuleA.GetValue(),
+				GEFVIRuleB.GetValue(),
+			)
+		} else if ruleAIsGEFVF && ruleBIsLEFVF {
+			r, err = NewOutsideFVF(
+				fieldA,
+				LEFVFRuleB.GetValue(),
+				GEFVFRuleA.GetValue(),
+			)
+		} else if ruleAIsLEFVF && ruleBIsGEFVF {
+			r, err = NewOutsideFVF(
+				fieldA,
+				LEFVFRuleA.GetValue(),
+				GEFVFRuleB.GetValue(),
+			)
+		} else {
+			err = fmt.Errorf("can't Or rule: %s, with: %s", ruleA, ruleB)
+		}
+		if err != nil {
+			return nil, fmt.Errorf("can't Or rule: %s, with: %s", ruleA, ruleB)
+		}
+		return r, err
+	}
+	return &Or{ruleA: ruleA, ruleB: ruleB}, nil
+}
+
+func handleInRules(ruleA, ruleB *InFV) Rule {
+	if ruleA.GetFields()[0] != ruleB.GetFields()[0] {
+		return &Or{ruleA: ruleA, ruleB: ruleB}
+	}
+	newValues := []*dlit.Literal{}
+	mNewValues := map[string]interface{}{}
+	for _, v := range ruleA.GetValues() {
+		if _, ok := mNewValues[v.String()]; !ok {
+			mNewValues[v.String()] = nil
+			newValues = append(newValues, v)
+		}
+	}
+	for _, v := range ruleB.GetValues() {
+		if _, ok := mNewValues[v.String()]; !ok {
+			mNewValues[v.String()] = nil
+			newValues = append(newValues, v)
+		}
+	}
+	return NewInFV(ruleA.GetFields()[0], newValues)
 }

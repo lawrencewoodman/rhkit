@@ -43,6 +43,10 @@ func (r *LEFVF) GetTweakableParts() (string, string, string) {
 	return r.field, "<=", strconv.FormatFloat(r.value, 'f', -1, 64)
 }
 
+func (r *LEFVF) GetValue() float64 {
+	return r.value
+}
+
 func (r *LEFVF) GetFields() []string {
 	return []string{r.field}
 }

@@ -42,6 +42,10 @@ func (r *GEFVI) GetTweakableParts() (string, string, string) {
 	return r.field, ">=", fmt.Sprintf("%d", r.value)
 }
 
+func (r *GEFVI) GetValue() int64 {
+	return r.value
+}
+
 func (r *GEFVI) IsTrue(record ddataset.Record) (bool, error) {
 	lh, ok := record[r.field]
 	if !ok {

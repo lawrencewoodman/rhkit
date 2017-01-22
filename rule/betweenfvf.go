@@ -20,58 +20,48 @@
 package rule
 
 import (
-	"fmt"
+	"errors"
 	"github.com/lawrencewoodman/ddataset"
 	"strconv"
 )
 
-// GEFVF represents a rule determening if field >= floatValue
-type GEFVF struct {
+// BetweenFVF represents a rule determining if:
+// field >= intValue && field <= intValue
+type BetweenFVF struct {
 	field string
-	value float64
+	min   float64
+	max   float64
 }
 
-func NewGEFVF(field string, value float64) TweakableRule {
-	return &GEFVF{field: field, value: value}
+func NewBetweenFVF(field string, min float64, max float64) (Rule, error) {
+	if max <= min {
+		msg := "can't create Between rule where max: " +
+			strconv.FormatFloat(max, 'f', -1, 64) + " <= min: " +
+			strconv.FormatFloat(min, 'f', -1, 64)
+		return nil, errors.New(msg)
+	}
+	return &BetweenFVF{field: field, min: min, max: max}, nil
 }
 
-func (r *GEFVF) String() string {
-	return r.field + " >= " + strconv.FormatFloat(r.value, 'f', -1, 64)
+func (r *BetweenFVF) String() string {
+	return r.field + " >= " + strconv.FormatFloat(r.min, 'f', -1, 64) +
+		" && " + r.field + " <= " + strconv.FormatFloat(r.max, 'f', -1, 64)
 }
 
-func (r *GEFVF) GetTweakableParts() (string, string, string) {
-	return r.field, ">=", strconv.FormatFloat(r.value, 'f', -1, 64)
-}
-
-func (r *GEFVF) GetValue() float64 {
-	return r.value
-}
-
-func (r *GEFVF) IsTrue(record ddataset.Record) (bool, error) {
-	lh, ok := record[r.field]
+func (r *BetweenFVF) IsTrue(record ddataset.Record) (bool, error) {
+	value, ok := record[r.field]
 	if !ok {
 		return false, InvalidRuleError{Rule: r}
 	}
 
-	lhFloat, lhIsFloat := lh.Float()
-	if lhIsFloat {
-		return lhFloat >= r.value, nil
+	valueFloat, valueIsFloat := value.Float()
+	if valueIsFloat {
+		return valueFloat >= r.min && valueFloat <= r.max, nil
 	}
 
 	return false, IncompatibleTypesRuleError{Rule: r}
 }
 
-func (r *GEFVF) CloneWithValue(newValue interface{}) TweakableRule {
-	f, ok := newValue.(float64)
-	if ok {
-		return NewGEFVF(r.field, f)
-	}
-	panic(fmt.Sprintf(
-		"can't clone with newValue: %v of type %T, need type float64",
-		newValue, newValue,
-	))
-}
-
-func (r *GEFVF) GetFields() []string {
+func (r *BetweenFVF) GetFields() []string {
 	return []string{r.field}
 }

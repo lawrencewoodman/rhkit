@@ -36,6 +36,7 @@ func NewAnd(ruleA Rule, ruleB Rule) (Rule, error) {
 	if ruleAIsTrue || ruleBIsTrue {
 		return nil, fmt.Errorf("can't And rule: %s, with: %s", ruleA, ruleB)
 	}
+
 	tRuleA, ruleAIsTweakable := ruleA.(TweakableRule)
 	tRuleB, ruleBIsTweakable := ruleB.(TweakableRule)
 	if !ruleAIsTweakable || !ruleBIsTweakable {
@@ -54,17 +55,8 @@ func NewAnd(ruleA Rule, ruleB Rule) (Rule, error) {
 			return &And{ruleA: ruleA, ruleB: ruleB}, nil
 		}
 	}
-
-	fieldA, opA, vA := tRuleA.GetTweakableParts()
-	fieldB, opB, vB := tRuleB.GetTweakableParts()
-	if fieldA == fieldB {
-		if (opA == opB) ||
-			(opA == "<=" && opB == ">=" && vB >= vA) ||
-			(opA == ">=" && opB == "<=" && vB <= vA) {
-			return nil, fmt.Errorf("can't And rule: %s, with: %s", ruleA, ruleB)
-		}
-	}
-	return &And{ruleA: ruleA, ruleB: ruleB}, nil
+	r, err := joinTweakableRulesBetween(tRuleA, tRuleB)
+	return r, err
 }
 
 func MustNewAnd(ruleA Rule, ruleB Rule) Rule {
@@ -122,4 +114,57 @@ func (r *And) GetFields() []string {
 		}
 	}
 	return results
+}
+
+func joinTweakableRulesBetween(
+	ruleA TweakableRule,
+	ruleB TweakableRule,
+) (Rule, error) {
+	var r Rule
+	var err error
+	fieldA := ruleA.GetFields()[0]
+	fieldB := ruleB.GetFields()[0]
+
+	if fieldA == fieldB {
+		GEFVIRuleA, ruleAIsGEFVI := ruleA.(*GEFVI)
+		LEFVIRuleA, ruleAIsLEFVI := ruleA.(*LEFVI)
+		GEFVIRuleB, ruleBIsGEFVI := ruleB.(*GEFVI)
+		LEFVIRuleB, ruleBIsLEFVI := ruleB.(*LEFVI)
+		GEFVFRuleA, ruleAIsGEFVF := ruleA.(*GEFVF)
+		LEFVFRuleA, ruleAIsLEFVF := ruleA.(*LEFVF)
+		GEFVFRuleB, ruleBIsGEFVF := ruleB.(*GEFVF)
+		LEFVFRuleB, ruleBIsLEFVF := ruleB.(*LEFVF)
+		if ruleAIsGEFVI && ruleBIsLEFVI {
+			r, err = NewBetweenFVI(
+				fieldA,
+				GEFVIRuleA.GetValue(),
+				LEFVIRuleB.GetValue(),
+			)
+		} else if ruleAIsLEFVI && ruleBIsGEFVI {
+			r, err = NewBetweenFVI(
+				fieldA,
+				GEFVIRuleB.GetValue(),
+				LEFVIRuleA.GetValue(),
+			)
+		} else if ruleAIsGEFVF && ruleBIsLEFVF {
+			r, err = NewBetweenFVF(
+				fieldA,
+				GEFVFRuleA.GetValue(),
+				LEFVFRuleB.GetValue(),
+			)
+		} else if ruleAIsLEFVF && ruleBIsGEFVF {
+			r, err = NewBetweenFVF(
+				fieldA,
+				GEFVFRuleB.GetValue(),
+				LEFVFRuleA.GetValue(),
+			)
+		} else {
+			err = fmt.Errorf("can't And rule: %s, with: %s", ruleA, ruleB)
+		}
+		if err != nil {
+			return nil, fmt.Errorf("can't And rule: %s, with: %s", ruleA, ruleB)
+		}
+		return r, err
+	}
+	return &And{ruleA: ruleA, ruleB: ruleB}, nil
 }

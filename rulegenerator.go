@@ -176,9 +176,23 @@ func generateIntRules(
 		rulesMap[r.String()] = r
 	}
 
-	rules := rulesMapToArray(rulesMap)
-	cRules := CombineRules(rules)
-	return append(rules, cRules...)
+	// i set to 0 to make more tweakable
+	for i := int64(0); i < diff; i += step {
+		geN := min + i
+		for j := step; j <= diff; j += step {
+			leN := min + j
+			rB, err := rule.NewBetweenFVI(field, geN, leN)
+			if err == nil {
+				rulesMap[rB.String()] = rB
+			}
+			rO, err := rule.NewOutsideFVI(field, leN, geN)
+			if err == nil {
+				rulesMap[rO.String()] = rO
+			}
+		}
+	}
+
+	return rulesMapToArray(rulesMap)
 }
 
 func truncateFloat(f float64, maxDP int) float64 {
@@ -203,6 +217,12 @@ func generateFloatRules(
 	diff := max - min
 	step := diff / 20.0
 
+	for i := step; i <= diff; i += step {
+		n := truncateFloat(min+i, maxDP)
+		r := rule.NewLEFVF(field, n)
+		rulesMap[r.String()] = r
+	}
+
 	// i set to 0 to make more tweakable
 	for i := float64(0); i < diff; i += step {
 		n := truncateFloat(min+i, maxDP)
@@ -210,15 +230,23 @@ func generateFloatRules(
 		rulesMap[r.String()] = r
 	}
 
-	for i := step; i <= diff; i += step {
-		n := truncateFloat(min+i, maxDP)
-		r := rule.NewLEFVF(field, n)
-		rulesMap[r.String()] = r
+	// i set to 0 to make more tweakable
+	for i := float64(0); i < diff; i += step {
+		geN := truncateFloat(min+i, maxDP)
+		for j := step; j <= diff; j += step {
+			leN := truncateFloat(min+j, maxDP)
+			rB, err := rule.NewBetweenFVF(field, geN, leN)
+			if err == nil {
+				rulesMap[rB.String()] = rB
+			}
+			rO, err := rule.NewOutsideFVF(field, leN, geN)
+			if err == nil {
+				rulesMap[rO.String()] = rO
+			}
+		}
 	}
 
-	rules := rulesMapToArray(rulesMap)
-	cRules := CombineRules(rules)
-	return append(rules, cRules...)
+	return rulesMapToArray(rulesMap)
 }
 
 func generateCompareNumericRules(

@@ -12,18 +12,14 @@ func TestNewOr(t *testing.T) {
 		ruleA Rule
 		ruleB Rule
 	}{
-		{ruleA: NewLEFVF("flow", 1.05), ruleB: NewGEFVF("flow", 0.0)},
+		{ruleA: NewLEFVF("flow", 1.05), ruleB: NewGEFVF("flow", 1.06)},
 		{ruleA: NewLEFVF("flow", 1.05), ruleB: NewEQFF("flow", "rate")},
 		{ruleA: NewEQFF("flow", "rate"), ruleB: NewLEFVF("flow", 1.05)},
 		{ruleA: NewLEFVF("rate", 1.05), ruleB: NewLEFVF("flow", 2.70)},
-		{ruleA: NewLEFVF("flow", 1.05), ruleB: NewGEFVF("flow", 1.05)},
 		{ruleA: NewLEFVF("rate", 1.05), ruleB: NewGEFVF("flow", 1.05)},
 		{ruleA: NewLEFVF("flow", 1.05), ruleB: NewGEFVF("flow", 2.1)},
 		{ruleA: NewLEFVF("flow", 1.05), ruleB: NewGEFVF("rate", 2.1)},
-		{ruleA: NewLEFVF("flow", 1.05), ruleB: NewGEFVF("flow", 1.05)},
 		{ruleA: NewGEFVF("flow", 2.1), ruleB: NewLEFVF("flow", 1.05)},
-		{ruleA: NewGEFVF("flow", 2.1), ruleB: NewLEFVF("flow", 2.1)},
-		{ruleA: NewGEFVF("flow", 1.05), ruleB: NewLEFVF("flow", 2.1)},
 		{ruleA: NewGEFVF("flow", 1.05), ruleB: NewGEFVF("rate", 2.07)},
 		{ruleA: NewInFV("group",
 			[]*dlit.Literal{

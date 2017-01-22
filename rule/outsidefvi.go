@@ -24,53 +24,41 @@ import (
 	"github.com/lawrencewoodman/ddataset"
 )
 
-// LEFVI represents a rule determening if field <= intValue
-type LEFVI struct {
+// OutsideFVI represents a rule determining if:
+// field <= intValue || field >= intValue
+type OutsideFVI struct {
 	field string
-	value int64
+	low   int64
+	high  int64
 }
 
-func NewLEFVI(field string, value int64) TweakableRule {
-	return &LEFVI{field: field, value: value}
+func NewOutsideFVI(field string, low int64, high int64) (Rule, error) {
+	if high <= low {
+		return nil,
+			fmt.Errorf("can't create Outside rule where high: %d <= low: %d",
+				high, low)
+	}
+	return &OutsideFVI{field: field, low: low, high: high}, nil
 }
 
-func (r *LEFVI) String() string {
-	return fmt.Sprintf("%s <= %d", r.field, r.value)
+func (r *OutsideFVI) String() string {
+	return fmt.Sprintf("%s <= %d || %s >= %d", r.field, r.low, r.field, r.high)
 }
 
-func (r *LEFVI) GetTweakableParts() (string, string, string) {
-	return r.field, "<=", fmt.Sprintf("%d", r.value)
-}
-
-func (r *LEFVI) GetValue() int64 {
-	return r.value
-}
-
-func (r *LEFVI) IsTrue(record ddataset.Record) (bool, error) {
-	lh, ok := record[r.field]
+func (r *OutsideFVI) IsTrue(record ddataset.Record) (bool, error) {
+	value, ok := record[r.field]
 	if !ok {
 		return false, InvalidRuleError{Rule: r}
 	}
 
-	lhInt, lhIsInt := lh.Int()
-	if lhIsInt {
-		return lhInt <= r.value, nil
+	valueInt, valueIsInt := value.Int()
+	if valueIsInt {
+		return valueInt <= r.low || valueInt >= r.high, nil
 	}
 
 	return false, IncompatibleTypesRuleError{Rule: r}
 }
 
-func (r *LEFVI) CloneWithValue(newValue interface{}) TweakableRule {
-	f, ok := newValue.(int64)
-	if ok {
-		return NewLEFVI(r.field, f)
-	}
-	panic(fmt.Sprintf(
-		"can't clone with newValue: %v of type %T, need type int64",
-		newValue, newValue,
-	))
-}
-
-func (r *LEFVI) GetFields() []string {
+func (r *OutsideFVI) GetFields() []string {
 	return []string{r.field}
 }

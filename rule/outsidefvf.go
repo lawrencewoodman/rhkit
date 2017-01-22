@@ -20,58 +20,48 @@
 package rule
 
 import (
-	"fmt"
+	"errors"
 	"github.com/lawrencewoodman/ddataset"
 	"strconv"
 )
 
-// GEFVF represents a rule determening if field >= floatValue
-type GEFVF struct {
+// OutsideFVF represents a rule determining if:
+// field <= intValue || field >= intValue
+type OutsideFVF struct {
 	field string
-	value float64
+	low   float64
+	high  float64
 }
 
-func NewGEFVF(field string, value float64) TweakableRule {
-	return &GEFVF{field: field, value: value}
+func NewOutsideFVF(field string, low float64, high float64) (Rule, error) {
+	if high <= low {
+		msg := "can't create Outside rule where high: " +
+			strconv.FormatFloat(high, 'f', -1, 64) + " <= low: " +
+			strconv.FormatFloat(low, 'f', -1, 64)
+		return nil, errors.New(msg)
+	}
+	return &OutsideFVF{field: field, low: low, high: high}, nil
 }
 
-func (r *GEFVF) String() string {
-	return r.field + " >= " + strconv.FormatFloat(r.value, 'f', -1, 64)
+func (r *OutsideFVF) String() string {
+	return r.field + " <= " + strconv.FormatFloat(r.low, 'f', -1, 64) +
+		" || " + r.field + " >= " + strconv.FormatFloat(r.high, 'f', -1, 64)
 }
 
-func (r *GEFVF) GetTweakableParts() (string, string, string) {
-	return r.field, ">=", strconv.FormatFloat(r.value, 'f', -1, 64)
-}
-
-func (r *GEFVF) GetValue() float64 {
-	return r.value
-}
-
-func (r *GEFVF) IsTrue(record ddataset.Record) (bool, error) {
-	lh, ok := record[r.field]
+func (r *OutsideFVF) IsTrue(record ddataset.Record) (bool, error) {
+	value, ok := record[r.field]
 	if !ok {
 		return false, InvalidRuleError{Rule: r}
 	}
 
-	lhFloat, lhIsFloat := lh.Float()
-	if lhIsFloat {
-		return lhFloat >= r.value, nil
+	valueFloat, valueIsFloat := value.Float()
+	if valueIsFloat {
+		return valueFloat <= r.low || valueFloat >= r.high, nil
 	}
 
 	return false, IncompatibleTypesRuleError{Rule: r}
 }
 
-func (r *GEFVF) CloneWithValue(newValue interface{}) TweakableRule {
-	f, ok := newValue.(float64)
-	if ok {
-		return NewGEFVF(r.field, f)
-	}
-	panic(fmt.Sprintf(
-		"can't clone with newValue: %v of type %T, need type float64",
-		newValue, newValue,
-	))
-}
-
-func (r *GEFVF) GetFields() []string {
+func (r *OutsideFVF) GetFields() []string {
 	return []string{r.field}
 }
