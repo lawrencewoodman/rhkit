@@ -330,6 +330,34 @@ func (sortedAssessment *Assessment) excludePoorerTweakableRules(
 	sortedAssessment.RuleAssessments = goodRuleAssessments
 }
 
+/*
+TODO: implement this
+func (sortedAssessment *Assessment) excludePoorerAndTweakableRules(
+	numSimilarRules int,
+) {
+	goodRuleAssessments := make([]*RuleAssessment, 0)
+	fieldOperatorIDs := make(map[string]int)
+	for _, a := range sortedAssessment.RuleAssessments {
+		if andRule, isAnd := a.Rule.(rule.And); isAnd {
+		if tRule, isTweakable := a.Rule.(rule.TweakableRule); isTweakable {
+			field, operator, _ := tRule.GetTweakableParts()
+			fieldOperatorID := fmt.Sprintf("%s^%s", field, operator)
+			n, ok := fieldOperatorIDs[fieldOperatorID]
+			if !ok {
+				goodRuleAssessments = append(goodRuleAssessments, a)
+				fieldOperatorIDs[fieldOperatorID] = 1
+			} else if n < numSimilarRules {
+				goodRuleAssessments = append(goodRuleAssessments, a)
+				fieldOperatorIDs[fieldOperatorID]++
+			}
+		} else {
+			goodRuleAssessments = append(goodRuleAssessments, a)
+		}
+	}
+	sortedAssessment.RuleAssessments = goodRuleAssessments
+}
+*/
+
 // by implements sort.Interface for []*RuleAssessments based
 // on the sortFields
 type by struct {

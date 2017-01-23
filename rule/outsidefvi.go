@@ -41,6 +41,14 @@ func NewOutsideFVI(field string, low int64, high int64) (Rule, error) {
 	return &OutsideFVI{field: field, low: low, high: high}, nil
 }
 
+func MustNewOutsideFVI(field string, low int64, high int64) Rule {
+	r, err := NewOutsideFVI(field, low, high)
+	if err != nil {
+		panic(err)
+	}
+	return r
+}
+
 func (r *OutsideFVI) String() string {
 	return fmt.Sprintf("%s <= %d || %s >= %d", r.field, r.low, r.field, r.high)
 }

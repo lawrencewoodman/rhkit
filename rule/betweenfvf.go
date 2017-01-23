@@ -43,6 +43,14 @@ func NewBetweenFVF(field string, min float64, max float64) (Rule, error) {
 	return &BetweenFVF{field: field, min: min, max: max}, nil
 }
 
+func MustNewBetweenFVF(field string, min float64, max float64) Rule {
+	r, err := NewBetweenFVF(field, min, max)
+	if err != nil {
+		panic(err)
+	}
+	return r
+}
+
 func (r *BetweenFVF) String() string {
 	return r.field + " >= " + strconv.FormatFloat(r.min, 'f', -1, 64) +
 		" && " + r.field + " <= " + strconv.FormatFloat(r.max, 'f', -1, 64)

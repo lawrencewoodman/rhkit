@@ -40,6 +40,14 @@ func NewBetweenFVI(field string, min int64, max int64) (Rule, error) {
 	return &BetweenFVI{field: field, min: min, max: max}, nil
 }
 
+func MustNewBetweenFVI(field string, min int64, max int64) Rule {
+	r, err := NewBetweenFVI(field, min, max)
+	if err != nil {
+		panic(err)
+	}
+	return r
+}
+
 func (r *BetweenFVI) String() string {
 	return fmt.Sprintf("%s >= %d && %s <= %d", r.field, r.min, r.field, r.max)
 }

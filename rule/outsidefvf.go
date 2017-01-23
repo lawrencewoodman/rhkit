@@ -43,6 +43,14 @@ func NewOutsideFVF(field string, low float64, high float64) (Rule, error) {
 	return &OutsideFVF{field: field, low: low, high: high}, nil
 }
 
+func MustNewOutsideFVF(field string, low float64, high float64) Rule {
+	r, err := NewOutsideFVF(field, low, high)
+	if err != nil {
+		panic(err)
+	}
+	return r
+}
+
 func (r *OutsideFVF) String() string {
 	return r.field + " <= " + strconv.FormatFloat(r.low, 'f', -1, 64) +
 		" || " + r.field + " >= " + strconv.FormatFloat(r.high, 'f', -1, 64)

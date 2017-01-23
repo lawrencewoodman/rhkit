@@ -76,11 +76,27 @@ func (r *And) String() string {
 		aStr = "(" + aStr + ")"
 	case *Or:
 		aStr = "(" + aStr + ")"
+	case *BetweenFVI:
+		aStr = "(" + aStr + ")"
+	case *BetweenFVF:
+		aStr = "(" + aStr + ")"
+	case *OutsideFVI:
+		aStr = "(" + aStr + ")"
+	case *OutsideFVF:
+		aStr = "(" + aStr + ")"
 	}
 	switch r.ruleB.(type) {
 	case *And:
 		bStr = "(" + bStr + ")"
 	case *Or:
+		bStr = "(" + bStr + ")"
+	case *BetweenFVI:
+		bStr = "(" + bStr + ")"
+	case *BetweenFVF:
+		bStr = "(" + bStr + ")"
+	case *OutsideFVI:
+		bStr = "(" + bStr + ")"
+	case *OutsideFVF:
 		bStr = "(" + bStr + ")"
 	}
 	return fmt.Sprintf("%s && %s", aStr, bStr)
