@@ -147,6 +147,8 @@ func (sortedAssessment *Assessment) Refine(numSimilarRules int) {
 	sortedAssessment.excludeSameRecordsRules()
 	sortedAssessment.excludePoorerInRules(numSimilarRules)
 	sortedAssessment.excludePoorerTweakableRules(numSimilarRules)
+	sortedAssessment.excludePoorerBetweenRules(numSimilarRules)
+	sortedAssessment.excludePoorerOutsideRules(numSimilarRules)
 	sortedAssessment.flags["refined"] = true
 }
 
@@ -229,7 +231,7 @@ func (sortedAssessment *Assessment) excludeSameRecordsRules() {
 	if len(sortedAssessment.RuleAssessments) < 2 {
 		return
 	}
-	lastAggregators := sortedAssessment.RuleAssessments[1].Aggregators
+	lastAggregators := sortedAssessment.RuleAssessments[0].Aggregators
 	if len(lastAggregators) <= 3 {
 		return
 	}
@@ -243,16 +245,18 @@ func (sortedAssessment *Assessment) excludeSameRecordsRules() {
 				aggregatorsMatch = false
 			}
 		}
-		_, isTrueRule := a.Rule.(rule.True)
-		if isTrueRule {
+		switch a.Rule.(type) {
+		case rule.True:
 			if aggregatorsMatch {
 				goodRuleAssessments[len(goodRuleAssessments)-1] = a
 			} else {
 				goodRuleAssessments = append(goodRuleAssessments, a)
 			}
 			break
-		} else if !aggregatorsMatch {
-			goodRuleAssessments = append(goodRuleAssessments, a)
+		default:
+			if !aggregatorsMatch {
+				goodRuleAssessments = append(goodRuleAssessments, a)
+			}
 		}
 		lastAggregators = a.Aggregators
 	}
@@ -287,12 +291,9 @@ func (sortedAssessment *Assessment) excludePoorerInRules(
 	goodRuleAssessments := make([]*RuleAssessment, 0)
 	inFields := make(map[string]int)
 	for _, a := range sortedAssessment.RuleAssessments {
-		r := a.Rule
-		inRule, isInRule := r.(*rule.InFV)
-		if !isInRule {
-			goodRuleAssessments = append(goodRuleAssessments, a)
-		} else {
-			field := inRule.GetFields()[0]
+		switch x := a.Rule.(type) {
+		case *rule.InFV:
+			field := x.GetFields()[0]
 			n, ok := inFields[field]
 			if !ok {
 				goodRuleAssessments = append(goodRuleAssessments, a)
@@ -301,6 +302,8 @@ func (sortedAssessment *Assessment) excludePoorerInRules(
 				goodRuleAssessments = append(goodRuleAssessments, a)
 				inFields[field]++
 			}
+		default:
+			goodRuleAssessments = append(goodRuleAssessments, a)
 		}
 	}
 	sortedAssessment.RuleAssessments = goodRuleAssessments
@@ -312,8 +315,9 @@ func (sortedAssessment *Assessment) excludePoorerTweakableRules(
 	goodRuleAssessments := make([]*RuleAssessment, 0)
 	fieldOperatorIDs := make(map[string]int)
 	for _, a := range sortedAssessment.RuleAssessments {
-		if tRule, isTweakable := a.Rule.(rule.TweakableRule); isTweakable {
-			field, operator, _ := tRule.GetTweakableParts()
+		switch x := a.Rule.(type) {
+		case rule.TweakableRule:
+			field, operator, _ := x.GetTweakableParts()
 			fieldOperatorID := fmt.Sprintf("%s^%s", field, operator)
 			n, ok := fieldOperatorIDs[fieldOperatorID]
 			if !ok {
@@ -323,40 +327,72 @@ func (sortedAssessment *Assessment) excludePoorerTweakableRules(
 				goodRuleAssessments = append(goodRuleAssessments, a)
 				fieldOperatorIDs[fieldOperatorID]++
 			}
-		} else {
+		default:
 			goodRuleAssessments = append(goodRuleAssessments, a)
 		}
 	}
 	sortedAssessment.RuleAssessments = goodRuleAssessments
 }
 
-/*
-TODO: implement this
-func (sortedAssessment *Assessment) excludePoorerAndTweakableRules(
+// TODO: This excludes the possibility of And rules creating
+//  (age >= 18 && age <= 25) || (age >= 50 && age <= 65)
+func (sortedAssessment *Assessment) excludePoorerBetweenRules(
 	numSimilarRules int,
 ) {
 	goodRuleAssessments := make([]*RuleAssessment, 0)
-	fieldOperatorIDs := make(map[string]int)
+	betweenFields := make(map[string]int)
+	processBetween := func(a *RuleAssessment) {
+		field := a.Rule.GetFields()[0]
+		n, ok := betweenFields[field]
+		if !ok {
+			goodRuleAssessments = append(goodRuleAssessments, a)
+			betweenFields[field] = 1
+		} else if n < numSimilarRules {
+			goodRuleAssessments = append(goodRuleAssessments, a)
+			betweenFields[field]++
+		}
+	}
 	for _, a := range sortedAssessment.RuleAssessments {
-		if andRule, isAnd := a.Rule.(rule.And); isAnd {
-		if tRule, isTweakable := a.Rule.(rule.TweakableRule); isTweakable {
-			field, operator, _ := tRule.GetTweakableParts()
-			fieldOperatorID := fmt.Sprintf("%s^%s", field, operator)
-			n, ok := fieldOperatorIDs[fieldOperatorID]
-			if !ok {
-				goodRuleAssessments = append(goodRuleAssessments, a)
-				fieldOperatorIDs[fieldOperatorID] = 1
-			} else if n < numSimilarRules {
-				goodRuleAssessments = append(goodRuleAssessments, a)
-				fieldOperatorIDs[fieldOperatorID]++
-			}
-		} else {
+		switch a.Rule.(type) {
+		case *rule.BetweenFVI:
+			processBetween(a)
+		case *rule.BetweenFVF:
+			processBetween(a)
+		default:
 			goodRuleAssessments = append(goodRuleAssessments, a)
 		}
 	}
 	sortedAssessment.RuleAssessments = goodRuleAssessments
 }
-*/
+
+func (sortedAssessment *Assessment) excludePoorerOutsideRules(
+	numSimilarRules int,
+) {
+	goodRuleAssessments := make([]*RuleAssessment, 0)
+	outsideFields := make(map[string]int)
+	processOutside := func(a *RuleAssessment) {
+		field := a.Rule.GetFields()[0]
+		n, ok := outsideFields[field]
+		if !ok {
+			goodRuleAssessments = append(goodRuleAssessments, a)
+			outsideFields[field] = 1
+		} else if n < numSimilarRules {
+			goodRuleAssessments = append(goodRuleAssessments, a)
+			outsideFields[field]++
+		}
+	}
+	for _, a := range sortedAssessment.RuleAssessments {
+		switch a.Rule.(type) {
+		case *rule.OutsideFVI:
+			processOutside(a)
+		case *rule.OutsideFVF:
+			processOutside(a)
+		default:
+			goodRuleAssessments = append(goodRuleAssessments, a)
+		}
+	}
+	sortedAssessment.RuleAssessments = goodRuleAssessments
+}
 
 // by implements sort.Interface for []*RuleAssessments based
 // on the sortFields
