@@ -22,6 +22,7 @@ package rule
 import (
 	"errors"
 	"github.com/lawrencewoodman/ddataset"
+	"github.com/lawrencewoodman/dlit"
 	"strconv"
 )
 
@@ -33,7 +34,11 @@ type BetweenFVF struct {
 	max   float64
 }
 
-func NewBetweenFVF(field string, min float64, max float64) (Rule, error) {
+func NewBetweenFVF(
+	field string,
+	min float64,
+	max float64,
+) (*BetweenFVF, error) {
 	if max <= min {
 		msg := "can't create Between rule where max: " +
 			strconv.FormatFloat(max, 'f', -1, 64) + " <= min: " +
@@ -43,12 +48,20 @@ func NewBetweenFVF(field string, min float64, max float64) (Rule, error) {
 	return &BetweenFVF{field: field, min: min, max: max}, nil
 }
 
-func MustNewBetweenFVF(field string, min float64, max float64) Rule {
+func MustNewBetweenFVF(field string, min float64, max float64) *BetweenFVF {
 	r, err := NewBetweenFVF(field, min, max)
 	if err != nil {
 		panic(err)
 	}
 	return r
+}
+
+func (r *BetweenFVF) GetMin() float64 {
+	return r.min
+}
+
+func (r *BetweenFVF) GetMax() float64 {
+	return r.max
 }
 
 func (r *BetweenFVF) String() string {
@@ -72,4 +85,47 @@ func (r *BetweenFVF) IsTrue(record ddataset.Record) (bool, error) {
 
 func (r *BetweenFVF) GetFields() []string {
 	return []string{r.field}
+}
+
+func (r *BetweenFVF) Tweak(
+	min *dlit.Literal,
+	max *dlit.Literal,
+	maxDP int,
+	stage int,
+) []Rule {
+	rules := make([]Rule, 0)
+	fdMinFloat, _ := min.Float()
+	fdMaxFloat, _ := max.Float()
+	step := (fdMaxFloat - fdMinFloat) / (10.0 * float64(stage))
+	minLow := r.min - step
+	minHigh := r.min + step
+	minFloaterStep := (minHigh - minLow) / 20.0
+	if minFloaterStep < 1 {
+		minFloaterStep = 1
+	}
+	maxLow := r.max - step
+	maxHigh := r.max + step
+	maxFloaterStep := (maxHigh - maxLow) / 20.0
+	if maxFloaterStep < 1 {
+		maxFloaterStep = 1
+	}
+	for minN := minLow; minN <= minHigh; minN += minFloaterStep {
+		for maxN := maxLow; maxN <= maxHigh; maxN += maxFloaterStep {
+			if minN != r.min &&
+				minN != minLow &&
+				minN != minHigh &&
+				minN >= fdMinFloat &&
+				minN <= fdMaxFloat &&
+				maxN != r.max &&
+				maxN != minLow &&
+				maxN != minHigh &&
+				maxN >= fdMinFloat &&
+				maxN <= fdMaxFloat &&
+				minN < maxN {
+				r := MustNewBetweenFVF(r.field, minN, maxN)
+				rules = append(rules, r)
+			}
+		}
+	}
+	return rules
 }

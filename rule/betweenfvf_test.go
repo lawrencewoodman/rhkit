@@ -142,3 +142,36 @@ func TestBetweenFVFGetFields(t *testing.T) {
 		t.Errorf("GetFields() got: %s, want: %s", got, want)
 	}
 }
+
+func TestBetweenFVFTweak(t *testing.T) {
+	field := "income"
+	min := float64(800)
+	max := float64(1000)
+	rule := MustNewBetweenFVF(field, min, max)
+	fdMin := float64(500)
+	fdMax := float64(2000)
+	fdMinL := dlit.MustNew(fdMin)
+	fdMaxL := dlit.MustNew(fdMax)
+	got := rule.Tweak(fdMinL, fdMaxL, 0, 1)
+	numGot := len(got)
+	if numGot < 300 {
+		t.Errorf("Tweak - got too few rules returned: %d", numGot)
+	}
+	uniqueRules := Uniq(got)
+	if len(uniqueRules) != numGot {
+		t.Errorf("Tweak - num uniqueRules: %d != num got: %d",
+			len(uniqueRules), numGot)
+	}
+	for _, r := range got {
+		switch x := r.(type) {
+		case *BetweenFVF:
+			minV := x.GetMin()
+			maxV := x.GetMax()
+			if minV <= fdMin || maxV >= fdMax || minV == min || maxV == max {
+				t.Errorf("Tweak - invalid rule: %s", r)
+			}
+		default:
+			t.Errorf("Tweak - invalid rule: %s", r)
+		}
+	}
+}

@@ -26,6 +26,7 @@ func TestTweakRules_1(t *testing.T) {
 		rule.NewGTFF("band", "team"),
 		rule.NewGEFVI("age", 7),
 		rule.NewGEFVI("age", 8),
+		rule.MustNewBetweenFVI("age", 21, 29),
 		rule.NewGEFVF("flow", 60.7),
 		rule.NewGEFVF("flow", 70.20),
 		rule.NewGEFVF("flow", 100.5),
@@ -34,6 +35,8 @@ func TestTweakRules_1(t *testing.T) {
 	}
 	gotRules := TweakRules(1, rulesIn, inputDescription)
 
+	numAgeGERules := 0
+	numAgeBetweenRules := 0
 	numBandGERules := 0
 	numFlowGERules := 0
 	numOtherRules := 0
@@ -42,12 +45,19 @@ func TestTweakRules_1(t *testing.T) {
 		case rule.True:
 			continue
 		case *rule.GEFVI:
-			if x.GetFields()[0] == "band" {
+			field := x.GetFields()[0]
+			if field == "band" {
 				numBandGERules++
+			} else if field == "age" {
+				numAgeGERules++
 			}
 		case *rule.GEFVF:
 			if x.GetFields()[0] == "flow" {
 				numFlowGERules++
+			}
+		case *rule.BetweenFVI:
+			if x.GetFields()[0] == "age" {
+				numAgeBetweenRules++
 			}
 		case rule.TweakableRule:
 			numOtherRules++
@@ -59,13 +69,23 @@ func TestTweakRules_1(t *testing.T) {
 
 	if numBandGERules < 7 {
 		printTestPurposes(t, testPurposes)
-		t.Errorf("TweakRules(%v) wrong number(%d) of rules: band > ? - got: %v",
+		t.Errorf("TweakRules(%v) wrong number(%d) of rules: band >= ? - got: %v",
 			rulesIn, numBandGERules, gotRules)
+	}
+	if numAgeGERules < 4 {
+		printTestPurposes(t, testPurposes)
+		t.Errorf("TweakRules(%v) wrong number(%d) of rules: age >= ? - got: %v",
+			rulesIn, numAgeGERules, gotRules)
 	}
 	if numFlowGERules < 9 {
 		printTestPurposes(t, testPurposes)
 		t.Errorf("TweakRules(%v) wrong number(%d) of rules: flow >= ? - got: %v",
 			rulesIn, numFlowGERules, gotRules)
+	}
+	if numAgeBetweenRules < 6 {
+		printTestPurposes(t, testPurposes)
+		t.Errorf("TweakRules(%v) wrong number(%d) of rules: age >= ? && age <= ?- got: %v",
+			rulesIn, numAgeBetweenRules, gotRules)
 	}
 	if numOtherRules != 0 {
 		printTestPurposes(t, testPurposes)

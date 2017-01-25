@@ -22,6 +22,7 @@ package rule
 import (
 	"fmt"
 	"github.com/lawrencewoodman/ddataset"
+	"github.com/lawrencewoodman/dlit"
 )
 
 // BetweenFVI represents a rule determining if:
@@ -32,7 +33,11 @@ type BetweenFVI struct {
 	max   int64
 }
 
-func NewBetweenFVI(field string, min int64, max int64) (Rule, error) {
+func NewBetweenFVI(
+	field string,
+	min int64,
+	max int64,
+) (*BetweenFVI, error) {
 	if max <= min {
 		return nil,
 			fmt.Errorf("can't create Between rule where max: %d <= min: %d", max, min)
@@ -40,12 +45,20 @@ func NewBetweenFVI(field string, min int64, max int64) (Rule, error) {
 	return &BetweenFVI{field: field, min: min, max: max}, nil
 }
 
-func MustNewBetweenFVI(field string, min int64, max int64) Rule {
+func MustNewBetweenFVI(field string, min int64, max int64) *BetweenFVI {
 	r, err := NewBetweenFVI(field, min, max)
 	if err != nil {
 		panic(err)
 	}
 	return r
+}
+
+func (r *BetweenFVI) GetMin() int64 {
+	return r.min
+}
+
+func (r *BetweenFVI) GetMax() int64 {
+	return r.max
 }
 
 func (r *BetweenFVI) String() string {
@@ -68,4 +81,47 @@ func (r *BetweenFVI) IsTrue(record ddataset.Record) (bool, error) {
 
 func (r *BetweenFVI) GetFields() []string {
 	return []string{r.field}
+}
+
+func (r *BetweenFVI) Tweak(
+	min *dlit.Literal,
+	max *dlit.Literal,
+	maxDP int,
+	stage int,
+) []Rule {
+	rules := make([]Rule, 0)
+	fdMinInt, _ := min.Int()
+	fdMaxInt, _ := max.Int()
+	step := (fdMaxInt - fdMinInt) / (10 * int64(stage))
+	minLow := r.min - step
+	minHigh := r.min + step
+	minInterStep := (minHigh - minLow) / 20
+	if minInterStep < 1 {
+		minInterStep = 1
+	}
+	maxLow := r.max - step
+	maxHigh := r.max + step
+	maxInterStep := (maxHigh - maxLow) / 20
+	if maxInterStep < 1 {
+		maxInterStep = 1
+	}
+	for minN := minLow; minN <= minHigh; minN += minInterStep {
+		for maxN := maxLow; maxN <= maxHigh; maxN += maxInterStep {
+			if minN != r.min &&
+				minN != minLow &&
+				minN != minHigh &&
+				minN >= fdMinInt &&
+				minN <= fdMaxInt &&
+				maxN != r.max &&
+				maxN != minLow &&
+				maxN != minHigh &&
+				maxN >= fdMinInt &&
+				maxN <= fdMaxInt &&
+				minN < maxN {
+				r := MustNewBetweenFVI(r.field, minN, maxN)
+				rules = append(rules, r)
+			}
+		}
+	}
+	return rules
 }

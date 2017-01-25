@@ -22,6 +22,7 @@ package rule
 import (
 	"errors"
 	"github.com/lawrencewoodman/ddataset"
+	"github.com/lawrencewoodman/dlit"
 	"strconv"
 )
 
@@ -33,7 +34,11 @@ type OutsideFVF struct {
 	high  float64
 }
 
-func NewOutsideFVF(field string, low float64, high float64) (Rule, error) {
+func NewOutsideFVF(
+	field string,
+	low float64,
+	high float64,
+) (*OutsideFVF, error) {
 	if high <= low {
 		msg := "can't create Outside rule where high: " +
 			strconv.FormatFloat(high, 'f', -1, 64) + " <= low: " +
@@ -43,12 +48,20 @@ func NewOutsideFVF(field string, low float64, high float64) (Rule, error) {
 	return &OutsideFVF{field: field, low: low, high: high}, nil
 }
 
-func MustNewOutsideFVF(field string, low float64, high float64) Rule {
+func MustNewOutsideFVF(field string, low float64, high float64) *OutsideFVF {
 	r, err := NewOutsideFVF(field, low, high)
 	if err != nil {
 		panic(err)
 	}
 	return r
+}
+
+func (r *OutsideFVF) GetHigh() float64 {
+	return r.high
+}
+
+func (r *OutsideFVF) GetLow() float64 {
+	return r.low
 }
 
 func (r *OutsideFVF) String() string {
@@ -72,4 +85,47 @@ func (r *OutsideFVF) IsTrue(record ddataset.Record) (bool, error) {
 
 func (r *OutsideFVF) GetFields() []string {
 	return []string{r.field}
+}
+
+func (r *OutsideFVF) Tweak(
+	min *dlit.Literal,
+	max *dlit.Literal,
+	maxDP int,
+	stage int,
+) []Rule {
+	rules := make([]Rule, 0)
+	fdMinFloat, _ := min.Float()
+	fdMaxFloat, _ := max.Float()
+	step := (fdMaxFloat - fdMinFloat) / (10.0 * float64(stage))
+	lowLow := r.low - step
+	lowHigh := r.low + step
+	minFloaterStep := (lowHigh - lowLow) / 20.0
+	if minFloaterStep < 1 {
+		minFloaterStep = 1
+	}
+	highLow := r.high - step
+	highHigh := r.high + step
+	maxFloaterStep := (highHigh - highLow) / 20.0
+	if maxFloaterStep < 1 {
+		maxFloaterStep = 1
+	}
+	for minN := lowLow; minN <= lowHigh; minN += minFloaterStep {
+		for maxN := highLow; maxN <= highHigh; maxN += maxFloaterStep {
+			if minN != r.low &&
+				minN != lowLow &&
+				minN != lowHigh &&
+				minN >= fdMinFloat &&
+				minN <= fdMaxFloat &&
+				maxN != r.high &&
+				maxN != lowLow &&
+				maxN != lowHigh &&
+				maxN >= fdMinFloat &&
+				maxN <= fdMaxFloat &&
+				minN < maxN {
+				r := MustNewOutsideFVF(r.field, minN, maxN)
+				rules = append(rules, r)
+			}
+		}
+	}
+	return rules
 }

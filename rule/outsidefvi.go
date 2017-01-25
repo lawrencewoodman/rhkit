@@ -22,6 +22,7 @@ package rule
 import (
 	"fmt"
 	"github.com/lawrencewoodman/ddataset"
+	"github.com/lawrencewoodman/dlit"
 )
 
 // OutsideFVI represents a rule determining if:
@@ -32,7 +33,11 @@ type OutsideFVI struct {
 	high  int64
 }
 
-func NewOutsideFVI(field string, low int64, high int64) (Rule, error) {
+func NewOutsideFVI(
+	field string,
+	low int64,
+	high int64,
+) (*OutsideFVI, error) {
 	if high <= low {
 		return nil,
 			fmt.Errorf("can't create Outside rule where high: %d <= low: %d",
@@ -41,12 +46,20 @@ func NewOutsideFVI(field string, low int64, high int64) (Rule, error) {
 	return &OutsideFVI{field: field, low: low, high: high}, nil
 }
 
-func MustNewOutsideFVI(field string, low int64, high int64) Rule {
+func MustNewOutsideFVI(field string, low int64, high int64) *OutsideFVI {
 	r, err := NewOutsideFVI(field, low, high)
 	if err != nil {
 		panic(err)
 	}
 	return r
+}
+
+func (r *OutsideFVI) GetHigh() int64 {
+	return r.high
+}
+
+func (r *OutsideFVI) GetLow() int64 {
+	return r.low
 }
 
 func (r *OutsideFVI) String() string {
@@ -69,4 +82,47 @@ func (r *OutsideFVI) IsTrue(record ddataset.Record) (bool, error) {
 
 func (r *OutsideFVI) GetFields() []string {
 	return []string{r.field}
+}
+
+func (r *OutsideFVI) Tweak(
+	min *dlit.Literal,
+	max *dlit.Literal,
+	maxDP int,
+	stage int,
+) []Rule {
+	rules := make([]Rule, 0)
+	fdMinInt, _ := min.Int()
+	fdMaxInt, _ := max.Int()
+	step := (fdMaxInt - fdMinInt) / (10 * int64(stage))
+	lowLow := r.low - step
+	lowHigh := r.low + step
+	minInterStep := (lowHigh - lowLow) / 20
+	if minInterStep < 1 {
+		minInterStep = 1
+	}
+	highLow := r.high - step
+	highHigh := r.high + step
+	maxInterStep := (highHigh - highLow) / 20
+	if maxInterStep < 1 {
+		maxInterStep = 1
+	}
+	for minN := lowLow; minN <= lowHigh; minN += minInterStep {
+		for maxN := highLow; maxN <= highHigh; maxN += maxInterStep {
+			if minN != r.low &&
+				minN != lowLow &&
+				minN != lowHigh &&
+				minN >= fdMinInt &&
+				minN <= fdMaxInt &&
+				maxN != r.high &&
+				maxN != lowLow &&
+				maxN != lowHigh &&
+				maxN >= fdMinInt &&
+				maxN <= fdMaxInt &&
+				minN < maxN {
+				r := MustNewOutsideFVI(r.field, minN, maxN)
+				rules = append(rules, r)
+			}
+		}
+	}
+	return rules
 }
