@@ -86,7 +86,7 @@ func processDataset(experiment *experiment.Experiment) error {
 	assessment.Refine(3)
 	sortedRules := assessment.GetRules()
 
-	tweakableRules := rhkit.TweakRules(sortedRules, fieldDescriptions)
+	tweakableRules := rhkit.TweakRules(1, sortedRules, fieldDescriptions)
 	if len(tweakableRules) < 2 {
 		return fmt.Errorf("rhkit.TweakRules(sortedRules, %v) - not enough rules generated",
 

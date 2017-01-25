@@ -313,19 +313,19 @@ func (sortedAssessment *Assessment) excludePoorerTweakableRules(
 	numSimilarRules int,
 ) {
 	goodRuleAssessments := make([]*RuleAssessment, 0)
-	fieldOperatorIDs := make(map[string]int)
+	fieldTypeIDs := make(map[string]int)
 	for _, a := range sortedAssessment.RuleAssessments {
 		switch x := a.Rule.(type) {
 		case rule.TweakableRule:
-			field, operator, _ := x.GetTweakableParts()
-			fieldOperatorID := fmt.Sprintf("%s^%s", field, operator)
-			n, ok := fieldOperatorIDs[fieldOperatorID]
+			field := x.GetFields()[0]
+			fieldTypeID := fmt.Sprintf("%s^%T", field, x)
+			n, ok := fieldTypeIDs[fieldTypeID]
 			if !ok {
 				goodRuleAssessments = append(goodRuleAssessments, a)
-				fieldOperatorIDs[fieldOperatorID] = 1
+				fieldTypeIDs[fieldTypeID] = 1
 			} else if n < numSimilarRules {
 				goodRuleAssessments = append(goodRuleAssessments, a)
-				fieldOperatorIDs[fieldOperatorID]++
+				fieldTypeIDs[fieldTypeID]++
 			}
 		default:
 			goodRuleAssessments = append(goodRuleAssessments, a)

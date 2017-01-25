@@ -25,6 +25,7 @@ import (
 	"github.com/lawrencewoodman/ddataset"
 	"github.com/lawrencewoodman/dlit"
 	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -36,8 +37,7 @@ type Rule interface {
 
 type TweakableRule interface {
 	Rule
-	GetTweakableParts() (string, string, string)
-	CloneWithValue(newValue interface{}) TweakableRule
+	Tweak(*dlit.Literal, *dlit.Literal, int, int) []Rule
 }
 
 type InvalidRuleError struct {
@@ -91,4 +91,10 @@ func (rs byString) Swap(i, j int) {
 }
 func (rs byString) Less(i, j int) bool {
 	return strings.Compare(rs[i].String(), rs[j].String()) == -1
+}
+
+func truncateFloat(f float64, maxDP int) float64 {
+	v := fmt.Sprintf("%.*f", maxDP, f)
+	nf, _ := strconv.ParseFloat(v, 64)
+	return nf
 }

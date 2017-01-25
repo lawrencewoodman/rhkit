@@ -17,17 +17,6 @@ func TestGEFVIString(t *testing.T) {
 	}
 }
 
-func TestGEFVIGetTweakableParts(t *testing.T) {
-	field := "income"
-	value := int64(893)
-	r := NewGEFVI(field, value)
-	a, b, c := r.GetTweakableParts()
-	if a != field || b != ">=" || c != "893" {
-		t.Errorf("GetTweakableParts() got: \"%s\",\"%s\",\"%s\" - want: \"%s\",\">=\",\"8.93\"",
-			a, b, c, field)
-	}
-}
-
 func TestGEFVIIsTrue(t *testing.T) {
 	cases := []struct {
 		field string
@@ -89,32 +78,122 @@ func TestGEFVIIsTrue_errors(t *testing.T) {
 	}
 }
 
-func TestGEFVICloneWithValue(t *testing.T) {
+func TestGEFVITweak(t *testing.T) {
 	field := "income"
-	value := int64(893)
-	r := NewGEFVI(field, value)
-	want := "income >= -27489"
-	cr := r.CloneWithValue(int64(-27489))
-	got := cr.String()
-	if got != want {
-		t.Errorf("CloseWithValue() got: %s, want: %s", got, want)
+	value := int64(800)
+	rule := NewGEFVI(field, value)
+	cases := []struct {
+		min   *dlit.Literal
+		max   *dlit.Literal
+		stage int
+		want  []Rule
+	}{
+		{min: dlit.MustNew(500),
+			max:   dlit.MustNew(1000),
+			stage: 1,
+			want: []Rule{
+				NewGEFVI(field, int64(755)),
+				NewGEFVI(field, int64(760)),
+				NewGEFVI(field, int64(765)),
+				NewGEFVI(field, int64(770)),
+				NewGEFVI(field, int64(775)),
+				NewGEFVI(field, int64(780)),
+				NewGEFVI(field, int64(785)),
+				NewGEFVI(field, int64(790)),
+				NewGEFVI(field, int64(795)),
+				NewGEFVI(field, int64(805)),
+				NewGEFVI(field, int64(810)),
+				NewGEFVI(field, int64(815)),
+				NewGEFVI(field, int64(820)),
+				NewGEFVI(field, int64(825)),
+				NewGEFVI(field, int64(830)),
+				NewGEFVI(field, int64(835)),
+				NewGEFVI(field, int64(840)),
+				NewGEFVI(field, int64(845)),
+			},
+		},
+		{min: dlit.MustNew(790),
+			max:   dlit.MustNew(1000),
+			stage: 1,
+			want: []Rule{
+				NewGEFVI(field, int64(791)),
+				NewGEFVI(field, int64(793)),
+				NewGEFVI(field, int64(795)),
+				NewGEFVI(field, int64(797)),
+				NewGEFVI(field, int64(799)),
+				NewGEFVI(field, int64(801)),
+				NewGEFVI(field, int64(803)),
+				NewGEFVI(field, int64(805)),
+				NewGEFVI(field, int64(807)),
+				NewGEFVI(field, int64(809)),
+				NewGEFVI(field, int64(811)),
+				NewGEFVI(field, int64(813)),
+				NewGEFVI(field, int64(815)),
+				NewGEFVI(field, int64(817)),
+				NewGEFVI(field, int64(819)),
+			},
+		},
+		{min: dlit.MustNew(500),
+			max:   dlit.MustNew(810),
+			stage: 1,
+			want: []Rule{
+				NewGEFVI(field, int64(772)),
+				NewGEFVI(field, int64(775)),
+				NewGEFVI(field, int64(778)),
+				NewGEFVI(field, int64(781)),
+				NewGEFVI(field, int64(784)),
+				NewGEFVI(field, int64(787)),
+				NewGEFVI(field, int64(790)),
+				NewGEFVI(field, int64(793)),
+				NewGEFVI(field, int64(796)),
+				NewGEFVI(field, int64(799)),
+				NewGEFVI(field, int64(802)),
+				NewGEFVI(field, int64(805)),
+				NewGEFVI(field, int64(808)),
+			},
+		},
+		{min: dlit.MustNew(798),
+			max:   dlit.MustNew(805),
+			stage: 1,
+			want:  []Rule{},
+		},
+		{min: dlit.MustNew(500),
+			max:   dlit.MustNew(1000),
+			stage: 2,
+			want: []Rule{
+				NewGEFVI(field, int64(777)),
+				NewGEFVI(field, int64(779)),
+				NewGEFVI(field, int64(781)),
+				NewGEFVI(field, int64(783)),
+				NewGEFVI(field, int64(785)),
+				NewGEFVI(field, int64(787)),
+				NewGEFVI(field, int64(789)),
+				NewGEFVI(field, int64(791)),
+				NewGEFVI(field, int64(793)),
+				NewGEFVI(field, int64(795)),
+				NewGEFVI(field, int64(797)),
+				NewGEFVI(field, int64(799)),
+				NewGEFVI(field, int64(801)),
+				NewGEFVI(field, int64(803)),
+				NewGEFVI(field, int64(805)),
+				NewGEFVI(field, int64(807)),
+				NewGEFVI(field, int64(809)),
+				NewGEFVI(field, int64(811)),
+				NewGEFVI(field, int64(813)),
+				NewGEFVI(field, int64(815)),
+				NewGEFVI(field, int64(817)),
+				NewGEFVI(field, int64(819)),
+				NewGEFVI(field, int64(821)),
+				NewGEFVI(field, int64(823)),
+			},
+		},
 	}
-}
-
-func TestGEFVICloneWithValue_panics(t *testing.T) {
-	wantPanic := "can't clone with newValue: fred of type string, need type int64"
-	defer func() {
-		if r := recover(); r == nil {
-			t.Errorf("CloneWithValue() didn't panic")
-		} else if r.(string) != wantPanic {
-			t.Errorf("CloseWithValue() - got panic: %s, wanted: %s",
-				r, wantPanic)
+	for _, c := range cases {
+		got := rule.Tweak(c.min, c.max, 0, c.stage)
+		if err := checkRulesMatch(got, c.want); err != nil {
+			t.Errorf("Tweak: %s, got: %s", err, got)
 		}
-	}()
-	field := "income"
-	value := int64(893)
-	r := NewGEFVI(field, value)
-	r.CloneWithValue("fred")
+	}
 }
 
 func TestGEFVIGetFields(t *testing.T) {

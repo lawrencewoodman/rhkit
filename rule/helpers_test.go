@@ -35,3 +35,15 @@ func checkErrorMatch(got, want error) error {
 	}
 	return nil
 }
+
+func checkRulesMatch(got, want []Rule) error {
+	if len(got) != len(want) {
+		return fmt.Errorf("len(got): %d != len(want): %d", len(got), len(want))
+	}
+	for i, r := range want {
+		if got[i].String() != r.String() {
+			return fmt.Errorf("got != want, got[%d]: %s, want[%d]: %s", i, got[i], i, r)
+		}
+	}
+	return nil
+}
