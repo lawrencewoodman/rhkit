@@ -147,8 +147,6 @@ func (sortedAssessment *Assessment) Refine(numSimilarRules int) {
 	sortedAssessment.excludeSameRecordsRules()
 	sortedAssessment.excludePoorerInRules(numSimilarRules)
 	sortedAssessment.excludePoorerTweakableRules(numSimilarRules)
-	sortedAssessment.excludePoorerBetweenRules(numSimilarRules)
-	sortedAssessment.excludePoorerOutsideRules(numSimilarRules)
 	sortedAssessment.flags["refined"] = true
 }
 
@@ -327,66 +325,6 @@ func (sortedAssessment *Assessment) excludePoorerTweakableRules(
 				goodRuleAssessments = append(goodRuleAssessments, a)
 				fieldTypeIDs[fieldTypeID]++
 			}
-		default:
-			goodRuleAssessments = append(goodRuleAssessments, a)
-		}
-	}
-	sortedAssessment.RuleAssessments = goodRuleAssessments
-}
-
-// TODO: This excludes the possibility of And rules creating
-//  (age >= 18 && age <= 25) || (age >= 50 && age <= 65)
-func (sortedAssessment *Assessment) excludePoorerBetweenRules(
-	numSimilarRules int,
-) {
-	goodRuleAssessments := make([]*RuleAssessment, 0)
-	betweenFields := make(map[string]int)
-	processBetween := func(a *RuleAssessment) {
-		field := a.Rule.GetFields()[0]
-		n, ok := betweenFields[field]
-		if !ok {
-			goodRuleAssessments = append(goodRuleAssessments, a)
-			betweenFields[field] = 1
-		} else if n < numSimilarRules {
-			goodRuleAssessments = append(goodRuleAssessments, a)
-			betweenFields[field]++
-		}
-	}
-	for _, a := range sortedAssessment.RuleAssessments {
-		switch a.Rule.(type) {
-		case *rule.BetweenFVI:
-			processBetween(a)
-		case *rule.BetweenFVF:
-			processBetween(a)
-		default:
-			goodRuleAssessments = append(goodRuleAssessments, a)
-		}
-	}
-	sortedAssessment.RuleAssessments = goodRuleAssessments
-}
-
-func (sortedAssessment *Assessment) excludePoorerOutsideRules(
-	numSimilarRules int,
-) {
-	goodRuleAssessments := make([]*RuleAssessment, 0)
-	outsideFields := make(map[string]int)
-	processOutside := func(a *RuleAssessment) {
-		field := a.Rule.GetFields()[0]
-		n, ok := outsideFields[field]
-		if !ok {
-			goodRuleAssessments = append(goodRuleAssessments, a)
-			outsideFields[field] = 1
-		} else if n < numSimilarRules {
-			goodRuleAssessments = append(goodRuleAssessments, a)
-			outsideFields[field]++
-		}
-	}
-	for _, a := range sortedAssessment.RuleAssessments {
-		switch a.Rule.(type) {
-		case *rule.OutsideFVI:
-			processOutside(a)
-		case *rule.OutsideFVF:
-			processOutside(a)
 		default:
 			goodRuleAssessments = append(goodRuleAssessments, a)
 		}
