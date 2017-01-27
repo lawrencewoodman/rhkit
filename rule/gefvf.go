@@ -31,7 +31,7 @@ type GEFVF struct {
 	value float64
 }
 
-func NewGEFVF(field string, value float64) TweakableRule {
+func NewGEFVF(field string, value float64) *GEFVF {
 	return &GEFVF{field: field, value: value}
 }
 

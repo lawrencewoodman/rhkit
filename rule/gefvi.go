@@ -31,7 +31,7 @@ type GEFVI struct {
 	value int64
 }
 
-func NewGEFVI(field string, value int64) TweakableRule {
+func NewGEFVI(field string, value int64) *GEFVI {
 	return &GEFVI{field: field, value: value}
 }
 

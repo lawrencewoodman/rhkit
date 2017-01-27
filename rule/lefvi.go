@@ -31,7 +31,7 @@ type LEFVI struct {
 	value int64
 }
 
-func NewLEFVI(field string, value int64) TweakableRule {
+func NewLEFVI(field string, value int64) *LEFVI {
 	return &LEFVI{field: field, value: value}
 }
 
