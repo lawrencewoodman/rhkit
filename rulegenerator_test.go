@@ -184,10 +184,6 @@ func TestGenerateRules_3(t *testing.T) {
 		rule.NewEQFVS("directionOut", "gorllewin"),
 		rule.MustNewAnd(
 			rule.NewEQFVS("directionIn", "de"),
-			rule.NewEQFVS("directionIn", "gogledd"),
-		),
-		rule.MustNewAnd(
-			rule.NewEQFVS("directionIn", "de"),
 			rule.NewEQFVS("directionOut", "dwyrain"),
 		),
 		rule.MustNewAnd(
@@ -200,10 +196,6 @@ func TestGenerateRules_3(t *testing.T) {
 		),
 		rule.MustNewAnd(
 			rule.NewEQFVS("directionIn", "gogledd"),
-			rule.NewEQFVS("directionOut", "gorllewin"),
-		),
-		rule.MustNewAnd(
-			rule.NewEQFVS("directionOut", "dwyrain"),
 			rule.NewEQFVS("directionOut", "gorllewin"),
 		),
 		rule.MustNewOr(
