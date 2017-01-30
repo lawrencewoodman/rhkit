@@ -162,7 +162,7 @@ func TestBetweenFVITweak(t *testing.T) {
 		case *BetweenFVI:
 			minV := x.GetMin()
 			maxV := x.GetMax()
-			if minV <= fdMin || maxV >= fdMax || minV == min || maxV == max {
+			if minV <= fdMin || maxV >= fdMax || (minV == min && maxV == max) {
 				t.Errorf("Tweak - invalid rule: %s", r)
 			}
 		default:

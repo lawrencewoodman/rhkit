@@ -140,9 +140,9 @@ func TestOutsideFVIGetFields(t *testing.T) {
 
 func TestOutsideFVITweak(t *testing.T) {
 	field := "income"
-	min := int64(800)
-	max := int64(1000)
-	rule := MustNewOutsideFVI(field, min, max)
+	low := int64(800)
+	high := int64(1000)
+	rule := MustNewOutsideFVI(field, low, high)
 	fdMin := int64(500)
 	fdMax := int64(2000)
 	fdMinL := dlit.MustNew(fdMin)
@@ -160,9 +160,9 @@ func TestOutsideFVITweak(t *testing.T) {
 	for _, r := range got {
 		switch x := r.(type) {
 		case *OutsideFVI:
-			minV := x.GetLow()
-			maxV := x.GetHigh()
-			if minV <= fdMin || maxV >= fdMax || minV == min || maxV == max {
+			lowV := x.GetLow()
+			highV := x.GetHigh()
+			if lowV <= fdMin || highV >= fdMax || (lowV == low && highV == high) {
 				t.Errorf("Tweak - invalid rule: %s", r)
 			}
 		default:

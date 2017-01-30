@@ -140,9 +140,9 @@ func TestOutsideFVFGetFields(t *testing.T) {
 
 func TestOutsideFVFTweak(t *testing.T) {
 	field := "income"
-	min := float64(800)
-	max := float64(1000)
-	rule := MustNewOutsideFVF(field, min, max)
+	low := float64(800)
+	high := float64(1000)
+	rule := MustNewOutsideFVF(field, low, high)
 	fdMin := float64(500)
 	fdMax := float64(2000)
 	fdMinL := dlit.MustNew(fdMin)
@@ -160,9 +160,9 @@ func TestOutsideFVFTweak(t *testing.T) {
 	for _, r := range got {
 		switch x := r.(type) {
 		case *OutsideFVF:
-			minV := x.GetLow()
-			maxV := x.GetHigh()
-			if minV <= fdMin || maxV >= fdMax || minV == min || maxV == max {
+			lowV := x.GetLow()
+			highV := x.GetHigh()
+			if lowV <= fdMin || highV >= fdMax || (lowV == low && highV == high) {
 				t.Errorf("Tweak - invalid rule: %s", r)
 			}
 		default:
