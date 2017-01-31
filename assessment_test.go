@@ -660,9 +660,35 @@ func TestRefine_between(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: rule.NewTrue(),
+				Rule: rule.NewLEFVI("band", 5),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("142"),
+					"percentMatches": dlit.MustNew("50"),
+					"numIncomeGt2":   dlit.MustNew("1"),
+					"goalsScore":     dlit.MustNew(1),
+				},
+				Goals: []*GoalAssessment{
+					&GoalAssessment{"numIncomeGt2 == 1", true},
+					&GoalAssessment{"numIncomeGt2 == 2", false},
+				},
+			},
+			&RuleAssessment{
+				Rule: rule.NewGEFVI("band", 6),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("141"),
+					"percentMatches": dlit.MustNew("50"),
+					"numIncomeGt2":   dlit.MustNew("1"),
+					"goalsScore":     dlit.MustNew(1),
+				},
+				Goals: []*GoalAssessment{
+					&GoalAssessment{"numIncomeGt2 == 1", true},
+					&GoalAssessment{"numIncomeGt2 == 2", false},
+				},
+			},
+			&RuleAssessment{
+				Rule: rule.NewTrue(),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("140"),
 					"percentMatches": dlit.MustNew("42"),
 					"numIncomeGt2":   dlit.MustNew("2"),
 					"goalsScore":     dlit.MustNew(0.1),
@@ -681,6 +707,7 @@ func TestRefine_between(t *testing.T) {
 		rule.MustNewBetweenFVI("band", 5, 6),
 		rule.MustNewBetweenFVF("rate", 16.2, 17.89),
 		rule.NewGEFVI("band", 5),
+		rule.NewLEFVI("band", 5),
 		rule.NewTrue(),
 	}
 	numSimilarRules := 2
