@@ -61,6 +61,18 @@ func TestNewOr(t *testing.T) {
 		{ruleA: MustNewOutsideFVF("flowA", 1.7, 5.2),
 			ruleB: MustNewOutsideFVF("flowB", 7.3, 8.9),
 		},
+		{ruleA: MustNewBetweenFVF("flow", 0.7, 22.1),
+			ruleB: MustNewOutsideFVF("flow", 1.05, 17.5),
+		},
+		{ruleA: MustNewOutsideFVF("flow", 1.05, 17.5),
+			ruleB: MustNewBetweenFVF("flow", 0.7, 22.1),
+		},
+		{ruleA: MustNewBetweenFVI("rate", 0, 22),
+			ruleB: MustNewOutsideFVI("rate", 1, 17),
+		},
+		{ruleA: MustNewOutsideFVI("rate", 1, 17),
+			ruleB: MustNewBetweenFVI("rate", 0, 22),
+		},
 	}
 	for _, c := range cases {
 		r, err := NewOr(c.ruleA, c.ruleB)
