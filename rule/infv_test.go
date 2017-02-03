@@ -198,3 +198,49 @@ func TestInFVIsTrue_errors(t *testing.T) {
 		}
 	}
 }
+
+func TestInFVOverlaps(t *testing.T) {
+	cases := []struct {
+		ruleA *InFV
+		ruleB Rule
+		want  bool
+	}{
+		{ruleA: NewInFV("band", []*dlit.Literal{
+			dlit.NewString("4"), dlit.NewString("3"), dlit.NewString("2")},
+		),
+			ruleB: NewInFV("band", []*dlit.Literal{
+				dlit.NewString("9"), dlit.NewString("2")},
+			),
+			want: true,
+		},
+		{ruleA: NewInFV("band", []*dlit.Literal{
+			dlit.NewString("9"), dlit.NewString("2")},
+		),
+			ruleB: NewInFV("band", []*dlit.Literal{
+				dlit.NewString("4"), dlit.NewString("3"), dlit.NewString("2")},
+			),
+			want: true,
+		},
+		{ruleA: NewInFV("rate", []*dlit.Literal{
+			dlit.NewString("4"), dlit.NewString("3"), dlit.NewString("2")},
+		),
+			ruleB: NewInFV("band", []*dlit.Literal{
+				dlit.NewString("9"), dlit.NewString("2")},
+			),
+			want: false,
+		},
+		{ruleA: NewInFV("band", []*dlit.Literal{
+			dlit.NewString("4"), dlit.NewString("3"), dlit.NewString("2")},
+		),
+			ruleB: NewLEFVI("band", 6),
+			want:  false,
+		},
+	}
+	for _, c := range cases {
+		got := c.ruleA.Overlaps(c.ruleB)
+		if got != c.want {
+			t.Errorf("Overlaps - ruleA: %s, ruleB: %s - got: %t, want: %t",
+				c.ruleA, c.ruleB, got, c.want)
+		}
+	}
+}

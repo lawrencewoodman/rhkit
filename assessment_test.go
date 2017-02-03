@@ -535,11 +535,9 @@ func TestRefine(t *testing.T) {
 		rule.NewInFV("band", makeStringsDlitSlice("4", "3", "2")),
 		rule.NewInFV("team", makeStringsDlitSlice("a", "b")),
 		rule.NewInFV("band", makeStringsDlitSlice("99", "23")),
-		rule.NewGEFVI("band", 3),
 		rule.NewTrue(),
 	}
-	numSimilarRules := 2
-	sortedAssessment.Refine(numSimilarRules)
+	sortedAssessment.Refine()
 	gotRules := sortedAssessment.GetRules()
 
 	if !matchRules(gotRules, wantRules) {
@@ -660,7 +658,7 @@ func TestRefine_between(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: rule.NewLEFVI("band", 5),
+				Rule: rule.MustNewBetweenFVF("rate", 10.2, 16.3),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("142"),
 					"percentMatches": dlit.MustNew("50"),
@@ -673,7 +671,7 @@ func TestRefine_between(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: rule.NewGEFVI("band", 6),
+				Rule: rule.MustNewBetweenFVF("rate", 50.1, 60.3),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("141"),
 					"percentMatches": dlit.MustNew("50"),
@@ -686,9 +684,61 @@ func TestRefine_between(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: rule.NewTrue(),
+				Rule: rule.MustNewBetweenFVF("rate", 16.1, 20.3),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("140"),
+					"percentMatches": dlit.MustNew("50"),
+					"numIncomeGt2":   dlit.MustNew("1"),
+					"goalsScore":     dlit.MustNew(1),
+				},
+				Goals: []*GoalAssessment{
+					&GoalAssessment{"numIncomeGt2 == 1", true},
+					&GoalAssessment{"numIncomeGt2 == 2", false},
+				},
+			},
+			&RuleAssessment{
+				Rule: rule.NewLEFVI("band", 5),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("139"),
+					"percentMatches": dlit.MustNew("50"),
+					"numIncomeGt2":   dlit.MustNew("1"),
+					"goalsScore":     dlit.MustNew(1),
+				},
+				Goals: []*GoalAssessment{
+					&GoalAssessment{"numIncomeGt2 == 1", true},
+					&GoalAssessment{"numIncomeGt2 == 2", false},
+				},
+			},
+			&RuleAssessment{
+				Rule: rule.NewGEFVI("band", 6),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("138"),
+					"percentMatches": dlit.MustNew("50"),
+					"numIncomeGt2":   dlit.MustNew("1"),
+					"goalsScore":     dlit.MustNew(1),
+				},
+				Goals: []*GoalAssessment{
+					&GoalAssessment{"numIncomeGt2 == 1", true},
+					&GoalAssessment{"numIncomeGt2 == 2", false},
+				},
+			},
+			&RuleAssessment{
+				Rule: rule.MustNewBetweenFVF("rate", 1.2, 6.3),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("137"),
+					"percentMatches": dlit.MustNew("50"),
+					"numIncomeGt2":   dlit.MustNew("1"),
+					"goalsScore":     dlit.MustNew(1),
+				},
+				Goals: []*GoalAssessment{
+					&GoalAssessment{"numIncomeGt2 == 1", true},
+					&GoalAssessment{"numIncomeGt2 == 2", false},
+				},
+			},
+			&RuleAssessment{
+				Rule: rule.NewTrue(),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("136"),
 					"percentMatches": dlit.MustNew("42"),
 					"numIncomeGt2":   dlit.MustNew("2"),
 					"goalsScore":     dlit.MustNew(0.1),
@@ -704,14 +754,12 @@ func TestRefine_between(t *testing.T) {
 		rule.MustNewBetweenFVI("band", 5, 7),
 		rule.NewGEFVI("band", 4),
 		rule.MustNewBetweenFVF("rate", 16.2, 17.93),
-		rule.MustNewBetweenFVI("band", 5, 6),
-		rule.MustNewBetweenFVF("rate", 16.2, 17.89),
-		rule.NewGEFVI("band", 5),
+		rule.MustNewBetweenFVF("rate", 50.1, 60.3),
 		rule.NewLEFVI("band", 5),
+		rule.MustNewBetweenFVF("rate", 1.2, 6.3),
 		rule.NewTrue(),
 	}
-	numSimilarRules := 2
-	sortedAssessment.Refine(numSimilarRules)
+	sortedAssessment.Refine()
 	gotRules := sortedAssessment.GetRules()
 
 	if !matchRules(gotRules, wantRules) {
@@ -850,13 +898,9 @@ func TestRefine_outside(t *testing.T) {
 		rule.MustNewOutsideFVI("band", 5, 7),
 		rule.NewGEFVI("band", 4),
 		rule.MustNewOutsideFVF("rate", 16.2, 17.93),
-		rule.MustNewOutsideFVI("band", 5, 6),
-		rule.MustNewOutsideFVF("rate", 16.2, 17.89),
-		rule.NewGEFVI("band", 5),
 		rule.NewTrue(),
 	}
-	numSimilarRules := 2
-	sortedAssessment.Refine(numSimilarRules)
+	sortedAssessment.Refine()
 	gotRules := sortedAssessment.GetRules()
 
 	if !matchRules(gotRules, wantRules) {
@@ -901,8 +945,7 @@ func TestRefine_panic_1(t *testing.T) {
 			}
 		}
 	}()
-	numSimilarRules := 1
-	unsortedAssessment.Refine(numSimilarRules)
+	unsortedAssessment.Refine()
 	if !paniced {
 		t.Errorf("Test: %s\n", testPurpose)
 		t.Errorf("Refine() - failed to panic with: %s", wantPanic)
@@ -948,8 +991,7 @@ func TestRefine_panic_2(t *testing.T) {
 			}
 		}
 	}()
-	numSimilarRules := 1
-	sortedAssessment.Refine(numSimilarRules)
+	sortedAssessment.Refine()
 	if !paniced {
 		t.Errorf("Test: %s\n", testPurpose)
 		t.Errorf("Refine() - failed to panic with: %s", wantPanic)

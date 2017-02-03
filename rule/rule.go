@@ -40,6 +40,10 @@ type TweakableRule interface {
 	Tweak(*dlit.Literal, *dlit.Literal, int, int) []Rule
 }
 
+type Overlapper interface {
+	Overlaps(o Rule) bool
+}
+
 type InvalidRuleError struct {
 	Rule Rule
 }

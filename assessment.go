@@ -139,14 +139,14 @@ func (r *RuleAssessment) String() string {
 
 // Tidy up rule assessments by removing poor and poorer similar rules
 // For example this removes all rules poorer than the True rule
-func (sortedAssessment *Assessment) Refine(numSimilarRules int) {
+func (sortedAssessment *Assessment) Refine() {
 	if !sortedAssessment.IsSorted() {
 		panic("Assessment isn't sorted")
 	}
 	sortedAssessment.excludePoorRules()
 	sortedAssessment.excludeSameRecordsRules()
-	sortedAssessment.excludePoorerInRules(numSimilarRules)
-	sortedAssessment.excludePoorerTweakableRules(numSimilarRules)
+	sortedAssessment.excludePoorerOverlappingRules()
+	sortedAssessment.excludePoorerTweakableRules()
 	sortedAssessment.flags["refined"] = true
 }
 
@@ -307,23 +307,46 @@ func (sortedAssessment *Assessment) excludePoorerInRules(
 	sortedAssessment.RuleAssessments = goodRuleAssessments
 }
 
-func (sortedAssessment *Assessment) excludePoorerTweakableRules(
-	numSimilarRules int,
-) {
+func (sortedAssessment *Assessment) excludePoorerOverlappingRules() {
 	goodRuleAssessments := make([]*RuleAssessment, 0)
-	fieldTypeIDs := make(map[string]int)
+	for i, aI := range sortedAssessment.RuleAssessments {
+		switch xI := aI.Rule.(type) {
+		case rule.Overlapper:
+			overlaps := false
+			for j, aJ := range sortedAssessment.RuleAssessments {
+				if j >= i {
+					break
+				}
+				if xI.Overlaps(aJ.Rule) {
+					overlaps = true
+				}
+			}
+			if !overlaps {
+				goodRuleAssessments = append(goodRuleAssessments, aI)
+			}
+		default:
+			goodRuleAssessments = append(goodRuleAssessments, aI)
+		}
+	}
+	sortedAssessment.RuleAssessments = goodRuleAssessments
+}
+
+// This doesn't effect Overlapper's because otherwise the
+// excludePoorerOverlappingRules wouldn't work
+func (sortedAssessment *Assessment) excludePoorerTweakableRules() {
+	goodRuleAssessments := make([]*RuleAssessment, 0)
+	fieldTypeIDs := make(map[string]interface{})
 	for _, a := range sortedAssessment.RuleAssessments {
 		switch x := a.Rule.(type) {
+		case rule.Overlapper:
+			goodRuleAssessments = append(goodRuleAssessments, a)
 		case rule.TweakableRule:
 			field := x.GetFields()[0]
 			fieldTypeID := fmt.Sprintf("%s^%T", field, x)
-			n, ok := fieldTypeIDs[fieldTypeID]
+			_, ok := fieldTypeIDs[fieldTypeID]
 			if !ok {
 				goodRuleAssessments = append(goodRuleAssessments, a)
-				fieldTypeIDs[fieldTypeID] = 1
-			} else if n < numSimilarRules {
-				goodRuleAssessments = append(goodRuleAssessments, a)
-				fieldTypeIDs[fieldTypeID]++
+				fieldTypeIDs[fieldTypeID] = nil
 			}
 		default:
 			goodRuleAssessments = append(goodRuleAssessments, a)

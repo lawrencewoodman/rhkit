@@ -170,3 +170,51 @@ func TestBetweenFVITweak(t *testing.T) {
 		}
 	}
 }
+
+func TestBetweenFVIOverlaps(t *testing.T) {
+	cases := []struct {
+		ruleA *BetweenFVI
+		ruleB Rule
+		want  bool
+	}{
+		{ruleA: MustNewBetweenFVI("rate", 5, 10),
+			ruleB: MustNewBetweenFVI("rate", 1, 5),
+			want:  true,
+		},
+		{ruleA: MustNewBetweenFVI("rate", 5, 10),
+			ruleB: MustNewBetweenFVI("rate", 10, 15),
+			want:  true,
+		},
+		{ruleA: MustNewBetweenFVI("rate", 5, 10),
+			ruleB: MustNewBetweenFVI("rate", 6, 20),
+			want:  true,
+		},
+		{ruleA: MustNewBetweenFVI("rate", 6, 20),
+			ruleB: MustNewBetweenFVI("rate", 5, 10),
+			want:  true,
+		},
+		{ruleA: MustNewBetweenFVI("rate", 5, 10),
+			ruleB: MustNewBetweenFVI("rate", 1, 4),
+			want:  false,
+		},
+		{ruleA: MustNewBetweenFVI("rate", 5, 10),
+			ruleB: MustNewBetweenFVI("rate", 11, 20),
+			want:  false,
+		},
+		{ruleA: MustNewBetweenFVI("rate", 5, 10),
+			ruleB: MustNewBetweenFVI("flow", 1, 5),
+			want:  false,
+		},
+		{ruleA: MustNewBetweenFVI("rate", 5, 10),
+			ruleB: NewLEFVI("flow", 6),
+			want:  false,
+		},
+	}
+	for _, c := range cases {
+		got := c.ruleA.Overlaps(c.ruleB)
+		if got != c.want {
+			t.Errorf("Overlaps - ruleA: %s, ruleB: %s - got: %t, want: %t",
+				c.ruleA, c.ruleB, got, c.want)
+		}
+	}
+}

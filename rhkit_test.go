@@ -83,7 +83,7 @@ func processDataset(experiment *experiment.Experiment) error {
 	}
 
 	assessment.Sort(experiment.SortOrder)
-	assessment.Refine(3)
+	assessment.Refine()
 	sortedRules := assessment.GetRules()
 
 	tweakableRules := rhkit.TweakRules(1, sortedRules, fieldDescriptions)
@@ -104,7 +104,7 @@ func processDataset(experiment *experiment.Experiment) error {
 		return fmt.Errorf("assessment.Merge(assessment2) - err: %s", err)
 	}
 	assessment3.Sort(experiment.SortOrder)
-	assessment3.Refine(1)
+	assessment3.Refine()
 
 	numRulesToCombine := 50
 	bestNonCombinedRules := assessment3.GetRules(numRulesToCombine)
@@ -125,7 +125,7 @@ func processDataset(experiment *experiment.Experiment) error {
 		return fmt.Errorf("assessment3.Merge(assessment4) - err: %s", err)
 	}
 	assessment5.Sort(experiment.SortOrder)
-	assessment5.Refine(1)
+	assessment5.Refine()
 
 	finalNumRuleAssessments := 100
 	assessment5.TruncateRuleAssessments(finalNumRuleAssessments)
