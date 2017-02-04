@@ -201,3 +201,31 @@ func TestLEFVFTweak(t *testing.T) {
 		}
 	}
 }
+
+func TestLEFVFOverlaps(t *testing.T) {
+	cases := []struct {
+		ruleA *LEFVF
+		ruleB Rule
+		want  bool
+	}{
+		{ruleA: NewLEFVF("band", 7.3),
+			ruleB: NewLEFVF("band", 6.5),
+			want:  true,
+		},
+		{ruleA: NewLEFVF("band", 7.3),
+			ruleB: NewLEFVF("rate", 6.5),
+			want:  false,
+		},
+		{ruleA: NewLEFVF("band", 7.3),
+			ruleB: NewGEFVF("band", 6.5),
+			want:  false,
+		},
+	}
+	for _, c := range cases {
+		got := c.ruleA.Overlaps(c.ruleB)
+		if got != c.want {
+			t.Errorf("Overlaps - ruleA: %s, ruleB: %s - got: %t, want: %t",
+				c.ruleA, c.ruleB, got, c.want)
+		}
+	}
+}

@@ -170,3 +170,31 @@ func TestOutsideFVFTweak(t *testing.T) {
 		}
 	}
 }
+
+func TestOutsideFVFOverlaps(t *testing.T) {
+	cases := []struct {
+		ruleA *OutsideFVF
+		ruleB Rule
+		want  bool
+	}{
+		{ruleA: MustNewOutsideFVF("band", 7.9, 120.9),
+			ruleB: MustNewOutsideFVF("band", 6.3, 50.3),
+			want:  true,
+		},
+		{ruleA: MustNewOutsideFVF("band", 7.9, 50.9),
+			ruleB: MustNewOutsideFVF("rate", 6.3, 90.3),
+			want:  false,
+		},
+		{ruleA: MustNewOutsideFVF("band", 7.9, 40.9),
+			ruleB: NewGEFVF("band", 6.3),
+			want:  false,
+		},
+	}
+	for _, c := range cases {
+		got := c.ruleA.Overlaps(c.ruleB)
+		if got != c.want {
+			t.Errorf("Overlaps - ruleA: %s, ruleB: %s - got: %t, want: %t",
+				c.ruleA, c.ruleB, got, c.want)
+		}
+	}
+}

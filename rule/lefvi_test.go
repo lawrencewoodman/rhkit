@@ -204,3 +204,31 @@ func TestLEFVIGetFields(t *testing.T) {
 		t.Errorf("GetFields() got: %s, want: %s", got, want)
 	}
 }
+
+func TestLEFVIOverlaps(t *testing.T) {
+	cases := []struct {
+		ruleA *LEFVI
+		ruleB Rule
+		want  bool
+	}{
+		{ruleA: NewLEFVI("band", 7),
+			ruleB: NewLEFVI("band", 6),
+			want:  true,
+		},
+		{ruleA: NewLEFVI("band", 7),
+			ruleB: NewLEFVI("rate", 6),
+			want:  false,
+		},
+		{ruleA: NewLEFVI("band", 7),
+			ruleB: NewGEFVI("band", 6),
+			want:  false,
+		},
+	}
+	for _, c := range cases {
+		got := c.ruleA.Overlaps(c.ruleB)
+		if got != c.want {
+			t.Errorf("Overlaps - ruleA: %s, ruleB: %s - got: %t, want: %t",
+				c.ruleA, c.ruleB, got, c.want)
+		}
+	}
+}

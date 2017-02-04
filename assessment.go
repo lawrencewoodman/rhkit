@@ -146,7 +146,6 @@ func (sortedAssessment *Assessment) Refine() {
 	sortedAssessment.excludePoorRules()
 	sortedAssessment.excludeSameRecordsRules()
 	sortedAssessment.excludePoorerOverlappingRules()
-	sortedAssessment.excludePoorerTweakableRules()
 	sortedAssessment.flags["refined"] = true
 }
 
@@ -326,30 +325,6 @@ func (sortedAssessment *Assessment) excludePoorerOverlappingRules() {
 			}
 		default:
 			goodRuleAssessments = append(goodRuleAssessments, aI)
-		}
-	}
-	sortedAssessment.RuleAssessments = goodRuleAssessments
-}
-
-// This doesn't effect Overlapper's because otherwise the
-// excludePoorerOverlappingRules wouldn't work
-func (sortedAssessment *Assessment) excludePoorerTweakableRules() {
-	goodRuleAssessments := make([]*RuleAssessment, 0)
-	fieldTypeIDs := make(map[string]interface{})
-	for _, a := range sortedAssessment.RuleAssessments {
-		switch x := a.Rule.(type) {
-		case rule.Overlapper:
-			goodRuleAssessments = append(goodRuleAssessments, a)
-		case rule.TweakableRule:
-			field := x.GetFields()[0]
-			fieldTypeID := fmt.Sprintf("%s^%T", field, x)
-			_, ok := fieldTypeIDs[fieldTypeID]
-			if !ok {
-				goodRuleAssessments = append(goodRuleAssessments, a)
-				fieldTypeIDs[fieldTypeID] = nil
-			}
-		default:
-			goodRuleAssessments = append(goodRuleAssessments, a)
 		}
 	}
 	sortedAssessment.RuleAssessments = goodRuleAssessments
