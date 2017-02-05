@@ -35,8 +35,7 @@ type Rule interface {
 	GetFields() []string
 }
 
-type TweakableRule interface {
-	Rule
+type Tweaker interface {
 	Tweak(*dlit.Literal, *dlit.Literal, int, int) []Rule
 }
 

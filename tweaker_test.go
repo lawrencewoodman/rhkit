@@ -59,7 +59,7 @@ func TestTweakRules_1(t *testing.T) {
 			if x.GetFields()[0] == "age" {
 				numAgeBetweenRules++
 			}
-		case rule.TweakableRule:
+		case rule.Tweaker:
 			numOtherRules++
 		default:
 			printTestPurposes(t, testPurposes)
@@ -139,7 +139,7 @@ func TestTweakRules_2(t *testing.T) {
 			} else {
 				numOther++
 			}
-		case rule.TweakableRule:
+		case rule.Tweaker:
 			continue
 		default:
 			printTestPurposes(t, testPurposes)
