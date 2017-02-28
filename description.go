@@ -20,20 +20,17 @@
 package rhkit
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/lawrencewoodman/ddataset"
 	"github.com/lawrencewoodman/dlit"
+	"io/ioutil"
 	"math"
+	"os"
 )
 
 type Description struct {
 	fields map[string]*fieldDescription
-}
-
-// Create a New Description.
-func newDescription() *Description {
-	fd := map[string]*fieldDescription{}
-	return &Description{fd}
 }
 
 type fieldDescription struct {
@@ -48,6 +45,105 @@ type fieldDescription struct {
 type valueDescription struct {
 	value *dlit.Literal
 	num   int
+}
+
+func LoadDescriptionJSON(filename string) (*Description, error) {
+	var dj descriptionJ
+
+	f, err := os.Open(filename)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	dec := json.NewDecoder(f)
+	if err := dec.Decode(&dj); err != nil {
+		return nil, err
+	}
+
+	fields := make(map[string]*fieldDescription, len(dj.Fields))
+	for field, fd := range dj.Fields {
+		values := make(map[string]valueDescription, len(fd.Values))
+		for v, vd := range fd.Values {
+			values[v] = valueDescription{
+				value: dlit.NewString(vd.Value),
+				num:   vd.Num,
+			}
+		}
+		fields[field] = &fieldDescription{
+			kind:      newFieldType(fd.Kind),
+			min:       dlit.NewString(fd.Min),
+			max:       dlit.NewString(fd.Max),
+			maxDP:     fd.MaxDP,
+			values:    values,
+			numValues: fd.NumValues,
+		}
+	}
+	d := &Description{fields: fields}
+	return d, nil
+}
+
+func (d *Description) WriteJSON(filename string) error {
+	fields := make(map[string]*fieldDescriptionJ, len(d.fields))
+	for field, fd := range d.fields {
+		fields[field] = newFieldDescriptionJ(fd)
+	}
+	dj := descriptionJ{Fields: fields}
+	json, err := json.Marshal(dj)
+	if err != nil {
+		return err
+	}
+	return ioutil.WriteFile(filename, json, 0640)
+}
+
+// Create a New Description.
+func newDescription() *Description {
+	fd := map[string]*fieldDescription{}
+	return &Description{fd}
+}
+
+type descriptionJ struct {
+	Fields map[string]*fieldDescriptionJ
+}
+
+type fieldDescriptionJ struct {
+	Kind      string
+	Min       string
+	Max       string
+	MaxDP     int
+	Values    map[string]valueDescriptionJ
+	NumValues int
+}
+
+type valueDescriptionJ struct {
+	Value string
+	Num   int
+}
+
+func newFieldDescriptionJ(fd *fieldDescription) *fieldDescriptionJ {
+	values := make(map[string]valueDescriptionJ, len(fd.values))
+	for v, vd := range fd.values {
+		values[v] = valueDescriptionJ{
+			Value: vd.value.String(),
+			Num:   vd.num,
+		}
+	}
+	min := ""
+	max := ""
+	if fd.min != nil {
+		min = fd.min.String()
+	}
+	if fd.max != nil {
+		max = fd.max.String()
+	}
+	return &fieldDescriptionJ{
+		Kind:      fd.kind.String(),
+		Min:       min,
+		Max:       max,
+		MaxDP:     fd.maxDP,
+		Values:    values,
+		NumValues: fd.numValues,
+	}
 }
 
 func (fd *fieldDescription) String() string {

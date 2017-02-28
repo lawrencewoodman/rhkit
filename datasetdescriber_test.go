@@ -1,7 +1,6 @@
 package rhkit
 
 import (
-	"fmt"
 	"github.com/lawrencewoodman/dlit"
 	"testing"
 )
@@ -161,84 +160,4 @@ func TestDescribeDataset(t *testing.T) {
 	if err := checkDescriptionsEqual(d, expected); err != nil {
 		t.Errorf("DescibeDataset(dataset) got not expected: %s", err)
 	}
-}
-
-/*************************
- *   Helper functions
- *************************/
-func checkDescriptionsEqual(dGot *Description, dWant *Description) error {
-	return fieldDescriptionsEqual(dGot.fields, dWant.fields)
-}
-
-func fieldDescriptionsEqual(
-	fdsGot map[string]*fieldDescription,
-	fdsWant map[string]*fieldDescription,
-) error {
-	for field, fdG := range fdsGot {
-		fdW, ok := fdsWant[field]
-		if !ok {
-			return fmt.Errorf("Field Description missing for field: %s", field)
-		}
-		if err := fieldDescriptionEqual(fdG, fdW); err != nil {
-			return fmt.Errorf("Field Description for field: %s, %s", field, err)
-		}
-	}
-	return nil
-}
-
-func fieldDescriptionEqual(
-	fdGot *fieldDescription,
-	fdWant *fieldDescription,
-) error {
-	if fdGot.kind != fdWant.kind {
-		return fmt.Errorf("got field kind: %s, want: %s", fdGot.kind, fdWant.kind)
-	}
-	if len(fdGot.values) != len(fdWant.values) {
-		return fmt.Errorf("got %d values, want: %d",
-			len(fdGot.values), len(fdWant.values))
-	}
-	if fdGot.kind == ftInt || fdGot.kind == ftFloat {
-		if fdGot.min.String() != fdWant.min.String() ||
-			fdGot.max.String() != fdWant.max.String() {
-			return fmt.Errorf("got min: %s and max: %s, want min: %s and max: %s",
-				fdGot.min, fdGot.max, fdWant.min, fdWant.max)
-		}
-	}
-	if fdGot.kind == ftFloat {
-		if fdGot.maxDP != fdWant.maxDP {
-			return fmt.Errorf("got maxDP: %d, want: %d", fdGot.maxDP, fdWant.maxDP)
-		}
-	}
-	if fdGot.kind == ftFloat {
-		if fdGot.maxDP != fdWant.maxDP {
-			return fmt.Errorf("got maxDP: %d, want: %d", fdGot.maxDP, fdWant.maxDP)
-		}
-	}
-
-	if fdGot.numValues != fdWant.numValues {
-		return fmt.Errorf("got numValues: %d, numValues: %d",
-			fdGot.numValues, fdWant.numValues)
-	}
-
-	return fieldValuesEqual(fdGot.values, fdWant.values)
-}
-
-func fieldValuesEqual(
-	vdsGot map[string]valueDescription,
-	vdsWant map[string]valueDescription,
-) error {
-	if len(vdsGot) != len(vdsWant) {
-		return fmt.Errorf("got %d valueDescriptions, want: %d",
-			len(vdsGot), len(vdsWant))
-	}
-	for k, vdW := range vdsWant {
-		vdG, ok := vdsGot[k]
-		if !ok {
-			return fmt.Errorf("valueDescription missing value: %s", k)
-		}
-		if vdG.num != vdW.num || vdG.value.String() != vdW.value.String() {
-			return fmt.Errorf("got valueDescription: %s, want: %s", vdG, vdW)
-		}
-	}
-	return nil
 }
