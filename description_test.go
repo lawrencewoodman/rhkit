@@ -107,7 +107,7 @@ func TestDescriptionWriteLoadJSON(t *testing.T) {
  *   Helper functions
  *************************/
 func checkDescriptionsEqual(dGot *Description, dWant *Description) error {
-	return fieldDescriptionsEqual(dGot.fields, dWant.fields)
+	return fieldDescriptionsEqual(dGot.Fields, dWant.Fields)
 }
 
 func fieldDescriptionsEqual(
@@ -136,37 +136,32 @@ func fieldDescriptionEqual(
 	fdGot *fieldDescription,
 	fdWant *fieldDescription,
 ) error {
-	if fdGot.kind != fdWant.kind {
-		return fmt.Errorf("got field kind: %s, want: %s", fdGot.kind, fdWant.kind)
+	if fdGot.Kind != fdWant.Kind {
+		return fmt.Errorf("got field kind: %s, want: %s", fdGot.Kind, fdWant.Kind)
 	}
-	if len(fdGot.values) != len(fdWant.values) {
+	if len(fdGot.Values) != len(fdWant.Values) {
 		return fmt.Errorf("got %d values, want: %d",
-			len(fdGot.values), len(fdWant.values))
+			len(fdGot.Values), len(fdWant.Values))
 	}
-	if fdGot.kind == ftInt || fdGot.kind == ftFloat {
-		if fdGot.min.String() != fdWant.min.String() ||
-			fdGot.max.String() != fdWant.max.String() {
+	if fdGot.Kind == ftInt || fdGot.Kind == ftFloat {
+		if fdGot.Min.String() != fdWant.Min.String() ||
+			fdGot.Max.String() != fdWant.Max.String() {
 			return fmt.Errorf("got min: %s and max: %s, want min: %s and max: %s",
-				fdGot.min, fdGot.max, fdWant.min, fdWant.max)
+				fdGot.Min, fdGot.Max, fdWant.Min, fdWant.Max)
 		}
 	}
-	if fdGot.kind == ftFloat {
-		if fdGot.maxDP != fdWant.maxDP {
-			return fmt.Errorf("got maxDP: %d, want: %d", fdGot.maxDP, fdWant.maxDP)
-		}
-	}
-	if fdGot.kind == ftFloat {
-		if fdGot.maxDP != fdWant.maxDP {
-			return fmt.Errorf("got maxDP: %d, want: %d", fdGot.maxDP, fdWant.maxDP)
+	if fdGot.Kind == ftFloat {
+		if fdGot.MaxDP != fdWant.MaxDP {
+			return fmt.Errorf("got maxDP: %d, want: %d", fdGot.MaxDP, fdWant.MaxDP)
 		}
 	}
 
-	if fdGot.numValues != fdWant.numValues {
+	if fdGot.NumValues != fdWant.NumValues {
 		return fmt.Errorf("got numValues: %d, numValues: %d",
-			fdGot.numValues, fdWant.numValues)
+			fdGot.NumValues, fdWant.NumValues)
 	}
 
-	return fieldValuesEqual(fdGot.values, fdWant.values)
+	return fieldValuesEqual(fdGot.Values, fdWant.Values)
 }
 
 func fieldValuesEqual(
@@ -182,7 +177,7 @@ func fieldValuesEqual(
 		if !ok {
 			return fmt.Errorf("valueDescription missing value: %s", k)
 		}
-		if vdG.num != vdW.num || vdG.value.String() != vdW.value.String() {
+		if vdG.Num != vdW.Num || vdG.Value.String() != vdW.Value.String() {
 			return fmt.Errorf("got valueDescription: %s, want: %s", vdG, vdW)
 		}
 	}

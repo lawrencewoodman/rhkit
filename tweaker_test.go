@@ -182,12 +182,12 @@ func TestTweakRules_3(t *testing.T) {
 	inputDescription := &Description{
 		map[string]*fieldDescription{
 			"flow": &fieldDescription{
-				kind:      ftFloat,
-				min:       dlit.MustNew(10),
-				max:       dlit.MustNew(80),
-				maxDP:     6,
-				values:    map[string]valueDescription{},
-				numValues: 0,
+				Kind:      ftFloat,
+				Min:       dlit.MustNew(10),
+				Max:       dlit.MustNew(80),
+				MaxDP:     6,
+				Values:    map[string]valueDescription{},
+				NumValues: 0,
 			},
 		}}
 	rulesIn := []rule.Rule{
@@ -196,7 +196,7 @@ func TestTweakRules_3(t *testing.T) {
 		rule.NewLEFVF("flow", 52.604956),
 		rule.NewLEFVF("flow", 65.80),
 	}
-	wantMaxDP := inputDescription.fields["flow"].maxDP
+	wantMaxDP := inputDescription.Fields["flow"].MaxDP
 	wantMinDP := 0
 	gotRules := TweakRules(1, rulesIn, inputDescription)
 

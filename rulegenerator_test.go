@@ -16,16 +16,16 @@ func TestGenerateRules_1(t *testing.T) {
 	inputDescription := &Description{
 		map[string]*fieldDescription{
 			"team": &fieldDescription{
-				kind: ftString,
-				values: map[string]valueDescription{
+				Kind: ftString,
+				Values: map[string]valueDescription{
 					"a": valueDescription{dlit.NewString("a"), 3},
 					"b": valueDescription{dlit.NewString("b"), 3},
 					"c": valueDescription{dlit.NewString("c"), 3},
 				},
 			},
 			"teamOut": &fieldDescription{
-				kind: ftString,
-				values: map[string]valueDescription{
+				Kind: ftString,
+				Values: map[string]valueDescription{
 					"a": valueDescription{dlit.NewString("a"), 3},
 					"c": valueDescription{dlit.NewString("c"), 1},
 					"d": valueDescription{dlit.NewString("d"), 3},
@@ -34,11 +34,11 @@ func TestGenerateRules_1(t *testing.T) {
 				},
 			},
 			"level": &fieldDescription{
-				kind:  ftInt,
-				min:   dlit.MustNew(0),
-				max:   dlit.MustNew(5),
-				maxDP: 0,
-				values: map[string]valueDescription{
+				Kind:  ftInt,
+				Min:   dlit.MustNew(0),
+				Max:   dlit.MustNew(5),
+				MaxDP: 0,
+				Values: map[string]valueDescription{
 					"0": valueDescription{dlit.NewString("0"), 3},
 					"1": valueDescription{dlit.NewString("1"), 3},
 					"2": valueDescription{dlit.NewString("2"), 1},
@@ -48,22 +48,22 @@ func TestGenerateRules_1(t *testing.T) {
 				},
 			},
 			"flow": &fieldDescription{
-				kind:  ftFloat,
-				min:   dlit.MustNew(0),
-				max:   dlit.MustNew(10.5),
-				maxDP: 2,
-				values: map[string]valueDescription{
+				Kind:  ftFloat,
+				Min:   dlit.MustNew(0),
+				Max:   dlit.MustNew(10.5),
+				MaxDP: 2,
+				Values: map[string]valueDescription{
 					"0.0":  valueDescription{dlit.NewString("0.0"), 3},
 					"2.34": valueDescription{dlit.NewString("2.34"), 3},
 					"10.5": valueDescription{dlit.NewString("10.5"), 3},
 				},
 			},
 			"position": &fieldDescription{
-				kind:  ftInt,
-				min:   dlit.MustNew(1),
-				max:   dlit.MustNew(13),
-				maxDP: 0,
-				values: map[string]valueDescription{
+				Kind:  ftInt,
+				Min:   dlit.MustNew(1),
+				Max:   dlit.MustNew(13),
+				MaxDP: 0,
+				Values: map[string]valueDescription{
 					"1":  valueDescription{dlit.NewString("1"), 3},
 					"2":  valueDescription{dlit.NewString("2"), 3},
 					"3":  valueDescription{dlit.NewString("3"), 3},
@@ -122,16 +122,16 @@ func TestGenerateRules_2(t *testing.T) {
 	inputDescription := &Description{
 		map[string]*fieldDescription{
 			"team": &fieldDescription{
-				kind: ftString,
-				values: map[string]valueDescription{
+				Kind: ftString,
+				Values: map[string]valueDescription{
 					"a": valueDescription{dlit.MustNew("a"), 3},
 					"b": valueDescription{dlit.MustNew("b"), 3},
 					"c": valueDescription{dlit.MustNew("c"), 3},
 				},
 			},
 			"teamOut": &fieldDescription{
-				kind: ftString,
-				values: map[string]valueDescription{
+				Kind: ftString,
+				Values: map[string]valueDescription{
 					"a": valueDescription{dlit.MustNew("a"), 3},
 					"c": valueDescription{dlit.MustNew("c"), 3},
 					"d": valueDescription{dlit.MustNew("d"), 3},
@@ -162,15 +162,15 @@ func TestGenerateRules_3(t *testing.T) {
 	inputDescription := &Description{
 		map[string]*fieldDescription{
 			"directionIn": &fieldDescription{
-				kind: ftString,
-				values: map[string]valueDescription{
+				Kind: ftString,
+				Values: map[string]valueDescription{
 					"gogledd": valueDescription{dlit.MustNew("gogledd"), 3},
 					"de":      valueDescription{dlit.MustNew("de"), 3},
 				},
 			},
 			"directionOut": &fieldDescription{
-				kind: ftString,
-				values: map[string]valueDescription{
+				Kind: ftString,
+				Values: map[string]valueDescription{
 					"dwyrain":   valueDescription{dlit.MustNew("dwyrain"), 3},
 					"gorllewin": valueDescription{dlit.MustNew("gorllewin"), 3},
 				},
@@ -239,10 +239,10 @@ func TestGenerateIntRules(t *testing.T) {
 	inputDescription := &Description{
 		map[string]*fieldDescription{
 			"flow": &fieldDescription{
-				kind:   ftInt,
-				min:    dlit.MustNew(1),
-				max:    dlit.MustNew(20),
-				values: map[string]valueDescription{},
+				Kind:   ftInt,
+				Min:    dlit.MustNew(1),
+				Max:    dlit.MustNew(20),
+				Values: map[string]valueDescription{},
 			},
 		},
 	}
@@ -288,11 +288,11 @@ func TestGenerateFloatRules(t *testing.T) {
 	inputDescription := &Description{
 		map[string]*fieldDescription{
 			"flow": &fieldDescription{
-				kind:   ftFloat,
-				min:    dlit.MustNew(0),
-				max:    dlit.MustNew(10.5),
-				maxDP:  2,
-				values: map[string]valueDescription{},
+				Kind:   ftFloat,
+				Min:    dlit.MustNew(0),
+				Max:    dlit.MustNew(10.5),
+				MaxDP:  2,
+				Values: map[string]valueDescription{},
 			},
 		},
 	}
@@ -414,42 +414,42 @@ func TestGenerateCompareNumericRules(t *testing.T) {
 	inputDescription := &Description{
 		map[string]*fieldDescription{
 			"band": &fieldDescription{
-				kind:   ftInt,
-				min:    dlit.MustNew(1),
-				max:    dlit.MustNew(3),
-				values: map[string]valueDescription{},
+				Kind:   ftInt,
+				Min:    dlit.MustNew(1),
+				Max:    dlit.MustNew(3),
+				Values: map[string]valueDescription{},
 			},
 			"flowIn": &fieldDescription{
-				kind:   ftFloat,
-				min:    dlit.MustNew(1),
-				max:    dlit.MustNew(4),
-				maxDP:  2,
-				values: map[string]valueDescription{},
+				Kind:   ftFloat,
+				Min:    dlit.MustNew(1),
+				Max:    dlit.MustNew(4),
+				MaxDP:  2,
+				Values: map[string]valueDescription{},
 			},
 			"flowOut": &fieldDescription{
-				kind:   ftFloat,
-				min:    dlit.MustNew(0.95),
-				max:    dlit.MustNew(4.1),
-				maxDP:  2,
-				values: map[string]valueDescription{},
+				Kind:   ftFloat,
+				Min:    dlit.MustNew(0.95),
+				Max:    dlit.MustNew(4.1),
+				MaxDP:  2,
+				Values: map[string]valueDescription{},
 			},
 			"rateIn": &fieldDescription{
-				kind:   ftFloat,
-				min:    dlit.MustNew(4.2),
-				max:    dlit.MustNew(8.9),
-				maxDP:  2,
-				values: map[string]valueDescription{},
+				Kind:   ftFloat,
+				Min:    dlit.MustNew(4.2),
+				Max:    dlit.MustNew(8.9),
+				MaxDP:  2,
+				Values: map[string]valueDescription{},
 			},
 			"rateOut": &fieldDescription{
-				kind:   ftFloat,
-				min:    dlit.MustNew(0.1),
-				max:    dlit.MustNew(0.9),
-				maxDP:  2,
-				values: map[string]valueDescription{},
+				Kind:   ftFloat,
+				Min:    dlit.MustNew(0.1),
+				Max:    dlit.MustNew(0.9),
+				MaxDP:  2,
+				Values: map[string]valueDescription{},
 			},
 			"group": &fieldDescription{
-				kind: ftString,
-				values: map[string]valueDescription{
+				Kind: ftString,
+				Values: map[string]valueDescription{
 					"Nelson":      valueDescription{dlit.NewString("Nelson"), 3},
 					"Collingwood": valueDescription{dlit.NewString("Collingwood"), 1},
 					"Mountbatten": valueDescription{dlit.NewString("Mountbatten"), 1},
@@ -518,14 +518,14 @@ func TestGenerateCompareStringRules(t *testing.T) {
 	inputDescription := &Description{
 		map[string]*fieldDescription{
 			"band": &fieldDescription{
-				kind:   ftInt,
-				min:    dlit.MustNew(1),
-				max:    dlit.MustNew(3),
-				values: map[string]valueDescription{},
+				Kind:   ftInt,
+				Min:    dlit.MustNew(1),
+				Max:    dlit.MustNew(3),
+				Values: map[string]valueDescription{},
 			},
 			"groupA": &fieldDescription{
-				kind: ftString,
-				values: map[string]valueDescription{
+				Kind: ftString,
+				Values: map[string]valueDescription{
 					"Nelson":      valueDescription{dlit.NewString("Nelson"), 3},
 					"Collingwood": valueDescription{dlit.NewString("Collingwood"), 1},
 					"Mountbatten": valueDescription{dlit.NewString("Mountbatten"), 1},
@@ -533,29 +533,29 @@ func TestGenerateCompareStringRules(t *testing.T) {
 				},
 			},
 			"groupB": &fieldDescription{
-				kind: ftString,
-				values: map[string]valueDescription{
+				Kind: ftString,
+				Values: map[string]valueDescription{
 					"Nelson":      valueDescription{dlit.NewString("Nelson"), 3},
 					"Mountbatten": valueDescription{dlit.NewString("Mountbatten"), 1},
 					"Drake":       valueDescription{dlit.NewString("Drake"), 2},
 				},
 			},
 			"groupC": &fieldDescription{
-				kind: ftString,
-				values: map[string]valueDescription{
+				Kind: ftString,
+				Values: map[string]valueDescription{
 					"Nelson": valueDescription{dlit.NewString("Nelson"), 3},
 					"Drake":  valueDescription{dlit.NewString("Drake"), 2},
 				},
 			},
 			"groupD": &fieldDescription{
-				kind: ftString,
-				values: map[string]valueDescription{
+				Kind: ftString,
+				Values: map[string]valueDescription{
 					"Drake": valueDescription{dlit.NewString("Drake"), 2},
 				},
 			},
 			"groupE": &fieldDescription{
-				kind: ftString,
-				values: map[string]valueDescription{
+				Kind: ftString,
+				Values: map[string]valueDescription{
 					"Drake":       valueDescription{dlit.NewString("Drake"), 2},
 					"Chaucer":     valueDescription{dlit.NewString("Chaucer"), 2},
 					"Shakespeare": valueDescription{dlit.NewString("Shakespeare"), 2},
@@ -563,8 +563,8 @@ func TestGenerateCompareStringRules(t *testing.T) {
 				},
 			},
 			"groupF": &fieldDescription{
-				kind: ftString,
-				values: map[string]valueDescription{
+				Kind: ftString,
+				Values: map[string]valueDescription{
 					"Nelson":      valueDescription{dlit.NewString("Nelson"), 3},
 					"Drake":       valueDescription{dlit.NewString("Drake"), 2},
 					"Chaucer":     valueDescription{dlit.NewString("Chaucer"), 2},
@@ -632,21 +632,21 @@ func TestGenerateInRules_1(t *testing.T) {
 	inputDescription := &Description{
 		map[string]*fieldDescription{
 			"band": &fieldDescription{
-				kind:   ftInt,
-				min:    dlit.MustNew(1),
-				max:    dlit.MustNew(3),
-				values: map[string]valueDescription{},
+				Kind:   ftInt,
+				Min:    dlit.MustNew(1),
+				Max:    dlit.MustNew(3),
+				Values: map[string]valueDescription{},
 			},
 			"flow": &fieldDescription{
-				kind:   ftFloat,
-				min:    dlit.MustNew(1),
-				max:    dlit.MustNew(3),
-				maxDP:  2,
-				values: map[string]valueDescription{},
+				Kind:   ftFloat,
+				Min:    dlit.MustNew(1),
+				Max:    dlit.MustNew(3),
+				MaxDP:  2,
+				Values: map[string]valueDescription{},
 			},
 			"groupA": &fieldDescription{
-				kind: ftString,
-				values: map[string]valueDescription{
+				Kind: ftString,
+				Values: map[string]valueDescription{
 					"Fred":    valueDescription{dlit.NewString("Fred"), 3},
 					"Mary":    valueDescription{dlit.NewString("Mary"), 4},
 					"Rebecca": valueDescription{dlit.NewString("Rebecca"), 2},
@@ -654,8 +654,8 @@ func TestGenerateInRules_1(t *testing.T) {
 			},
 
 			"groupB": &fieldDescription{
-				kind: ftString,
-				values: map[string]valueDescription{
+				Kind: ftString,
+				Values: map[string]valueDescription{
 					"Fred":    valueDescription{dlit.NewString("Fred"), 3},
 					"Mary":    valueDescription{dlit.NewString("Mary"), 4},
 					"Rebecca": valueDescription{dlit.NewString("Rebecca"), 2},
@@ -672,8 +672,8 @@ func TestGenerateInRules_1(t *testing.T) {
 				},
 			},
 			"groupC": &fieldDescription{
-				kind: ftString,
-				values: map[string]valueDescription{
+				Kind: ftString,
+				Values: map[string]valueDescription{
 					"Fred":    valueDescription{dlit.NewString("Fred"), 3},
 					"Mary":    valueDescription{dlit.NewString("Mary"), 4},
 					"Rebecca": valueDescription{dlit.NewString("Rebecca"), 2},
@@ -681,8 +681,8 @@ func TestGenerateInRules_1(t *testing.T) {
 				},
 			},
 			"groupD": &fieldDescription{
-				kind: ftString,
-				values: map[string]valueDescription{
+				Kind: ftString,
+				Values: map[string]valueDescription{
 					"Fred":    valueDescription{dlit.NewString("Fred"), 3},
 					"Mary":    valueDescription{dlit.NewString("Mary"), 4},
 					"Rebecca": valueDescription{dlit.NewString("Rebecca"), 1},
@@ -690,8 +690,8 @@ func TestGenerateInRules_1(t *testing.T) {
 				},
 			},
 			"groupE": &fieldDescription{
-				kind: ftString,
-				values: map[string]valueDescription{
+				Kind: ftString,
+				Values: map[string]valueDescription{
 					"Fred":    valueDescription{dlit.NewString("Fred"), 3},
 					"Mary":    valueDescription{dlit.NewString("Mary"), 4},
 					"Rebecca": valueDescription{dlit.NewString("Rebecca"), 2},
@@ -875,8 +875,8 @@ func TestGenerateInRules_2(t *testing.T) {
 	inputDescription := &Description{
 		map[string]*fieldDescription{
 			"group": &fieldDescription{
-				kind: ftString,
-				values: map[string]valueDescription{
+				Kind: ftString,
+				Values: map[string]valueDescription{
 					"Fred":    valueDescription{dlit.NewString("Fred"), 3},
 					"Mary":    valueDescription{dlit.NewString("Mary"), 4},
 					"Rebecca": valueDescription{dlit.NewString("Rebecca"), 2},
@@ -910,10 +910,10 @@ func TestGenerateValueRules(t *testing.T) {
 	inputDescription := &Description{
 		map[string]*fieldDescription{
 			"band": &fieldDescription{
-				kind: ftInt,
-				min:  dlit.MustNew(1),
-				max:  dlit.MustNew(4),
-				values: map[string]valueDescription{
+				Kind: ftInt,
+				Min:  dlit.MustNew(1),
+				Max:  dlit.MustNew(4),
+				Values: map[string]valueDescription{
 					"1": valueDescription{dlit.NewString("1"), 3},
 					"2": valueDescription{dlit.NewString("2"), 1},
 					"3": valueDescription{dlit.NewString("3"), 2},
@@ -921,11 +921,11 @@ func TestGenerateValueRules(t *testing.T) {
 				},
 			},
 			"flow": &fieldDescription{
-				kind:  ftFloat,
-				min:   dlit.MustNew(1),
-				max:   dlit.MustNew(4),
-				maxDP: 2,
-				values: map[string]valueDescription{
+				Kind:  ftFloat,
+				Min:   dlit.MustNew(1),
+				Max:   dlit.MustNew(4),
+				MaxDP: 2,
+				Values: map[string]valueDescription{
 					"1":    valueDescription{dlit.NewString("1"), 3},
 					"2":    valueDescription{dlit.NewString("2"), 1},
 					"2.90": valueDescription{dlit.NewString("2.90"), 1},
@@ -935,8 +935,8 @@ func TestGenerateValueRules(t *testing.T) {
 				},
 			},
 			"group": &fieldDescription{
-				kind: ftString,
-				values: map[string]valueDescription{
+				Kind: ftString,
+				Values: map[string]valueDescription{
 					"Nelson":      valueDescription{dlit.NewString("Nelson"), 3},
 					"Collingwood": valueDescription{dlit.NewString("Collingwood"), 1},
 					"Mountbatten": valueDescription{dlit.NewString("Mountbatten"), 1},
