@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/lawrencewoodman/dlit"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"testing"
 )
@@ -88,6 +89,7 @@ func TestDescriptionWriteLoadJSON(t *testing.T) {
 	if err != nil {
 		t.Fatalf("TempDir() err: %s", err)
 	}
+	defer os.RemoveAll(tempDir)
 	filename := filepath.Join(tempDir, "fd.json")
 	if err := description.WriteJSON(filename); err != nil {
 		t.Fatalf("WriteJSON: %s", err)
