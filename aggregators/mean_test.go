@@ -45,10 +45,7 @@ func TestMeanGetResult(t *testing.T) {
 		{[]map[string]*dlit.Literal{}, func(i int) bool { return true }, 0},
 	}
 	for _, c := range cases {
-		meanProfitDesc, err := New("meanProfit", "mean", "income-cost")
-		if err != nil {
-			t.Errorf("New(\"meanProfit\", \"mean\", \"income-cost\") err == %s", err)
-		}
+		meanProfitDesc := MustNew("meanProfit", "mean", "income-cost")
 		meanProfit := meanProfitDesc.New()
 		instances := []AggregatorInstance{meanProfit}
 
@@ -61,5 +58,32 @@ func TestMeanGetResult(t *testing.T) {
 		if !gotIsFloat || gotFloat != c.want {
 			t.Errorf("GetResult() got: %v, want: %f", got, c.want)
 		}
+	}
+}
+
+func TestMeanSpecGetName(t *testing.T) {
+	name := "a"
+	as := MustNew(name, "mean", "income - cost")
+	got := as.GetName()
+	if got != name {
+		t.Errorf("GetName - got: %s, want: %s", got, name)
+	}
+}
+
+func TestMeanSpecGetKind(t *testing.T) {
+	kind := "mean"
+	as := MustNew("a", kind, "income - cost")
+	got := as.GetKind()
+	if got != kind {
+		t.Errorf("GetKind - got: %s, want: %s", got, kind)
+	}
+}
+
+func TestMeanSpecGetArg(t *testing.T) {
+	arg := "income - cost"
+	as := MustNew("a", "mean", arg)
+	got := as.GetArg()
+	if got != arg {
+		t.Errorf("GetArg - got: %s, want: %s", got, arg)
 	}
 }

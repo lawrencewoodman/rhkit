@@ -65,11 +65,7 @@ func TestPrecisionGetResult(t *testing.T) {
 		{[]map[string]*dlit.Literal{}, func(i int) bool { return true }, 0},
 	}
 	for _, c := range cases {
-		precisionCostGt2Desc, err := New("precisionCostGt2", "precision", "cost > 2")
-		if err != nil {
-			t.Errorf("New(\"precisionCostGt2\", \"precision\", \"cost > 2\") err == %s",
-				err)
-		}
+		precisionCostGt2Desc := MustNew("precisionCostGt2", "precision", "cost > 2")
 		for i := 0; i < 5; i++ {
 			precisionCostGt2 := precisionCostGt2Desc.New()
 			instances := []AggregatorInstance{precisionCostGt2}
@@ -84,5 +80,32 @@ func TestPrecisionGetResult(t *testing.T) {
 				t.Errorf("GetResult() got: %v, want: %v", got, c.want)
 			}
 		}
+	}
+}
+
+func TestPrecisionSpecGetName(t *testing.T) {
+	name := "a"
+	as := MustNew(name, "precision", "cost > 2")
+	got := as.GetName()
+	if got != name {
+		t.Errorf("GetName - got: %s, want: %s", got, name)
+	}
+}
+
+func TestPrecisionSpecGetKind(t *testing.T) {
+	kind := "precision"
+	as := MustNew("a", kind, "cost > 2")
+	got := as.GetKind()
+	if got != kind {
+		t.Errorf("GetKind - got: %s, want: %s", got, kind)
+	}
+}
+
+func TestPrecisionSpecGetArg(t *testing.T) {
+	arg := "cost > 2"
+	as := MustNew("a", "precision", arg)
+	got := as.GetArg()
+	if got != arg {
+		t.Errorf("GetArg - got: %s, want: %s", got, arg)
 	}
 }

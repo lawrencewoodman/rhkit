@@ -93,10 +93,7 @@ func TestMCCGetResult(t *testing.T) {
 	}
 	callFuncs := map[string]dexpr.CallFun{}
 	for _, c := range cases {
-		mccCostGt2Desc, err := New("mccCostGt2", "mcc", "cost > 2")
-		if err != nil {
-			t.Fatalf("New(\"mccCostGt2\", \"mcc\", \"cost > 2\") err: %s", err)
-		}
+		mccCostGt2Desc := MustNew("mccCostGt2", "mcc", "cost > 2")
 		mccCostGt2 := mccCostGt2Desc.New()
 		instances := []AggregatorInstance{mccCostGt2}
 
@@ -118,5 +115,32 @@ func TestMCCGetResult(t *testing.T) {
 			t.Errorf("GetResult() (c.ruleExpr: %s) got: %v, want: %v",
 				c.ruleExpr, got, c.checkExpr)
 		}
+	}
+}
+
+func TestMCCSpecGetName(t *testing.T) {
+	name := "a"
+	as := MustNew(name, "mcc", "band > 4")
+	got := as.GetName()
+	if got != name {
+		t.Errorf("GetName - got: %s, want: %s", got, name)
+	}
+}
+
+func TestMCCSpecGetKind(t *testing.T) {
+	kind := "mcc"
+	as := MustNew("a", kind, "band > 4")
+	got := as.GetKind()
+	if got != kind {
+		t.Errorf("GetKind - got: %s, want: %s", got, kind)
+	}
+}
+
+func TestMCCSpecGetArg(t *testing.T) {
+	arg := "band > 4"
+	as := MustNew("a", "mcc", arg)
+	got := as.GetArg()
+	if got != arg {
+		t.Errorf("GetArg - got: %s, want: %s", got, arg)
 	}
 }

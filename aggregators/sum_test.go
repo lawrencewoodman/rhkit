@@ -30,10 +30,7 @@ func TestSumGetResult(t *testing.T) {
 		},
 	}
 	goals := []*goal.Goal{}
-	profitDesc, err := New("profit", "sum", "income-cost")
-	if err != nil {
-		t.Errorf("New(\"profit\", \"sum\", \"income-cost\") err == %s", err)
-	}
+	profitDesc := MustNew("profit", "sum", "income-cost")
 	profit := profitDesc.New()
 	instances := []AggregatorInstance{profit}
 
@@ -46,5 +43,32 @@ func TestSumGetResult(t *testing.T) {
 	gotFloat, gotIsFloat := got.Float()
 	if !gotIsFloat || gotFloat != want {
 		t.Errorf("GetResult() got: %f, want: %f", got, want)
+	}
+}
+
+func TestSumSpecGetName(t *testing.T) {
+	name := "a"
+	as := MustNew(name, "sum", "income-cost")
+	got := as.GetName()
+	if got != name {
+		t.Errorf("GetName - got: %s, want: %s", got, name)
+	}
+}
+
+func TestSumSpecGetKind(t *testing.T) {
+	kind := "sum"
+	as := MustNew("a", kind, "income-cost")
+	got := as.GetKind()
+	if got != kind {
+		t.Errorf("GetKind - got: %s, want: %s", got, kind)
+	}
+}
+
+func TestSumSpecGetArg(t *testing.T) {
+	arg := "income-cost"
+	as := MustNew("a", "sum", arg)
+	got := as.GetArg()
+	if got != arg {
+		t.Errorf("GetArg - got: %s, want: %s", got, arg)
 	}
 }

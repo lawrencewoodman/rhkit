@@ -15,10 +15,7 @@ func TestCountGetResult(t *testing.T) {
 		map[string]*dlit.Literal{"income": dlit.MustNew(0), "band": dlit.MustNew(9)},
 	}
 	goals := []*goal.Goal{}
-	numBandGt4Desc, err := New("numBandGt4", "count", "band > 4")
-	if err != nil {
-		t.Errorf("New(\"numBandGt4\", \"count\", \"band > 4\") err: %v", err)
-	}
+	numBandGt4Desc := MustNew("numBandGt4", "count", "band > 4")
 	numBandGt4 := numBandGt4Desc.New()
 	instances := []AggregatorInstance{numBandGt4}
 
@@ -32,5 +29,32 @@ func TestCountGetResult(t *testing.T) {
 	if !gotIsInt || gotInt != want {
 		t.Errorf("New(\"numBandGt4\", \"count\", \"band > 4\") got: %v, want: %v",
 			got, want)
+	}
+}
+
+func TestCountSpecGetName(t *testing.T) {
+	name := "a"
+	as := MustNew(name, "count", "band > 4")
+	got := as.GetName()
+	if got != name {
+		t.Errorf("GetName - got: %s, want: %s", got, name)
+	}
+}
+
+func TestCountSpecGetKind(t *testing.T) {
+	kind := "count"
+	as := MustNew("a", kind, "band > 4")
+	got := as.GetKind()
+	if got != kind {
+		t.Errorf("GetKind - got: %s, want: %s", got, kind)
+	}
+}
+
+func TestCountSpecGetArg(t *testing.T) {
+	arg := "band > 4"
+	as := MustNew("a", "count", arg)
+	got := as.GetArg()
+	if got != arg {
+		t.Errorf("GetArg - got: %s, want: %s", got, arg)
 	}
 }

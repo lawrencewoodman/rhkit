@@ -64,11 +64,7 @@ func TestRecallGetResult(t *testing.T) {
 		{[]map[string]*dlit.Literal{}, 0},
 	}
 	for _, c := range cases {
-		recallCostGt2Desc, err := New("recallCostGt2", "recall", "cost > 2")
-		if err != nil {
-			t.Errorf("New(\"recallCostGt2\", \"recall\", \"cost > 2\") err == %s",
-				err)
-		}
+		recallCostGt2Desc := MustNew("recallCostGt2", "recall", "cost > 2")
 		for i := 0; i < 5; i++ {
 			recallCostGt2 := recallCostGt2Desc.New()
 			instances := []AggregatorInstance{recallCostGt2}
@@ -83,5 +79,32 @@ func TestRecallGetResult(t *testing.T) {
 				t.Errorf("GetResult() got: %v, want: %v", got, c.want)
 			}
 		}
+	}
+}
+
+func TestRecallSpecGetName(t *testing.T) {
+	name := "a"
+	as := MustNew(name, "recall", "cost > 2")
+	got := as.GetName()
+	if got != name {
+		t.Errorf("GetName - got: %s, want: %s", got, name)
+	}
+}
+
+func TestRecallSpecGetKind(t *testing.T) {
+	kind := "recall"
+	as := MustNew("a", kind, "cost > 2")
+	got := as.GetKind()
+	if got != kind {
+		t.Errorf("GetKind - got: %s, want: %s", got, kind)
+	}
+}
+
+func TestRecallSpecGetArg(t *testing.T) {
+	arg := "cost > 2"
+	as := MustNew("a", "recall", arg)
+	got := as.GetArg()
+	if got != arg {
+		t.Errorf("GetArg - got: %s, want: %s", got, arg)
 	}
 }

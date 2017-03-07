@@ -38,3 +38,30 @@ func TestCalcGetResult(t *testing.T) {
 		}
 	}
 }
+
+func TestCalcSpecGetName(t *testing.T) {
+	name := "a"
+	as := MustNew(name, "calc", "3+4")
+	got := as.GetName()
+	if got != name {
+		t.Errorf("GetName - got: %s, want: %s", got, name)
+	}
+}
+
+func TestCalcSpecGetKind(t *testing.T) {
+	kind := "calc"
+	as := MustNew("a", kind, "3+4")
+	got := as.GetKind()
+	if got != kind {
+		t.Errorf("GetKind - got: %s, want: %s", got, kind)
+	}
+}
+
+func TestCalcSpecGetArg(t *testing.T) {
+	arg := "3+4"
+	as := MustNew("a", "calc", arg)
+	got := as.GetArg()
+	if got != arg {
+		t.Errorf("GetArg - got: %s, want: %s", got, arg)
+	}
+}
