@@ -31,7 +31,7 @@ func TestNew(t *testing.T) {
 				"campaign", "pdays", "previous", "p_1234567890outcome", "y",
 			},
 			Aggregators: []aggregators.AggregatorSpec{
-				aggregators.MustNew("numMatches", "count", "1==1"),
+				aggregators.MustNew("numMatches", "count", "true()"),
 				aggregators.MustNew("percentMatches", "calc",
 					"roundto(100.0 * numMatches / numRecords, 2)"),
 				// num_married to check for allowed characters
