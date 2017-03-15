@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2016 vLife Systems Ltd <http://vlifesystems.com>
+	Copyright (C) 2016-2017 vLife Systems Ltd <http://vlifesystems.com>
 	This file is part of rhkit.
 
 	rhkit is free software: you can redistribute it and/or modify
@@ -144,12 +144,10 @@ func in(args []*dlit.Literal) (*dlit.Literal, error) {
 	haystack := args[1:]
 	for _, v := range haystack {
 		if needle.String() == v.String() {
-			r, err := dlit.New(true)
-			return r, err
+			return dlit.MustNew(true), nil
 		}
 	}
-	r, err := dlit.New(false)
-	return r, err
+	return dlit.MustNew(false), nil
 }
 
 // Is a string NI a list of strings
