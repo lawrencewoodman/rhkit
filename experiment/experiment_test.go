@@ -137,7 +137,7 @@ func TestNew_errors(t *testing.T) {
 				&SortDesc{"percentMatches", "descending"},
 				&SortDesc{"age", "ascending"},
 			}},
-			errors.New("Invalid sort field: age"),
+			InvalidSortFieldError("age"),
 		},
 		{&ExperimentDesc{
 			Title:   "This is a nice title",
@@ -151,7 +151,7 @@ func TestNew_errors(t *testing.T) {
 			SortOrder: []*SortDesc{
 				&SortDesc{"numMatches", "Descending"},
 			}},
-			errors.New("Invalid sort direction: Descending, for field: numMatches"),
+			&InvalidSortDirectionError{"numMatches", "Descending"},
 		},
 		{&ExperimentDesc{
 			Title:   "This is a nice title",
@@ -165,7 +165,7 @@ func TestNew_errors(t *testing.T) {
 			SortOrder: []*SortDesc{
 				&SortDesc{"percentMatches", "Ascending"},
 			}},
-			errors.New("Invalid sort direction: Ascending, for field: percentMatches"),
+			&InvalidSortDirectionError{"percentMatches", "Ascending"},
 		},
 		{&ExperimentDesc{
 			Title:       "This is a nice title",
@@ -177,7 +177,7 @@ func TestNew_errors(t *testing.T) {
 				&SortDesc{"numMatches", "descending"},
 				&SortDesc{"percentMatches", "descending"},
 			}},
-			errors.New("No rule fields specified"),
+			ErrNoRuleFieldsSpecified,
 		},
 		{&ExperimentDesc{
 			Title:   "This is a nice title",
@@ -192,7 +192,7 @@ func TestNew_errors(t *testing.T) {
 				&SortDesc{"numMatches", "descending"},
 				&SortDesc{"percentMatches", "descending"},
 			}},
-			errors.New("Invalid rule field: bob"),
+			InvalidRuleFieldError("bob"),
 		},
 		{&ExperimentDesc{
 			Title:   "This is a nice title",
@@ -209,7 +209,7 @@ func TestNew_errors(t *testing.T) {
 				&SortDesc{"numMatches", "descending"},
 				&SortDesc{"percentMatches", "descending"},
 			}},
-			errors.New("Aggregator name clashes with field name: pdays"),
+			AggregatorNameClashError("pdays"),
 		},
 		{&ExperimentDesc{
 			Title:   "This is a nice title",
@@ -226,7 +226,7 @@ func TestNew_errors(t *testing.T) {
 				&SortDesc{"numMatches", "descending"},
 				&SortDesc{"percentMatches", "descending"},
 			}},
-			errors.New("Aggregator name reserved: numMatches"),
+			AggregatorNameReservedError("numMatches"),
 		},
 		{&ExperimentDesc{
 			Title:   "This is a nice title",
@@ -243,7 +243,7 @@ func TestNew_errors(t *testing.T) {
 				&SortDesc{"numMatches", "descending"},
 				&SortDesc{"percentMatches", "descending"},
 			}},
-			errors.New("Aggregator name reserved: percentMatches"),
+			AggregatorNameReservedError("percentMatches"),
 		},
 		{&ExperimentDesc{
 			Title:   "This is a nice title",
@@ -260,7 +260,7 @@ func TestNew_errors(t *testing.T) {
 				&SortDesc{"numMatches", "descending"},
 				&SortDesc{"percentMatches", "descending"},
 			}},
-			errors.New("Aggregator name reserved: goalsScore"),
+			AggregatorNameReservedError("goalsScore"),
 		},
 		{&ExperimentDesc{
 			Title:   "This is a nice title",
@@ -277,7 +277,7 @@ func TestNew_errors(t *testing.T) {
 				&SortDesc{"numMatches", "descending"},
 				&SortDesc{"percentMatches", "descending"},
 			}},
-			errors.New("Invalid aggregator name: 3numSignedUp"),
+			InvalidAggregatorNameError("3numSignedUp"),
 		},
 		{&ExperimentDesc{
 			Title:   "This is a nice title",
@@ -294,7 +294,24 @@ func TestNew_errors(t *testing.T) {
 				&SortDesc{"numMatches", "descending"},
 				&SortDesc{"percentMatches", "descending"},
 			}},
-			errors.New("Invalid aggregator name: num-signed-up"),
+			InvalidAggregatorNameError("num-signed-up"),
+		},
+		{&ExperimentDesc{
+			Title:   "This is a nice title",
+			Dataset: dataset,
+			RuleFields: []string{"age", "job", "marital", "education", "default",
+				"balance", "housing", "loan", "contact", "day", "month", "duration",
+				"campaign", "pdays", "previous", "poutcome", "y",
+			},
+			Aggregators: []*AggregatorDesc{
+				&AggregatorDesc{"numSignedUp", "count", "y == \"yes\""},
+			},
+			Goals: []string{"profit > > 0"},
+			SortOrder: []*SortDesc{
+				&SortDesc{"numMatches", "descending"},
+				&SortDesc{"percentMatches", "descending"},
+			}},
+			goal.InvalidGoalError("profit > > 0"),
 		},
 	}
 	for _, c := range cases {
