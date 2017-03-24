@@ -77,25 +77,19 @@ func (d direction) String() string {
 
 // Create a new Experiment from the description
 func New(e *ExperimentDesc) (*Experiment, error) {
-	var goals []*goal.Goal
-	var aggregators []aggregators.AggregatorSpec
-	var sortOrder []SortField
-	var err error
-
-	err = checkExperimentDescValid(e)
+	if err := checkExperimentDescValid(e); err != nil {
+		return nil, err
+	}
+	goals, err := makeGoals(e.Goals)
 	if err != nil {
 		return nil, err
 	}
-	goals, err = makeGoals(e.Goals)
-	if err != nil {
-		return nil, err
-	}
-	aggregators, err = makeAggregators(e.Aggregators)
+	aggregators, err := makeAggregators(e.Aggregators)
 	if err != nil {
 		return nil, err
 	}
 
-	sortOrder, err = makeSortOrder(e.SortOrder)
+	sortOrder, err := makeSortOrder(e.SortOrder)
 	if err != nil {
 		return nil, err
 	}
