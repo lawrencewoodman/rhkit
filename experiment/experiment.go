@@ -238,11 +238,8 @@ func makeSortOrder(eSortOrder []*SortDesc) ([]SortField, error) {
 		// TODO: Make case insensitive
 		if direction == "ascending" {
 			r[i] = SortField{field, ASCENDING}
-		} else if direction == "descending" {
-			r[i] = SortField{field, DESCENDING}
 		} else {
-			err := &InvalidSortDirectionError{field, direction}
-			return r, err
+			r[i] = SortField{field, DESCENDING}
 		}
 	}
 	return r, nil
