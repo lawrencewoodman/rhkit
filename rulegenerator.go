@@ -422,7 +422,7 @@ func valuesToLiterals(values map[string]valueDescription) []*dlit.Literal {
 	lits := make([]*dlit.Literal, len(values))
 	keys := make([]string, len(values))
 	i := 0
-	for k, _ := range values {
+	for k := range values {
 		keys[i] = k
 		i++
 	}
