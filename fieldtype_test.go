@@ -38,8 +38,8 @@ func TestFieldTypeString_panic(t *testing.T) {
 			}
 		}
 	}()
-	kind.String()
+	got := kind.String()
 	if !paniced {
-		t.Errorf("String() - failed to panic with: %s", wantPanic)
+		t.Errorf("String() - got: %s, failed to panic with: %s", got, wantPanic)
 	}
 }
