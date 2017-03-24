@@ -178,7 +178,7 @@ func fieldValuesEqual(
 			return fmt.Errorf("valueDescription missing value: %s", k)
 		}
 		if vdG.Num != vdW.Num || vdG.Value.String() != vdW.Value.String() {
-			return fmt.Errorf("got valueDescription: %s, want: %s", vdG, vdW)
+			return fmt.Errorf("got valueDescription: %v, want: %v", vdG, vdW)
 		}
 	}
 	return nil

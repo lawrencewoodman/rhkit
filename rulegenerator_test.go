@@ -1277,13 +1277,13 @@ func TestMakeCompareValues(t *testing.T) {
 	for _, c := range cases {
 		got := makeCompareValues(c.values, c.i)
 		if len(got) != len(c.want) {
-			t.Errorf("makeCompareValues(%s, %d) got: %v, want: %v",
+			t.Errorf("makeCompareValues(%v, %d) got: %v, want: %v",
 				c.values, c.i, got, c.want)
 		}
 		for j, v := range got {
 			o := c.want[j]
 			if o.String() != v.String() {
-				t.Errorf("makeCompareValues(%s, %d) got: %v, want: %v",
+				t.Errorf("makeCompareValues(%v, %d) got: %v, want: %v",
 					c.values, c.i, got, c.want)
 			}
 		}
