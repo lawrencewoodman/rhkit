@@ -37,6 +37,9 @@ var CallFuncs = map[string]dexpr.CallFun{
 	"true":    alwaysTrue,
 }
 
+var trueLiteral = dlit.MustNew(true)
+var falseLiteral = dlit.MustNew(false)
+
 type WrongNumOfArgsError struct {
 	Got  int
 	Want int
@@ -76,7 +79,7 @@ func sqrt(args []*dlit.Literal) (*dlit.Literal, error) {
 	return r, err
 }
 
-// Pow returns the base raised to the power of the exponent
+// pow returns the base raised to the power of the exponent
 func pow(args []*dlit.Literal) (*dlit.Literal, error) {
 	if len(args) != 2 {
 		err := WrongNumOfArgsError{Got: len(args), Want: 2}
@@ -103,6 +106,7 @@ func pow(args []*dlit.Literal) (*dlit.Literal, error) {
 	return r, err
 }
 
+// roundto returns a number rounded to a number of decimal places.
 // This uses round half-up to tie-break
 func roundTo(args []*dlit.Literal) (*dlit.Literal, error) {
 	if len(args) != 2 {
@@ -133,7 +137,7 @@ func roundTo(args []*dlit.Literal) (*dlit.Literal, error) {
 	return r, err
 }
 
-// Is a string IN a list of strings
+// in returns whether a string is in a slice strings
 func in(args []*dlit.Literal) (*dlit.Literal, error) {
 	if len(args) < 2 {
 		err := errors.New("too few arguments")
@@ -144,13 +148,13 @@ func in(args []*dlit.Literal) (*dlit.Literal, error) {
 	haystack := args[1:]
 	for _, v := range haystack {
 		if needle.String() == v.String() {
-			return dlit.MustNew(true), nil
+			return trueLiteral, nil
 		}
 	}
-	return dlit.MustNew(false), nil
+	return falseLiteral, nil
 }
 
-// Is a string NI a list of strings
+// ni returns whether a string is not in a slice strings
 func ni(args []*dlit.Literal) (*dlit.Literal, error) {
 	if len(args) < 2 {
 		err := errors.New("too few arguments")
@@ -161,15 +165,13 @@ func ni(args []*dlit.Literal) (*dlit.Literal, error) {
 	haystack := args[1:]
 	for _, v := range haystack {
 		if needle.String() == v.String() {
-			r, err := dlit.New(false)
-			return r, err
+			return falseLiteral, nil
 		}
 	}
-	r, err := dlit.New(true)
-	return r, err
+	return trueLiteral, nil
 }
 
-// Returns true
+// alwaysTrue returns true
 func alwaysTrue(args []*dlit.Literal) (*dlit.Literal, error) {
-	return dlit.MustNew(true), nil
+	return trueLiteral, nil
 }

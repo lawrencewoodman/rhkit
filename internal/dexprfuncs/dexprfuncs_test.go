@@ -158,6 +158,82 @@ func TestPow_errors(t *testing.T) {
 	}
 }
 
+/*************************
+ *       Benchmarks
+ *************************/
+func BenchmarkAlwaysTrue(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		b.StartTimer()
+		l, _ := alwaysTrue([]*dlit.Literal{})
+		b.StopTimer()
+		if v, ok := l.Bool(); !ok || !v {
+			b.Errorf("alwaysTrue - got: %v, want: %t ", l, true)
+		}
+	}
+}
+
+func BenchmarkIn(b *testing.B) {
+	b.StopTimer()
+	haystack := []*dlit.Literal{
+		dlit.MustNew(7),
+		dlit.MustNew(21),
+		dlit.MustNew(789),
+		dlit.MustNew(56),
+	}
+	cases := []struct {
+		needle *dlit.Literal
+		want   bool
+	}{
+		{needle: dlit.MustNew(7), want: true},
+		{needle: dlit.MustNew(789), want: true},
+		{needle: dlit.MustNew(56), want: true},
+		{needle: dlit.MustNew(89), want: false},
+		{needle: dlit.MustNew(102), want: false},
+		{needle: dlit.MustNew(78), want: false},
+	}
+	for n := 0; n < b.N; n++ {
+		for _, c := range cases {
+			b.StartTimer()
+			l, _ := in(append([]*dlit.Literal{c.needle}, haystack...))
+			b.StopTimer()
+			if v, ok := l.Bool(); !ok || v != c.want {
+				b.Errorf("alwaysTrue - got: %v, want: %t ", l, c.want)
+			}
+		}
+	}
+}
+
+func BenchmarkNi(b *testing.B) {
+	b.StopTimer()
+	haystack := []*dlit.Literal{
+		dlit.MustNew(7),
+		dlit.MustNew(21),
+		dlit.MustNew(789),
+		dlit.MustNew(56),
+	}
+	cases := []struct {
+		needle *dlit.Literal
+		want   bool
+	}{
+		{needle: dlit.MustNew(7), want: false},
+		{needle: dlit.MustNew(789), want: false},
+		{needle: dlit.MustNew(56), want: false},
+		{needle: dlit.MustNew(89), want: true},
+		{needle: dlit.MustNew(102), want: true},
+		{needle: dlit.MustNew(78), want: true},
+	}
+	for n := 0; n < b.N; n++ {
+		for _, c := range cases {
+			b.StartTimer()
+			l, _ := ni(append([]*dlit.Literal{c.needle}, haystack...))
+			b.StopTimer()
+			if v, ok := l.Bool(); !ok || v != c.want {
+				b.Errorf("alwaysTrue - got: %v, want: %t ", l, c.want)
+			}
+		}
+	}
+}
+
 /*************************************
  *  Helper functions
  *************************************/
