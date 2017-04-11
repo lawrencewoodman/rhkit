@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
+	"github.com/vlifesystems/rhkit/internal/dexprfuncs"
 	"github.com/vlifesystems/rhkit/rule"
 	"sort"
 	"strconv"
@@ -39,7 +40,7 @@ func GenerateRules(
 	ruleGenerators := []ruleGeneratorFunc{
 		generateIntRules, generateFloatRules, generateValueRules,
 		generateCompareNumericRules, generateCompareStringRules,
-		generateInRules,
+		generateAddRules, generateInRules,
 	}
 	rules[0] = rule.NewTrue()
 	for field := range inputDescription.Fields {
@@ -314,6 +315,86 @@ func generateCompareStringRules(
 	}
 	rules := rulesMapToArray(rulesMap)
 	return rules
+}
+
+func generateAddRules(
+	inputDescription *Description,
+	ruleFields []string,
+	field string,
+) []rule.Rule {
+	fd := inputDescription.Fields[field]
+	if !isNumberField(fd) {
+		return []rule.Rule{}
+	}
+	diffExpr := dexpr.MustNew("(max + oMax) - (min + oMin)")
+	fieldNum := calcFieldNum(inputDescription.Fields, field)
+	rulesMap := make(map[string]rule.Rule)
+
+	for oField, oFd := range inputDescription.Fields {
+		oFieldNum := calcFieldNum(inputDescription.Fields, oField)
+		if fieldNum < oFieldNum && isNumberField(oFd) &&
+			stringInSlice(oField, ruleFields) {
+			min, _ := fd.Min.Float()
+			max, _ := fd.Max.Float()
+			maxDP := fd.MaxDP
+			oMin, _ := oFd.Min.Float()
+			oMax, _ := oFd.Max.Float()
+			oMaxDP := oFd.MaxDP
+			vars := map[string]*dlit.Literal{
+				"max":  dlit.MustNew(max),
+				"oMax": dlit.MustNew(oMax),
+				"min":  dlit.MustNew(min),
+				"oMin": dlit.MustNew(oMin),
+			}
+			diffL := diffExpr.Eval(vars, dexprfuncs.CallFuncs)
+			diff, ok := diffL.Float()
+			if !ok {
+				continue
+			}
+
+			step := diff / 20.0
+			if step <= 0 {
+				continue
+			}
+			if oMaxDP > maxDP {
+				maxDP = oMaxDP
+			}
+
+			for i := step; i <= diff; i += step {
+				n := truncateFloat(min+oMin+i, maxDP)
+				r := rule.NewAddLEF(field, oField, n)
+				rulesMap[r.String()] = r
+			}
+
+			// i set to 0 to make more tweakable
+			for i := float64(0); i < diff; i += step {
+				n := truncateFloat(min+oMin+i, maxDP)
+				r := rule.NewAddGEF(field, oField, n)
+				rulesMap[r.String()] = r
+			}
+
+			// TODO: Implement between for Add
+			/*
+				// i set to 0 to make more tweakable
+				for i := float64(0); i < diff; i += step {
+					geN := truncateFloat(min+i, maxDP)
+					for j := step; j <= diff; j += step {
+						leN := truncateFloat(min+j, maxDP)
+						rB, err := rule.NewBetweenFVF(field, geN, leN)
+						if err == nil {
+							rulesMap[rB.String()] = rB
+						}
+						rO, err := rule.NewOutsideFVF(field, leN, geN)
+						if err == nil {
+							rulesMap[rO.String()] = rO
+						}
+					}
+				}
+			*/
+		}
+	}
+
+	return rulesMapToArray(rulesMap)
 }
 
 func calcNumSharedValues(
