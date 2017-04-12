@@ -372,25 +372,6 @@ func generateAddRules(
 				r := rule.NewAddGEF(field, oField, n)
 				rulesMap[r.String()] = r
 			}
-
-			// TODO: Implement between for Add
-			/*
-				// i set to 0 to make more tweakable
-				for i := float64(0); i < diff; i += step {
-					geN := truncateFloat(min+i, maxDP)
-					for j := step; j <= diff; j += step {
-						leN := truncateFloat(min+j, maxDP)
-						rB, err := rule.NewBetweenFVF(field, geN, leN)
-						if err == nil {
-							rulesMap[rB.String()] = rB
-						}
-						rO, err := rule.NewOutsideFVF(field, leN, geN)
-						if err == nil {
-							rulesMap[rO.String()] = rO
-						}
-					}
-				}
-			*/
 		}
 	}
 
