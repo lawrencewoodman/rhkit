@@ -218,6 +218,10 @@ func generateFloatRules(
 	diff := max - min
 	step := diff / 20.0
 
+	if step == 0 {
+		return []rule.Rule{}
+	}
+
 	for i := step; i <= diff; i += step {
 		n := truncateFloat(min+i, maxDP)
 		r := rule.NewLEFVF(field, n)
