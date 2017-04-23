@@ -330,7 +330,10 @@ func generateAddRules(
 	if !isNumberField(fd) {
 		return []rule.Rule{}
 	}
-	diffExpr := dexpr.MustNew("(max + oMax) - (min + oMin)")
+	diffExpr := dexpr.MustNew(
+		"(max + oMax) - (min + oMin)",
+		dexprfuncs.CallFuncs,
+	)
 	fieldNum := calcFieldNum(inputDescription.Fields, field)
 	rulesMap := make(map[string]rule.Rule)
 
@@ -338,19 +341,13 @@ func generateAddRules(
 		oFieldNum := calcFieldNum(inputDescription.Fields, oField)
 		if fieldNum < oFieldNum && isNumberField(oFd) &&
 			stringInSlice(oField, ruleFields) {
-			min, _ := fd.Min.Float()
-			max, _ := fd.Max.Float()
-			maxDP := fd.MaxDP
-			oMin, _ := oFd.Min.Float()
-			oMax, _ := oFd.Max.Float()
-			oMaxDP := oFd.MaxDP
 			vars := map[string]*dlit.Literal{
-				"max":  dlit.MustNew(max),
-				"oMax": dlit.MustNew(oMax),
-				"min":  dlit.MustNew(min),
-				"oMin": dlit.MustNew(oMin),
+				"max":  fd.Max,
+				"oMax": oFd.Max,
+				"min":  fd.Min,
+				"oMin": oFd.Min,
 			}
-			diffL := diffExpr.Eval(vars, dexprfuncs.CallFuncs)
+			diffL := diffExpr.Eval(vars)
 			diff, ok := diffL.Float()
 			if !ok {
 				continue
@@ -360,20 +357,24 @@ func generateAddRules(
 			if step <= 0 {
 				continue
 			}
+			maxDP := fd.MaxDP
+			oMaxDP := oFd.MaxDP
 			if oMaxDP > maxDP {
 				maxDP = oMaxDP
 			}
 
+			min, _ := fd.Min.Float()
+			oMin, _ := oFd.Min.Float()
 			for i := step; i <= diff; i += step {
 				n := truncateFloat(min+oMin+i, maxDP)
-				r := rule.NewAddLEF(field, oField, n)
+				r := rule.NewAddLEF(field, oField, dlit.MustNew(n))
 				rulesMap[r.String()] = r
 			}
 
 			// i set to 0 to make more tweakable
 			for i := float64(0); i < diff; i += step {
 				n := truncateFloat(min+oMin+i, maxDP)
-				r := rule.NewAddGEF(field, oField, n)
+				r := rule.NewAddGEF(field, oField, dlit.MustNew(n))
 				rulesMap[r.String()] = r
 			}
 		}
@@ -399,7 +400,10 @@ func isNumberField(fd *fieldDescription) bool {
 	return fd.Kind == ftInt || fd.Kind == ftFloat
 }
 
-var compareExpr *dexpr.Expr = dexpr.MustNew("min1 < max2 && max1 > min2")
+var compareExpr *dexpr.Expr = dexpr.MustNew(
+	"min1 < max2 && max1 > min2",
+	dexprfuncs.CallFuncs,
+)
 
 func hasComparableNumberRange(
 	fd1 *fieldDescription,
@@ -415,8 +419,7 @@ func hasComparableNumberRange(
 		"min2": fd2.Min,
 		"max2": fd2.Max,
 	}
-	funcs := map[string]dexpr.CallFun{}
-	isComparable, err := compareExpr.EvalBool(vars, funcs)
+	isComparable, err := compareExpr.EvalBool(vars)
 	return err == nil && isComparable
 }
 

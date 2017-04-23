@@ -9,7 +9,7 @@ import (
 func TestAddGEFString(t *testing.T) {
 	fieldA := "income"
 	fieldB := "balance"
-	value := 8.93
+	value := dlit.MustNew(8.93)
 	want := "income + balance >= 8.93"
 	r := NewAddGEF(fieldA, fieldB, value)
 	got := r.String()
@@ -22,17 +22,17 @@ func TestAddGEFIsTrue(t *testing.T) {
 	cases := []struct {
 		fieldA string
 		fieldB string
-		value  float64
+		value  *dlit.Literal
 		want   bool
 	}{
-		{"income", "balance", 19, true},
-		{"income", "balance", 19.12, false},
-		{"income", "balance", 20, false},
-		{"income", "balance", -20, true},
-		{"income", "balance", 18.34, true},
-		{"flow", "cost", 144.564, true},
-		{"flow", "cost", 144.565, false},
-		{"flow", "cost", 144.563, true},
+		{"income", "balance", dlit.MustNew(19), true},
+		{"income", "balance", dlit.MustNew(19.12), false},
+		{"income", "balance", dlit.MustNew(20), false},
+		{"income", "balance", dlit.MustNew(-20), true},
+		{"income", "balance", dlit.MustNew(18.34), true},
+		{"flow", "cost", dlit.MustNew(144.564), true},
+		{"flow", "cost", dlit.MustNew(144.565), false},
+		{"flow", "cost", dlit.MustNew(144.563), true},
 	}
 	record := map[string]*dlit.Literal{
 		"income":  dlit.MustNew(4),
@@ -55,31 +55,35 @@ func TestAddGEFIsTrue_errors(t *testing.T) {
 	cases := []struct {
 		fieldA  string
 		fieldB  string
-		value   float64
+		value   *dlit.Literal
 		wantErr error
 	}{
 		{fieldA: "fred",
-			fieldB:  "flow",
-			value:   7.894,
-			wantErr: InvalidRuleError{Rule: NewAddGEF("fred", "flow", 7.894)},
+			fieldB: "flow",
+			value:  dlit.MustNew(7.894),
+			wantErr: InvalidRuleError{
+				Rule: NewAddGEF("fred", "flow", dlit.MustNew(7.894)),
+			},
 		},
 		{fieldA: "flow",
-			fieldB:  "fred",
-			value:   7.894,
-			wantErr: InvalidRuleError{Rule: NewAddGEF("flow", "fred", 7.894)},
+			fieldB: "fred",
+			value:  dlit.MustNew(7.894),
+			wantErr: InvalidRuleError{
+				Rule: NewAddGEF("flow", "fred", dlit.MustNew(7.894)),
+			},
 		},
 		{fieldA: "band",
 			fieldB: "flow",
-			value:  7.894,
+			value:  dlit.MustNew(7.894),
 			wantErr: IncompatibleTypesRuleError{
-				Rule: NewAddGEF("band", "flow", 7.894),
+				Rule: NewAddGEF("band", "flow", dlit.MustNew(7.894)),
 			},
 		},
 		{fieldA: "flow",
 			fieldB: "band",
-			value:  7.894,
+			value:  dlit.MustNew(7.894),
 			wantErr: IncompatibleTypesRuleError{
-				Rule: NewAddGEF("flow", "band", 7.894),
+				Rule: NewAddGEF("flow", "band", dlit.MustNew(7.894)),
 			},
 		},
 	}
@@ -98,7 +102,7 @@ func TestAddGEFIsTrue_errors(t *testing.T) {
 }
 
 func TestAddGEFGetFields(t *testing.T) {
-	r := NewAddGEF("income", "cost", 5.5)
+	r := NewAddGEF("income", "cost", dlit.MustNew(5.5))
 	want := []string{"income", "cost"}
 	got := r.GetFields()
 	if !reflect.DeepEqual(got, want) {
@@ -112,19 +116,19 @@ func TestAddGEFOverlaps(t *testing.T) {
 		ruleB Rule
 		want  bool
 	}{
-		{ruleA: NewAddGEF("band", "cost", 7.3),
-			ruleB: NewAddGEF("band", "cost", 6.5),
+		{ruleA: NewAddGEF("band", "cost", dlit.MustNew(7.3)),
+			ruleB: NewAddGEF("band", "cost", dlit.MustNew(6.5)),
 			want:  true,
 		},
-		{ruleA: NewAddGEF("band", "balance", 7.3),
-			ruleB: NewAddGEF("rate", "balance", 6.5),
+		{ruleA: NewAddGEF("band", "balance", dlit.MustNew(7.3)),
+			ruleB: NewAddGEF("rate", "balance", dlit.MustNew(6.5)),
 			want:  false,
 		},
-		{ruleA: NewAddGEF("band", "balance", 7.3),
-			ruleB: NewAddGEF("band", "rate", 6.5),
+		{ruleA: NewAddGEF("band", "balance", dlit.MustNew(7.3)),
+			ruleB: NewAddGEF("band", "rate", dlit.MustNew(6.5)),
 			want:  false,
 		},
-		{ruleA: NewAddGEF("band", "cost", 7.3),
+		{ruleA: NewAddGEF("band", "cost", dlit.MustNew(7.3)),
 			ruleB: NewGEFVF("band", 6.5),
 			want:  false,
 		},
@@ -135,5 +139,22 @@ func TestAddGEFOverlaps(t *testing.T) {
 			t.Errorf("Overlaps - ruleA: %s, ruleB: %s - got: %t, want: %t",
 				c.ruleA, c.ruleB, got, c.want)
 		}
+	}
+}
+
+/**************************
+ *  Benchmarks
+ **************************/
+
+func BenchmarkAddGEFIsTrue(b *testing.B) {
+	record := map[string]*dlit.Literal{
+		"band":   dlit.MustNew(23),
+		"income": dlit.MustNew(1024),
+		"cost":   dlit.MustNew(890),
+	}
+	r := NewAddGEF("cost", "income", dlit.MustNew(900.23))
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, _ = r.IsTrue(record)
 	}
 }

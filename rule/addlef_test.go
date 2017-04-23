@@ -9,7 +9,7 @@ import (
 func TestAddLEFString(t *testing.T) {
 	fieldA := "income"
 	fieldB := "balance"
-	value := 8.93
+	value := dlit.MustNew(8.93)
 	want := "income + balance <= 8.93"
 	r := NewAddLEF(fieldA, fieldB, value)
 	got := r.String()
@@ -22,17 +22,17 @@ func TestAddLEFIsTrue(t *testing.T) {
 	cases := []struct {
 		fieldA string
 		fieldB string
-		value  float64
+		value  *dlit.Literal
 		want   bool
 	}{
-		{"income", "balance", 19, true},
-		{"income", "balance", 19.12, true},
-		{"income", "balance", 20, true},
-		{"income", "balance", -20, false},
-		{"income", "balance", 18.34, false},
-		{"flow", "cost", 144.564, true},
-		{"flow", "cost", 144.565, true},
-		{"flow", "cost", 144.563, false},
+		{"income", "balance", dlit.MustNew(19), true},
+		{"income", "balance", dlit.MustNew(19.12), true},
+		{"income", "balance", dlit.MustNew(20), true},
+		{"income", "balance", dlit.MustNew(-20), false},
+		{"income", "balance", dlit.MustNew(18.34), false},
+		{"flow", "cost", dlit.MustNew(144.564), true},
+		{"flow", "cost", dlit.MustNew(144.565), true},
+		{"flow", "cost", dlit.MustNew(144.563), false},
 	}
 	record := map[string]*dlit.Literal{
 		"income":  dlit.MustNew(4),
@@ -55,31 +55,35 @@ func TestAddLEFIsTrue_errors(t *testing.T) {
 	cases := []struct {
 		fieldA  string
 		fieldB  string
-		value   float64
+		value   *dlit.Literal
 		wantErr error
 	}{
 		{fieldA: "fred",
-			fieldB:  "flow",
-			value:   7.894,
-			wantErr: InvalidRuleError{Rule: NewAddLEF("fred", "flow", 7.894)},
+			fieldB: "flow",
+			value:  dlit.MustNew(7.894),
+			wantErr: InvalidRuleError{
+				Rule: NewAddLEF("fred", "flow", dlit.MustNew(7.894)),
+			},
 		},
 		{fieldA: "flow",
-			fieldB:  "fred",
-			value:   7.894,
-			wantErr: InvalidRuleError{Rule: NewAddLEF("flow", "fred", 7.894)},
+			fieldB: "fred",
+			value:  dlit.MustNew(7.894),
+			wantErr: InvalidRuleError{
+				Rule: NewAddLEF("flow", "fred", dlit.MustNew(7.894)),
+			},
 		},
 		{fieldA: "band",
 			fieldB: "flow",
-			value:  7.894,
+			value:  dlit.MustNew(7.894),
 			wantErr: IncompatibleTypesRuleError{
-				Rule: NewAddLEF("band", "flow", 7.894),
+				Rule: NewAddLEF("band", "flow", dlit.MustNew(7.894)),
 			},
 		},
 		{fieldA: "flow",
 			fieldB: "band",
-			value:  7.894,
+			value:  dlit.MustNew(7.894),
 			wantErr: IncompatibleTypesRuleError{
-				Rule: NewAddLEF("flow", "band", 7.894),
+				Rule: NewAddLEF("flow", "band", dlit.MustNew(7.894)),
 			},
 		},
 	}
@@ -98,7 +102,7 @@ func TestAddLEFIsTrue_errors(t *testing.T) {
 }
 
 func TestAddLEFGetFields(t *testing.T) {
-	r := NewAddLEF("income", "cost", 5.5)
+	r := NewAddLEF("income", "cost", dlit.MustNew(5.5))
 	want := []string{"income", "cost"}
 	got := r.GetFields()
 	if !reflect.DeepEqual(got, want) {
@@ -112,19 +116,19 @@ func TestAddLEFOverlaps(t *testing.T) {
 		ruleB Rule
 		want  bool
 	}{
-		{ruleA: NewAddLEF("band", "cost", 7.3),
-			ruleB: NewAddLEF("band", "cost", 6.5),
+		{ruleA: NewAddLEF("band", "cost", dlit.MustNew(7.3)),
+			ruleB: NewAddLEF("band", "cost", dlit.MustNew(6.5)),
 			want:  true,
 		},
-		{ruleA: NewAddLEF("band", "balance", 7.3),
-			ruleB: NewAddLEF("rate", "balance", 6.5),
+		{ruleA: NewAddLEF("band", "balance", dlit.MustNew(7.3)),
+			ruleB: NewAddLEF("rate", "balance", dlit.MustNew(6.5)),
 			want:  false,
 		},
-		{ruleA: NewAddLEF("band", "balance", 7.3),
-			ruleB: NewAddLEF("band", "rate", 6.5),
+		{ruleA: NewAddLEF("band", "balance", dlit.MustNew(7.3)),
+			ruleB: NewAddLEF("band", "rate", dlit.MustNew(6.5)),
 			want:  false,
 		},
-		{ruleA: NewAddLEF("band", "cost", 7.3),
+		{ruleA: NewAddLEF("band", "cost", dlit.MustNew(7.3)),
 			ruleB: NewGEFVF("band", 6.5),
 			want:  false,
 		},
@@ -135,5 +139,22 @@ func TestAddLEFOverlaps(t *testing.T) {
 			t.Errorf("Overlaps - ruleA: %s, ruleB: %s - got: %t, want: %t",
 				c.ruleA, c.ruleB, got, c.want)
 		}
+	}
+}
+
+/**************************
+ *  Benchmarks
+ **************************/
+
+func BenchmarkAddLEFIsTrue(b *testing.B) {
+	record := map[string]*dlit.Literal{
+		"band":   dlit.MustNew(23),
+		"income": dlit.MustNew(1024),
+		"cost":   dlit.MustNew(890),
+	}
+	r := NewAddLEF("cost", "income", dlit.MustNew(900.23))
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, _ = r.IsTrue(record)
 	}
 }

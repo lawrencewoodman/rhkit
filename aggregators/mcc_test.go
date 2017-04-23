@@ -4,6 +4,7 @@ import (
 	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/goal"
+	"github.com/vlifesystems/rhkit/internal/dexprfuncs"
 	"testing"
 )
 
@@ -67,38 +68,37 @@ func TestMCCGetResult(t *testing.T) {
 		checkExpr *dexpr.Expr
 	}{
 		{records: records,
-			ruleExpr:  dexpr.MustNew("cost > 2"),
-			checkExpr: dexpr.MustNew("got == 1.0"),
+			ruleExpr:  dexpr.MustNew("cost > 2", dexprfuncs.CallFuncs),
+			checkExpr: dexpr.MustNew("got == 1.0", dexprfuncs.CallFuncs),
 		},
 		{records: records,
-			ruleExpr:  dexpr.MustNew("band == 9"),
-			checkExpr: dexpr.MustNew("got >= 0 && got <= 1.0"),
+			ruleExpr:  dexpr.MustNew("band == 9", dexprfuncs.CallFuncs),
+			checkExpr: dexpr.MustNew("got >= 0 && got <= 1.0", dexprfuncs.CallFuncs),
 		},
 		{records: records,
-			ruleExpr:  dexpr.MustNew("band != 9"),
-			checkExpr: dexpr.MustNew("got >= -1.0 && got <= 0"),
+			ruleExpr:  dexpr.MustNew("band != 9", dexprfuncs.CallFuncs),
+			checkExpr: dexpr.MustNew("got >= -1.0 && got <= 0", dexprfuncs.CallFuncs),
 		},
 		{records: records,
-			ruleExpr:  dexpr.MustNew("cost <= 2"),
-			checkExpr: dexpr.MustNew("got == -1.0"),
+			ruleExpr:  dexpr.MustNew("cost <= 2", dexprfuncs.CallFuncs),
+			checkExpr: dexpr.MustNew("got == -1.0", dexprfuncs.CallFuncs),
 		},
 		{records: records,
-			ruleExpr:  dexpr.MustNew("1 != 1"),
-			checkExpr: dexpr.MustNew("got == 0"),
+			ruleExpr:  dexpr.MustNew("1 != 1", dexprfuncs.CallFuncs),
+			checkExpr: dexpr.MustNew("got == 0", dexprfuncs.CallFuncs),
 		},
 		{records: []map[string]*dlit.Literal{},
-			ruleExpr:  dexpr.MustNew("1 == 1"),
-			checkExpr: dexpr.MustNew("got == 0"),
+			ruleExpr:  dexpr.MustNew("1 == 1", dexprfuncs.CallFuncs),
+			checkExpr: dexpr.MustNew("got == 0", dexprfuncs.CallFuncs),
 		},
 	}
-	callFuncs := map[string]dexpr.CallFun{}
 	for _, c := range cases {
 		mccCostGt2Desc := MustNew("mccCostGt2", "mcc", "cost > 2")
 		mccCostGt2 := mccCostGt2Desc.New()
 		instances := []AggregatorInstance{mccCostGt2}
 
 		for _, record := range c.records {
-			isTrue, err := c.ruleExpr.EvalBool(record, callFuncs)
+			isTrue, err := c.ruleExpr.EvalBool(record)
 			if err != nil {
 				t.Fatalf("EvalBool(%v, callFuncs) err: %v", record, err)
 			}
@@ -107,7 +107,7 @@ func TestMCCGetResult(t *testing.T) {
 		numRecords := int64(len(c.records))
 		got := mccCostGt2.GetResult(instances, goals, numRecords)
 		vars := map[string]*dlit.Literal{"got": got}
-		isCorrect, err := c.checkExpr.EvalBool(vars, callFuncs)
+		isCorrect, err := c.checkExpr.EvalBool(vars)
 		if err != nil {
 			t.Fatalf("EvalBool(%v, callFuncs) err: %v", vars, err)
 		}

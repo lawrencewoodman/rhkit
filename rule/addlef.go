@@ -21,27 +21,22 @@ package rule
 
 import (
 	"github.com/lawrencewoodman/ddataset"
-	"strconv"
+	"github.com/lawrencewoodman/dlit"
 )
 
 // AddLEF represents a rule determining if fieldA + fieldB <= floatValue
 type AddLEF struct {
 	fieldA string
 	fieldB string
-	value  float64
+	value  *dlit.Literal
 }
 
-func NewAddLEF(fieldA string, fieldB string, value float64) *AddLEF {
+func NewAddLEF(fieldA string, fieldB string, value *dlit.Literal) *AddLEF {
 	return &AddLEF{fieldA: fieldA, fieldB: fieldB, value: value}
 }
 
 func (r *AddLEF) String() string {
-	return r.fieldA + " + " + r.fieldB + " <= " +
-		strconv.FormatFloat(r.value, 'f', -1, 64)
-}
-
-func (r *AddLEF) GetValue() float64 {
-	return r.value
+	return r.fieldA + " + " + r.fieldB + " <= " + r.value.String()
 }
 
 func (r *AddLEF) GetFields() []string {
@@ -63,16 +58,24 @@ func (r *AddLEF) IsTrue(record ddataset.Record) (bool, error) {
 		return false, InvalidRuleError{Rule: r}
 	}
 
-	vAFloat, vAIsFloat := vA.Float()
-	if !vAIsFloat {
-		return false, IncompatibleTypesRuleError{Rule: r}
+	vAInt, vAIsInt := vA.Int()
+	if vAIsInt {
+		vBInt, vBIsInt := vB.Int()
+		if vBIsInt {
+			if i, ok := r.value.Int(); ok {
+				return vAInt+vBInt <= i, nil
+			}
+		}
 	}
+
+	vAFloat, vAIsFloat := vA.Float()
 	vBFloat, vBIsFloat := vB.Float()
-	if !vBIsFloat {
+	valueFloat, valueIsFloat := r.value.Float()
+	if !vAIsFloat || !vBIsFloat || !valueIsFloat {
 		return false, IncompatibleTypesRuleError{Rule: r}
 	}
 
-	return vAFloat+vBFloat <= r.value, nil
+	return vAFloat+vBFloat <= valueFloat, nil
 }
 
 // TODO: implement this by passing inputDescription
