@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2016 vLife Systems Ltd <http://vlifesystems.com>
+	Copyright (C) 2016-2017 vLife Systems Ltd <http://vlifesystems.com>
 	This file is part of rhkit.
 
 	rhkit is free software: you can redistribute it and/or modify
@@ -23,17 +23,19 @@ import (
 	"fmt"
 	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
+	"github.com/vlifesystems/rhkit/description"
 	"github.com/vlifesystems/rhkit/internal/dexprfuncs"
+	"github.com/vlifesystems/rhkit/internal/fieldtype"
 	"github.com/vlifesystems/rhkit/rule"
 	"sort"
 	"strconv"
 	"strings"
 )
 
-type ruleGeneratorFunc func(*Description, []string, string) []rule.Rule
+type ruleGeneratorFunc func(*description.Description, []string, string) []rule.Rule
 
 func GenerateRules(
-	inputDescription *Description,
+	inputDescription *description.Description,
 	ruleFields []string,
 ) []rule.Rule {
 	rules := make([]rule.Rule, 1)
@@ -87,7 +89,7 @@ func stringInSlice(s string, strings []string) bool {
 }
 
 func generateValueRules(
-	inputDescription *Description,
+	inputDescription *description.Description,
 	ruleFields []string,
 	field string,
 ) []rule.Rule {
@@ -98,7 +100,7 @@ func generateValueRules(
 		return []rule.Rule{}
 	}
 	switch fd.Kind {
-	case ftInt:
+	case fieldtype.Int:
 		for _, vd := range values {
 			if vd.Num < 2 {
 				continue
@@ -112,7 +114,7 @@ func generateValueRules(
 			rulesMap[eqRule.String()] = eqRule
 			rulesMap[neRule.String()] = neRule
 		}
-	case ftFloat:
+	case fieldtype.Float:
 		maxDP := fd.MaxDP
 		for _, vd := range values {
 			if vd.Num < 2 {
@@ -128,7 +130,7 @@ func generateValueRules(
 			rulesMap[eqRule.String()] = eqRule
 			rulesMap[neRule.String()] = neRule
 		}
-	case ftString:
+	case fieldtype.String:
 		for _, vd := range values {
 			if vd.Num < 2 {
 				continue
@@ -147,12 +149,12 @@ func generateValueRules(
 }
 
 func generateIntRules(
-	inputDescription *Description,
+	inputDescription *description.Description,
 	ruleFields []string,
 	field string,
 ) []rule.Rule {
 	fd := inputDescription.Fields[field]
-	if fd.Kind != ftInt {
+	if fd.Kind != fieldtype.Int {
 		return []rule.Rule{}
 	}
 	rulesMap := make(map[string]rule.Rule)
@@ -203,12 +205,12 @@ func truncateFloat(f float64, maxDP int) float64 {
 }
 
 func generateFloatRules(
-	inputDescription *Description,
+	inputDescription *description.Description,
 	ruleFields []string,
 	field string,
 ) []rule.Rule {
 	fd := inputDescription.Fields[field]
-	if fd.Kind != ftFloat {
+	if fd.Kind != fieldtype.Float {
 		return []rule.Rule{}
 	}
 	rulesMap := make(map[string]rule.Rule)
@@ -255,12 +257,12 @@ func generateFloatRules(
 }
 
 func generateCompareNumericRules(
-	inputDescription *Description,
+	inputDescription *description.Description,
 	ruleFields []string,
 	field string,
 ) []rule.Rule {
 	fd := inputDescription.Fields[field]
-	if fd.Kind != ftInt && fd.Kind != ftFloat {
+	if fd.Kind != fieldtype.Int && fd.Kind != fieldtype.Float {
 		return []rule.Rule{}
 	}
 	fieldNum := calcFieldNum(inputDescription.Fields, field)
@@ -290,12 +292,12 @@ func generateCompareNumericRules(
 }
 
 func generateCompareStringRules(
-	inputDescription *Description,
+	inputDescription *description.Description,
 	ruleFields []string,
 	field string,
 ) []rule.Rule {
 	fd := inputDescription.Fields[field]
-	if fd.Kind != ftString {
+	if fd.Kind != fieldtype.String {
 		return []rule.Rule{}
 	}
 	fieldNum := calcFieldNum(inputDescription.Fields, field)
@@ -305,7 +307,7 @@ func generateCompareStringRules(
 		rule.NewNEFF,
 	}
 	for oField, oFd := range inputDescription.Fields {
-		if oFd.Kind == ftString {
+		if oFd.Kind == fieldtype.String {
 			oFieldNum := calcFieldNum(inputDescription.Fields, oField)
 			numSharedValues := calcNumSharedValues(fd, oFd)
 			if fieldNum < oFieldNum && numSharedValues >= 2 &&
@@ -322,7 +324,7 @@ func generateCompareStringRules(
 }
 
 func generateAddRules(
-	inputDescription *Description,
+	inputDescription *description.Description,
 	ruleFields []string,
 	field string,
 ) []rule.Rule {
@@ -384,8 +386,8 @@ func generateAddRules(
 }
 
 func calcNumSharedValues(
-	fd1 *fieldDescription,
-	fd2 *fieldDescription,
+	fd1 *description.Field,
+	fd2 *description.Field,
 ) int {
 	numShared := 0
 	for _, vd1 := range fd1.Values {
@@ -396,8 +398,8 @@ func calcNumSharedValues(
 	return numShared
 }
 
-func isNumberField(fd *fieldDescription) bool {
-	return fd.Kind == ftInt || fd.Kind == ftFloat
+func isNumberField(fd *description.Field) bool {
+	return fd.Kind == fieldtype.Int || fd.Kind == fieldtype.Float
 }
 
 var compareExpr *dexpr.Expr = dexpr.MustNew(
@@ -406,8 +408,8 @@ var compareExpr *dexpr.Expr = dexpr.MustNew(
 )
 
 func hasComparableNumberRange(
-	fd1 *fieldDescription,
-	fd2 *fieldDescription,
+	fd1 *description.Field,
+	fd2 *description.Field,
 ) bool {
 	if !isNumberField(fd1) || !isNumberField(fd2) {
 		return false
@@ -435,15 +437,15 @@ func rulesMapToArray(rulesMap map[string]rule.Rule) []rule.Rule {
 
 // TODO: Allow more numValues if only two ruleFields
 func generateInRules(
-	inputDescription *Description,
+	inputDescription *description.Description,
 	ruleFields []string,
 	field string,
 ) []rule.Rule {
 	fd := inputDescription.Fields[field]
 	numValues := len(fd.Values)
-	if fd.Kind != ftString &&
-		fd.Kind != ftFloat &&
-		fd.Kind != ftInt ||
+	if fd.Kind != fieldtype.String &&
+		fd.Kind != fieldtype.Float &&
+		fd.Kind != fieldtype.Int ||
 		numValues <= 3 || numValues > 12 {
 		return []rule.Rule{}
 	}
@@ -466,7 +468,7 @@ func generateInRules(
 }
 
 func makeCompareValues(
-	values map[string]valueDescription,
+	values map[string]description.Value,
 	i int,
 ) []*dlit.Literal {
 	bStr := fmt.Sprintf("%b", i)
@@ -487,7 +489,7 @@ func makeCompareValues(
 	return compareValues
 }
 
-func valuesToLiterals(values map[string]valueDescription) []*dlit.Literal {
+func valuesToLiterals(values map[string]description.Value) []*dlit.Literal {
 	lits := make([]*dlit.Literal, len(values))
 	keys := make([]string, len(values))
 	i := 0
@@ -518,7 +520,7 @@ func calcNumOnBits(i int) int {
 }
 
 func calcFieldNum(
-	fieldDescriptions map[string]*fieldDescription,
+	fieldDescriptions map[string]*description.Field,
 	fieldN string,
 ) int {
 	fields := make([]string, len(fieldDescriptions))

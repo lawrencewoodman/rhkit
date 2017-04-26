@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2016 vLife Systems Ltd <http://vlifesystems.com>
+	Copyright (C) 2016-2017 vLife Systems Ltd <http://vlifesystems.com>
 	This file is part of rhkit.
 
 	rhkit is free software: you can redistribute it and/or modify
@@ -17,11 +17,11 @@
 	<http://www.gnu.org/licenses/>.
 */
 
-package rhkit
+package internal
 
 import "strings"
 
-func numDecPlaces(s string) int {
+func NumDecPlaces(s string) int {
 	i := strings.IndexByte(s, '.')
 	if i > -1 {
 		s = strings.TrimRight(s, "0")

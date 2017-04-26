@@ -2,6 +2,8 @@ package rule
 
 import (
 	"github.com/lawrencewoodman/dlit"
+	"github.com/vlifesystems/rhkit/description"
+	"github.com/vlifesystems/rhkit/internal/fieldtype"
 	"reflect"
 	"testing"
 )
@@ -91,15 +93,20 @@ func TestGEFVFTweak(t *testing.T) {
 	value := float64(800)
 	rule := NewGEFVF(field, value)
 	cases := []struct {
-		min   *dlit.Literal
-		max   *dlit.Literal
-		maxDP int
-		stage int
-		want  []Rule
+		description *description.Description
+		stage       int
+		want        []Rule
 	}{
-		{min: dlit.MustNew(500),
-			max:   dlit.MustNew(1000),
-			maxDP: 2,
+		{description: &description.Description{
+			map[string]*description.Field{
+				"income": &description.Field{
+					Kind:  fieldtype.Float,
+					Min:   dlit.MustNew(500),
+					Max:   dlit.MustNew(1000),
+					MaxDP: 2,
+				},
+			},
+		},
 			stage: 1,
 			want: []Rule{
 				NewGEFVF(field, float64(755)),
@@ -122,9 +129,16 @@ func TestGEFVFTweak(t *testing.T) {
 				NewGEFVF(field, float64(845)),
 			},
 		},
-		{min: dlit.MustNew(790),
-			max:   dlit.MustNew(1000),
-			maxDP: 2,
+		{description: &description.Description{
+			map[string]*description.Field{
+				"income": &description.Field{
+					Kind:  fieldtype.Float,
+					Min:   dlit.MustNew(790),
+					Max:   dlit.MustNew(1000),
+					MaxDP: 2,
+				},
+			},
+		},
 			stage: 1,
 			want: []Rule{
 				NewGEFVF(field, float64(791.6)),
@@ -142,9 +156,16 @@ func TestGEFVFTweak(t *testing.T) {
 				NewGEFVF(field, float64(818.9)),
 			},
 		},
-		{min: dlit.MustNew(500),
-			max:   dlit.MustNew(810),
-			maxDP: 2,
+		{description: &description.Description{
+			map[string]*description.Field{
+				"income": &description.Field{
+					Kind:  fieldtype.Float,
+					Min:   dlit.MustNew(500),
+					Max:   dlit.MustNew(810),
+					MaxDP: 2,
+				},
+			},
+		},
 			stage: 1,
 			want: []Rule{
 				NewGEFVF(field, float64(772.1)),
@@ -161,15 +182,29 @@ func TestGEFVFTweak(t *testing.T) {
 				NewGEFVF(field, float64(809.3)),
 			},
 		},
-		{min: dlit.MustNew(799),
-			max:   dlit.MustNew(801),
-			maxDP: 0,
+		{description: &description.Description{
+			map[string]*description.Field{
+				"income": &description.Field{
+					Kind:  fieldtype.Float,
+					Min:   dlit.MustNew(799),
+					Max:   dlit.MustNew(801),
+					MaxDP: 0,
+				},
+			},
+		},
 			stage: 1,
 			want:  []Rule{},
 		},
-		{min: dlit.MustNew(500),
-			max:   dlit.MustNew(1000),
-			maxDP: 2,
+		{description: &description.Description{
+			map[string]*description.Field{
+				"income": &description.Field{
+					Kind:  fieldtype.Float,
+					Min:   dlit.MustNew(500),
+					Max:   dlit.MustNew(1000),
+					MaxDP: 2,
+				},
+			},
+		},
 			stage: 2,
 			want: []Rule{
 				NewGEFVF(field, float64(777.5)),
@@ -194,7 +229,7 @@ func TestGEFVFTweak(t *testing.T) {
 		},
 	}
 	for _, c := range cases {
-		got := rule.Tweak(c.min, c.max, c.maxDP, c.stage)
+		got := rule.Tweak(c.description, c.stage)
 		if err := checkRulesMatch(got, c.want); err != nil {
 			t.Errorf("Tweak: %s, got: %s, want: %s", err, got, c.want)
 		}

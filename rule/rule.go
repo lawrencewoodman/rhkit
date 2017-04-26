@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2016 vLife Systems Ltd <http://vlifesystems.com>
+	Copyright (C) 2016-2017 vLife Systems Ltd <http://vlifesystems.com>
 	This file is part of rhkit.
 
 	rhkit is free software: you can redistribute it and/or modify
@@ -23,7 +23,10 @@ package rule
 import (
 	"fmt"
 	"github.com/lawrencewoodman/ddataset"
+	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
+	"github.com/vlifesystems/rhkit/description"
+	"github.com/vlifesystems/rhkit/internal/dexprfuncs"
 	"sort"
 	"strconv"
 	"strings"
@@ -36,7 +39,7 @@ type Rule interface {
 }
 
 type Tweaker interface {
-	Tweak(*dlit.Literal, *dlit.Literal, int, int) []Rule
+	Tweak(*description.Description, int) []Rule
 }
 
 type Overlapper interface {
@@ -96,8 +99,109 @@ func (rs byString) Less(i, j int) bool {
 	return strings.Compare(rs[i].String(), rs[j].String()) == -1
 }
 
+// byNumber implements sort.Interface for []*dlit.Literal
+type byNumber []*dlit.Literal
+
+func (bn byNumber) Len() int { return len(bn) }
+func (bn byNumber) Swap(i, j int) {
+	bn[i], bn[j] = bn[j], bn[i]
+}
+
+var compareLitExpr = dexpr.MustNew("a < b", dexprfuncs.CallFuncs)
+
+func (bn byNumber) Less(i, j int) bool {
+	vars := map[string]*dlit.Literal{
+		"a": bn[i],
+		"b": bn[j],
+	}
+	if r, err := compareLitExpr.EvalBool(vars); err != nil {
+		panic(err)
+	} else {
+		return r
+	}
+}
+
 func truncateFloat(f float64, maxDP int) float64 {
 	v := fmt.Sprintf("%.*f", maxDP, f)
 	nf, _ := strconv.ParseFloat(v, 64)
 	return nf
+}
+
+func generatePoints(
+	value, min, max *dlit.Literal,
+	maxDP int,
+	stage int,
+) []*dlit.Literal {
+	stepExpr := dexpr.MustNew(
+		"(max - min) / (10 * stage)",
+		dexprfuncs.CallFuncs,
+	)
+	lowExpr := dexpr.MustNew("value - step", dexprfuncs.CallFuncs)
+	highExpr := dexpr.MustNew("value + step", dexprfuncs.CallFuncs)
+	interStepExpr := dexpr.MustNew("step/10", dexprfuncs.CallFuncs)
+	nextNExpr := dexpr.MustNew("n + interStep", dexprfuncs.CallFuncs)
+	stopExpr := dexpr.MustNew("interStep <= 0 || n > high", dexprfuncs.CallFuncs)
+	roundExpr := dexpr.MustNew("roundto(n, maxDP)", dexprfuncs.CallFuncs)
+	isValidExpr := dexpr.MustNew(
+		"newValue != value && newValue != low && newValue != high && "+
+			"newValue > min && newValue < max",
+		dexprfuncs.CallFuncs,
+	)
+	points := make(map[string]*dlit.Literal)
+	varsStep := map[string]*dlit.Literal{
+		"min":   min,
+		"max":   max,
+		"stage": dlit.MustNew(stage),
+	}
+	step := stepExpr.Eval(varsStep)
+	varsHighLow := map[string]*dlit.Literal{
+		"value": value,
+		"step":  step,
+	}
+	low := lowExpr.Eval(varsHighLow)
+	high := highExpr.Eval(varsHighLow)
+	varsInterStep := map[string]*dlit.Literal{"step": step}
+	interStep := interStepExpr.Eval(varsInterStep)
+	n := lowExpr.Eval(varsHighLow)
+	for {
+		varsStop := map[string]*dlit.Literal{
+			"interStep": interStep,
+			"n":         n,
+			"high":      high,
+		}
+		if stop, err := stopExpr.EvalBool(varsStop); stop || err != nil {
+			break
+		}
+		varsRound := map[string]*dlit.Literal{
+			"n":     n,
+			"maxDP": dlit.MustNew(maxDP),
+		}
+		v := roundExpr.Eval(varsRound)
+		varsIsValid := map[string]*dlit.Literal{
+			"min":      min,
+			"max":      max,
+			"low":      low,
+			"high":     high,
+			"value":    value,
+			"newValue": v,
+		}
+		if ok, err := isValidExpr.EvalBool(varsIsValid); ok && err == nil {
+			points[v.String()] = v
+		}
+		varsNextN := map[string]*dlit.Literal{
+			"n":         n,
+			"interStep": interStep,
+		}
+		n = nextNExpr.Eval(varsNextN)
+	}
+
+	r := make([]*dlit.Literal, len(points))
+	i := 0
+	for _, p := range points {
+		r[i] = p
+		i++
+	}
+
+	sort.Sort(byNumber(r))
+	return r
 }

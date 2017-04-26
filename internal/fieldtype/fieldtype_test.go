@@ -1,4 +1,4 @@
-package rhkit
+package fieldtype
 
 import (
 	"fmt"
@@ -7,14 +7,14 @@ import (
 
 func TestFieldTypeString(t *testing.T) {
 	cases := []struct {
-		in   fieldType
+		in   FieldType
 		want string
 	}{
-		{ftUnknown, "Unknown"},
-		{ftIgnore, "Ignore"},
-		{ftInt, "Int"},
-		{ftFloat, "Float"},
-		{ftString, "String"},
+		{Unknown, "Unknown"},
+		{Ignore, "Ignore"},
+		{Int, "Int"},
+		{Float, "Float"},
+		{String, "String"},
 	}
 
 	for _, c := range cases {
@@ -26,7 +26,7 @@ func TestFieldTypeString(t *testing.T) {
 }
 
 func TestFieldTypeString_panic(t *testing.T) {
-	kind := fieldType(99)
+	kind := FieldType(99)
 	paniced := false
 	wantPanic := fmt.Sprintf("Unsupported type: %d", kind)
 	defer func() {

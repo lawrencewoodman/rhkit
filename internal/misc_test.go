@@ -1,4 +1,4 @@
-package rhkit
+package internal
 
 import (
 	"testing"
@@ -38,9 +38,9 @@ func TestNumDecPlaces(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		got := numDecPlaces(c.in)
+		got := NumDecPlaces(c.in)
 		if got != c.want {
-			t.Errorf("numDecPlaces(%s) got: %d, want: %d", c.in, got, c.want)
+			t.Errorf("NumDecPlaces(%s) got: %d, want: %d", c.in, got, c.want)
 		}
 	}
 }

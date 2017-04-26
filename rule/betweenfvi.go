@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2016 vLife Systems Ltd <http://vlifesystems.com>
+	Copyright (C) 2016-2017 vLife Systems Ltd <http://vlifesystems.com>
 	This file is part of rhkit.
 
 	rhkit is free software: you can redistribute it and/or modify
@@ -22,7 +22,7 @@ package rule
 import (
 	"fmt"
 	"github.com/lawrencewoodman/ddataset"
-	"github.com/lawrencewoodman/dlit"
+	"github.com/vlifesystems/rhkit/description"
 )
 
 // BetweenFVI represents a rule determining if:
@@ -84,14 +84,12 @@ func (r *BetweenFVI) GetFields() []string {
 }
 
 func (r *BetweenFVI) Tweak(
-	min *dlit.Literal,
-	max *dlit.Literal,
-	maxDP int,
+	inputDescription *description.Description,
 	stage int,
 ) []Rule {
 	rules := make([]Rule, 0)
-	fdMinInt, _ := min.Int()
-	fdMaxInt, _ := max.Int()
+	fdMinInt, _ := inputDescription.Fields[r.field].Min.Int()
+	fdMaxInt, _ := inputDescription.Fields[r.field].Max.Int()
 	step := (fdMaxInt - fdMinInt) / (10 * int64(stage))
 	minLow := r.min - step
 	minHigh := r.min + step

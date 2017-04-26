@@ -2,23 +2,26 @@ package rhkit
 
 import (
 	"github.com/lawrencewoodman/dlit"
+	"github.com/vlifesystems/rhkit/description"
+	"github.com/vlifesystems/rhkit/internal"
+	"github.com/vlifesystems/rhkit/internal/fieldtype"
 	"github.com/vlifesystems/rhkit/rule"
 	"testing"
 )
 
 func TestTweakRules_1(t *testing.T) {
 	testPurposes := []string{"Ensure that results are only from tweakable rules"}
-	inputDescription := &Description{
-		map[string]*fieldDescription{
-			"band": &fieldDescription{
-				ftInt, dlit.MustNew(3), dlit.MustNew(40), 0,
-				map[string]valueDescription{}, 0},
-			"age": &fieldDescription{
-				ftInt, dlit.MustNew(4), dlit.MustNew(30), 0,
-				map[string]valueDescription{}, 0},
-			"flow": &fieldDescription{
-				ftFloat, dlit.MustNew(50), dlit.MustNew(400), 2,
-				map[string]valueDescription{}, 0},
+	inputDescription := &description.Description{
+		map[string]*description.Field{
+			"band": &description.Field{
+				fieldtype.Int, dlit.MustNew(3), dlit.MustNew(40), 0,
+				map[string]description.Value{}, 0},
+			"age": &description.Field{
+				fieldtype.Int, dlit.MustNew(4), dlit.MustNew(30), 0,
+				map[string]description.Value{}, 0},
+			"flow": &description.Field{
+				fieldtype.Float, dlit.MustNew(50), dlit.MustNew(400), 2,
+				map[string]description.Value{}, 0},
 		}}
 	rulesIn := []rule.Rule{
 		rule.NewGEFVI("band", 4),
@@ -98,11 +101,11 @@ func TestTweakRules_2(t *testing.T) {
 	testPurposes := []string{
 		"Ensure that generates a range of int numbers between current ones",
 	}
-	inputDescription := &Description{
-		map[string]*fieldDescription{
-			"age": &fieldDescription{
-				ftInt, dlit.MustNew(10), dlit.MustNew(80), 0,
-				map[string]valueDescription{}, 0,
+	inputDescription := &description.Description{
+		map[string]*description.Field{
+			"age": &description.Field{
+				fieldtype.Int, dlit.MustNew(10), dlit.MustNew(80), 0,
+				map[string]description.Value{}, 0,
 			},
 		}}
 	rulesIn := []rule.Rule{
@@ -179,14 +182,14 @@ func TestTweakRules_3(t *testing.T) {
 		"Ensure that generates a range of float numbers between current ones",
 		"Ensure that decimal places are no greater than maxDP for field",
 	}
-	inputDescription := &Description{
-		map[string]*fieldDescription{
-			"flow": &fieldDescription{
-				Kind:      ftFloat,
+	inputDescription := &description.Description{
+		map[string]*description.Field{
+			"flow": &description.Field{
+				Kind:      fieldtype.Float,
 				Min:       dlit.MustNew(10),
 				Max:       dlit.MustNew(80),
 				MaxDP:     6,
-				Values:    map[string]valueDescription{},
+				Values:    map[string]description.Value{},
 				NumValues: 0,
 			},
 		}}
@@ -228,7 +231,7 @@ func TestTweakRules_3(t *testing.T) {
 			} else {
 				numOther++
 			}
-			valueDP := numDecPlaces(dlit.MustNew(x.GetValue()).String())
+			valueDP := internal.NumDecPlaces(dlit.MustNew(x.GetValue()).String())
 			if valueDP > gotMaxDP {
 				gotMaxDP = valueDP
 			}
@@ -287,11 +290,11 @@ func TestTweakRules_4(t *testing.T) {
 	testPurposes := []string{
 		"Ensure that generates a True rule",
 	}
-	inputDescription := &Description{
-		map[string]*fieldDescription{
-			"flow": &fieldDescription{
-				ftFloat, dlit.MustNew(4), dlit.MustNew(30), 6,
-				map[string]valueDescription{}, 0,
+	inputDescription := &description.Description{
+		map[string]*description.Field{
+			"flow": &description.Field{
+				fieldtype.Float, dlit.MustNew(4), dlit.MustNew(30), 6,
+				map[string]description.Value{}, 0,
 			},
 		}}
 	rulesIn := []rule.Rule{
@@ -317,17 +320,17 @@ func TestTweakRules_4(t *testing.T) {
 
 func TestTweakRules_5(t *testing.T) {
 	testPurposes := []string{"Ensure that are rules are unique"}
-	inputDescription := &Description{
-		map[string]*fieldDescription{
-			"band": &fieldDescription{
-				ftInt, dlit.MustNew(3), dlit.MustNew(40), 0,
-				map[string]valueDescription{}, 0},
-			"age": &fieldDescription{
-				ftInt, dlit.MustNew(4), dlit.MustNew(30), 0,
-				map[string]valueDescription{}, 0},
-			"flow": &fieldDescription{
-				ftFloat, dlit.MustNew(50), dlit.MustNew(400), 2,
-				map[string]valueDescription{}, 0},
+	inputDescription := &description.Description{
+		map[string]*description.Field{
+			"band": &description.Field{
+				fieldtype.Int, dlit.MustNew(3), dlit.MustNew(40), 0,
+				map[string]description.Value{}, 0},
+			"age": &description.Field{
+				fieldtype.Int, dlit.MustNew(4), dlit.MustNew(30), 0,
+				map[string]description.Value{}, 0},
+			"flow": &description.Field{
+				fieldtype.Float, dlit.MustNew(50), dlit.MustNew(400), 2,
+				map[string]description.Value{}, 0},
 		}}
 	rulesIn := []rule.Rule{
 		rule.NewGEFVI("band", 4),

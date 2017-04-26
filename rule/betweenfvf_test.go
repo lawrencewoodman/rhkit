@@ -2,6 +2,8 @@ package rule
 
 import (
 	"github.com/lawrencewoodman/dlit"
+	"github.com/vlifesystems/rhkit/description"
+	"github.com/vlifesystems/rhkit/internal/fieldtype"
 	"reflect"
 	"testing"
 )
@@ -150,9 +152,16 @@ func TestBetweenFVFTweak(t *testing.T) {
 	rule := MustNewBetweenFVF(field, min, max)
 	fdMin := float64(500)
 	fdMax := float64(2000)
-	fdMinL := dlit.MustNew(fdMin)
-	fdMaxL := dlit.MustNew(fdMax)
-	got := rule.Tweak(fdMinL, fdMaxL, 0, 1)
+	description := &description.Description{
+		map[string]*description.Field{
+			"income": &description.Field{
+				Kind: fieldtype.Float,
+				Min:  dlit.MustNew(fdMin),
+				Max:  dlit.MustNew(fdMax),
+			},
+		},
+	}
+	got := rule.Tweak(description, 1)
 	numGot := len(got)
 	if numGot < 300 {
 		t.Errorf("Tweak - got too few rules returned: %d", numGot)

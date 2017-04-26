@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/lawrencewoodman/dlit"
+	"github.com/vlifesystems/rhkit/description"
+	"github.com/vlifesystems/rhkit/internal/fieldtype"
 	"github.com/vlifesystems/rhkit/rule"
 	"regexp"
 	"sort"
@@ -13,70 +15,70 @@ import (
 
 func TestGenerateRules_1(t *testing.T) {
 	testPurpose := "Ensure generates correct rules for each field"
-	inputDescription := &Description{
-		map[string]*fieldDescription{
-			"team": &fieldDescription{
-				Kind: ftString,
-				Values: map[string]valueDescription{
-					"a": valueDescription{dlit.NewString("a"), 3},
-					"b": valueDescription{dlit.NewString("b"), 3},
-					"c": valueDescription{dlit.NewString("c"), 3},
+	inputDescription := &description.Description{
+		map[string]*description.Field{
+			"team": &description.Field{
+				Kind: fieldtype.String,
+				Values: map[string]description.Value{
+					"a": description.Value{dlit.NewString("a"), 3},
+					"b": description.Value{dlit.NewString("b"), 3},
+					"c": description.Value{dlit.NewString("c"), 3},
 				},
 			},
-			"teamOut": &fieldDescription{
-				Kind: ftString,
-				Values: map[string]valueDescription{
-					"a": valueDescription{dlit.NewString("a"), 3},
-					"c": valueDescription{dlit.NewString("c"), 1},
-					"d": valueDescription{dlit.NewString("d"), 3},
-					"e": valueDescription{dlit.NewString("e"), 3},
-					"f": valueDescription{dlit.NewString("f"), 3},
+			"teamOut": &description.Field{
+				Kind: fieldtype.String,
+				Values: map[string]description.Value{
+					"a": description.Value{dlit.NewString("a"), 3},
+					"c": description.Value{dlit.NewString("c"), 1},
+					"d": description.Value{dlit.NewString("d"), 3},
+					"e": description.Value{dlit.NewString("e"), 3},
+					"f": description.Value{dlit.NewString("f"), 3},
 				},
 			},
-			"level": &fieldDescription{
-				Kind:  ftInt,
+			"level": &description.Field{
+				Kind:  fieldtype.Int,
 				Min:   dlit.MustNew(0),
 				Max:   dlit.MustNew(5),
 				MaxDP: 0,
-				Values: map[string]valueDescription{
-					"0": valueDescription{dlit.NewString("0"), 3},
-					"1": valueDescription{dlit.NewString("1"), 3},
-					"2": valueDescription{dlit.NewString("2"), 1},
-					"3": valueDescription{dlit.NewString("3"), 3},
-					"4": valueDescription{dlit.NewString("4"), 3},
-					"5": valueDescription{dlit.NewString("5"), 3},
+				Values: map[string]description.Value{
+					"0": description.Value{dlit.NewString("0"), 3},
+					"1": description.Value{dlit.NewString("1"), 3},
+					"2": description.Value{dlit.NewString("2"), 1},
+					"3": description.Value{dlit.NewString("3"), 3},
+					"4": description.Value{dlit.NewString("4"), 3},
+					"5": description.Value{dlit.NewString("5"), 3},
 				},
 			},
-			"flow": &fieldDescription{
-				Kind:  ftFloat,
+			"flow": &description.Field{
+				Kind:  fieldtype.Float,
 				Min:   dlit.MustNew(0),
 				Max:   dlit.MustNew(10.5),
 				MaxDP: 2,
-				Values: map[string]valueDescription{
-					"0.0":  valueDescription{dlit.NewString("0.0"), 3},
-					"2.34": valueDescription{dlit.NewString("2.34"), 3},
-					"10.5": valueDescription{dlit.NewString("10.5"), 3},
+				Values: map[string]description.Value{
+					"0.0":  description.Value{dlit.NewString("0.0"), 3},
+					"2.34": description.Value{dlit.NewString("2.34"), 3},
+					"10.5": description.Value{dlit.NewString("10.5"), 3},
 				},
 			},
-			"position": &fieldDescription{
-				Kind:  ftInt,
+			"position": &description.Field{
+				Kind:  fieldtype.Int,
 				Min:   dlit.MustNew(1),
 				Max:   dlit.MustNew(13),
 				MaxDP: 0,
-				Values: map[string]valueDescription{
-					"1":  valueDescription{dlit.NewString("1"), 3},
-					"2":  valueDescription{dlit.NewString("2"), 3},
-					"3":  valueDescription{dlit.NewString("3"), 3},
-					"4":  valueDescription{dlit.NewString("4"), 3},
-					"5":  valueDescription{dlit.NewString("5"), 3},
-					"6":  valueDescription{dlit.NewString("6"), 3},
-					"7":  valueDescription{dlit.NewString("7"), 3},
-					"8":  valueDescription{dlit.NewString("8"), 3},
-					"9":  valueDescription{dlit.NewString("9"), 3},
-					"10": valueDescription{dlit.NewString("10"), 3},
-					"11": valueDescription{dlit.NewString("11"), 3},
-					"12": valueDescription{dlit.NewString("12"), 3},
-					"13": valueDescription{dlit.NewString("13"), 3},
+				Values: map[string]description.Value{
+					"1":  description.Value{dlit.NewString("1"), 3},
+					"2":  description.Value{dlit.NewString("2"), 3},
+					"3":  description.Value{dlit.NewString("3"), 3},
+					"4":  description.Value{dlit.NewString("4"), 3},
+					"5":  description.Value{dlit.NewString("5"), 3},
+					"6":  description.Value{dlit.NewString("6"), 3},
+					"7":  description.Value{dlit.NewString("7"), 3},
+					"8":  description.Value{dlit.NewString("8"), 3},
+					"9":  description.Value{dlit.NewString("9"), 3},
+					"10": description.Value{dlit.NewString("10"), 3},
+					"11": description.Value{dlit.NewString("11"), 3},
+					"12": description.Value{dlit.NewString("12"), 3},
+					"13": description.Value{dlit.NewString("13"), 3},
 				},
 			},
 		}}
@@ -121,24 +123,24 @@ func TestGenerateRules_1(t *testing.T) {
 
 func TestGenerateRules_2(t *testing.T) {
 	testPurpose := "Ensure generates a True rule"
-	inputDescription := &Description{
-		map[string]*fieldDescription{
-			"team": &fieldDescription{
-				Kind: ftString,
-				Values: map[string]valueDescription{
-					"a": valueDescription{dlit.MustNew("a"), 3},
-					"b": valueDescription{dlit.MustNew("b"), 3},
-					"c": valueDescription{dlit.MustNew("c"), 3},
+	inputDescription := &description.Description{
+		map[string]*description.Field{
+			"team": &description.Field{
+				Kind: fieldtype.String,
+				Values: map[string]description.Value{
+					"a": description.Value{dlit.MustNew("a"), 3},
+					"b": description.Value{dlit.MustNew("b"), 3},
+					"c": description.Value{dlit.MustNew("c"), 3},
 				},
 			},
-			"teamOut": &fieldDescription{
-				Kind: ftString,
-				Values: map[string]valueDescription{
-					"a": valueDescription{dlit.MustNew("a"), 3},
-					"c": valueDescription{dlit.MustNew("c"), 3},
-					"d": valueDescription{dlit.MustNew("d"), 3},
-					"e": valueDescription{dlit.MustNew("e"), 3},
-					"f": valueDescription{dlit.MustNew("f"), 3},
+			"teamOut": &description.Field{
+				Kind: fieldtype.String,
+				Values: map[string]description.Value{
+					"a": description.Value{dlit.MustNew("a"), 3},
+					"c": description.Value{dlit.MustNew("c"), 3},
+					"d": description.Value{dlit.MustNew("d"), 3},
+					"e": description.Value{dlit.MustNew("e"), 3},
+					"f": description.Value{dlit.MustNew("f"), 3},
 				},
 			},
 		}}
@@ -161,20 +163,20 @@ func TestGenerateRules_2(t *testing.T) {
 
 func TestGenerateRules_3(t *testing.T) {
 	testPurpose := "Ensure generates correct combination rules"
-	inputDescription := &Description{
-		map[string]*fieldDescription{
-			"directionIn": &fieldDescription{
-				Kind: ftString,
-				Values: map[string]valueDescription{
-					"gogledd": valueDescription{dlit.MustNew("gogledd"), 3},
-					"de":      valueDescription{dlit.MustNew("de"), 3},
+	inputDescription := &description.Description{
+		map[string]*description.Field{
+			"directionIn": &description.Field{
+				Kind: fieldtype.String,
+				Values: map[string]description.Value{
+					"gogledd": description.Value{dlit.MustNew("gogledd"), 3},
+					"de":      description.Value{dlit.MustNew("de"), 3},
 				},
 			},
-			"directionOut": &fieldDescription{
-				Kind: ftString,
-				Values: map[string]valueDescription{
-					"dwyrain":   valueDescription{dlit.MustNew("dwyrain"), 3},
-					"gorllewin": valueDescription{dlit.MustNew("gorllewin"), 3},
+			"directionOut": &description.Field{
+				Kind: fieldtype.String,
+				Values: map[string]description.Value{
+					"dwyrain":   description.Value{dlit.MustNew("dwyrain"), 3},
+					"gorllewin": description.Value{dlit.MustNew("gorllewin"), 3},
 				},
 			},
 		}}
@@ -238,13 +240,13 @@ func TestGenerateRules_3(t *testing.T) {
 }
 
 func TestGenerateIntRules(t *testing.T) {
-	inputDescription := &Description{
-		map[string]*fieldDescription{
-			"flow": &fieldDescription{
-				Kind:   ftInt,
+	inputDescription := &description.Description{
+		map[string]*description.Field{
+			"flow": &description.Field{
+				Kind:   fieldtype.Int,
 				Min:    dlit.MustNew(1),
 				Max:    dlit.MustNew(20),
-				Values: map[string]valueDescription{},
+				Values: map[string]description.Value{},
 			},
 		},
 	}
@@ -287,21 +289,21 @@ func TestGenerateIntRules(t *testing.T) {
 }
 
 func TestGenerateFloatRules(t *testing.T) {
-	inputDescription := &Description{
-		map[string]*fieldDescription{
-			"flow": &fieldDescription{
-				Kind:   ftFloat,
+	inputDescription := &description.Description{
+		map[string]*description.Field{
+			"flow": &description.Field{
+				Kind:   fieldtype.Float,
 				Min:    dlit.MustNew(0),
 				Max:    dlit.MustNew(10.5),
 				MaxDP:  2,
-				Values: map[string]valueDescription{},
+				Values: map[string]description.Value{},
 			},
-			"flowConstant": &fieldDescription{
-				Kind:   ftFloat,
+			"flowConstant": &description.Field{
+				Kind:   fieldtype.Float,
 				Min:    dlit.MustNew(10.5),
 				Max:    dlit.MustNew(10.5),
 				MaxDP:  1,
-				Values: map[string]valueDescription{},
+				Values: map[string]description.Value{},
 			},
 		},
 	}
@@ -432,35 +434,35 @@ func TestGenerateFloatRules(t *testing.T) {
 }
 
 func TestGenerateAddRules(t *testing.T) {
-	inputDescription := &Description{
-		map[string]*fieldDescription{
-			"flowIn": &fieldDescription{
-				Kind:   ftFloat,
+	inputDescription := &description.Description{
+		map[string]*description.Field{
+			"flowIn": &description.Field{
+				Kind:   fieldtype.Float,
 				Min:    dlit.MustNew(0),
 				Max:    dlit.MustNew(10.5),
 				MaxDP:  2,
-				Values: map[string]valueDescription{},
+				Values: map[string]description.Value{},
 			},
-			"flowOut": &fieldDescription{
-				Kind:   ftFloat,
+			"flowOut": &description.Field{
+				Kind:   fieldtype.Float,
 				Min:    dlit.MustNew(1.2),
 				Max:    dlit.MustNew(5.2),
 				MaxDP:  2,
-				Values: map[string]valueDescription{},
+				Values: map[string]description.Value{},
 			},
-			"flowSideA": &fieldDescription{
-				Kind:   ftFloat,
+			"flowSideA": &description.Field{
+				Kind:   fieldtype.Float,
 				Min:    dlit.MustNew(2.2),
 				Max:    dlit.MustNew(2.2),
 				MaxDP:  1,
-				Values: map[string]valueDescription{},
+				Values: map[string]description.Value{},
 			},
-			"flowSideB": &fieldDescription{
-				Kind:   ftFloat,
+			"flowSideB": &description.Field{
+				Kind:   fieldtype.Float,
 				Min:    dlit.MustNew(2.2),
 				Max:    dlit.MustNew(2.2),
 				MaxDP:  1,
-				Values: map[string]valueDescription{},
+				Values: map[string]description.Value{},
 			},
 		},
 	}
@@ -694,49 +696,49 @@ func TestGenerateAddRules(t *testing.T) {
 }
 
 func TestGenerateCompareNumericRules(t *testing.T) {
-	inputDescription := &Description{
-		map[string]*fieldDescription{
-			"band": &fieldDescription{
-				Kind:   ftInt,
+	inputDescription := &description.Description{
+		map[string]*description.Field{
+			"band": &description.Field{
+				Kind:   fieldtype.Int,
 				Min:    dlit.MustNew(1),
 				Max:    dlit.MustNew(3),
-				Values: map[string]valueDescription{},
+				Values: map[string]description.Value{},
 			},
-			"flowIn": &fieldDescription{
-				Kind:   ftFloat,
+			"flowIn": &description.Field{
+				Kind:   fieldtype.Float,
 				Min:    dlit.MustNew(1),
 				Max:    dlit.MustNew(4),
 				MaxDP:  2,
-				Values: map[string]valueDescription{},
+				Values: map[string]description.Value{},
 			},
-			"flowOut": &fieldDescription{
-				Kind:   ftFloat,
+			"flowOut": &description.Field{
+				Kind:   fieldtype.Float,
 				Min:    dlit.MustNew(0.95),
 				Max:    dlit.MustNew(4.1),
 				MaxDP:  2,
-				Values: map[string]valueDescription{},
+				Values: map[string]description.Value{},
 			},
-			"rateIn": &fieldDescription{
-				Kind:   ftFloat,
+			"rateIn": &description.Field{
+				Kind:   fieldtype.Float,
 				Min:    dlit.MustNew(4.2),
 				Max:    dlit.MustNew(8.9),
 				MaxDP:  2,
-				Values: map[string]valueDescription{},
+				Values: map[string]description.Value{},
 			},
-			"rateOut": &fieldDescription{
-				Kind:   ftFloat,
+			"rateOut": &description.Field{
+				Kind:   fieldtype.Float,
 				Min:    dlit.MustNew(0.1),
 				Max:    dlit.MustNew(0.9),
 				MaxDP:  2,
-				Values: map[string]valueDescription{},
+				Values: map[string]description.Value{},
 			},
-			"group": &fieldDescription{
-				Kind: ftString,
-				Values: map[string]valueDescription{
-					"Nelson":      valueDescription{dlit.NewString("Nelson"), 3},
-					"Collingwood": valueDescription{dlit.NewString("Collingwood"), 1},
-					"Mountbatten": valueDescription{dlit.NewString("Mountbatten"), 1},
-					"Drake":       valueDescription{dlit.NewString("Drake"), 2},
+			"group": &description.Field{
+				Kind: fieldtype.String,
+				Values: map[string]description.Value{
+					"Nelson":      description.Value{dlit.NewString("Nelson"), 3},
+					"Collingwood": description.Value{dlit.NewString("Collingwood"), 1},
+					"Mountbatten": description.Value{dlit.NewString("Mountbatten"), 1},
+					"Drake":       description.Value{dlit.NewString("Drake"), 2},
 				},
 			},
 		},
@@ -798,61 +800,61 @@ func TestGenerateCompareNumericRules(t *testing.T) {
 }
 
 func TestGenerateCompareStringRules(t *testing.T) {
-	inputDescription := &Description{
-		map[string]*fieldDescription{
-			"band": &fieldDescription{
-				Kind:   ftInt,
+	inputDescription := &description.Description{
+		map[string]*description.Field{
+			"band": &description.Field{
+				Kind:   fieldtype.Int,
 				Min:    dlit.MustNew(1),
 				Max:    dlit.MustNew(3),
-				Values: map[string]valueDescription{},
+				Values: map[string]description.Value{},
 			},
-			"groupA": &fieldDescription{
-				Kind: ftString,
-				Values: map[string]valueDescription{
-					"Nelson":      valueDescription{dlit.NewString("Nelson"), 3},
-					"Collingwood": valueDescription{dlit.NewString("Collingwood"), 1},
-					"Mountbatten": valueDescription{dlit.NewString("Mountbatten"), 1},
-					"Drake":       valueDescription{dlit.NewString("Drake"), 2},
+			"groupA": &description.Field{
+				Kind: fieldtype.String,
+				Values: map[string]description.Value{
+					"Nelson":      description.Value{dlit.NewString("Nelson"), 3},
+					"Collingwood": description.Value{dlit.NewString("Collingwood"), 1},
+					"Mountbatten": description.Value{dlit.NewString("Mountbatten"), 1},
+					"Drake":       description.Value{dlit.NewString("Drake"), 2},
 				},
 			},
-			"groupB": &fieldDescription{
-				Kind: ftString,
-				Values: map[string]valueDescription{
-					"Nelson":      valueDescription{dlit.NewString("Nelson"), 3},
-					"Mountbatten": valueDescription{dlit.NewString("Mountbatten"), 1},
-					"Drake":       valueDescription{dlit.NewString("Drake"), 2},
+			"groupB": &description.Field{
+				Kind: fieldtype.String,
+				Values: map[string]description.Value{
+					"Nelson":      description.Value{dlit.NewString("Nelson"), 3},
+					"Mountbatten": description.Value{dlit.NewString("Mountbatten"), 1},
+					"Drake":       description.Value{dlit.NewString("Drake"), 2},
 				},
 			},
-			"groupC": &fieldDescription{
-				Kind: ftString,
-				Values: map[string]valueDescription{
-					"Nelson": valueDescription{dlit.NewString("Nelson"), 3},
-					"Drake":  valueDescription{dlit.NewString("Drake"), 2},
+			"groupC": &description.Field{
+				Kind: fieldtype.String,
+				Values: map[string]description.Value{
+					"Nelson": description.Value{dlit.NewString("Nelson"), 3},
+					"Drake":  description.Value{dlit.NewString("Drake"), 2},
 				},
 			},
-			"groupD": &fieldDescription{
-				Kind: ftString,
-				Values: map[string]valueDescription{
-					"Drake": valueDescription{dlit.NewString("Drake"), 2},
+			"groupD": &description.Field{
+				Kind: fieldtype.String,
+				Values: map[string]description.Value{
+					"Drake": description.Value{dlit.NewString("Drake"), 2},
 				},
 			},
-			"groupE": &fieldDescription{
-				Kind: ftString,
-				Values: map[string]valueDescription{
-					"Drake":       valueDescription{dlit.NewString("Drake"), 2},
-					"Chaucer":     valueDescription{dlit.NewString("Chaucer"), 2},
-					"Shakespeare": valueDescription{dlit.NewString("Shakespeare"), 2},
-					"Marlowe":     valueDescription{dlit.NewString("Marlowe"), 2},
+			"groupE": &description.Field{
+				Kind: fieldtype.String,
+				Values: map[string]description.Value{
+					"Drake":       description.Value{dlit.NewString("Drake"), 2},
+					"Chaucer":     description.Value{dlit.NewString("Chaucer"), 2},
+					"Shakespeare": description.Value{dlit.NewString("Shakespeare"), 2},
+					"Marlowe":     description.Value{dlit.NewString("Marlowe"), 2},
 				},
 			},
-			"groupF": &fieldDescription{
-				Kind: ftString,
-				Values: map[string]valueDescription{
-					"Nelson":      valueDescription{dlit.NewString("Nelson"), 3},
-					"Drake":       valueDescription{dlit.NewString("Drake"), 2},
-					"Chaucer":     valueDescription{dlit.NewString("Chaucer"), 2},
-					"Shakespeare": valueDescription{dlit.NewString("Shakespeare"), 2},
-					"Marlowe":     valueDescription{dlit.NewString("Marlowe"), 2},
+			"groupF": &description.Field{
+				Kind: fieldtype.String,
+				Values: map[string]description.Value{
+					"Nelson":      description.Value{dlit.NewString("Nelson"), 3},
+					"Drake":       description.Value{dlit.NewString("Drake"), 2},
+					"Chaucer":     description.Value{dlit.NewString("Chaucer"), 2},
+					"Shakespeare": description.Value{dlit.NewString("Shakespeare"), 2},
+					"Marlowe":     description.Value{dlit.NewString("Marlowe"), 2},
 				},
 			},
 		},
@@ -912,74 +914,74 @@ func TestGenerateCompareStringRules(t *testing.T) {
 }
 
 func TestGenerateInRules_1(t *testing.T) {
-	inputDescription := &Description{
-		map[string]*fieldDescription{
-			"band": &fieldDescription{
-				Kind:   ftInt,
+	inputDescription := &description.Description{
+		map[string]*description.Field{
+			"band": &description.Field{
+				Kind:   fieldtype.Int,
 				Min:    dlit.MustNew(1),
 				Max:    dlit.MustNew(3),
-				Values: map[string]valueDescription{},
+				Values: map[string]description.Value{},
 			},
-			"flow": &fieldDescription{
-				Kind:   ftFloat,
+			"flow": &description.Field{
+				Kind:   fieldtype.Float,
 				Min:    dlit.MustNew(1),
 				Max:    dlit.MustNew(3),
 				MaxDP:  2,
-				Values: map[string]valueDescription{},
+				Values: map[string]description.Value{},
 			},
-			"groupA": &fieldDescription{
-				Kind: ftString,
-				Values: map[string]valueDescription{
-					"Fred":    valueDescription{dlit.NewString("Fred"), 3},
-					"Mary":    valueDescription{dlit.NewString("Mary"), 4},
-					"Rebecca": valueDescription{dlit.NewString("Rebecca"), 2},
+			"groupA": &description.Field{
+				Kind: fieldtype.String,
+				Values: map[string]description.Value{
+					"Fred":    description.Value{dlit.NewString("Fred"), 3},
+					"Mary":    description.Value{dlit.NewString("Mary"), 4},
+					"Rebecca": description.Value{dlit.NewString("Rebecca"), 2},
 				},
 			},
 
-			"groupB": &fieldDescription{
-				Kind: ftString,
-				Values: map[string]valueDescription{
-					"Fred":    valueDescription{dlit.NewString("Fred"), 3},
-					"Mary":    valueDescription{dlit.NewString("Mary"), 4},
-					"Rebecca": valueDescription{dlit.NewString("Rebecca"), 2},
-					"Harry":   valueDescription{dlit.NewString("Harry"), 2},
-					"Dinah":   valueDescription{dlit.NewString("Dinah"), 2},
-					"Israel":  valueDescription{dlit.NewString("Israel"), 2},
-					"Sarah":   valueDescription{dlit.NewString("Sarah"), 2},
-					"Ishmael": valueDescription{dlit.NewString("Ishmael"), 2},
-					"Caen":    valueDescription{dlit.NewString("Caen"), 2},
-					"Abel":    valueDescription{dlit.NewString("Abel"), 2},
-					"Noah":    valueDescription{dlit.NewString("Noah"), 2},
-					"Isaac":   valueDescription{dlit.NewString("Isaac"), 2},
-					"Moses":   valueDescription{dlit.NewString("Moses"), 2},
+			"groupB": &description.Field{
+				Kind: fieldtype.String,
+				Values: map[string]description.Value{
+					"Fred":    description.Value{dlit.NewString("Fred"), 3},
+					"Mary":    description.Value{dlit.NewString("Mary"), 4},
+					"Rebecca": description.Value{dlit.NewString("Rebecca"), 2},
+					"Harry":   description.Value{dlit.NewString("Harry"), 2},
+					"Dinah":   description.Value{dlit.NewString("Dinah"), 2},
+					"Israel":  description.Value{dlit.NewString("Israel"), 2},
+					"Sarah":   description.Value{dlit.NewString("Sarah"), 2},
+					"Ishmael": description.Value{dlit.NewString("Ishmael"), 2},
+					"Caen":    description.Value{dlit.NewString("Caen"), 2},
+					"Abel":    description.Value{dlit.NewString("Abel"), 2},
+					"Noah":    description.Value{dlit.NewString("Noah"), 2},
+					"Isaac":   description.Value{dlit.NewString("Isaac"), 2},
+					"Moses":   description.Value{dlit.NewString("Moses"), 2},
 				},
 			},
-			"groupC": &fieldDescription{
-				Kind: ftString,
-				Values: map[string]valueDescription{
-					"Fred":    valueDescription{dlit.NewString("Fred"), 3},
-					"Mary":    valueDescription{dlit.NewString("Mary"), 4},
-					"Rebecca": valueDescription{dlit.NewString("Rebecca"), 2},
-					"Harry":   valueDescription{dlit.NewString("Harry"), 2},
+			"groupC": &description.Field{
+				Kind: fieldtype.String,
+				Values: map[string]description.Value{
+					"Fred":    description.Value{dlit.NewString("Fred"), 3},
+					"Mary":    description.Value{dlit.NewString("Mary"), 4},
+					"Rebecca": description.Value{dlit.NewString("Rebecca"), 2},
+					"Harry":   description.Value{dlit.NewString("Harry"), 2},
 				},
 			},
-			"groupD": &fieldDescription{
-				Kind: ftString,
-				Values: map[string]valueDescription{
-					"Fred":    valueDescription{dlit.NewString("Fred"), 3},
-					"Mary":    valueDescription{dlit.NewString("Mary"), 4},
-					"Rebecca": valueDescription{dlit.NewString("Rebecca"), 1},
-					"Harry":   valueDescription{dlit.NewString("Harry"), 2},
+			"groupD": &description.Field{
+				Kind: fieldtype.String,
+				Values: map[string]description.Value{
+					"Fred":    description.Value{dlit.NewString("Fred"), 3},
+					"Mary":    description.Value{dlit.NewString("Mary"), 4},
+					"Rebecca": description.Value{dlit.NewString("Rebecca"), 1},
+					"Harry":   description.Value{dlit.NewString("Harry"), 2},
 				},
 			},
-			"groupE": &fieldDescription{
-				Kind: ftString,
-				Values: map[string]valueDescription{
-					"Fred":    valueDescription{dlit.NewString("Fred"), 3},
-					"Mary":    valueDescription{dlit.NewString("Mary"), 4},
-					"Rebecca": valueDescription{dlit.NewString("Rebecca"), 2},
-					"Harry":   valueDescription{dlit.NewString("Harry"), 2},
-					"Juliet":  valueDescription{dlit.NewString("Juliet"), 2},
+			"groupE": &description.Field{
+				Kind: fieldtype.String,
+				Values: map[string]description.Value{
+					"Fred":    description.Value{dlit.NewString("Fred"), 3},
+					"Mary":    description.Value{dlit.NewString("Mary"), 4},
+					"Rebecca": description.Value{dlit.NewString("Rebecca"), 2},
+					"Harry":   description.Value{dlit.NewString("Harry"), 2},
+					"Juliet":  description.Value{dlit.NewString("Juliet"), 2},
 				},
 			},
 		},
@@ -1155,23 +1157,23 @@ func TestGenerateInRules_1(t *testing.T) {
 // Test that will generate if has 12 values and ensures that has correct
 // number of values in In rule
 func TestGenerateInRules_2(t *testing.T) {
-	inputDescription := &Description{
-		map[string]*fieldDescription{
-			"group": &fieldDescription{
-				Kind: ftString,
-				Values: map[string]valueDescription{
-					"Fred":    valueDescription{dlit.NewString("Fred"), 3},
-					"Mary":    valueDescription{dlit.NewString("Mary"), 4},
-					"Rebecca": valueDescription{dlit.NewString("Rebecca"), 2},
-					"Harry":   valueDescription{dlit.NewString("Harry"), 2},
-					"Dinah":   valueDescription{dlit.NewString("Dinah"), 2},
-					"Israel":  valueDescription{dlit.NewString("Israel"), 2},
-					"Sarah":   valueDescription{dlit.NewString("Sarah"), 2},
-					"Ishmael": valueDescription{dlit.NewString("Ishmael"), 2},
-					"Caen":    valueDescription{dlit.NewString("Caen"), 2},
-					"Abel":    valueDescription{dlit.NewString("Abel"), 2},
-					"Noah":    valueDescription{dlit.NewString("Noah"), 2},
-					"Isaac":   valueDescription{dlit.NewString("Isaac"), 2},
+	inputDescription := &description.Description{
+		map[string]*description.Field{
+			"group": &description.Field{
+				Kind: fieldtype.String,
+				Values: map[string]description.Value{
+					"Fred":    description.Value{dlit.NewString("Fred"), 3},
+					"Mary":    description.Value{dlit.NewString("Mary"), 4},
+					"Rebecca": description.Value{dlit.NewString("Rebecca"), 2},
+					"Harry":   description.Value{dlit.NewString("Harry"), 2},
+					"Dinah":   description.Value{dlit.NewString("Dinah"), 2},
+					"Israel":  description.Value{dlit.NewString("Israel"), 2},
+					"Sarah":   description.Value{dlit.NewString("Sarah"), 2},
+					"Ishmael": description.Value{dlit.NewString("Ishmael"), 2},
+					"Caen":    description.Value{dlit.NewString("Caen"), 2},
+					"Abel":    description.Value{dlit.NewString("Abel"), 2},
+					"Noah":    description.Value{dlit.NewString("Noah"), 2},
+					"Isaac":   description.Value{dlit.NewString("Isaac"), 2},
 				},
 			},
 		},
@@ -1190,40 +1192,40 @@ func TestGenerateInRules_2(t *testing.T) {
 }
 
 func TestGenerateValueRules(t *testing.T) {
-	inputDescription := &Description{
-		map[string]*fieldDescription{
-			"band": &fieldDescription{
-				Kind: ftInt,
+	inputDescription := &description.Description{
+		map[string]*description.Field{
+			"band": &description.Field{
+				Kind: fieldtype.Int,
 				Min:  dlit.MustNew(1),
 				Max:  dlit.MustNew(4),
-				Values: map[string]valueDescription{
-					"1": valueDescription{dlit.NewString("1"), 3},
-					"2": valueDescription{dlit.NewString("2"), 1},
-					"3": valueDescription{dlit.NewString("3"), 2},
-					"4": valueDescription{dlit.NewString("4"), 5},
+				Values: map[string]description.Value{
+					"1": description.Value{dlit.NewString("1"), 3},
+					"2": description.Value{dlit.NewString("2"), 1},
+					"3": description.Value{dlit.NewString("3"), 2},
+					"4": description.Value{dlit.NewString("4"), 5},
 				},
 			},
-			"flow": &fieldDescription{
-				Kind:  ftFloat,
+			"flow": &description.Field{
+				Kind:  fieldtype.Float,
 				Min:   dlit.MustNew(1),
 				Max:   dlit.MustNew(4),
 				MaxDP: 2,
-				Values: map[string]valueDescription{
-					"1":    valueDescription{dlit.NewString("1"), 3},
-					"2":    valueDescription{dlit.NewString("2"), 1},
-					"2.90": valueDescription{dlit.NewString("2.90"), 1},
-					"3.37": valueDescription{dlit.NewString("3.37"), 2},
-					"3.3":  valueDescription{dlit.NewString("3.3"), 2},
-					"4":    valueDescription{dlit.NewString("4"), 5},
+				Values: map[string]description.Value{
+					"1":    description.Value{dlit.NewString("1"), 3},
+					"2":    description.Value{dlit.NewString("2"), 1},
+					"2.90": description.Value{dlit.NewString("2.90"), 1},
+					"3.37": description.Value{dlit.NewString("3.37"), 2},
+					"3.3":  description.Value{dlit.NewString("3.3"), 2},
+					"4":    description.Value{dlit.NewString("4"), 5},
 				},
 			},
-			"group": &fieldDescription{
-				Kind: ftString,
-				Values: map[string]valueDescription{
-					"Nelson":      valueDescription{dlit.NewString("Nelson"), 3},
-					"Collingwood": valueDescription{dlit.NewString("Collingwood"), 1},
-					"Mountbatten": valueDescription{dlit.NewString("Mountbatten"), 1},
-					"Drake":       valueDescription{dlit.NewString("Drake"), 2},
+			"group": &description.Field{
+				Kind: fieldtype.String,
+				Values: map[string]description.Value{
+					"Nelson":      description.Value{dlit.NewString("Nelson"), 3},
+					"Collingwood": description.Value{dlit.NewString("Collingwood"), 1},
+					"Mountbatten": description.Value{dlit.NewString("Mountbatten"), 1},
+					"Drake":       description.Value{dlit.NewString("Drake"), 2},
 				},
 			},
 		},
@@ -1371,22 +1373,22 @@ func TestCombineRules(t *testing.T) {
 }
 
 func TestMakeCompareValues(t *testing.T) {
-	values1 := map[string]valueDescription{
-		"a": valueDescription{dlit.MustNew("a"), 2},
-		"c": valueDescription{dlit.MustNew("c"), 2},
-		"d": valueDescription{dlit.MustNew("d"), 2},
-		"e": valueDescription{dlit.MustNew("e"), 2},
-		"f": valueDescription{dlit.MustNew("f"), 2},
+	values1 := map[string]description.Value{
+		"a": description.Value{dlit.MustNew("a"), 2},
+		"c": description.Value{dlit.MustNew("c"), 2},
+		"d": description.Value{dlit.MustNew("d"), 2},
+		"e": description.Value{dlit.MustNew("e"), 2},
+		"f": description.Value{dlit.MustNew("f"), 2},
 	}
-	values2 := map[string]valueDescription{
-		"a": valueDescription{dlit.MustNew("a"), 2},
-		"c": valueDescription{dlit.MustNew("c"), 1},
-		"d": valueDescription{dlit.MustNew("d"), 2},
-		"e": valueDescription{dlit.MustNew("e"), 2},
-		"f": valueDescription{dlit.MustNew("f"), 2},
+	values2 := map[string]description.Value{
+		"a": description.Value{dlit.MustNew("a"), 2},
+		"c": description.Value{dlit.MustNew("c"), 1},
+		"d": description.Value{dlit.MustNew("d"), 2},
+		"e": description.Value{dlit.MustNew("e"), 2},
+		"f": description.Value{dlit.MustNew("f"), 2},
 	}
 	cases := []struct {
-		values map[string]valueDescription
+		values map[string]description.Value
 		i      int
 		want   []*dlit.Literal
 	}{

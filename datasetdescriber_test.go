@@ -2,6 +2,8 @@ package rhkit
 
 import (
 	"github.com/lawrencewoodman/dlit"
+	"github.com/vlifesystems/rhkit/description"
+	"github.com/vlifesystems/rhkit/internal/fieldtype"
 	"testing"
 )
 
@@ -52,112 +54,112 @@ var flowRecords = [][]string{
 func TestDescribeDataset(t *testing.T) {
 	fieldNames :=
 		[]string{"band", "inputA", "inputB", "version", "flow", "score", "method"}
-	expected := &Description{
-		map[string]*fieldDescription{
-			"band": &fieldDescription{ftString, nil, nil, 0,
-				map[string]valueDescription{
-					"a": valueDescription{dlit.MustNew("a"), 2},
-					"b": valueDescription{dlit.MustNew("b"), 3},
-					"c": valueDescription{dlit.MustNew("c"), 1},
-					"f": valueDescription{dlit.MustNew("f"), 1},
-					"g": valueDescription{dlit.MustNew("g"), 1},
-					"h": valueDescription{dlit.MustNew("h"), 1},
-					"i": valueDescription{dlit.MustNew("i"), 1},
-					"j": valueDescription{dlit.MustNew("j"), 1},
-					"k": valueDescription{dlit.MustNew("k"), 1},
-					"l": valueDescription{dlit.MustNew("l"), 1},
-					"m": valueDescription{dlit.MustNew("m"), 1},
-					"n": valueDescription{dlit.MustNew("n"), 1},
-					"o": valueDescription{dlit.MustNew("o"), 1},
-					"p": valueDescription{dlit.MustNew("p"), 1},
-					"q": valueDescription{dlit.MustNew("q"), 1},
-					"s": valueDescription{dlit.MustNew("s"), 1},
-					"t": valueDescription{dlit.MustNew("t"), 1},
-					"u": valueDescription{dlit.MustNew("u"), 1},
-					"v": valueDescription{dlit.MustNew("v"), 1},
-					"x": valueDescription{dlit.MustNew("x"), 1},
-					"y": valueDescription{dlit.MustNew("y"), 1},
-					"z": valueDescription{dlit.MustNew("z"), 1},
-					"1": valueDescription{dlit.MustNew("1"), 1},
-					"2": valueDescription{dlit.MustNew("2"), 1},
-					"3": valueDescription{dlit.MustNew("3"), 1},
-					"4": valueDescription{dlit.MustNew("4"), 1},
-					"5": valueDescription{dlit.MustNew("5"), 1},
-					"6": valueDescription{dlit.MustNew("6"), 1},
-					"7": valueDescription{dlit.MustNew("7"), 1},
-					"8": valueDescription{dlit.MustNew("8"), 2},
-					"9": valueDescription{dlit.MustNew("9"), 1},
+	expected := &description.Description{
+		map[string]*description.Field{
+			"band": &description.Field{fieldtype.String, nil, nil, 0,
+				map[string]description.Value{
+					"a": description.Value{dlit.MustNew("a"), 2},
+					"b": description.Value{dlit.MustNew("b"), 3},
+					"c": description.Value{dlit.MustNew("c"), 1},
+					"f": description.Value{dlit.MustNew("f"), 1},
+					"g": description.Value{dlit.MustNew("g"), 1},
+					"h": description.Value{dlit.MustNew("h"), 1},
+					"i": description.Value{dlit.MustNew("i"), 1},
+					"j": description.Value{dlit.MustNew("j"), 1},
+					"k": description.Value{dlit.MustNew("k"), 1},
+					"l": description.Value{dlit.MustNew("l"), 1},
+					"m": description.Value{dlit.MustNew("m"), 1},
+					"n": description.Value{dlit.MustNew("n"), 1},
+					"o": description.Value{dlit.MustNew("o"), 1},
+					"p": description.Value{dlit.MustNew("p"), 1},
+					"q": description.Value{dlit.MustNew("q"), 1},
+					"s": description.Value{dlit.MustNew("s"), 1},
+					"t": description.Value{dlit.MustNew("t"), 1},
+					"u": description.Value{dlit.MustNew("u"), 1},
+					"v": description.Value{dlit.MustNew("v"), 1},
+					"x": description.Value{dlit.MustNew("x"), 1},
+					"y": description.Value{dlit.MustNew("y"), 1},
+					"z": description.Value{dlit.MustNew("z"), 1},
+					"1": description.Value{dlit.MustNew("1"), 1},
+					"2": description.Value{dlit.MustNew("2"), 1},
+					"3": description.Value{dlit.MustNew("3"), 1},
+					"4": description.Value{dlit.MustNew("4"), 1},
+					"5": description.Value{dlit.MustNew("5"), 1},
+					"6": description.Value{dlit.MustNew("6"), 1},
+					"7": description.Value{dlit.MustNew("7"), 1},
+					"8": description.Value{dlit.MustNew("8"), 2},
+					"9": description.Value{dlit.MustNew("9"), 1},
 				},
 				31,
 			},
-			"inputA": &fieldDescription{
-				ftFloat,
+			"inputA": &description.Field{
+				fieldtype.Float,
 				dlit.MustNew(7),
 				dlit.MustNew(15.1),
 				1,
-				map[string]valueDescription{
-					"7":    valueDescription{dlit.MustNew(7), 7},
-					"7.3":  valueDescription{dlit.MustNew(7.3), 7},
-					"9":    valueDescription{dlit.MustNew(9), 7},
-					"14":   valueDescription{dlit.MustNew(14), 7},
-					"15.1": valueDescription{dlit.MustNew(15.1), 7},
+				map[string]description.Value{
+					"7":    description.Value{dlit.MustNew(7), 7},
+					"7.3":  description.Value{dlit.MustNew(7.3), 7},
+					"9":    description.Value{dlit.MustNew(9), 7},
+					"14":   description.Value{dlit.MustNew(14), 7},
+					"15.1": description.Value{dlit.MustNew(15.1), 7},
 				},
 				5,
 			},
-			"inputB": &fieldDescription{
-				ftFloat,
+			"inputB": &description.Field{
+				fieldtype.Float,
 				dlit.MustNew(2),
 				dlit.MustNew(5),
 				4,
-				map[string]valueDescription{
-					"2.6":    valueDescription{dlit.MustNew(2.6), 7},
-					"2.8789": valueDescription{dlit.MustNew(2.8789), 1},
-					"3":      valueDescription{dlit.MustNew(3), 7},
-					"5":      valueDescription{dlit.MustNew(5), 7},
-					"2":      valueDescription{dlit.MustNew(2), 7},
-					"2.8":    valueDescription{dlit.MustNew(2.8), 6},
+				map[string]description.Value{
+					"2.6":    description.Value{dlit.MustNew(2.6), 7},
+					"2.8789": description.Value{dlit.MustNew(2.8789), 1},
+					"3":      description.Value{dlit.MustNew(3), 7},
+					"5":      description.Value{dlit.MustNew(5), 7},
+					"2":      description.Value{dlit.MustNew(2), 7},
+					"2.8":    description.Value{dlit.MustNew(2.8), 6},
 				},
 				6,
 			},
-			"version": &fieldDescription{ftString, nil, nil, 0,
-				map[string]valueDescription{
-					"9.9":   valueDescription{dlit.MustNew("9.9"), 7},
-					"9.97":  valueDescription{dlit.MustNew("9.97"), 7},
-					"10":    valueDescription{dlit.MustNew("10"), 7},
-					"10.94": valueDescription{dlit.MustNew("10.94"), 7},
-					"9.9a":  valueDescription{dlit.MustNew("9.9a"), 6},
-					"9.9b":  valueDescription{dlit.MustNew("9.9b"), 1},
+			"version": &description.Field{fieldtype.String, nil, nil, 0,
+				map[string]description.Value{
+					"9.9":   description.Value{dlit.MustNew("9.9"), 7},
+					"9.97":  description.Value{dlit.MustNew("9.97"), 7},
+					"10":    description.Value{dlit.MustNew("10"), 7},
+					"10.94": description.Value{dlit.MustNew("10.94"), 7},
+					"9.9a":  description.Value{dlit.MustNew("9.9a"), 6},
+					"9.9b":  description.Value{dlit.MustNew("9.9b"), 1},
 				},
 				6,
 			},
-			"flow": &fieldDescription{
-				ftInt,
+			"flow": &description.Field{
+				fieldtype.Int,
 				dlit.MustNew(21),
 				dlit.MustNew(87),
 				0,
-				map[string]valueDescription{}, -1},
-			"score": &fieldDescription{
-				ftInt,
+				map[string]description.Value{}, -1},
+			"score": &description.Field{
+				fieldtype.Int,
 				dlit.MustNew(1),
 				dlit.MustNew(5),
 				0,
-				map[string]valueDescription{
-					"1": valueDescription{dlit.MustNew(1), 6},
-					"2": valueDescription{dlit.MustNew(2), 7},
-					"3": valueDescription{dlit.MustNew(3), 6},
-					"4": valueDescription{dlit.MustNew(4), 8},
-					"5": valueDescription{dlit.MustNew(5), 8},
+				map[string]description.Value{
+					"1": description.Value{dlit.MustNew(1), 6},
+					"2": description.Value{dlit.MustNew(2), 7},
+					"3": description.Value{dlit.MustNew(3), 6},
+					"4": description.Value{dlit.MustNew(4), 8},
+					"5": description.Value{dlit.MustNew(5), 8},
 				}, 5,
 			},
-			"method": &fieldDescription{ftIgnore, nil, nil, 0,
-				map[string]valueDescription{}, -1},
+			"method": &description.Field{fieldtype.Ignore, nil, nil, 0,
+				map[string]description.Value{}, -1},
 		}}
 	dataset := NewLiteralDataset(fieldNames, flowRecords)
 	d, err := DescribeDataset(dataset)
 	if err != nil {
 		t.Errorf("DescribeDataset(dataset) err: %s", err)
 	}
-	if err := checkDescriptionsEqual(d, expected); err != nil {
+	if err := d.CheckEqual(expected); err != nil {
 		t.Errorf("DescibeDataset(dataset) got not expected: %s", err)
 	}
 }

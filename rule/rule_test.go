@@ -1,6 +1,10 @@
 package rule
 
-import "testing"
+import (
+	"github.com/lawrencewoodman/dlit"
+	"github.com/vlifesystems/rhkit/internal"
+	"testing"
+)
 
 func TestInvalidRuleErrorError(t *testing.T) {
 	r := NewTrue()
@@ -67,6 +71,71 @@ func TestUniq(t *testing.T) {
 	for i, r := range want {
 		if got[i].String() != r.String() {
 			t.Fatalf("Sort - got: %v, want: %v", got, want)
+		}
+	}
+}
+
+// TODO: Expand this test
+func TestGeneratePoints(t *testing.T) {
+	cases := []struct {
+		value   *dlit.Literal
+		min     *dlit.Literal
+		max     *dlit.Literal
+		maxDP   int
+		stage   int
+		wantNum int
+	}{
+		{value: dlit.MustNew(5),
+			min:     dlit.MustNew(10),
+			max:     dlit.MustNew(10),
+			maxDP:   0,
+			stage:   1,
+			wantNum: 0,
+		},
+		{value: dlit.MustNew(5),
+			min:     dlit.MustNew(10),
+			max:     dlit.MustNew(10),
+			maxDP:   50,
+			stage:   1,
+			wantNum: 0,
+		},
+		{value: dlit.MustNew(800),
+			min:     dlit.MustNew(500),
+			max:     dlit.MustNew(1000),
+			maxDP:   0,
+			stage:   1,
+			wantNum: 18,
+		},
+		{value: dlit.MustNew(5),
+			min:     dlit.MustNew(1),
+			max:     dlit.MustNew(10),
+			maxDP:   0,
+			stage:   1,
+			wantNum: 2,
+		},
+		{value: dlit.MustNew(5),
+			min:     dlit.MustNew(1),
+			max:     dlit.MustNew(10),
+			maxDP:   3,
+			stage:   1,
+			wantNum: 18,
+		},
+	}
+	for _, c := range cases {
+		got := generatePoints(c.value, c.min, c.max, c.maxDP, c.stage)
+		if len(got) != c.wantNum {
+			t.Errorf("generatePoints(%s, %s, %s, %d, %d) got: %s, len(want): %d",
+				c.value, c.min, c.max, c.maxDP, c.stage, got, c.wantNum)
+		}
+		for _, v := range got {
+			// TODO: Extend this test of validity
+			if v.String() == c.value.String() ||
+				v.String() == c.min.String() ||
+				v.String() == c.max.String() ||
+				internal.NumDecPlaces(v.String()) > c.maxDP {
+				t.Errorf("generatePoints(%s, %s, %s, %d, %d) invalid point: %s",
+					c.value, c.min, c.max, c.maxDP, c.stage, v)
+			}
 		}
 	}
 }

@@ -2,6 +2,8 @@ package rule
 
 import (
 	"github.com/lawrencewoodman/dlit"
+	"github.com/vlifesystems/rhkit/description"
+	"github.com/vlifesystems/rhkit/internal/fieldtype"
 	"reflect"
 	"testing"
 )
@@ -138,6 +140,218 @@ func TestAddLEFOverlaps(t *testing.T) {
 		if got != c.want {
 			t.Errorf("Overlaps - ruleA: %s, ruleB: %s - got: %t, want: %t",
 				c.ruleA, c.ruleB, got, c.want)
+		}
+	}
+}
+
+func TestAddLEFTweak(t *testing.T) {
+	fieldA := "income"
+	fieldB := "balance"
+	value := int64(800)
+	rule := NewAddLEF(fieldA, fieldB, dlit.MustNew(value))
+	cases := []struct {
+		description *description.Description
+		stage       int
+		want        []Rule
+	}{
+		{description: &description.Description{
+			map[string]*description.Field{
+				"balance": &description.Field{
+					Kind: fieldtype.Int,
+					Min:  dlit.MustNew(250),
+					Max:  dlit.MustNew(500),
+				},
+				"income": &description.Field{
+					Kind: fieldtype.Int,
+					Min:  dlit.MustNew(250),
+					Max:  dlit.MustNew(500),
+				},
+			},
+		},
+			stage: 1,
+			want: []Rule{
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(755)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(760)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(765)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(770)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(775)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(780)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(785)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(790)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(795)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(805)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(810)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(815)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(820)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(825)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(830)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(835)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(840)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(845)),
+			},
+		},
+		{description: &description.Description{
+			map[string]*description.Field{
+				"balance": &description.Field{
+					Kind: fieldtype.Int,
+					Min:  dlit.MustNew(250),
+					Max:  dlit.MustNew(300),
+				},
+				"income": &description.Field{
+					Kind: fieldtype.Int,
+					Min:  dlit.MustNew(540),
+					Max:  dlit.MustNew(700),
+				},
+			},
+		},
+			stage: 1,
+			want: []Rule{
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(792)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(794)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(796)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(798)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(802)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(804)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(806)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(808)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(811)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(813)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(815)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(817)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(819)),
+			},
+		},
+		{description: &description.Description{
+			map[string]*description.Field{
+				"balance": &description.Field{
+					Kind: fieldtype.Int,
+					Min:  dlit.MustNew(200),
+					Max:  dlit.MustNew(300),
+				},
+				"income": &description.Field{
+					Kind: fieldtype.Int,
+					Min:  dlit.MustNew(300),
+					Max:  dlit.MustNew(510),
+				},
+			},
+		},
+			stage: 1,
+			want: []Rule{
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(772)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(775)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(778)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(781)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(785)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(788)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(791)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(794)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(797)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(803)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(806)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(809)),
+			},
+		},
+		{description: &description.Description{
+			map[string]*description.Field{
+				"balance": &description.Field{
+					Kind: fieldtype.Int,
+					Min:  dlit.MustNew(200),
+					Max:  dlit.MustNew(300),
+				},
+				"income": &description.Field{
+					Kind: fieldtype.Int,
+					Min:  dlit.MustNew(598),
+					Max:  dlit.MustNew(505),
+				},
+			},
+		},
+			stage: 1,
+			want: []Rule{
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(799)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(801)),
+			},
+		},
+		{description: &description.Description{
+			map[string]*description.Field{
+				"balance": &description.Field{
+					Kind:  fieldtype.Float,
+					Min:   dlit.MustNew(200),
+					Max:   dlit.MustNew(300),
+					MaxDP: 0,
+				},
+				"income": &description.Field{
+					Kind:  fieldtype.Float,
+					Min:   dlit.MustNew(597.924),
+					Max:   dlit.MustNew(505),
+					MaxDP: 3,
+				},
+			},
+		},
+			stage: 1,
+			want: []Rule{
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(799.292)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(799.363)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(799.434)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(799.505)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(799.575)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(799.646)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(799.717)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(799.788)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(799.858)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(799.929)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(800.071)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(800.142)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(800.212)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(800.283)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(800.354)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(800.425)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(800.495)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(800.566)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(800.637)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(800.708)),
+			},
+		},
+		{description: &description.Description{
+			map[string]*description.Field{
+				"balance": &description.Field{
+					Kind: fieldtype.Int,
+					Min:  dlit.MustNew(200),
+					Max:  dlit.MustNew(300),
+				},
+				"income": &description.Field{
+					Kind: fieldtype.Int,
+					Min:  dlit.MustNew(300),
+					Max:  dlit.MustNew(700),
+				},
+			},
+		},
+			stage: 2,
+			want: []Rule{
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(778)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(780)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(783)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(785)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(788)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(790)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(793)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(795)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(798)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(803)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(805)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(808)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(810)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(813)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(815)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(818)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(820)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(823)),
+			},
+		},
+	}
+	for i, c := range cases {
+		got := rule.Tweak(c.description, c.stage)
+		if err := checkRulesMatch(got, c.want); err != nil {
+			t.Errorf("Tweak(%d): %s, got: %s", i, err, got)
 		}
 	}
 }

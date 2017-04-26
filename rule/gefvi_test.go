@@ -2,6 +2,8 @@ package rule
 
 import (
 	"github.com/lawrencewoodman/dlit"
+	"github.com/vlifesystems/rhkit/description"
+	"github.com/vlifesystems/rhkit/internal/fieldtype"
 	"reflect"
 	"testing"
 )
@@ -83,13 +85,19 @@ func TestGEFVITweak(t *testing.T) {
 	value := int64(800)
 	rule := NewGEFVI(field, value)
 	cases := []struct {
-		min   *dlit.Literal
-		max   *dlit.Literal
-		stage int
-		want  []Rule
+		description *description.Description
+		stage       int
+		want        []Rule
 	}{
-		{min: dlit.MustNew(500),
-			max:   dlit.MustNew(1000),
+		{description: &description.Description{
+			map[string]*description.Field{
+				"income": &description.Field{
+					Kind: fieldtype.Int,
+					Min:  dlit.MustNew(500),
+					Max:  dlit.MustNew(1000),
+				},
+			},
+		},
 			stage: 1,
 			want: []Rule{
 				NewGEFVI(field, int64(755)),
@@ -112,8 +120,15 @@ func TestGEFVITweak(t *testing.T) {
 				NewGEFVI(field, int64(845)),
 			},
 		},
-		{min: dlit.MustNew(790),
-			max:   dlit.MustNew(1000),
+		{description: &description.Description{
+			map[string]*description.Field{
+				"income": &description.Field{
+					Kind: fieldtype.Int,
+					Min:  dlit.MustNew(790),
+					Max:  dlit.MustNew(1000),
+				},
+			},
+		},
 			stage: 1,
 			want: []Rule{
 				NewGEFVI(field, int64(791)),
@@ -133,8 +148,15 @@ func TestGEFVITweak(t *testing.T) {
 				NewGEFVI(field, int64(819)),
 			},
 		},
-		{min: dlit.MustNew(500),
-			max:   dlit.MustNew(810),
+		{description: &description.Description{
+			map[string]*description.Field{
+				"income": &description.Field{
+					Kind: fieldtype.Int,
+					Min:  dlit.MustNew(500),
+					Max:  dlit.MustNew(810),
+				},
+			},
+		},
 			stage: 1,
 			want: []Rule{
 				NewGEFVI(field, int64(772)),
@@ -152,13 +174,27 @@ func TestGEFVITweak(t *testing.T) {
 				NewGEFVI(field, int64(808)),
 			},
 		},
-		{min: dlit.MustNew(798),
-			max:   dlit.MustNew(805),
+		{description: &description.Description{
+			map[string]*description.Field{
+				"income": &description.Field{
+					Kind: fieldtype.Int,
+					Min:  dlit.MustNew(798),
+					Max:  dlit.MustNew(805),
+				},
+			},
+		},
 			stage: 1,
 			want:  []Rule{},
 		},
-		{min: dlit.MustNew(500),
-			max:   dlit.MustNew(1000),
+		{description: &description.Description{
+			map[string]*description.Field{
+				"income": &description.Field{
+					Kind: fieldtype.Int,
+					Min:  dlit.MustNew(500),
+					Max:  dlit.MustNew(1000),
+				},
+			},
+		},
 			stage: 2,
 			want: []Rule{
 				NewGEFVI(field, int64(777)),
@@ -189,7 +225,7 @@ func TestGEFVITweak(t *testing.T) {
 		},
 	}
 	for _, c := range cases {
-		got := rule.Tweak(c.min, c.max, 0, c.stage)
+		got := rule.Tweak(c.description, c.stage)
 		if err := checkRulesMatch(got, c.want); err != nil {
 			t.Errorf("Tweak: %s, got: %s", err, got)
 		}

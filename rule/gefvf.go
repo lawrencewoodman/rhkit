@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2016 vLife Systems Ltd <http://vlifesystems.com>
+	Copyright (C) 2016-2017 vLife Systems Ltd <http://vlifesystems.com>
 	This file is part of rhkit.
 
 	rhkit is free software: you can redistribute it and/or modify
@@ -21,7 +21,7 @@ package rule
 
 import (
 	"github.com/lawrencewoodman/ddataset"
-	"github.com/lawrencewoodman/dlit"
+	"github.com/vlifesystems/rhkit/description"
 	"strconv"
 )
 
@@ -58,14 +58,13 @@ func (r *GEFVF) IsTrue(record ddataset.Record) (bool, error) {
 }
 
 func (r *GEFVF) Tweak(
-	min *dlit.Literal,
-	max *dlit.Literal,
-	maxDP int,
+	inputDescription *description.Description,
 	stage int,
 ) []Rule {
 	rules := make([]Rule, 0)
-	minFloat, _ := min.Float()
-	maxFloat, _ := max.Float()
+	minFloat, _ := inputDescription.Fields[r.field].Min.Float()
+	maxFloat, _ := inputDescription.Fields[r.field].Max.Float()
+	maxDP := inputDescription.Fields[r.field].MaxDP
 	step := (maxFloat - minFloat) / (10 * float64(stage))
 	low := r.value - step
 	high := r.value + step

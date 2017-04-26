@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2016 vLife Systems Ltd <http://vlifesystems.com>
+	Copyright (C) 2016-2017 vLife Systems Ltd <http://vlifesystems.com>
 	This file is part of rhkit.
 
 	rhkit is free software: you can redistribute it and/or modify
@@ -22,7 +22,7 @@ package rule
 import (
 	"errors"
 	"github.com/lawrencewoodman/ddataset"
-	"github.com/lawrencewoodman/dlit"
+	"github.com/vlifesystems/rhkit/description"
 	"strconv"
 )
 
@@ -88,14 +88,12 @@ func (r *BetweenFVF) GetFields() []string {
 }
 
 func (r *BetweenFVF) Tweak(
-	min *dlit.Literal,
-	max *dlit.Literal,
-	maxDP int,
+	inputDescription *description.Description,
 	stage int,
 ) []Rule {
 	rules := make([]Rule, 0)
-	fdMinFloat, _ := min.Float()
-	fdMaxFloat, _ := max.Float()
+	fdMinFloat, _ := inputDescription.Fields[r.field].Min.Float()
+	fdMaxFloat, _ := inputDescription.Fields[r.field].Max.Float()
 	step := (fdMaxFloat - fdMinFloat) / (10.0 * float64(stage))
 	minLow := r.min - step
 	minHigh := r.min + step
