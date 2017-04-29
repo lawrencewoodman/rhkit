@@ -85,23 +85,20 @@ func (r *AddLEF) Tweak(
 	inputDescription *description.Description,
 	stage int,
 ) []Rule {
-	minExpr := dexpr.MustNew("aMin + bMin", dexprfuncs.CallFuncs)
-	maxExpr := dexpr.MustNew("aMax + bMax", dexprfuncs.CallFuncs)
 	vars := map[string]*dlit.Literal{
 		"aMin": inputDescription.Fields[r.fieldA].Min,
 		"bMin": inputDescription.Fields[r.fieldB].Min,
 		"aMax": inputDescription.Fields[r.fieldA].Max,
 		"bMax": inputDescription.Fields[r.fieldB].Max,
 	}
-	aMaxDP := inputDescription.Fields[r.fieldA].MaxDP
+	maxDP := inputDescription.Fields[r.fieldA].MaxDP
 	bMaxDP := inputDescription.Fields[r.fieldB].MaxDP
-	maxDP := aMaxDP
 	if bMaxDP > maxDP {
 		maxDP = bMaxDP
 	}
 	rules := make([]Rule, 0)
-	min := minExpr.Eval(vars)
-	max := maxExpr.Eval(vars)
+	min := dexpr.Eval("aMin + bMin", dexprfuncs.CallFuncs, vars)
+	max := dexpr.Eval("aMax + bMax", dexprfuncs.CallFuncs, vars)
 	points := generatePoints(r.value, min, max, maxDP, stage)
 	for _, p := range points {
 		r := NewAddLEF(r.fieldA, r.fieldB, p)

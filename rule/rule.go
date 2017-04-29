@@ -132,13 +132,20 @@ func generatePoints(
 	maxDP int,
 	stage int,
 ) []*dlit.Literal {
-	stepExpr := dexpr.MustNew(
-		"(max - min) / (10 * stage)",
-		dexprfuncs.CallFuncs,
-	)
-	lowExpr := dexpr.MustNew("value - step", dexprfuncs.CallFuncs)
-	highExpr := dexpr.MustNew("value + step", dexprfuncs.CallFuncs)
-	interStepExpr := dexpr.MustNew("step/10", dexprfuncs.CallFuncs)
+	points := make(map[string]*dlit.Literal)
+	vars := map[string]*dlit.Literal{
+		"min":   min,
+		"max":   max,
+		"maxDP": dlit.MustNew(maxDP),
+		"stage": dlit.MustNew(stage),
+		"value": value,
+	}
+	vars["step"] =
+		dexpr.Eval("(max - min) / (10 * stage)", dexprfuncs.CallFuncs, vars)
+	vars["low"] = dexpr.Eval("value - step", dexprfuncs.CallFuncs, vars)
+	vars["high"] = dexpr.Eval("value + step", dexprfuncs.CallFuncs, vars)
+	vars["interStep"] = dexpr.Eval("step/10", dexprfuncs.CallFuncs, vars)
+
 	nextNExpr := dexpr.MustNew("n + interStep", dexprfuncs.CallFuncs)
 	stopExpr := dexpr.MustNew("interStep <= 0 || n > high", dexprfuncs.CallFuncs)
 	roundExpr := dexpr.MustNew("roundto(n, maxDP)", dexprfuncs.CallFuncs)
@@ -147,52 +154,17 @@ func generatePoints(
 			"newValue > min && newValue < max",
 		dexprfuncs.CallFuncs,
 	)
-	points := make(map[string]*dlit.Literal)
-	varsStep := map[string]*dlit.Literal{
-		"min":   min,
-		"max":   max,
-		"stage": dlit.MustNew(stage),
-	}
-	step := stepExpr.Eval(varsStep)
-	varsHighLow := map[string]*dlit.Literal{
-		"value": value,
-		"step":  step,
-	}
-	low := lowExpr.Eval(varsHighLow)
-	high := highExpr.Eval(varsHighLow)
-	varsInterStep := map[string]*dlit.Literal{"step": step}
-	interStep := interStepExpr.Eval(varsInterStep)
-	n := lowExpr.Eval(varsHighLow)
+	vars["n"] = dexpr.Eval("value - step", dexprfuncs.CallFuncs, vars)
 	for {
-		varsStop := map[string]*dlit.Literal{
-			"interStep": interStep,
-			"n":         n,
-			"high":      high,
-		}
-		if stop, err := stopExpr.EvalBool(varsStop); stop || err != nil {
+		if stop, err := stopExpr.EvalBool(vars); stop || err != nil {
 			break
 		}
-		varsRound := map[string]*dlit.Literal{
-			"n":     n,
-			"maxDP": dlit.MustNew(maxDP),
-		}
-		v := roundExpr.Eval(varsRound)
-		varsIsValid := map[string]*dlit.Literal{
-			"min":      min,
-			"max":      max,
-			"low":      low,
-			"high":     high,
-			"value":    value,
-			"newValue": v,
-		}
-		if ok, err := isValidExpr.EvalBool(varsIsValid); ok && err == nil {
+		v := roundExpr.Eval(vars)
+		vars["newValue"] = v
+		if ok, err := isValidExpr.EvalBool(vars); ok && err == nil {
 			points[v.String()] = v
 		}
-		varsNextN := map[string]*dlit.Literal{
-			"n":         n,
-			"interStep": interStep,
-		}
-		n = nextNExpr.Eval(varsNextN)
+		vars["n"] = nextNExpr.Eval(vars)
 	}
 
 	r := make([]*dlit.Literal, len(points))
