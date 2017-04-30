@@ -158,6 +158,71 @@ func TestPow_errors(t *testing.T) {
 	}
 }
 
+func TestMin(t *testing.T) {
+	cases := []struct {
+		in   []*dlit.Literal
+		want *dlit.Literal
+	}{
+		{in: []*dlit.Literal{dlit.MustNew(16), dlit.MustNew(27)},
+			want: dlit.MustNew(16),
+		},
+		{in: []*dlit.Literal{dlit.MustNew(27), dlit.MustNew(16)},
+			want: dlit.MustNew(16),
+		},
+		{in: []*dlit.Literal{dlit.MustNew(27), dlit.MustNew(8), dlit.MustNew(17)},
+			want: dlit.MustNew(8),
+		},
+		{in: []*dlit.Literal{dlit.MustNew(27), dlit.MustNew(18), dlit.MustNew(17)},
+			want: dlit.MustNew(17),
+		},
+	}
+
+	for _, c := range cases {
+		got, err := min(c.in)
+		if err != nil {
+			t.Errorf("min(%v) err: %v", c.in, err)
+		}
+		if got.String() != c.want.String() {
+			t.Errorf("min(%v) got: %s, want: %s",
+				c.in, got, c.want)
+		}
+	}
+}
+
+func TestMax(t *testing.T) {
+	cases := []struct {
+		in   []*dlit.Literal
+		want *dlit.Literal
+	}{
+		{in: []*dlit.Literal{dlit.MustNew(16), dlit.MustNew(27)},
+			want: dlit.MustNew(27),
+		},
+		{in: []*dlit.Literal{dlit.MustNew(27), dlit.MustNew(16)},
+			want: dlit.MustNew(27),
+		},
+		{in: []*dlit.Literal{dlit.MustNew(17), dlit.MustNew(8), dlit.MustNew(27)},
+			want: dlit.MustNew(27),
+		},
+		{in: []*dlit.Literal{dlit.MustNew(27), dlit.MustNew(18), dlit.MustNew(17)},
+			want: dlit.MustNew(27),
+		},
+		{in: []*dlit.Literal{dlit.MustNew(18), dlit.MustNew(27), dlit.MustNew(17)},
+			want: dlit.MustNew(27),
+		},
+	}
+
+	for _, c := range cases {
+		got, err := max(c.in)
+		if err != nil {
+			t.Errorf("max(%v) err: %v", c.in, err)
+		}
+		if got.String() != c.want.String() {
+			t.Errorf("max(%v) got: %s, want: %s",
+				c.in, got, c.want)
+		}
+	}
+}
+
 /*************************
  *       Benchmarks
  *************************/

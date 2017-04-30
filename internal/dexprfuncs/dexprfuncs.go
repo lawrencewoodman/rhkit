@@ -28,13 +28,17 @@ import (
 	"math"
 )
 
-var CallFuncs = map[string]dexpr.CallFun{
-	"in":      in,
-	"ni":      ni,
-	"pow":     pow,
-	"roundto": roundTo,
-	"sqrt":    sqrt,
-	"true":    alwaysTrue,
+var CallFuncs = map[string]dexpr.CallFun{}
+
+func init() {
+	CallFuncs["in"] = in
+	CallFuncs["ni"] = ni
+	CallFuncs["min"] = min
+	CallFuncs["max"] = max
+	CallFuncs["pow"] = pow
+	CallFuncs["roundto"] = roundTo
+	CallFuncs["sqrt"] = sqrt
+	CallFuncs["true"] = alwaysTrue
 }
 
 var trueLiteral = dlit.MustNew(true)
@@ -169,6 +173,50 @@ func ni(args []*dlit.Literal) (*dlit.Literal, error) {
 		}
 	}
 	return trueLiteral, nil
+}
+
+// min returns the smallest number of those supplied
+func min(args []*dlit.Literal) (*dlit.Literal, error) {
+	if len(args) < 2 {
+		err := errors.New("too few arguments")
+		r := dlit.MustNew(err)
+		return r, err
+	}
+
+	min := args[0]
+	for _, v := range args[1:] {
+		vars := map[string]*dlit.Literal{"min": min, "v": v}
+		isSmaller, err := dexpr.EvalBool("v < min", CallFuncs, vars)
+		if err != nil {
+			return dlit.MustNew(err), err
+		}
+		if isSmaller {
+			min = v
+		}
+	}
+	return min, nil
+}
+
+// max returns the smallest number of those supplied
+func max(args []*dlit.Literal) (*dlit.Literal, error) {
+	if len(args) < 2 {
+		err := errors.New("too few arguments")
+		r := dlit.MustNew(err)
+		return r, err
+	}
+
+	max := args[0]
+	for _, v := range args[1:] {
+		vars := map[string]*dlit.Literal{"max": max, "v": v}
+		isBigger, err := dexpr.EvalBool("v > max", CallFuncs, vars)
+		if err != nil {
+			return dlit.MustNew(err), err
+		}
+		if isBigger {
+			max = v
+		}
+	}
+	return max, nil
 }
 
 // alwaysTrue returns true
