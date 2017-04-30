@@ -24,6 +24,7 @@ import (
 	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/description"
+	"github.com/vlifesystems/rhkit/internal"
 	"github.com/vlifesystems/rhkit/internal/dexprfuncs"
 	"github.com/vlifesystems/rhkit/internal/fieldtype"
 	"github.com/vlifesystems/rhkit/rule"
@@ -158,39 +159,35 @@ func generateIntRules(
 		return []rule.Rule{}
 	}
 	rulesMap := make(map[string]rule.Rule)
-	min, _ := fd.Min.Int()
-	max, _ := fd.Max.Int()
-	diff := max - min
-	step := diff / 20
-	if step == 0 {
-		step = 1
+	points := internal.GeneratePoints(fd.Min, fd.Max, fd.MaxDP)
+
+	for _, p := range points {
+		pInt, pIsInt := p.Int()
+		if !pIsInt {
+			continue
+		}
+		rL := rule.NewLEFVI(field, pInt)
+		rG := rule.NewGEFVI(field, pInt)
+		rulesMap[rL.String()] = rL
+		rulesMap[rG.String()] = rG
 	}
 
-	for i := step; i <= diff; i += step {
-		n := min + i
-		r := rule.NewLEFVI(field, n)
-		rulesMap[r.String()] = r
-	}
-
-	// i set to 0 to make more tweakable
-	for i := int64(0); i < diff; i += step {
-		n := min + i
-		r := rule.NewGEFVI(field, n)
-		rulesMap[r.String()] = r
-	}
-
-	// i set to 0 to make more tweakable
-	for i := int64(0); i < diff; i += step {
-		geN := min + i
-		for j := step; j <= diff; j += step {
-			leN := min + j
-			rB, err := rule.NewBetweenFVI(field, geN, leN)
-			if err == nil {
-				rulesMap[rB.String()] = rB
+	for iL, pL := range points {
+		for iH, pH := range points {
+			pLInt, pLIsInt := pL.Int()
+			pHInt, pHIsInt := pH.Int()
+			if !pLIsInt || !pHIsInt {
+				continue
 			}
-			rO, err := rule.NewOutsideFVI(field, leN, geN)
-			if err == nil {
-				rulesMap[rO.String()] = rO
+			if iH > iL {
+				rB, err := rule.NewBetweenFVI(field, pLInt, pHInt)
+				if err == nil {
+					rulesMap[rB.String()] = rB
+				}
+				rO, err := rule.NewOutsideFVI(field, pLInt, pHInt)
+				if err == nil {
+					rulesMap[rO.String()] = rO
+				}
 			}
 		}
 	}
@@ -214,41 +211,35 @@ func generateFloatRules(
 		return []rule.Rule{}
 	}
 	rulesMap := make(map[string]rule.Rule)
-	min, _ := fd.Min.Float()
-	max, _ := fd.Max.Float()
-	maxDP := fd.MaxDP
-	diff := max - min
-	step := diff / 20.0
+	points := internal.GeneratePoints(fd.Min, fd.Max, fd.MaxDP)
 
-	if step == 0 {
-		return []rule.Rule{}
+	for _, p := range points {
+		pFloat, pIsFloat := p.Float()
+		if !pIsFloat {
+			continue
+		}
+		rL := rule.NewLEFVF(field, pFloat)
+		rG := rule.NewGEFVF(field, pFloat)
+		rulesMap[rL.String()] = rL
+		rulesMap[rG.String()] = rG
 	}
 
-	for i := step; i <= diff; i += step {
-		n := truncateFloat(min+i, maxDP)
-		r := rule.NewLEFVF(field, n)
-		rulesMap[r.String()] = r
-	}
-
-	// i set to 0 to make more tweakable
-	for i := float64(0); i < diff; i += step {
-		n := truncateFloat(min+i, maxDP)
-		r := rule.NewGEFVF(field, n)
-		rulesMap[r.String()] = r
-	}
-
-	// i set to 0 to make more tweakable
-	for i := float64(0); i < diff; i += step {
-		geN := truncateFloat(min+i, maxDP)
-		for j := step; j <= diff; j += step {
-			leN := truncateFloat(min+j, maxDP)
-			rB, err := rule.NewBetweenFVF(field, geN, leN)
-			if err == nil {
-				rulesMap[rB.String()] = rB
+	for iL, pL := range points {
+		for iH, pH := range points {
+			pLFloat, pLIsFloat := pL.Float()
+			pHFloat, pHIsFloat := pH.Float()
+			if !pLIsFloat || !pHIsFloat {
+				continue
 			}
-			rO, err := rule.NewOutsideFVF(field, leN, geN)
-			if err == nil {
-				rulesMap[rO.String()] = rO
+			if iH > iL {
+				rB, err := rule.NewBetweenFVF(field, pLFloat, pHFloat)
+				if err == nil {
+					rulesMap[rB.String()] = rB
+				}
+				rO, err := rule.NewOutsideFVF(field, pLFloat, pHFloat)
+				if err == nil {
+					rulesMap[rO.String()] = rO
+				}
 			}
 		}
 	}
