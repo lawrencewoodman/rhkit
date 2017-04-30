@@ -127,44 +127,41 @@ func truncateFloat(f float64, maxDP int) float64 {
 	return nf
 }
 
-func generatePoints(
-	value, min, max *dlit.Literal,
-	maxDP int,
-	stage int,
-) []*dlit.Literal {
+func generatePoints(min, max *dlit.Literal, maxDP int) []*dlit.Literal {
 	points := make(map[string]*dlit.Literal)
 	vars := map[string]*dlit.Literal{
 		"min":   min,
 		"max":   max,
 		"maxDP": dlit.MustNew(maxDP),
-		"stage": dlit.MustNew(stage),
-		"value": value,
+		"n":     min,
 	}
-	vars["step"] =
-		dexpr.Eval("(max - min) / (10 * stage)", dexprfuncs.CallFuncs, vars)
-	vars["low"] = dexpr.Eval("value - step", dexprfuncs.CallFuncs, vars)
-	vars["high"] = dexpr.Eval("value + step", dexprfuncs.CallFuncs, vars)
-	vars["interStep"] = dexpr.Eval("step/10", dexprfuncs.CallFuncs, vars)
-
-	nextNExpr := dexpr.MustNew("n + interStep", dexprfuncs.CallFuncs)
-	stopExpr := dexpr.MustNew("interStep <= 0 || n > high", dexprfuncs.CallFuncs)
-	roundExpr := dexpr.MustNew("roundto(n, maxDP)", dexprfuncs.CallFuncs)
-	isValidExpr := dexpr.MustNew(
-		"newValue != value && newValue != low && newValue != high && "+
-			"newValue > min && newValue < max",
+	vars["diff"] = dexpr.Eval("max - min", dexprfuncs.CallFuncs, vars)
+	vars["step"] = dexpr.Eval(
+		"roundto(diff / 20, maxDP)",
 		dexprfuncs.CallFuncs,
+		vars,
 	)
-	vars["n"] = dexpr.Eval("value - step", dexprfuncs.CallFuncs, vars)
-	for {
-		if stop, err := stopExpr.EvalBool(vars); stop || err != nil {
-			break
-		}
-		v := roundExpr.Eval(vars)
-		vars["newValue"] = v
-		if ok, err := isValidExpr.EvalBool(vars); ok && err == nil {
-			points[v.String()] = v
-		}
+	if vars["step"].String() == "0" {
+		vars["step"] = dlit.MustNew(1)
+	}
+
+	nextNExpr := dexpr.MustNew("n + step", dexprfuncs.CallFuncs)
+	stopExpr := dexpr.MustNew("v >= max", dexprfuncs.CallFuncs)
+	roundExpr := dexpr.MustNew("roundto(n, dp)", dexprfuncs.CallFuncs)
+	stop := false
+	for !stop {
 		vars["n"] = nextNExpr.Eval(vars)
+		for dp := 0; dp <= maxDP; dp++ {
+			vars["dp"] = dlit.MustNew(dp)
+			v := roundExpr.Eval(vars)
+			vars["v"] = v
+			if shouldStop, err := stopExpr.EvalBool(vars); shouldStop || err != nil {
+				stop = true
+				break
+			} else {
+				points[v.String()] = v
+			}
+		}
 	}
 
 	r := make([]*dlit.Literal, len(points))
@@ -175,5 +172,41 @@ func generatePoints(
 	}
 
 	sort.Sort(byNumber(r))
+	return r
+}
+
+func generateTweakPoints(
+	value, min, max *dlit.Literal,
+	maxDP int,
+	stage int,
+) []*dlit.Literal {
+	matchValueExpr := dexpr.MustNew("value == p", dexprfuncs.CallFuncs)
+	vars := map[string]*dlit.Literal{
+		"min":   min,
+		"max":   max,
+		"maxDP": dlit.MustNew(maxDP),
+		"stage": dlit.MustNew(stage),
+		"value": value,
+	}
+	vars["step"] =
+		dexpr.Eval(
+			"roundto((max - min) / (10 * stage), maxDP)",
+			dexprfuncs.CallFuncs,
+			vars,
+		)
+	low := dexpr.Eval("max(min, value - step)", dexprfuncs.CallFuncs, vars)
+	high := dexpr.Eval("min(max, value + step)", dexprfuncs.CallFuncs, vars)
+	points := generatePoints(low, high, maxDP)
+	r := make([]*dlit.Literal, 0)
+	for _, p := range points {
+		vars["p"] = p
+		match, err := matchValueExpr.EvalBool(vars)
+		if err != nil {
+			return r
+		}
+		if !match {
+			r = append(r, p)
+		}
+	}
 	return r
 }

@@ -99,7 +99,7 @@ func (r *AddGEF) Tweak(
 	rules := make([]Rule, 0)
 	min := dexpr.Eval("aMin + bMin", dexprfuncs.CallFuncs, vars)
 	max := dexpr.Eval("aMax + bMax", dexprfuncs.CallFuncs, vars)
-	points := generatePoints(r.value, min, max, maxDP, stage)
+	points := generateTweakPoints(r.value, min, max, maxDP, stage)
 	for _, p := range points {
 		r := NewAddGEF(r.fieldA, r.fieldB, p)
 		rules = append(rules, r)

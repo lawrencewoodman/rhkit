@@ -1,8 +1,10 @@
 package rule
 
 import (
+	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/internal"
+	"github.com/vlifesystems/rhkit/internal/dexprfuncs"
 	"testing"
 )
 
@@ -76,7 +78,7 @@ func TestUniq(t *testing.T) {
 }
 
 // TODO: Expand this test
-func TestGeneratePoints(t *testing.T) {
+func TestGenerateTweakPoints(t *testing.T) {
 	cases := []struct {
 		value   *dlit.Literal
 		min     *dlit.Literal
@@ -111,6 +113,13 @@ func TestGeneratePoints(t *testing.T) {
 			max:     dlit.MustNew(10),
 			maxDP:   0,
 			stage:   1,
+			wantNum: 0,
+		},
+		{value: dlit.MustNew(10),
+			min:     dlit.MustNew(1),
+			max:     dlit.MustNew(20),
+			maxDP:   0,
+			stage:   1,
 			wantNum: 2,
 		},
 		{value: dlit.MustNew(5),
@@ -120,20 +129,43 @@ func TestGeneratePoints(t *testing.T) {
 			stage:   1,
 			wantNum: 18,
 		},
+		{value: dlit.MustNew(800),
+			min:     dlit.MustNew(790),
+			max:     dlit.MustNew(1000),
+			maxDP:   3,
+			stage:   1,
+			wantNum: 18,
+		},
+		{value: dlit.MustNew(990),
+			min:     dlit.MustNew(790),
+			max:     dlit.MustNew(1000),
+			maxDP:   3,
+			stage:   1,
+			wantNum: 18,
+		},
 	}
+	isValidExpr := dexpr.MustNew(
+		"v != value && v > min && v < max && vNumDecPlaces <= maxDP",
+		dexprfuncs.CallFuncs,
+	)
 	for _, c := range cases {
-		got := generatePoints(c.value, c.min, c.max, c.maxDP, c.stage)
-		if len(got) != c.wantNum {
-			t.Errorf("generatePoints(%s, %s, %s, %d, %d) got: %s, len(want): %d",
+		vars := map[string]*dlit.Literal{
+			"value": c.value,
+			"min":   c.min,
+			"max":   c.max,
+			"maxDP": dlit.MustNew(c.maxDP),
+		}
+		got := generateTweakPoints(c.value, c.min, c.max, c.maxDP, c.stage)
+		if len(got) < c.wantNum || len(got) > (c.wantNum+c.maxDP*c.wantNum) {
+			t.Errorf("generateTweakPoints(%s, %s, %s, %d, %d) got: %s, len(want): %d",
 				c.value, c.min, c.max, c.maxDP, c.stage, got, c.wantNum)
 		}
 		for _, v := range got {
+			vars["v"] = v
+			vars["vNumDecPlaces"] = dlit.MustNew(internal.NumDecPlaces(v.String()))
 			// TODO: Extend this test of validity
-			if v.String() == c.value.String() ||
-				v.String() == c.min.String() ||
-				v.String() == c.max.String() ||
-				internal.NumDecPlaces(v.String()) > c.maxDP {
-				t.Errorf("generatePoints(%s, %s, %s, %d, %d) invalid point: %s",
+			if isValid, err := isValidExpr.EvalBool(vars); !isValid || err != nil {
+				t.Errorf("generateTweakPoints(%s, %s, %s, %d, %d) invalid point: %s",
 					c.value, c.min, c.max, c.maxDP, c.stage, v)
 			}
 		}
