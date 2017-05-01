@@ -234,11 +234,11 @@ func TestMin_errors(t *testing.T) {
 		},
 	}
 
-	for i, c := range cases {
+	for _, c := range cases {
 		got, err := min(c.in)
 		checkErrorMatch(t, fmt.Sprintf("min(%v)", c.in), err, c.err)
 		if got.String() != c.want.String() {
-			t.Errorf("i: %d, min(%v) got: %s, want: %s", i, c.in, got, c.want)
+			t.Errorf("min(%v) got: %s, want: %s", c.in, got, c.want)
 		}
 	}
 }
