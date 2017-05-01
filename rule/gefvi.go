@@ -22,6 +22,7 @@ package rule
 import (
 	"fmt"
 	"github.com/lawrencewoodman/ddataset"
+	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/description"
 )
 
@@ -62,20 +63,20 @@ func (r *GEFVI) Tweak(
 	stage int,
 ) []Rule {
 	rules := make([]Rule, 0)
-	minInt, _ := inputDescription.Fields[r.field].Min.Int()
-	maxInt, _ := inputDescription.Fields[r.field].Max.Int()
-	step := (maxInt - minInt) / (10 * int64(stage))
-	low := r.value - step
-	high := r.value + step
-	interStep := (high - low) / 20
-	if interStep < 1 {
-		interStep = 1
-	}
-	for n := low; n <= high; n += interStep {
-		if n != r.value && n != low && n != high && n >= minInt && n <= maxInt {
-			r := NewGEFVI(r.field, n)
-			rules = append(rules, r)
+	points := generateTweakPoints(
+		dlit.MustNew(r.value),
+		inputDescription.Fields[r.field].Min,
+		inputDescription.Fields[r.field].Max,
+		inputDescription.Fields[r.field].MaxDP,
+		stage,
+	)
+	for _, p := range points {
+		pInt, pIsInt := p.Int()
+		if !pIsInt {
+			continue
 		}
+		r := NewGEFVI(r.field, pInt)
+		rules = append(rules, r)
 	}
 	return rules
 }
