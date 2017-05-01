@@ -21,6 +21,7 @@ package rule
 
 import (
 	"github.com/lawrencewoodman/ddataset"
+	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/description"
 	"strconv"
 )
@@ -66,19 +67,20 @@ func (r *LEFVF) Tweak(
 	stage int,
 ) []Rule {
 	rules := make([]Rule, 0)
-	minFloat, _ := inputDescription.Fields[r.field].Min.Float()
-	maxFloat, _ := inputDescription.Fields[r.field].Max.Float()
-	maxDP := inputDescription.Fields[r.field].MaxDP
-	step := (maxFloat - minFloat) / (10 * float64(stage))
-	low := r.value - step
-	high := r.value + step
-	interStep := (high - low) / 20
-	for n := low; n <= high; n += interStep {
-		v := truncateFloat(n, maxDP)
-		if v != r.value && v != low && v != high && v >= minFloat && v <= maxFloat {
-			r := NewLEFVF(r.field, truncateFloat(n, maxDP))
-			rules = append(rules, r)
+	points := generateTweakPoints(
+		dlit.MustNew(r.value),
+		inputDescription.Fields[r.field].Min,
+		inputDescription.Fields[r.field].Max,
+		inputDescription.Fields[r.field].MaxDP,
+		stage,
+	)
+	for _, p := range points {
+		pFloat, pIsFloat := p.Float()
+		if !pIsFloat {
+			continue
 		}
+		r := NewLEFVF(r.field, pFloat)
+		rules = append(rules, r)
 	}
 	return rules
 }

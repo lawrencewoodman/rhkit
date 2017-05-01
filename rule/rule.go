@@ -29,7 +29,6 @@ import (
 	"github.com/vlifesystems/rhkit/internal"
 	"github.com/vlifesystems/rhkit/internal/dexprfuncs"
 	"sort"
-	"strconv"
 	"strings"
 )
 
@@ -98,12 +97,6 @@ func (rs byString) Swap(i, j int) {
 }
 func (rs byString) Less(i, j int) bool {
 	return strings.Compare(rs[i].String(), rs[j].String()) == -1
-}
-
-func truncateFloat(f float64, maxDP int) float64 {
-	v := fmt.Sprintf("%.*f", maxDP, f)
-	nf, _ := strconv.ParseFloat(v, 64)
-	return nf
 }
 
 func generateTweakPoints(
