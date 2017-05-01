@@ -189,6 +189,60 @@ func TestMin(t *testing.T) {
 	}
 }
 
+func TestMin_errors(t *testing.T) {
+	cases := []struct {
+		in   []*dlit.Literal
+		want *dlit.Literal
+		err  error
+	}{
+		{in: []*dlit.Literal{},
+			want: dlit.MustNew(ErrTooFewArguments),
+			err:  ErrTooFewArguments,
+		},
+		{in: []*dlit.Literal{dlit.MustNew(23)},
+			want: dlit.MustNew(ErrTooFewArguments),
+			err:  ErrTooFewArguments,
+		},
+		{in: []*dlit.Literal{
+			dlit.MustNew(errThisIsAnError),
+			dlit.MustNew(errThisIsAnError),
+		},
+			want: dlit.MustNew(errThisIsAnError),
+			err:  errThisIsAnError,
+		},
+		{in: []*dlit.Literal{
+			dlit.MustNew(5),
+			dlit.MustNew(errThisIsAnError),
+		},
+			want: dlit.MustNew(errThisIsAnError),
+			err:  errThisIsAnError,
+		},
+		{in: []*dlit.Literal{
+			dlit.MustNew(errThisIsAnError),
+			dlit.MustNew(5),
+		},
+			want: dlit.MustNew(errThisIsAnError),
+			err:  errThisIsAnError,
+		},
+		{in: []*dlit.Literal{dlit.NewString("hello"), dlit.MustNew(4)},
+			want: dlit.MustNew(ErrIncompatibleTypes),
+			err:  ErrIncompatibleTypes,
+		},
+		{in: []*dlit.Literal{dlit.MustNew(4), dlit.NewString("hello")},
+			want: dlit.MustNew(ErrIncompatibleTypes),
+			err:  ErrIncompatibleTypes,
+		},
+	}
+
+	for i, c := range cases {
+		got, err := min(c.in)
+		checkErrorMatch(t, fmt.Sprintf("min(%v)", c.in), err, c.err)
+		if got.String() != c.want.String() {
+			t.Errorf("i: %d, min(%v) got: %s, want: %s", i, c.in, got, c.want)
+		}
+	}
+}
+
 func TestMax(t *testing.T) {
 	cases := []struct {
 		in   []*dlit.Literal
@@ -219,6 +273,60 @@ func TestMax(t *testing.T) {
 		if got.String() != c.want.String() {
 			t.Errorf("max(%v) got: %s, want: %s",
 				c.in, got, c.want)
+		}
+	}
+}
+
+func TestMax_errors(t *testing.T) {
+	cases := []struct {
+		in   []*dlit.Literal
+		want *dlit.Literal
+		err  error
+	}{
+		{in: []*dlit.Literal{},
+			want: dlit.MustNew(ErrTooFewArguments),
+			err:  ErrTooFewArguments,
+		},
+		{in: []*dlit.Literal{dlit.MustNew(23)},
+			want: dlit.MustNew(ErrTooFewArguments),
+			err:  ErrTooFewArguments,
+		},
+		{in: []*dlit.Literal{
+			dlit.MustNew(errThisIsAnError),
+			dlit.MustNew(errThisIsAnError),
+		},
+			want: dlit.MustNew(errThisIsAnError),
+			err:  errThisIsAnError,
+		},
+		{in: []*dlit.Literal{
+			dlit.MustNew(5),
+			dlit.MustNew(errThisIsAnError),
+		},
+			want: dlit.MustNew(errThisIsAnError),
+			err:  errThisIsAnError,
+		},
+		{in: []*dlit.Literal{
+			dlit.MustNew(errThisIsAnError),
+			dlit.MustNew(5),
+		},
+			want: dlit.MustNew(errThisIsAnError),
+			err:  errThisIsAnError,
+		},
+		{in: []*dlit.Literal{dlit.NewString("hello"), dlit.MustNew(4)},
+			want: dlit.MustNew(ErrIncompatibleTypes),
+			err:  ErrIncompatibleTypes,
+		},
+		{in: []*dlit.Literal{dlit.MustNew(4), dlit.NewString("hello")},
+			want: dlit.MustNew(ErrIncompatibleTypes),
+			err:  ErrIncompatibleTypes,
+		},
+	}
+
+	for i, c := range cases {
+		got, err := max(c.in)
+		checkErrorMatch(t, fmt.Sprintf("max(%v)", c.in), err, c.err)
+		if got.String() != c.want.String() {
+			t.Errorf("i: %d, max(%v) got: %s, want: %s", i, c.in, got, c.want)
 		}
 	}
 }

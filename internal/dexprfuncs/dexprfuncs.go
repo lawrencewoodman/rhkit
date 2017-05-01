@@ -49,6 +49,9 @@ type WrongNumOfArgsError struct {
 	Want int
 }
 
+var ErrTooFewArguments = errors.New("too few arguments")
+var ErrIncompatibleTypes = errors.New("incompatible types")
+
 func (e WrongNumOfArgsError) Error() string {
 	return fmt.Sprintf("wrong number of arguments got: %d, expected: %d",
 		e.Got, e.Want)
@@ -144,9 +147,8 @@ func roundTo(args []*dlit.Literal) (*dlit.Literal, error) {
 // in returns whether a string is in a slice strings
 func in(args []*dlit.Literal) (*dlit.Literal, error) {
 	if len(args) < 2 {
-		err := errors.New("too few arguments")
-		r := dlit.MustNew(err)
-		return r, err
+		r := dlit.MustNew(ErrTooFewArguments)
+		return r, ErrTooFewArguments
 	}
 	needle := args[0]
 	haystack := args[1:]
@@ -161,9 +163,8 @@ func in(args []*dlit.Literal) (*dlit.Literal, error) {
 // ni returns whether a string is not in a slice strings
 func ni(args []*dlit.Literal) (*dlit.Literal, error) {
 	if len(args) < 2 {
-		err := errors.New("too few arguments")
-		r := dlit.MustNew(err)
-		return r, err
+		r := dlit.MustNew(ErrTooFewArguments)
+		return r, ErrTooFewArguments
 	}
 	needle := args[0]
 	haystack := args[1:]
@@ -178,9 +179,8 @@ func ni(args []*dlit.Literal) (*dlit.Literal, error) {
 // min returns the smallest number of those supplied
 func min(args []*dlit.Literal) (*dlit.Literal, error) {
 	if len(args) < 2 {
-		err := errors.New("too few arguments")
-		r := dlit.MustNew(err)
-		return r, err
+		r := dlit.MustNew(ErrTooFewArguments)
+		return r, ErrTooFewArguments
 	}
 
 	min := args[0]
@@ -188,6 +188,12 @@ func min(args []*dlit.Literal) (*dlit.Literal, error) {
 		vars := map[string]*dlit.Literal{"min": min, "v": v}
 		isSmaller, err := dexpr.EvalBool("v < min", CallFuncs, vars)
 		if err != nil {
+			if x, ok := err.(dexpr.InvalidExprError); ok {
+				if x.Err == dexpr.ErrIncompatibleTypes {
+					return dlit.MustNew(ErrIncompatibleTypes), ErrIncompatibleTypes
+				}
+				return dlit.MustNew(x.Err), x.Err
+			}
 			return dlit.MustNew(err), err
 		}
 		if isSmaller {
@@ -200,9 +206,8 @@ func min(args []*dlit.Literal) (*dlit.Literal, error) {
 // max returns the smallest number of those supplied
 func max(args []*dlit.Literal) (*dlit.Literal, error) {
 	if len(args) < 2 {
-		err := errors.New("too few arguments")
-		r := dlit.MustNew(err)
-		return r, err
+		r := dlit.MustNew(ErrTooFewArguments)
+		return r, ErrTooFewArguments
 	}
 
 	max := args[0]
@@ -210,6 +215,12 @@ func max(args []*dlit.Literal) (*dlit.Literal, error) {
 		vars := map[string]*dlit.Literal{"max": max, "v": v}
 		isBigger, err := dexpr.EvalBool("v > max", CallFuncs, vars)
 		if err != nil {
+			if x, ok := err.(dexpr.InvalidExprError); ok {
+				if x.Err == dexpr.ErrIncompatibleTypes {
+					return dlit.MustNew(ErrIncompatibleTypes), ErrIncompatibleTypes
+				}
+				return dlit.MustNew(x.Err), x.Err
+			}
 			return dlit.MustNew(err), err
 		}
 		if isBigger {
