@@ -159,7 +159,7 @@ func TestBetweenFVITweak(t *testing.T) {
 
 	got := rule.Tweak(description, 1)
 	numGot := len(got)
-	if numGot < 300 {
+	if numGot < 150 {
 		t.Errorf("Tweak - got too few rules returned: %d", numGot)
 	}
 	uniqueRules := Uniq(got)
@@ -172,7 +172,7 @@ func TestBetweenFVITweak(t *testing.T) {
 		case *BetweenFVI:
 			minV := x.GetMin()
 			maxV := x.GetMax()
-			if minV <= fdMin || maxV >= fdMax || (minV == min && maxV == max) {
+			if minV <= fdMin || maxV >= fdMax || minV == min || maxV == max {
 				t.Errorf("Tweak - invalid rule: %s", r)
 			}
 		default:

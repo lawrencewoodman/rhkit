@@ -22,6 +22,7 @@ package rule
 import (
 	"errors"
 	"github.com/lawrencewoodman/ddataset"
+	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/description"
 	"strconv"
 )
@@ -92,34 +93,26 @@ func (r *BetweenFVF) Tweak(
 	stage int,
 ) []Rule {
 	rules := make([]Rule, 0)
-	fdMinFloat, _ := inputDescription.Fields[r.field].Min.Float()
-	fdMaxFloat, _ := inputDescription.Fields[r.field].Max.Float()
-	step := (fdMaxFloat - fdMinFloat) / (10.0 * float64(stage))
-	minLow := r.min - step
-	minHigh := r.min + step
-	minFloaterStep := (minHigh - minLow) / 20.0
-	if minFloaterStep < 1 {
-		minFloaterStep = 1
-	}
-	maxLow := r.max - step
-	maxHigh := r.max + step
-	maxFloaterStep := (maxHigh - maxLow) / 20.0
-	if maxFloaterStep < 1 {
-		maxFloaterStep = 1
-	}
-	for minN := minLow; minN <= minHigh; minN += minFloaterStep {
-		for maxN := maxLow; maxN <= maxHigh; maxN += maxFloaterStep {
-			if (minN != r.min || maxN != r.max) &&
-				minN != minLow &&
-				minN != minHigh &&
-				minN >= fdMinFloat &&
-				minN <= fdMaxFloat &&
-				maxN != minLow &&
-				maxN != minHigh &&
-				maxN >= fdMinFloat &&
-				maxN <= fdMaxFloat &&
-				minN < maxN {
-				r := MustNewBetweenFVF(r.field, minN, maxN)
+	pointsL := generateTweakPoints(
+		dlit.MustNew(r.min),
+		inputDescription.Fields[r.field].Min,
+		inputDescription.Fields[r.field].Max,
+		inputDescription.Fields[r.field].MaxDP,
+		stage,
+	)
+	pointsH := generateTweakPoints(
+		dlit.MustNew(r.max),
+		inputDescription.Fields[r.field].Min,
+		inputDescription.Fields[r.field].Max,
+		inputDescription.Fields[r.field].MaxDP,
+		stage,
+	)
+	for iL, pL := range pointsL {
+		for iH, pH := range pointsH {
+			pLFloat, pLIsFloat := pL.Float()
+			pHFloat, pHIsFloat := pH.Float()
+			if pLIsFloat && pHIsFloat && iH > iL {
+				r := MustNewBetweenFVF(r.field, pLFloat, pHFloat)
 				rules = append(rules, r)
 			}
 		}

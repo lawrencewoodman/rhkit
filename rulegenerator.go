@@ -219,10 +219,7 @@ func generateFloatRules(
 		for iH, pH := range points {
 			pLFloat, pLIsFloat := pL.Float()
 			pHFloat, pHIsFloat := pH.Float()
-			if !pLIsFloat || !pHIsFloat {
-				continue
-			}
-			if iH > iL {
+			if pLIsFloat && pHIsFloat && iH > iL {
 				rB, err := rule.NewBetweenFVF(field, pLFloat, pHFloat)
 				if err == nil {
 					rulesMap[rB.String()] = rB

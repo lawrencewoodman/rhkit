@@ -22,6 +22,7 @@ package rule
 import (
 	"errors"
 	"github.com/lawrencewoodman/ddataset"
+	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/description"
 	"strconv"
 )
@@ -92,34 +93,26 @@ func (r *OutsideFVF) Tweak(
 	stage int,
 ) []Rule {
 	rules := make([]Rule, 0)
-	fdMinFloat, _ := inputDescription.Fields[r.field].Min.Float()
-	fdMaxFloat, _ := inputDescription.Fields[r.field].Max.Float()
-	step := (fdMaxFloat - fdMinFloat) / (10.0 * float64(stage))
-	lowLow := r.low - step
-	lowHigh := r.low + step
-	minFloaterStep := (lowHigh - lowLow) / 20.0
-	if minFloaterStep < 1 {
-		minFloaterStep = 1
-	}
-	highLow := r.high - step
-	highHigh := r.high + step
-	maxFloaterStep := (highHigh - highLow) / 20.0
-	if maxFloaterStep < 1 {
-		maxFloaterStep = 1
-	}
-	for minN := lowLow; minN <= lowHigh; minN += minFloaterStep {
-		for maxN := highLow; maxN <= highHigh; maxN += maxFloaterStep {
-			if (minN != r.low || maxN != r.high) &&
-				minN != lowLow &&
-				minN != lowHigh &&
-				minN >= fdMinFloat &&
-				minN <= fdMaxFloat &&
-				maxN != lowLow &&
-				maxN != lowHigh &&
-				maxN >= fdMinFloat &&
-				maxN <= fdMaxFloat &&
-				minN < maxN {
-				r := MustNewOutsideFVF(r.field, minN, maxN)
+	pointsL := generateTweakPoints(
+		dlit.MustNew(r.low),
+		inputDescription.Fields[r.field].Min,
+		inputDescription.Fields[r.field].Max,
+		inputDescription.Fields[r.field].MaxDP,
+		stage,
+	)
+	pointsH := generateTweakPoints(
+		dlit.MustNew(r.high),
+		inputDescription.Fields[r.field].Min,
+		inputDescription.Fields[r.field].Max,
+		inputDescription.Fields[r.field].MaxDP,
+		stage,
+	)
+	for iL, pL := range pointsL {
+		for iH, pH := range pointsH {
+			pLFloat, pLIsFloat := pL.Float()
+			pHFloat, pHIsFloat := pH.Float()
+			if pLIsFloat && pHIsFloat && iH > iL {
+				r := MustNewOutsideFVF(r.field, pLFloat, pHFloat)
 				rules = append(rules, r)
 			}
 		}

@@ -158,7 +158,7 @@ func TestOutsideFVITweak(t *testing.T) {
 	}
 	got := rule.Tweak(description, 1)
 	numGot := len(got)
-	if numGot < 300 {
+	if numGot < 150 {
 		t.Errorf("Tweak - got too few rules returned: %d", numGot)
 	}
 	uniqueRules := Uniq(got)
@@ -171,7 +171,7 @@ func TestOutsideFVITweak(t *testing.T) {
 		case *OutsideFVI:
 			lowV := x.GetLow()
 			highV := x.GetHigh()
-			if lowV <= fdMin || highV >= fdMax || (lowV == low && highV == high) {
+			if lowV <= fdMin || highV >= fdMax || lowV == low || highV == high {
 				t.Errorf("Tweak - invalid rule: %s", r)
 			}
 		default:

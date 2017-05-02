@@ -17,7 +17,7 @@ func TestTweakRules_1(t *testing.T) {
 				fieldtype.Int, dlit.MustNew(3), dlit.MustNew(40), 0,
 				map[string]description.Value{}, 0},
 			"age": &description.Field{
-				fieldtype.Int, dlit.MustNew(4), dlit.MustNew(30), 0,
+				fieldtype.Int, dlit.MustNew(4), dlit.MustNew(90), 0,
 				map[string]description.Value{}, 0},
 			"flow": &description.Field{
 				fieldtype.Float, dlit.MustNew(50), dlit.MustNew(400), 2,
@@ -29,7 +29,7 @@ func TestTweakRules_1(t *testing.T) {
 		rule.NewGTFF("band", "team"),
 		rule.NewGEFVI("age", 7),
 		rule.NewGEFVI("age", 8),
-		rule.MustNewBetweenFVI("age", 21, 29),
+		rule.MustNewBetweenFVI("age", 21, 39),
 		rule.NewGEFVF("flow", 60.7),
 		rule.NewGEFVF("flow", 70.20),
 		rule.NewGEFVF("flow", 100.5),

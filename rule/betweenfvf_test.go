@@ -155,15 +155,16 @@ func TestBetweenFVFTweak(t *testing.T) {
 	description := &description.Description{
 		map[string]*description.Field{
 			"income": &description.Field{
-				Kind: fieldtype.Float,
-				Min:  dlit.MustNew(fdMin),
-				Max:  dlit.MustNew(fdMax),
+				Kind:  fieldtype.Float,
+				Min:   dlit.MustNew(fdMin),
+				Max:   dlit.MustNew(fdMax),
+				MaxDP: 2,
 			},
 		},
 	}
 	got := rule.Tweak(description, 1)
 	numGot := len(got)
-	if numGot < 300 {
+	if numGot < 150 {
 		t.Errorf("Tweak - got too few rules returned: %d", numGot)
 	}
 	uniqueRules := Uniq(got)
@@ -176,7 +177,7 @@ func TestBetweenFVFTweak(t *testing.T) {
 		case *BetweenFVF:
 			minV := x.GetMin()
 			maxV := x.GetMax()
-			if minV <= fdMin || maxV >= fdMax || (minV == min && maxV == max) {
+			if minV <= fdMin || maxV >= fdMax || minV == min || maxV == max {
 				t.Errorf("Tweak - invalid rule: %s", r)
 			}
 		default:

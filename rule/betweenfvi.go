@@ -22,6 +22,7 @@ package rule
 import (
 	"fmt"
 	"github.com/lawrencewoodman/ddataset"
+	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/description"
 )
 
@@ -88,34 +89,26 @@ func (r *BetweenFVI) Tweak(
 	stage int,
 ) []Rule {
 	rules := make([]Rule, 0)
-	fdMinInt, _ := inputDescription.Fields[r.field].Min.Int()
-	fdMaxInt, _ := inputDescription.Fields[r.field].Max.Int()
-	step := (fdMaxInt - fdMinInt) / (10 * int64(stage))
-	minLow := r.min - step
-	minHigh := r.min + step
-	minInterStep := (minHigh - minLow) / 20
-	if minInterStep < 1 {
-		minInterStep = 1
-	}
-	maxLow := r.max - step
-	maxHigh := r.max + step
-	maxInterStep := (maxHigh - maxLow) / 20
-	if maxInterStep < 1 {
-		maxInterStep = 1
-	}
-	for minN := minLow; minN <= minHigh; minN += minInterStep {
-		for maxN := maxLow; maxN <= maxHigh; maxN += maxInterStep {
-			if (minN != r.min || maxN != r.max) &&
-				minN != minLow &&
-				minN != minHigh &&
-				minN >= fdMinInt &&
-				minN <= fdMaxInt &&
-				maxN != minLow &&
-				maxN != minHigh &&
-				maxN >= fdMinInt &&
-				maxN <= fdMaxInt &&
-				minN < maxN {
-				r := MustNewBetweenFVI(r.field, minN, maxN)
+	pointsL := generateTweakPoints(
+		dlit.MustNew(r.min),
+		inputDescription.Fields[r.field].Min,
+		inputDescription.Fields[r.field].Max,
+		inputDescription.Fields[r.field].MaxDP,
+		stage,
+	)
+	pointsH := generateTweakPoints(
+		dlit.MustNew(r.max),
+		inputDescription.Fields[r.field].Min,
+		inputDescription.Fields[r.field].Max,
+		inputDescription.Fields[r.field].MaxDP,
+		stage,
+	)
+	for iL, pL := range pointsL {
+		for iH, pH := range pointsH {
+			pLInt, pLIsInt := pL.Int()
+			pHInt, pHIsInt := pH.Int()
+			if pLIsInt && pHIsInt && iH > iL {
+				r := MustNewBetweenFVI(r.field, pLInt, pHInt)
 				rules = append(rules, r)
 			}
 		}
