@@ -323,57 +323,35 @@ func generateAddRules(
 	if !isNumberField(fd) {
 		return []rule.Rule{}
 	}
-	diffExpr := dexpr.MustNew(
-		"(max + oMax) - (min + oMin)",
-		dexprfuncs.CallFuncs,
-	)
 	fieldNum := calcFieldNum(inputDescription.Fields, field)
-	rulesMap := make(map[string]rule.Rule)
+	rules := make([]rule.Rule, 0)
 
 	for oField, oFd := range inputDescription.Fields {
 		oFieldNum := calcFieldNum(inputDescription.Fields, oField)
 		if fieldNum < oFieldNum && isNumberField(oFd) &&
 			stringInSlice(oField, ruleFields) {
 			vars := map[string]*dlit.Literal{
-				"max":  fd.Max,
-				"oMax": oFd.Max,
 				"min":  fd.Min,
+				"max":  fd.Max,
 				"oMin": oFd.Min,
+				"oMax": oFd.Max,
 			}
-			diffL := diffExpr.Eval(vars)
-			diff, ok := diffL.Float()
-			if !ok {
-				continue
-			}
-
-			step := diff / 20.0
-			if step <= 0 {
-				continue
-			}
+			min := dexpr.Eval("min + oMin", dexprfuncs.CallFuncs, vars)
+			max := dexpr.Eval("max + oMax", dexprfuncs.CallFuncs, vars)
 			maxDP := fd.MaxDP
-			oMaxDP := oFd.MaxDP
-			if oMaxDP > maxDP {
-				maxDP = oMaxDP
+			if oFd.MaxDP > maxDP {
+				maxDP = oFd.MaxDP
 			}
-
-			min, _ := fd.Min.Float()
-			oMin, _ := oFd.Min.Float()
-			for i := step; i <= diff; i += step {
-				n := truncateFloat(min+oMin+i, maxDP)
-				r := rule.NewAddLEF(field, oField, dlit.MustNew(n))
-				rulesMap[r.String()] = r
-			}
-
-			// i set to 0 to make more tweakable
-			for i := float64(0); i < diff; i += step {
-				n := truncateFloat(min+oMin+i, maxDP)
-				r := rule.NewAddGEF(field, oField, dlit.MustNew(n))
-				rulesMap[r.String()] = r
+			points := internal.GeneratePoints(min, max, maxDP)
+			for _, p := range points {
+				rL := rule.NewAddLEF(field, oField, p)
+				rG := rule.NewAddGEF(field, oField, p)
+				rules = append(rules, rL)
+				rules = append(rules, rG)
 			}
 		}
 	}
-
-	return rulesMapToArray(rulesMap)
+	return rules
 }
 
 func calcNumSharedValues(
