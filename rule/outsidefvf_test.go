@@ -142,40 +142,65 @@ func TestOutsideFVFGetFields(t *testing.T) {
 
 func TestOutsideFVFTweak(t *testing.T) {
 	field := "income"
-	low := float64(800)
-	high := float64(1000)
-	rule := MustNewOutsideFVF(field, low, high)
-	fdMin := float64(500)
-	fdMax := float64(2000)
-	description := &description.Description{
-		map[string]*description.Field{
-			"income": &description.Field{
-				Kind: fieldtype.Float,
-				Min:  dlit.MustNew(fdMin),
-				Max:  dlit.MustNew(fdMax),
-			},
+	cases := []struct {
+		fdMin   float64
+		fdMax   float64
+		fdMaxDP int
+		low     float64
+		high    float64
+		wantNum int
+	}{
+		{fdMin: float64(500),
+			fdMax:   float64(2000),
+			fdMaxDP: 2,
+			low:     float64(800),
+			high:    float64(1000),
+			wantNum: 150,
+		},
+		{fdMin: float64(18),
+			fdMax:   float64(95),
+			fdMaxDP: 0,
+			low:     float64(22),
+			high:    float64(26),
+			wantNum: 80,
 		},
 	}
-	got := rule.Tweak(description, 1)
-	numGot := len(got)
-	if numGot < 150 {
-		t.Errorf("Tweak - got too few rules returned: %d", numGot)
-	}
-	uniqueRules := Uniq(got)
-	if len(uniqueRules) != numGot {
-		t.Errorf("Tweak - num uniqueRules: %d != num got: %d",
-			len(uniqueRules), numGot)
-	}
-	for _, r := range got {
-		switch x := r.(type) {
-		case *OutsideFVF:
-			lowV := x.GetLow()
-			highV := x.GetHigh()
-			if lowV <= fdMin || highV >= fdMax || lowV == low || highV == high {
+	for _, c := range cases {
+		description := &description.Description{
+			map[string]*description.Field{
+				"income": &description.Field{
+					Kind:  fieldtype.Float,
+					Min:   dlit.MustNew(c.fdMin),
+					Max:   dlit.MustNew(c.fdMax),
+					MaxDP: c.fdMaxDP,
+				},
+			},
+		}
+		rule := MustNewOutsideFVF(field, c.low, c.high)
+		got := rule.Tweak(description, 1)
+		numGot := len(got)
+		if numGot < c.wantNum {
+			t.Errorf("Tweak - got too few rules returned: %d, got: %v", numGot, got)
+		}
+		uniqueRules := Uniq(got)
+		if len(uniqueRules) != numGot {
+			t.Errorf("Tweak - num uniqueRules: %d != num got: %d",
+				len(uniqueRules), numGot)
+		}
+		for _, r := range got {
+			switch x := r.(type) {
+			case *OutsideFVF:
+				lowV := x.GetLow()
+				highV := x.GetHigh()
+				if lowV <= c.fdMin ||
+					highV >= c.fdMax ||
+					lowV == c.low ||
+					highV == c.high {
+					t.Errorf("Tweak - invalid rule: %s", r)
+				}
+			default:
 				t.Errorf("Tweak - invalid rule: %s", r)
 			}
-		default:
-			t.Errorf("Tweak - invalid rule: %s", r)
 		}
 	}
 }

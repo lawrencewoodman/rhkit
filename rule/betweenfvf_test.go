@@ -147,41 +147,62 @@ func TestBetweenFVFGetFields(t *testing.T) {
 
 func TestBetweenFVFTweak(t *testing.T) {
 	field := "income"
-	min := float64(800)
-	max := float64(1000)
-	rule := MustNewBetweenFVF(field, min, max)
-	fdMin := float64(500)
-	fdMax := float64(2000)
-	description := &description.Description{
-		map[string]*description.Field{
-			"income": &description.Field{
-				Kind:  fieldtype.Float,
-				Min:   dlit.MustNew(fdMin),
-				Max:   dlit.MustNew(fdMax),
-				MaxDP: 2,
-			},
+	cases := []struct {
+		fdMin   float64
+		fdMax   float64
+		min     float64
+		max     float64
+		wantNum int
+	}{
+		{fdMin: float64(500),
+			fdMax:   float64(2000),
+			min:     float64(800),
+			max:     float64(1000),
+			wantNum: 150,
+		},
+		{fdMin: float64(18),
+			fdMax:   float64(95),
+			min:     float64(22),
+			max:     float64(26),
+			wantNum: 150,
 		},
 	}
-	got := rule.Tweak(description, 1)
-	numGot := len(got)
-	if numGot < 150 {
-		t.Errorf("Tweak - got too few rules returned: %d", numGot)
-	}
-	uniqueRules := Uniq(got)
-	if len(uniqueRules) != numGot {
-		t.Errorf("Tweak - num uniqueRules: %d != num got: %d",
-			len(uniqueRules), numGot)
-	}
-	for _, r := range got {
-		switch x := r.(type) {
-		case *BetweenFVF:
-			minV := x.GetMin()
-			maxV := x.GetMax()
-			if minV <= fdMin || maxV >= fdMax || minV == min || maxV == max {
+	for _, c := range cases {
+		description := &description.Description{
+			map[string]*description.Field{
+				"income": &description.Field{
+					Kind:  fieldtype.Float,
+					Min:   dlit.MustNew(c.fdMin),
+					Max:   dlit.MustNew(c.fdMax),
+					MaxDP: 2,
+				},
+			},
+		}
+		rule := MustNewBetweenFVF(field, c.min, c.max)
+		got := rule.Tweak(description, 1)
+		numGot := len(got)
+		if numGot < c.wantNum {
+			t.Errorf("Tweak - got too few rules returned: %d", numGot)
+		}
+		uniqueRules := Uniq(got)
+		if len(uniqueRules) != numGot {
+			t.Errorf("Tweak - num uniqueRules: %d != num got: %d",
+				len(uniqueRules), numGot)
+		}
+		for _, r := range got {
+			switch x := r.(type) {
+			case *BetweenFVF:
+				minV := x.GetMin()
+				maxV := x.GetMax()
+				if minV <= c.fdMin ||
+					maxV >= c.fdMax ||
+					minV == c.min ||
+					maxV == c.max {
+					t.Errorf("Tweak - invalid rule: %s", r)
+				}
+			default:
 				t.Errorf("Tweak - invalid rule: %s", r)
 			}
-		default:
-			t.Errorf("Tweak - invalid rule: %s", r)
 		}
 	}
 }

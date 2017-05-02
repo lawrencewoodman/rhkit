@@ -22,8 +22,10 @@ package rule
 import (
 	"fmt"
 	"github.com/lawrencewoodman/ddataset"
+	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/description"
+	"github.com/vlifesystems/rhkit/internal/dexprfuncs"
 )
 
 // OutsideFVI represents a rule determining if:
@@ -104,11 +106,17 @@ func (r *OutsideFVI) Tweak(
 		inputDescription.Fields[r.field].MaxDP,
 		stage,
 	)
-	for iL, pL := range pointsL {
-		for iH, pH := range pointsH {
+	isValidExpr := dexpr.MustNew("pH > pL", dexprfuncs.CallFuncs)
+	for _, pL := range pointsL {
+		for _, pH := range pointsH {
+			vars := map[string]*dlit.Literal{
+				"pL": pL,
+				"pH": pH,
+			}
 			pLInt, pLIsInt := pL.Int()
 			pHInt, pHIsInt := pH.Int()
-			if pLIsInt && pHIsInt && iH > iL {
+			isValid, err := isValidExpr.EvalBool(vars)
+			if pLIsInt && pHIsInt && err == nil && isValid {
 				r := MustNewOutsideFVI(r.field, pLInt, pHInt)
 				rules = append(rules, r)
 			}
