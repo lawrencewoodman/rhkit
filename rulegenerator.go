@@ -29,7 +29,6 @@ import (
 	"github.com/vlifesystems/rhkit/internal/fieldtype"
 	"github.com/vlifesystems/rhkit/rule"
 	"sort"
-	"strconv"
 	"strings"
 )
 
@@ -116,7 +115,6 @@ func generateValueRules(
 			rulesMap[neRule.String()] = neRule
 		}
 	case fieldtype.Float:
-		maxDP := fd.MaxDP
 		for _, vd := range values {
 			if vd.Num < 2 {
 				continue
@@ -125,9 +123,8 @@ func generateValueRules(
 			if !isFloat {
 				panic(fmt.Sprintf("value isn't float: %s", vd.Value))
 			}
-			tn := truncateFloat(n, maxDP)
-			eqRule := rule.NewEQFVF(field, tn)
-			neRule := rule.NewNEFVF(field, tn)
+			eqRule := rule.NewEQFVF(field, n)
+			neRule := rule.NewNEFVF(field, n)
 			rulesMap[eqRule.String()] = eqRule
 			rulesMap[neRule.String()] = neRule
 		}
@@ -193,12 +190,6 @@ func generateIntRules(
 	}
 
 	return rulesMapToArray(rulesMap)
-}
-
-func truncateFloat(f float64, maxDP int) float64 {
-	v := fmt.Sprintf("%.*f", maxDP, f)
-	nf, _ := strconv.ParseFloat(v, 64)
-	return nf
 }
 
 func generateFloatRules(
