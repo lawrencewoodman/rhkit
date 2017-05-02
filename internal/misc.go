@@ -37,6 +37,7 @@ func NumDecPlaces(s string) int {
 }
 
 func GeneratePoints(min, max *dlit.Literal, maxDP int) []*dlit.Literal {
+	const reduceDPBy = 4
 	points := make(map[string]*dlit.Literal)
 	vars := map[string]*dlit.Literal{
 		"min":   min,
@@ -53,6 +54,10 @@ func GeneratePoints(min, max *dlit.Literal, maxDP int) []*dlit.Literal {
 	if vars["step"].String() == "0" {
 		vars["step"] = dlit.MustNew(1)
 	}
+	minDP := 0
+	if maxDP > reduceDPBy {
+		minDP = maxDP - reduceDPBy
+	}
 
 	nextNExpr := dexpr.MustNew("n + step", dexprfuncs.CallFuncs)
 	stopExpr := dexpr.MustNew("v >= max", dexprfuncs.CallFuncs)
@@ -60,7 +65,7 @@ func GeneratePoints(min, max *dlit.Literal, maxDP int) []*dlit.Literal {
 	stop := false
 	for !stop {
 		vars["n"] = nextNExpr.Eval(vars)
-		for dp := 0; dp <= maxDP; dp++ {
+		for dp := minDP; dp <= maxDP; dp++ {
 			vars["dp"] = dlit.MustNew(dp)
 			v := roundExpr.Eval(vars)
 			vars["v"] = v
