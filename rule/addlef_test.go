@@ -341,6 +341,8 @@ func TestAddLEFTweak(t *testing.T) {
 				NewAddLEF(fieldA, fieldB, dlit.MustNew(800.43)),
 				NewAddLEF(fieldA, fieldB, dlit.MustNew(800.499)),
 				NewAddLEF(fieldA, fieldB, dlit.MustNew(800.5)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(800.57)),
+				NewAddLEF(fieldA, fieldB, dlit.MustNew(800.6)),
 			},
 		},
 		{description: &description.Description{

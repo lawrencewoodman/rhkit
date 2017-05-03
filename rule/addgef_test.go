@@ -341,6 +341,8 @@ func TestAddGEFTweak(t *testing.T) {
 				NewAddGEF(fieldA, fieldB, dlit.MustNew(800.43)),
 				NewAddGEF(fieldA, fieldB, dlit.MustNew(800.499)),
 				NewAddGEF(fieldA, fieldB, dlit.MustNew(800.5)),
+				NewAddGEF(fieldA, fieldB, dlit.MustNew(800.57)),
+				NewAddGEF(fieldA, fieldB, dlit.MustNew(800.6)),
 			},
 		},
 		{description: &description.Description{
