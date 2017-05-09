@@ -222,8 +222,9 @@ func TestLEFVITweak(t *testing.T) {
 			},
 		},
 	}
+	complexity := 10
 	for _, c := range cases {
-		got := rule.Tweak(c.description, c.stage)
+		got := rule.Tweak(c.description, complexity, c.stage)
 		if err := checkRulesMatch(got, c.want); err != nil {
 			t.Errorf("Tweak: %s, got: %s", err, got)
 		}

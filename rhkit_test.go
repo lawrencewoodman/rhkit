@@ -67,7 +67,12 @@ func processDataset(experiment *experiment.Experiment) error {
 		return fmt.Errorf("describer.DescribeDataset(experiment.dataset) - err: %s",
 			err)
 	}
-	rules := rhkit.GenerateRules(fieldDescriptions, experiment.RuleFieldNames)
+	complexity := 5
+	rules := rhkit.GenerateRules(
+		fieldDescriptions,
+		experiment.RuleFieldNames,
+		complexity,
+	)
 	if len(rules) < 2 {
 		return fmt.Errorf(
 			"rhkit.GenerateRules(%v, %v) - not enough rules generated",
@@ -86,7 +91,12 @@ func processDataset(experiment *experiment.Experiment) error {
 	assessment.Refine()
 	sortedRules := assessment.GetRules()
 
-	tweakableRules := rhkit.TweakRules(1, sortedRules, fieldDescriptions)
+	tweakableRules := rhkit.TweakRules(
+		complexity,
+		1,
+		sortedRules,
+		fieldDescriptions,
+	)
 	if len(tweakableRules) < 2 {
 		return fmt.Errorf("rhkit.TweakRules(sortedRules, %v) - not enough rules generated",
 

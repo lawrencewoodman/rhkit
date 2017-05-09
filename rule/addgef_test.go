@@ -380,8 +380,9 @@ func TestAddGEFTweak(t *testing.T) {
 			},
 		},
 	}
+	complexity := 10
 	for i, c := range cases {
-		got := rule.Tweak(c.description, c.stage)
+		got := rule.Tweak(c.description, complexity, c.stage)
 		if err := checkRulesMatch(got, c.want); err != nil {
 			t.Errorf("Tweak(%d): %s, got: %s", i, err, got)
 		}

@@ -111,8 +111,8 @@ func TestGenerateRules_1(t *testing.T) {
 		rule.NewAddLEF("level", "position", dlit.MustNew(12)),
 		rule.NewAddGEF("level", "position", dlit.MustNew(12)),
 	}
-
-	got := GenerateRules(inputDescription, ruleFields)
+	complexity := 10
+	got := GenerateRules(inputDescription, ruleFields, complexity)
 	if err := rulesContain(got, wantRules); err != nil {
 		t.Errorf("Test: %s\n", testPurpose)
 		t.Errorf("GenerateRules: %s", err)
@@ -143,10 +143,11 @@ func TestGenerateRules_2(t *testing.T) {
 			},
 		}}
 	ruleFields := []string{"team", "teamOut"}
-	rules := GenerateRules(inputDescription, ruleFields)
+	complexity := 10
+	got := GenerateRules(inputDescription, ruleFields, complexity)
 
 	trueRuleFound := false
-	for _, r := range rules {
+	for _, r := range got {
 		if _, isTrueRule := r.(rule.True); isTrueRule {
 			trueRuleFound = true
 			break
@@ -227,7 +228,8 @@ func TestGenerateRules_3(t *testing.T) {
 		rule.NewTrue(),
 	}
 
-	got := GenerateRules(inputDescription, ruleFields)
+	complexity := 10
+	got := GenerateRules(inputDescription, ruleFields, complexity)
 	rule.Sort(got)
 	rule.Sort(want)
 	if err := matchRulesUnordered(got, want); err != nil {
@@ -270,7 +272,8 @@ func TestGenerateIntRules(t *testing.T) {
 		rule.NewGEFVI("flow", 19),
 	}
 
-	got := generateIntRules(inputDescription, ruleFields, "flow")
+	complexity := 10
+	got := generateIntRules(inputDescription, ruleFields, complexity, "flow")
 	if err := rulesContain(got, wantRules); err != nil {
 		t.Errorf("GenerateIntRules: %s, got: %s", err, got)
 	}
@@ -301,10 +304,211 @@ func TestGenerateFloatRules(t *testing.T) {
 	}
 	ruleFields := []string{"flow", "flowConstant"}
 	cases := []struct {
-		field string
-		want  []rule.Rule
+		field        string
+		complexities []int
+		want         []rule.Rule
 	}{
 		{field: "flow",
+			complexities: []int{1, 2},
+			want: []rule.Rule{
+				rule.NewLEFVF("flow", 1),
+				rule.NewLEFVF("flow", 1.06),
+				rule.MustNewOr(rule.NewLEFVF("flow", 1.06), rule.NewGEFVF("flow", 2)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 1.06), rule.NewGEFVF("flow", 2.12)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 1.06), rule.NewGEFVF("flow", 3)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 1.06), rule.NewGEFVF("flow", 3.18)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 1.06), rule.NewGEFVF("flow", 4)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 1.06), rule.NewGEFVF("flow", 4.24)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 1.06), rule.NewGEFVF("flow", 5)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 1.06), rule.NewGEFVF("flow", 5.3)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 1.06), rule.NewGEFVF("flow", 6)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 1.06), rule.NewGEFVF("flow", 6.36)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 1.06), rule.NewGEFVF("flow", 7)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 1.06), rule.NewGEFVF("flow", 7.42)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 1.06), rule.NewGEFVF("flow", 8)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 1.06), rule.NewGEFVF("flow", 8.48)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 1.06), rule.NewGEFVF("flow", 9)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 1.06), rule.NewGEFVF("flow", 9.01)),
+				rule.NewLEFVF("flow", 2.12),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 2.12), rule.NewGEFVF("flow", 1.06)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 2.12), rule.NewGEFVF("flow", 3.18)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 2.12), rule.NewGEFVF("flow", 4.24)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 2.12), rule.NewGEFVF("flow", 5.3)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 2.12), rule.NewGEFVF("flow", 6.36)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 2.12), rule.NewGEFVF("flow", 7.42)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 2.12), rule.NewGEFVF("flow", 8.48)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 2.12), rule.NewGEFVF("flow", 9.01)),
+				rule.NewLEFVF("flow", 3.18),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 3.18), rule.NewGEFVF("flow", 1.06)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 3.18), rule.NewGEFVF("flow", 2.12)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 3.18), rule.NewGEFVF("flow", 4.24)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 3.18), rule.NewGEFVF("flow", 5.3)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 3.18), rule.NewGEFVF("flow", 6.36)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 3.18), rule.NewGEFVF("flow", 7.42)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 3.18), rule.NewGEFVF("flow", 8.48)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 3.18), rule.NewGEFVF("flow", 9.01)),
+				rule.NewLEFVF("flow", 4.24),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 4.24), rule.NewGEFVF("flow", 1.06)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 4.24), rule.NewGEFVF("flow", 2.12)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 4.24), rule.NewGEFVF("flow", 3.18)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 4.24), rule.NewGEFVF("flow", 5.3)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 4.24), rule.NewGEFVF("flow", 6.36)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 4.24), rule.NewGEFVF("flow", 7.42)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 4.24), rule.NewGEFVF("flow", 8.48)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 4.24), rule.NewGEFVF("flow", 9.01)),
+				rule.NewLEFVF("flow", 5.3),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 5.3), rule.NewGEFVF("flow", 1.06)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 5.3), rule.NewGEFVF("flow", 2.12)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 5.3), rule.NewGEFVF("flow", 3.18)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 5.3), rule.NewGEFVF("flow", 4.24)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 5.3), rule.NewGEFVF("flow", 6.36)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 5.3), rule.NewGEFVF("flow", 7.42)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 5.3), rule.NewGEFVF("flow", 8.48)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 5.3), rule.NewGEFVF("flow", 9.01)),
+				rule.NewLEFVF("flow", 6.36),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 6.36), rule.NewGEFVF("flow", 1.06)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 6.36), rule.NewGEFVF("flow", 2.12)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 6.36), rule.NewGEFVF("flow", 3.18)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 6.36), rule.NewGEFVF("flow", 4.24)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 6.36), rule.NewGEFVF("flow", 5.3)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 6.36), rule.NewGEFVF("flow", 7.42)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 6.36), rule.NewGEFVF("flow", 8.48)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 6.36), rule.NewGEFVF("flow", 9.01)),
+				rule.NewLEFVF("flow", 7.42),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 7.42), rule.NewGEFVF("flow", 1.06)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 7.42), rule.NewGEFVF("flow", 2.12)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 7.42), rule.NewGEFVF("flow", 3.18)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 7.42), rule.NewGEFVF("flow", 4.24)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 7.42), rule.NewGEFVF("flow", 5.3)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 7.42), rule.NewGEFVF("flow", 6.36)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 7.42), rule.NewGEFVF("flow", 8.48)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 7.42), rule.NewGEFVF("flow", 9.01)),
+				rule.NewLEFVF("flow", 8.48),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 8.48), rule.NewGEFVF("flow", 1.06)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 8.48), rule.NewGEFVF("flow", 2.12)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 8.48), rule.NewGEFVF("flow", 3.18)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 8.48), rule.NewGEFVF("flow", 4.24)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 8.48), rule.NewGEFVF("flow", 5.3)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 8.48), rule.NewGEFVF("flow", 6.36)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 8.48), rule.NewGEFVF("flow", 7.42)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 8.48), rule.NewGEFVF("flow", 9.01)),
+				rule.NewLEFVF("flow", 9.54),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 9.54), rule.NewGEFVF("flow", 1.06)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 9.54), rule.NewGEFVF("flow", 2.12)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 9.54), rule.NewGEFVF("flow", 3.18)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 9.54), rule.NewGEFVF("flow", 4.24)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 9.54), rule.NewGEFVF("flow", 5.3)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 9.54), rule.NewGEFVF("flow", 6.36)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 9.54), rule.NewGEFVF("flow", 7.42)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 9.54), rule.NewGEFVF("flow", 8.48)),
+				rule.NewGEFVF("flow", 1.06),
+				rule.NewGEFVF("flow", 2.12),
+				rule.NewGEFVF("flow", 3.18),
+				rule.NewGEFVF("flow", 4.24),
+				rule.NewGEFVF("flow", 5.3),
+				rule.NewGEFVF("flow", 6.36),
+				rule.NewGEFVF("flow", 7.42),
+				rule.NewGEFVF("flow", 8.48),
+				rule.NewGEFVF("flow", 9.01),
+			},
+		},
+		{field: "flow",
+			complexities: []int{3, 4},
+			want: []rule.Rule{
+				rule.NewLEFVF("flow", 1.1),
+				rule.MustNewOr(rule.NewLEFVF("flow", 1.1), rule.NewGEFVF("flow", 2.1)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 1.1), rule.NewGEFVF("flow", 3.18)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 1.1), rule.NewGEFVF("flow", 4.2)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 1.1), rule.NewGEFVF("flow", 5.8)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 1.1), rule.NewGEFVF("flow", 6.36)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 1.1), rule.NewGEFVF("flow", 7.4)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 1.1), rule.NewGEFVF("flow", 8.48)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 1.1), rule.NewGEFVF("flow", 9.54)),
+				rule.NewLEFVF("flow", 2.1),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 2.1), rule.NewGEFVF("flow", 1.1)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 2.1), rule.NewGEFVF("flow", 3.18)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 2.1), rule.NewGEFVF("flow", 4.2)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 2.1), rule.NewGEFVF("flow", 5.8)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 2.1), rule.NewGEFVF("flow", 6.36)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 2.1), rule.NewGEFVF("flow", 7.4)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 2.1), rule.NewGEFVF("flow", 8.48)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 2.1), rule.NewGEFVF("flow", 9.54)),
+				rule.NewLEFVF("flow", 3.18),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 3.18), rule.NewGEFVF("flow", 1.1)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 3.18), rule.NewGEFVF("flow", 2.1)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 3.18), rule.NewGEFVF("flow", 4.2)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 3.18), rule.NewGEFVF("flow", 5.8)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 3.18), rule.NewGEFVF("flow", 6.36)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 3.18), rule.NewGEFVF("flow", 7.4)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 3.18), rule.NewGEFVF("flow", 8.48)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 3.18), rule.NewGEFVF("flow", 9.54)),
+				rule.NewLEFVF("flow", 4.2),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 4.2), rule.NewGEFVF("flow", 1.1)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 4.2), rule.NewGEFVF("flow", 2.1)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 4.2), rule.NewGEFVF("flow", 3.18)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 4.2), rule.NewGEFVF("flow", 5.8)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 4.2), rule.NewGEFVF("flow", 6.36)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 4.2), rule.NewGEFVF("flow", 7.4)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 4.2), rule.NewGEFVF("flow", 8.48)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 4.2), rule.NewGEFVF("flow", 9.54)),
+				rule.NewLEFVF("flow", 5.8),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 5.8), rule.NewGEFVF("flow", 1.1)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 5.8), rule.NewGEFVF("flow", 2.1)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 5.8), rule.NewGEFVF("flow", 3.18)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 5.8), rule.NewGEFVF("flow", 4.2)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 5.8), rule.NewGEFVF("flow", 6.36)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 5.8), rule.NewGEFVF("flow", 7.4)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 5.8), rule.NewGEFVF("flow", 8.48)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 5.8), rule.NewGEFVF("flow", 9.54)),
+				rule.NewLEFVF("flow", 6.36),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 6.36), rule.NewGEFVF("flow", 1.1)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 6.36), rule.NewGEFVF("flow", 2.1)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 6.36), rule.NewGEFVF("flow", 3.18)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 6.36), rule.NewGEFVF("flow", 4.2)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 6.36), rule.NewGEFVF("flow", 5.8)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 6.36), rule.NewGEFVF("flow", 7.4)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 6.36), rule.NewGEFVF("flow", 8.48)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 6.36), rule.NewGEFVF("flow", 9.54)),
+				rule.NewLEFVF("flow", 7.4),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 7.4), rule.NewGEFVF("flow", 1.1)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 7.4), rule.NewGEFVF("flow", 2.1)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 7.4), rule.NewGEFVF("flow", 3.18)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 7.4), rule.NewGEFVF("flow", 4.2)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 7.4), rule.NewGEFVF("flow", 5.8)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 7.4), rule.NewGEFVF("flow", 6.36)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 7.4), rule.NewGEFVF("flow", 8.48)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 7.4), rule.NewGEFVF("flow", 9.54)),
+				rule.NewLEFVF("flow", 8.48),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 8.48), rule.NewGEFVF("flow", 1.1)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 8.48), rule.NewGEFVF("flow", 2.1)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 8.48), rule.NewGEFVF("flow", 3.18)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 8.48), rule.NewGEFVF("flow", 4.2)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 8.48), rule.NewGEFVF("flow", 5.8)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 8.48), rule.NewGEFVF("flow", 6.36)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 8.48), rule.NewGEFVF("flow", 7.4)),
+				rule.MustNewOr(rule.NewLEFVF("flow", 8.48), rule.NewGEFVF("flow", 9.54)),
+				rule.NewLEFVF("flow", 9.54),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 9.54), rule.NewGEFVF("flow", 1.1)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 9.54), rule.NewGEFVF("flow", 2.1)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 9.54), rule.NewGEFVF("flow", 3.18)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 9.54), rule.NewGEFVF("flow", 4.2)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 9.54), rule.NewGEFVF("flow", 5.8)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 9.54), rule.NewGEFVF("flow", 6.36)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 9.54), rule.NewGEFVF("flow", 7.4)),
+				rule.MustNewAnd(rule.NewLEFVF("flow", 9.54), rule.NewGEFVF("flow", 8.48)),
+				rule.NewGEFVF("flow", 1.1),
+				rule.NewGEFVF("flow", 2.1),
+				rule.NewGEFVF("flow", 3.18),
+				rule.NewGEFVF("flow", 4.2),
+				rule.NewGEFVF("flow", 5.8),
+				rule.NewGEFVF("flow", 6.36),
+				rule.NewGEFVF("flow", 7.4),
+				rule.NewGEFVF("flow", 8.48),
+				rule.NewGEFVF("flow", 9.54),
+			},
+		},
+		{field: "flow",
+			complexities: []int{5, 6, 7, 8, 9, 10},
 			want: []rule.Rule{
 				rule.NewLEFVF("flow", 1.1),
 				rule.MustNewOr(rule.NewLEFVF("flow", 1.1), rule.NewGEFVF("flow", 2.1)),
@@ -402,15 +606,18 @@ func TestGenerateFloatRules(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		got := generateFloatRules(inputDescription, ruleFields, c.field)
-		if err := rulesContain(got, c.want); err != nil {
-			t.Errorf("GenerateFloatRules: %s - got: %v", err, got)
-		}
-		if len(got) < len(c.want) {
-			t.Errorf(
-				"GenerateFloatRules: There should be more rules generated for field: %s, got: %d",
-				c.field, len(got),
-			)
+		for _, complexity := range c.complexities {
+			got :=
+				generateFloatRules(inputDescription, ruleFields, complexity, c.field)
+			if err := rulesContain(got, c.want); err != nil {
+				t.Errorf("GenerateFloatRules: %s - got: %v", err, got)
+			}
+			if len(got) < len(c.want) {
+				t.Errorf(
+					"GenerateFloatRules: There should be more rules generated for field: %s, got: %d",
+					c.field, len(got),
+				)
+			}
 		}
 	}
 }
@@ -449,10 +656,203 @@ func TestGenerateAddRules(t *testing.T) {
 		},
 	}
 	cases := []struct {
-		field string
-		want  []rule.Rule
+		field        string
+		complexities []int
+		want         []rule.Rule
 	}{
 		{field: "flowIn",
+			complexities: []int{1, 2},
+			want:         []rule.Rule{},
+		},
+		{field: "flowIn",
+			complexities: []int{3, 4},
+			want: []rule.Rule{
+				rule.NewAddLEF("flowIn", "flowOut", dlit.MustNew(1.93)),
+				rule.NewAddLEF("flowIn", "flowOut", dlit.MustNew(10)),
+				rule.NewAddLEF("flowIn", "flowOut", dlit.MustNew(10.69)),
+				rule.NewAddLEF("flowIn", "flowOut", dlit.MustNew(11)),
+				rule.NewAddLEF("flowIn", "flowOut", dlit.MustNew(11.42)),
+				rule.NewAddLEF("flowIn", "flowOut", dlit.MustNew(12)),
+				rule.NewAddLEF("flowIn", "flowOut", dlit.MustNew(12.15)),
+				rule.NewAddLEF("flowIn", "flowOut", dlit.MustNew(12.88)),
+				rule.NewAddLEF("flowIn", "flowOut", dlit.MustNew(13)),
+				rule.NewAddLEF("flowIn", "flowOut", dlit.MustNew(13.61)),
+				rule.NewAddLEF("flowIn", "flowOut", dlit.MustNew(14)),
+				rule.NewAddLEF("flowIn", "flowOut", dlit.MustNew(14.34)),
+				rule.NewAddLEF("flowIn", "flowOut", dlit.MustNew(15)),
+				rule.NewAddLEF("flowIn", "flowOut", dlit.MustNew(15.07)),
+				rule.NewAddLEF("flowIn", "flowOut", dlit.MustNew(2)),
+				rule.NewAddLEF("flowIn", "flowOut", dlit.MustNew(2.66)),
+				rule.NewAddLEF("flowIn", "flowOut", dlit.MustNew(3)),
+				rule.NewAddLEF("flowIn", "flowOut", dlit.MustNew(3.39)),
+				rule.NewAddLEF("flowIn", "flowOut", dlit.MustNew(4)),
+				rule.NewAddLEF("flowIn", "flowOut", dlit.MustNew(4.12)),
+				rule.NewAddLEF("flowIn", "flowOut", dlit.MustNew(4.85)),
+				rule.NewAddLEF("flowIn", "flowOut", dlit.MustNew(5)),
+				rule.NewAddLEF("flowIn", "flowOut", dlit.MustNew(5.58)),
+				rule.NewAddLEF("flowIn", "flowOut", dlit.MustNew(6)),
+				rule.NewAddLEF("flowIn", "flowOut", dlit.MustNew(6.31)),
+				rule.NewAddLEF("flowIn", "flowOut", dlit.MustNew(7)),
+				rule.NewAddLEF("flowIn", "flowOut", dlit.MustNew(7.04)),
+				rule.NewAddLEF("flowIn", "flowOut", dlit.MustNew(7.77)),
+				rule.NewAddLEF("flowIn", "flowOut", dlit.MustNew(8)),
+				rule.NewAddLEF("flowIn", "flowOut", dlit.MustNew(8.5)),
+				rule.NewAddLEF("flowIn", "flowOut", dlit.MustNew(9)),
+				rule.NewAddLEF("flowIn", "flowOut", dlit.MustNew(9.23)),
+				rule.NewAddLEF("flowIn", "flowOut", dlit.MustNew(9.96)),
+				rule.NewAddGEF("flowIn", "flowOut", dlit.MustNew(1.93)),
+				rule.NewAddGEF("flowIn", "flowOut", dlit.MustNew(10)),
+				rule.NewAddGEF("flowIn", "flowOut", dlit.MustNew(10.69)),
+				rule.NewAddGEF("flowIn", "flowOut", dlit.MustNew(11)),
+				rule.NewAddGEF("flowIn", "flowOut", dlit.MustNew(11.42)),
+				rule.NewAddGEF("flowIn", "flowOut", dlit.MustNew(12)),
+				rule.NewAddGEF("flowIn", "flowOut", dlit.MustNew(12.15)),
+				rule.NewAddGEF("flowIn", "flowOut", dlit.MustNew(12.88)),
+				rule.NewAddGEF("flowIn", "flowOut", dlit.MustNew(13)),
+				rule.NewAddGEF("flowIn", "flowOut", dlit.MustNew(13.61)),
+				rule.NewAddGEF("flowIn", "flowOut", dlit.MustNew(14)),
+				rule.NewAddGEF("flowIn", "flowOut", dlit.MustNew(14.34)),
+				rule.NewAddGEF("flowIn", "flowOut", dlit.MustNew(15)),
+				rule.NewAddGEF("flowIn", "flowOut", dlit.MustNew(15.07)),
+				rule.NewAddGEF("flowIn", "flowOut", dlit.MustNew(2)),
+				rule.NewAddGEF("flowIn", "flowOut", dlit.MustNew(2.66)),
+				rule.NewAddGEF("flowIn", "flowOut", dlit.MustNew(3)),
+				rule.NewAddGEF("flowIn", "flowOut", dlit.MustNew(3.39)),
+				rule.NewAddGEF("flowIn", "flowOut", dlit.MustNew(4)),
+				rule.NewAddGEF("flowIn", "flowOut", dlit.MustNew(4.12)),
+				rule.NewAddGEF("flowIn", "flowOut", dlit.MustNew(4.85)),
+				rule.NewAddGEF("flowIn", "flowOut", dlit.MustNew(5)),
+				rule.NewAddGEF("flowIn", "flowOut", dlit.MustNew(5.58)),
+				rule.NewAddGEF("flowIn", "flowOut", dlit.MustNew(6)),
+				rule.NewAddGEF("flowIn", "flowOut", dlit.MustNew(6.31)),
+				rule.NewAddGEF("flowIn", "flowOut", dlit.MustNew(7)),
+				rule.NewAddGEF("flowIn", "flowOut", dlit.MustNew(7.04)),
+				rule.NewAddGEF("flowIn", "flowOut", dlit.MustNew(7.77)),
+				rule.NewAddGEF("flowIn", "flowOut", dlit.MustNew(8)),
+				rule.NewAddGEF("flowIn", "flowOut", dlit.MustNew(8.5)),
+				rule.NewAddGEF("flowIn", "flowOut", dlit.MustNew(9)),
+				rule.NewAddGEF("flowIn", "flowOut", dlit.MustNew(9.23)),
+				rule.NewAddGEF("flowIn", "flowOut", dlit.MustNew(9.96)),
+				rule.NewAddLEF("flowIn", "flowSideA", dlit.MustNew(10)),
+				rule.NewAddLEF("flowIn", "flowSideA", dlit.MustNew(10.15)),
+				rule.NewAddLEF("flowIn", "flowSideA", dlit.MustNew(10.68)),
+				rule.NewAddLEF("flowIn", "flowSideA", dlit.MustNew(11)),
+				rule.NewAddLEF("flowIn", "flowSideA", dlit.MustNew(11.21)),
+				rule.NewAddLEF("flowIn", "flowSideA", dlit.MustNew(11.74)),
+				rule.NewAddLEF("flowIn", "flowSideA", dlit.MustNew(12)),
+				rule.NewAddLEF("flowIn", "flowSideA", dlit.MustNew(12.27)),
+				rule.NewAddLEF("flowIn", "flowSideA", dlit.MustNew(2.73)),
+				rule.NewAddLEF("flowIn", "flowSideA", dlit.MustNew(3)),
+				rule.NewAddLEF("flowIn", "flowSideA", dlit.MustNew(3.26)),
+				rule.NewAddLEF("flowIn", "flowSideA", dlit.MustNew(3.79)),
+				rule.NewAddLEF("flowIn", "flowSideA", dlit.MustNew(4)),
+				rule.NewAddLEF("flowIn", "flowSideA", dlit.MustNew(4.32)),
+				rule.NewAddLEF("flowIn", "flowSideA", dlit.MustNew(4.85)),
+				rule.NewAddLEF("flowIn", "flowSideA", dlit.MustNew(5)),
+				rule.NewAddLEF("flowIn", "flowSideA", dlit.MustNew(5.38)),
+				rule.NewAddLEF("flowIn", "flowSideA", dlit.MustNew(5.91)),
+				rule.NewAddLEF("flowIn", "flowSideA", dlit.MustNew(6)),
+				rule.NewAddLEF("flowIn", "flowSideA", dlit.MustNew(6.44)),
+				rule.NewAddLEF("flowIn", "flowSideA", dlit.MustNew(6.97)),
+				rule.NewAddLEF("flowIn", "flowSideA", dlit.MustNew(7)),
+				rule.NewAddLEF("flowIn", "flowSideA", dlit.MustNew(7.5)),
+				rule.NewAddLEF("flowIn", "flowSideA", dlit.MustNew(8)),
+				rule.NewAddLEF("flowIn", "flowSideA", dlit.MustNew(8.03)),
+				rule.NewAddLEF("flowIn", "flowSideA", dlit.MustNew(8.56)),
+				rule.NewAddLEF("flowIn", "flowSideA", dlit.MustNew(9)),
+				rule.NewAddLEF("flowIn", "flowSideA", dlit.MustNew(9.09)),
+				rule.NewAddLEF("flowIn", "flowSideA", dlit.MustNew(9.62)),
+				rule.NewAddGEF("flowIn", "flowSideA", dlit.MustNew(10)),
+				rule.NewAddGEF("flowIn", "flowSideA", dlit.MustNew(10.15)),
+				rule.NewAddGEF("flowIn", "flowSideA", dlit.MustNew(10.68)),
+				rule.NewAddGEF("flowIn", "flowSideA", dlit.MustNew(11)),
+				rule.NewAddGEF("flowIn", "flowSideA", dlit.MustNew(11.21)),
+				rule.NewAddGEF("flowIn", "flowSideA", dlit.MustNew(11.74)),
+				rule.NewAddGEF("flowIn", "flowSideA", dlit.MustNew(12)),
+				rule.NewAddGEF("flowIn", "flowSideA", dlit.MustNew(12.27)),
+				rule.NewAddGEF("flowIn", "flowSideA", dlit.MustNew(2.73)),
+				rule.NewAddGEF("flowIn", "flowSideA", dlit.MustNew(3)),
+				rule.NewAddGEF("flowIn", "flowSideA", dlit.MustNew(3.26)),
+				rule.NewAddGEF("flowIn", "flowSideA", dlit.MustNew(3.79)),
+				rule.NewAddGEF("flowIn", "flowSideA", dlit.MustNew(4)),
+				rule.NewAddGEF("flowIn", "flowSideA", dlit.MustNew(4.32)),
+				rule.NewAddGEF("flowIn", "flowSideA", dlit.MustNew(4.85)),
+				rule.NewAddGEF("flowIn", "flowSideA", dlit.MustNew(5)),
+				rule.NewAddGEF("flowIn", "flowSideA", dlit.MustNew(5.38)),
+				rule.NewAddGEF("flowIn", "flowSideA", dlit.MustNew(5.91)),
+				rule.NewAddGEF("flowIn", "flowSideA", dlit.MustNew(6)),
+				rule.NewAddGEF("flowIn", "flowSideA", dlit.MustNew(6.44)),
+				rule.NewAddGEF("flowIn", "flowSideA", dlit.MustNew(6.97)),
+				rule.NewAddGEF("flowIn", "flowSideA", dlit.MustNew(7)),
+				rule.NewAddGEF("flowIn", "flowSideA", dlit.MustNew(7.5)),
+				rule.NewAddGEF("flowIn", "flowSideA", dlit.MustNew(8)),
+				rule.NewAddGEF("flowIn", "flowSideA", dlit.MustNew(8.03)),
+				rule.NewAddGEF("flowIn", "flowSideA", dlit.MustNew(8.56)),
+				rule.NewAddGEF("flowIn", "flowSideA", dlit.MustNew(9)),
+				rule.NewAddGEF("flowIn", "flowSideA", dlit.MustNew(9.09)),
+				rule.NewAddGEF("flowIn", "flowSideA", dlit.MustNew(9.62)),
+				rule.NewAddLEF("flowIn", "flowSideB", dlit.MustNew(10)),
+				rule.NewAddLEF("flowIn", "flowSideB", dlit.MustNew(10.15)),
+				rule.NewAddLEF("flowIn", "flowSideB", dlit.MustNew(10.68)),
+				rule.NewAddLEF("flowIn", "flowSideB", dlit.MustNew(11)),
+				rule.NewAddLEF("flowIn", "flowSideB", dlit.MustNew(11.21)),
+				rule.NewAddLEF("flowIn", "flowSideB", dlit.MustNew(11.74)),
+				rule.NewAddLEF("flowIn", "flowSideB", dlit.MustNew(12)),
+				rule.NewAddLEF("flowIn", "flowSideB", dlit.MustNew(12.27)),
+				rule.NewAddLEF("flowIn", "flowSideB", dlit.MustNew(2.73)),
+				rule.NewAddLEF("flowIn", "flowSideB", dlit.MustNew(3)),
+				rule.NewAddLEF("flowIn", "flowSideB", dlit.MustNew(3.26)),
+				rule.NewAddLEF("flowIn", "flowSideB", dlit.MustNew(3.79)),
+				rule.NewAddLEF("flowIn", "flowSideB", dlit.MustNew(4)),
+				rule.NewAddLEF("flowIn", "flowSideB", dlit.MustNew(4.32)),
+				rule.NewAddLEF("flowIn", "flowSideB", dlit.MustNew(4.85)),
+				rule.NewAddLEF("flowIn", "flowSideB", dlit.MustNew(5)),
+				rule.NewAddLEF("flowIn", "flowSideB", dlit.MustNew(5.38)),
+				rule.NewAddLEF("flowIn", "flowSideB", dlit.MustNew(5.91)),
+				rule.NewAddLEF("flowIn", "flowSideB", dlit.MustNew(6)),
+				rule.NewAddLEF("flowIn", "flowSideB", dlit.MustNew(6.44)),
+				rule.NewAddLEF("flowIn", "flowSideB", dlit.MustNew(6.97)),
+				rule.NewAddLEF("flowIn", "flowSideB", dlit.MustNew(7)),
+				rule.NewAddLEF("flowIn", "flowSideB", dlit.MustNew(7.5)),
+				rule.NewAddLEF("flowIn", "flowSideB", dlit.MustNew(8)),
+				rule.NewAddLEF("flowIn", "flowSideB", dlit.MustNew(8.03)),
+				rule.NewAddLEF("flowIn", "flowSideB", dlit.MustNew(8.56)),
+				rule.NewAddLEF("flowIn", "flowSideB", dlit.MustNew(9)),
+				rule.NewAddLEF("flowIn", "flowSideB", dlit.MustNew(9.09)),
+				rule.NewAddLEF("flowIn", "flowSideB", dlit.MustNew(9.62)),
+				rule.NewAddGEF("flowIn", "flowSideB", dlit.MustNew(10)),
+				rule.NewAddGEF("flowIn", "flowSideB", dlit.MustNew(10.15)),
+				rule.NewAddGEF("flowIn", "flowSideB", dlit.MustNew(10.68)),
+				rule.NewAddGEF("flowIn", "flowSideB", dlit.MustNew(11)),
+				rule.NewAddGEF("flowIn", "flowSideB", dlit.MustNew(11.21)),
+				rule.NewAddGEF("flowIn", "flowSideB", dlit.MustNew(11.74)),
+				rule.NewAddGEF("flowIn", "flowSideB", dlit.MustNew(12)),
+				rule.NewAddGEF("flowIn", "flowSideB", dlit.MustNew(12.27)),
+				rule.NewAddGEF("flowIn", "flowSideB", dlit.MustNew(2.73)),
+				rule.NewAddGEF("flowIn", "flowSideB", dlit.MustNew(3)),
+				rule.NewAddGEF("flowIn", "flowSideB", dlit.MustNew(3.26)),
+				rule.NewAddGEF("flowIn", "flowSideB", dlit.MustNew(3.79)),
+				rule.NewAddGEF("flowIn", "flowSideB", dlit.MustNew(4)),
+				rule.NewAddGEF("flowIn", "flowSideB", dlit.MustNew(4.32)),
+				rule.NewAddGEF("flowIn", "flowSideB", dlit.MustNew(4.85)),
+				rule.NewAddGEF("flowIn", "flowSideB", dlit.MustNew(5)),
+				rule.NewAddGEF("flowIn", "flowSideB", dlit.MustNew(5.38)),
+				rule.NewAddGEF("flowIn", "flowSideB", dlit.MustNew(5.91)),
+				rule.NewAddGEF("flowIn", "flowSideB", dlit.MustNew(6)),
+				rule.NewAddGEF("flowIn", "flowSideB", dlit.MustNew(6.44)),
+				rule.NewAddGEF("flowIn", "flowSideB", dlit.MustNew(6.97)),
+				rule.NewAddGEF("flowIn", "flowSideB", dlit.MustNew(7)),
+				rule.NewAddGEF("flowIn", "flowSideB", dlit.MustNew(7.5)),
+				rule.NewAddGEF("flowIn", "flowSideB", dlit.MustNew(8)),
+				rule.NewAddGEF("flowIn", "flowSideB", dlit.MustNew(8.03)),
+				rule.NewAddGEF("flowIn", "flowSideB", dlit.MustNew(8.56)),
+				rule.NewAddGEF("flowIn", "flowSideB", dlit.MustNew(9)),
+				rule.NewAddGEF("flowIn", "flowSideB", dlit.MustNew(9.09)),
+				rule.NewAddGEF("flowIn", "flowSideB", dlit.MustNew(9.62)),
+			},
+		},
+		{field: "flowIn",
+			complexities: []int{5, 6, 7, 8, 9, 10},
 			want: []rule.Rule{
 				rule.NewAddLEF("flowIn", "flowOut", dlit.MustNew(1.9)),
 				rule.NewAddLEF("flowIn", "flowOut", dlit.MustNew(1.93)),
@@ -735,6 +1135,7 @@ func TestGenerateAddRules(t *testing.T) {
 			},
 		},
 		{field: "flowOut",
+			complexities: []int{10},
 			want: []rule.Rule{
 				rule.NewAddLEF("flowOut", "flowSideA", dlit.MustNew(3.6)),
 				rule.NewAddLEF("flowOut", "flowSideA", dlit.MustNew(3.8)),
@@ -815,21 +1216,26 @@ func TestGenerateAddRules(t *testing.T) {
 			},
 		},
 		{field: "flowSideA",
-			want: []rule.Rule{},
+			complexities: []int{10},
+			want:         []rule.Rule{},
 		},
 		{field: "flowSideB",
-			want: []rule.Rule{},
+			complexities: []int{10},
+			want:         []rule.Rule{},
 		},
 	}
 	ruleFields := []string{"flowIn", "flowOut", "flowSideA", "flowSideB"}
 
 	for _, c := range cases {
-		got := generateAddRules(inputDescription, ruleFields, c.field)
-		if err := matchRulesUnordered(got, c.want); err != nil {
-			gotRuleStrs := rulesToSortedStrings(got)
-			wantRuleStrs := rulesToSortedStrings(c.want)
-			t.Errorf("matchRulesUnordered() rules don't match: %s\ngot: %s\nwant: %s\n",
-				err, gotRuleStrs, wantRuleStrs)
+		for _, complexity := range c.complexities {
+			got := generateAddRules(inputDescription, ruleFields, complexity, c.field)
+			if err := matchRulesUnordered(got, c.want); err != nil {
+				gotRuleStrs := rulesToSortedStrings(got)
+				wantRuleStrs := rulesToSortedStrings(c.want)
+				t.Errorf(
+					"matchRulesUnordered() rules don't match: %s\ngot: %s\nwant: %s\n",
+					err, gotRuleStrs, wantRuleStrs)
+			}
 		}
 	}
 }
@@ -927,8 +1333,14 @@ func TestGenerateCompareNumericRules(t *testing.T) {
 	}
 	ruleFields :=
 		[]string{"band", "flowIn", "flowOut", "rateIn", "rateOut", "group"}
+	complexity := 10
 	for _, c := range cases {
-		got := generateCompareNumericRules(inputDescription, ruleFields, c.field)
+		got := generateCompareNumericRules(
+			inputDescription,
+			ruleFields,
+			complexity,
+			c.field,
+		)
 		if err := matchRulesUnordered(got, c.want); err != nil {
 			gotRuleStrs := rulesToSortedStrings(got)
 			wantRuleStrs := rulesToSortedStrings(c.want)
@@ -1041,8 +1453,14 @@ func TestGenerateCompareStringRules(t *testing.T) {
 	}
 	ruleFields :=
 		[]string{"band", "groupA", "groupB", "groupC", "groupD", "groupE", "groupF"}
+	complexity := 10
 	for _, c := range cases {
-		got := generateCompareStringRules(inputDescription, ruleFields, c.field)
+		got := generateCompareStringRules(
+			inputDescription,
+			ruleFields,
+			complexity,
+			c.field,
+		)
 		if err := matchRulesUnordered(got, c.want); err != nil {
 			gotRuleStrs := rulesToSortedStrings(got)
 			wantRuleStrs := rulesToSortedStrings(c.want)
@@ -1126,22 +1544,32 @@ func TestGenerateInRules_1(t *testing.T) {
 		},
 	}
 	cases := []struct {
-		field string
-		want  []rule.Rule
+		field        string
+		complexities []int
+		want         []rule.Rule
 	}{
 		{field: "band",
-			want: []rule.Rule{},
+			complexities: []int{10},
+			want:         []rule.Rule{},
 		},
 		{field: "flow",
-			want: []rule.Rule{},
+			complexities: []int{10},
+			want:         []rule.Rule{},
 		},
 		{field: "groupA",
-			want: []rule.Rule{},
+			complexities: []int{10},
+			want:         []rule.Rule{},
 		},
 		{field: "groupB",
-			want: []rule.Rule{},
+			complexities: []int{1, 2, 3, 4, 5, 6},
+			want:         []rule.Rule{},
 		},
 		{field: "groupC",
+			complexities: []int{1, 2, 3, 4},
+			want:         []rule.Rule{},
+		},
+		{field: "groupC",
+			complexities: []int{5, 6},
 			want: []rule.Rule{
 				rule.NewInFV("groupC", []*dlit.Literal{
 					dlit.NewString("Fred"),
@@ -1170,6 +1598,7 @@ func TestGenerateInRules_1(t *testing.T) {
 			},
 		},
 		{field: "groupD",
+			complexities: []int{5, 6},
 			want: []rule.Rule{
 				rule.NewInFV("groupD", []*dlit.Literal{
 					dlit.NewString("Fred"),
@@ -1186,6 +1615,7 @@ func TestGenerateInRules_1(t *testing.T) {
 			},
 		},
 		{field: "groupE",
+			complexities: []int{5, 6},
 			want: []rule.Rule{
 				rule.NewInFV("groupE", []*dlit.Literal{
 					dlit.NewString("Fred"),
@@ -1283,49 +1713,87 @@ func TestGenerateInRules_1(t *testing.T) {
 	ruleFields :=
 		[]string{"band", "flow", "groupA", "groupB", "groupC", "groupD", "groupE"}
 	for _, c := range cases {
-		got := generateInRules(inputDescription, ruleFields, c.field)
-		if err := matchRulesUnordered(got, c.want); err != nil {
-			gotRuleStrs := rulesToSortedStrings(got)
-			wantRuleStrs := rulesToSortedStrings(c.want)
-			t.Errorf("matchRulesUnordered() rules don't match: %s\ngot: %s\nwant: %s\n",
-				err, gotRuleStrs, wantRuleStrs)
+		for _, complexity := range c.complexities {
+			got := generateInRules(inputDescription, ruleFields, complexity, c.field)
+			if err := matchRulesUnordered(got, c.want); err != nil {
+				gotRuleStrs := rulesToSortedStrings(got)
+				wantRuleStrs := rulesToSortedStrings(c.want)
+				t.Errorf("matchRulesUnordered() rules don't match: %s\ngot: %s\nwant: %s\n",
+					err, gotRuleStrs, wantRuleStrs)
+			}
 		}
 	}
 }
 
-// Test that will generate if has 12 values and ensures that has correct
-// number of values in In rule
+// Test that will generate correct number of values in In rule for complexity
 func TestGenerateInRules_2(t *testing.T) {
 	inputDescription := &description.Description{
 		map[string]*description.Field{
 			"group": &description.Field{
 				Kind: fieldtype.String,
-				Values: map[string]description.Value{
-					"Fred":    description.Value{dlit.NewString("Fred"), 3},
-					"Mary":    description.Value{dlit.NewString("Mary"), 4},
-					"Rebecca": description.Value{dlit.NewString("Rebecca"), 2},
-					"Harry":   description.Value{dlit.NewString("Harry"), 2},
-					"Dinah":   description.Value{dlit.NewString("Dinah"), 2},
-					"Israel":  description.Value{dlit.NewString("Israel"), 2},
-					"Sarah":   description.Value{dlit.NewString("Sarah"), 2},
-					"Ishmael": description.Value{dlit.NewString("Ishmael"), 2},
-					"Caen":    description.Value{dlit.NewString("Caen"), 2},
-					"Abel":    description.Value{dlit.NewString("Abel"), 2},
-					"Noah":    description.Value{dlit.NewString("Noah"), 2},
-					"Isaac":   description.Value{dlit.NewString("Isaac"), 2},
-				},
 			},
 		},
 	}
-	ruleFields := []string{"group"}
-	got := generateInRules(inputDescription, ruleFields, "group")
-	if len(got) < 1000 {
-		t.Errorf("generateInRules: got too few rules: %d", len(got))
+	cases := []struct {
+		groupValues      map[string]description.Value
+		complexities     []int
+		wantMinNumRules  int
+		wantMaxNumRules  int
+		wantMaxNumValues int
+	}{
+		{groupValues: map[string]description.Value{
+			"Fred":    description.Value{dlit.NewString("Fred"), 3},
+			"Mary":    description.Value{dlit.NewString("Mary"), 4},
+			"Rebecca": description.Value{dlit.NewString("Rebecca"), 2},
+			"Harry":   description.Value{dlit.NewString("Harry"), 2},
+			"Dinah":   description.Value{dlit.NewString("Dinah"), 2},
+			"Israel":  description.Value{dlit.NewString("Israel"), 2},
+			"Sarah":   description.Value{dlit.NewString("Sarah"), 2},
+			"Ishmael": description.Value{dlit.NewString("Ishmael"), 2},
+			"Caen":    description.Value{dlit.NewString("Caen"), 2},
+			"Abel":    description.Value{dlit.NewString("Abel"), 2},
+			"Noah":    description.Value{dlit.NewString("Noah"), 2},
+			"Isaac":   description.Value{dlit.NewString("Isaac"), 2},
+		},
+			complexities:     []int{1, 2, 3, 4},
+			wantMinNumRules:  0,
+			wantMaxNumRules:  0,
+			wantMaxNumValues: 5,
+		},
+		{groupValues: map[string]description.Value{
+			"Fred":    description.Value{dlit.NewString("Fred"), 3},
+			"Mary":    description.Value{dlit.NewString("Mary"), 4},
+			"Rebecca": description.Value{dlit.NewString("Rebecca"), 2},
+			"Harry":   description.Value{dlit.NewString("Harry"), 2},
+			"Dinah":   description.Value{dlit.NewString("Dinah"), 2},
+			"Israel":  description.Value{dlit.NewString("Israel"), 2},
+			"Sarah":   description.Value{dlit.NewString("Sarah"), 2},
+			"Ishmael": description.Value{dlit.NewString("Ishmael"), 2},
+			"Caen":    description.Value{dlit.NewString("Caen"), 2},
+			"Abel":    description.Value{dlit.NewString("Abel"), 2},
+			"Noah":    description.Value{dlit.NewString("Noah"), 2},
+			"Isaac":   description.Value{dlit.NewString("Isaac"), 2},
+		},
+			complexities:     []int{5, 6},
+			wantMinNumRules:  1000,
+			wantMaxNumRules:  2000,
+			wantMaxNumValues: 5,
+		},
 	}
-	for _, r := range got {
-		numValues := strings.Count(r.String(), ",")
-		if numValues < 2 || numValues > 5 {
-			t.Errorf("generateInRules: wrong number of values in rule: %s", r)
+	ruleFields := []string{"group"}
+	for _, c := range cases {
+		for _, complexity := range c.complexities {
+			inputDescription.Fields["group"].Values = c.groupValues
+			got := generateInRules(inputDescription, ruleFields, complexity, "group")
+			if len(got) < c.wantMinNumRules || len(got) > c.wantMaxNumRules {
+				t.Errorf("generateInRules: got wrong number of rules: %d", len(got))
+			}
+			for _, r := range got {
+				numValues := strings.Count(r.String(), ",")
+				if numValues < 2 || numValues > c.wantMaxNumValues {
+					t.Errorf("generateInRules: wrong number of values in rule: %s", r)
+				}
+			}
 		}
 	}
 }
@@ -1405,8 +1873,9 @@ func TestGenerateValueRules(t *testing.T) {
 		},
 	}
 	ruleFields := []string{"band", "flow", "group"}
+	complexity := 5
 	for _, c := range cases {
-		got := generateValueRules(inputDescription, ruleFields, c.field)
+		got := generateValueRules(inputDescription, ruleFields, complexity, c.field)
 		if err := matchRulesUnordered(got, c.want); err != nil {
 			gotRuleStrs := rulesToSortedStrings(got)
 			wantRuleStrs := rulesToSortedStrings(c.want)

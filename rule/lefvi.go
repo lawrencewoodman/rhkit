@@ -60,6 +60,7 @@ func (r *LEFVI) IsTrue(record ddataset.Record) (bool, error) {
 
 func (r *LEFVI) Tweak(
 	inputDescription *description.Description,
+	complexity int,
 	stage int,
 ) []Rule {
 	rules := make([]Rule, 0)
@@ -68,6 +69,7 @@ func (r *LEFVI) Tweak(
 		inputDescription.Fields[r.field].Min,
 		inputDescription.Fields[r.field].Max,
 		inputDescription.Fields[r.field].MaxDP,
+		complexity,
 		stage,
 	)
 	for _, p := range points {

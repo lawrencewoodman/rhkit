@@ -88,6 +88,7 @@ func (r *BetweenFVI) GetFields() []string {
 
 func (r *BetweenFVI) Tweak(
 	inputDescription *description.Description,
+	complexity int,
 	stage int,
 ) []Rule {
 	rules := make([]Rule, 0)
@@ -96,6 +97,7 @@ func (r *BetweenFVI) Tweak(
 		inputDescription.Fields[r.field].Min,
 		inputDescription.Fields[r.field].Max,
 		inputDescription.Fields[r.field].MaxDP,
+		complexity,
 		stage,
 	)
 	pointsH := generateTweakPoints(
@@ -103,6 +105,7 @@ func (r *BetweenFVI) Tweak(
 		inputDescription.Fields[r.field].Min,
 		inputDescription.Fields[r.field].Max,
 		inputDescription.Fields[r.field].MaxDP,
+		complexity,
 		stage,
 	)
 	isValidExpr := dexpr.MustNew("pH > pL", dexprfuncs.CallFuncs)

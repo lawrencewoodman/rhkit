@@ -83,6 +83,7 @@ func (r *AddGEF) IsTrue(record ddataset.Record) (bool, error) {
 
 func (r *AddGEF) Tweak(
 	inputDescription *description.Description,
+	complexity int,
 	stage int,
 ) []Rule {
 	vars := map[string]*dlit.Literal{
@@ -99,7 +100,7 @@ func (r *AddGEF) Tweak(
 	rules := make([]Rule, 0)
 	min := dexpr.Eval("aMin + bMin", dexprfuncs.CallFuncs, vars)
 	max := dexpr.Eval("aMax + bMax", dexprfuncs.CallFuncs, vars)
-	points := generateTweakPoints(r.value, min, max, maxDP, stage)
+	points := generateTweakPoints(r.value, min, max, maxDP, complexity, stage)
 	for _, p := range points {
 		r := NewAddGEF(r.fieldA, r.fieldB, p)
 		rules = append(rules, r)

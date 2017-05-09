@@ -32,12 +32,24 @@ import (
 	"strings"
 )
 
-type ruleGeneratorFunc func(*description.Description, []string, string) []rule.Rule
+type ruleGeneratorFunc func(
+	*description.Description,
+	[]string,
+	int,
+	string,
+) []rule.Rule
 
+// GenerateRules generates rules for the ruleFields.
+// complexity is used to indicate how complex and in turn how many rules
+// to produce it takes a number 1 to 10.
 func GenerateRules(
 	inputDescription *description.Description,
 	ruleFields []string,
+	complexity int,
 ) []rule.Rule {
+	if complexity < 1 || complexity > 10 {
+		panic("complexity must be in range 1..10")
+	}
 	rules := make([]rule.Rule, 1)
 	ruleGenerators := []ruleGeneratorFunc{
 		generateIntRules, generateFloatRules, generateValueRules,
@@ -48,7 +60,8 @@ func GenerateRules(
 	for field := range inputDescription.Fields {
 		if stringInSlice(field, ruleFields) {
 			for _, ruleGenerator := range ruleGenerators {
-				newRules := ruleGenerator(inputDescription, ruleFields, field)
+				newRules :=
+					ruleGenerator(inputDescription, ruleFields, complexity, field)
 				rules = append(rules, newRules...)
 			}
 		}
@@ -91,6 +104,7 @@ func stringInSlice(s string, strings []string) bool {
 func generateValueRules(
 	inputDescription *description.Description,
 	ruleFields []string,
+	complexity int,
 	field string,
 ) []rule.Rule {
 	fd := inputDescription.Fields[field]
@@ -149,6 +163,7 @@ func generateValueRules(
 func generateIntRules(
 	inputDescription *description.Description,
 	ruleFields []string,
+	complexity int,
 	field string,
 ) []rule.Rule {
 	fd := inputDescription.Fields[field]
@@ -156,7 +171,7 @@ func generateIntRules(
 		return []rule.Rule{}
 	}
 	rulesMap := make(map[string]rule.Rule)
-	points := internal.GeneratePoints(fd.Min, fd.Max, fd.MaxDP)
+	points := internal.GeneratePoints(fd.Min, fd.Max, 0, 0)
 
 	for _, p := range points {
 		pInt, pIsInt := p.Int()
@@ -195,6 +210,7 @@ func generateIntRules(
 func generateFloatRules(
 	inputDescription *description.Description,
 	ruleFields []string,
+	complexity int,
 	field string,
 ) []rule.Rule {
 	fd := inputDescription.Fields[field]
@@ -202,7 +218,19 @@ func generateFloatRules(
 		return []rule.Rule{}
 	}
 	rulesMap := make(map[string]rule.Rule)
-	points := internal.GeneratePoints(fd.Min, fd.Max, fd.MaxDP)
+	maxShortDP := 0
+	switch complexity {
+	case 1, 2:
+		maxShortDP = 0
+	case 3, 4:
+		maxShortDP = 1
+	case 5, 6:
+		maxShortDP = 2
+	case 7, 8, 9, 10:
+		maxShortDP = 3
+	}
+
+	points := internal.GeneratePoints(fd.Min, fd.Max, maxShortDP, fd.MaxDP)
 
 	for _, p := range points {
 		pFloat, pIsFloat := p.Float()
@@ -238,6 +266,7 @@ func generateFloatRules(
 func generateCompareNumericRules(
 	inputDescription *description.Description,
 	ruleFields []string,
+	complexity int,
 	field string,
 ) []rule.Rule {
 	fd := inputDescription.Fields[field]
@@ -273,6 +302,7 @@ func generateCompareNumericRules(
 func generateCompareStringRules(
 	inputDescription *description.Description,
 	ruleFields []string,
+	complexity int,
 	field string,
 ) []rule.Rule {
 	fd := inputDescription.Fields[field]
@@ -305,8 +335,23 @@ func generateCompareStringRules(
 func generateAddRules(
 	inputDescription *description.Description,
 	ruleFields []string,
+	complexity int,
 	field string,
 ) []rule.Rule {
+	maxShortDP := 0
+	switch complexity {
+	case 1, 2:
+		return []rule.Rule{}
+	case 3, 4:
+		maxShortDP = 0
+	case 5, 6:
+		maxShortDP = 1
+	case 7, 8:
+		maxShortDP = 2
+	case 9, 10:
+		maxShortDP = 3
+	}
+
 	fd := inputDescription.Fields[field]
 	if !isNumberField(fd) {
 		return []rule.Rule{}
@@ -330,7 +375,7 @@ func generateAddRules(
 			if oFd.MaxDP > maxDP {
 				maxDP = oFd.MaxDP
 			}
-			points := internal.GeneratePoints(min, max, maxDP)
+			points := internal.GeneratePoints(min, max, maxShortDP, maxDP)
 			for _, p := range points {
 				rL := rule.NewAddLEF(field, oField, p)
 				rG := rule.NewAddGEF(field, oField, p)
@@ -392,18 +437,31 @@ func rulesMapToArray(rulesMap map[string]rule.Rule) []rule.Rule {
 	return rules
 }
 
-// TODO: Allow more numValues if only two ruleFields
 func generateInRules(
 	inputDescription *description.Description,
 	ruleFields []string,
+	complexity int,
 	field string,
 ) []rule.Rule {
+	extra := 0
+	switch complexity {
+	case 1, 2, 3, 4:
+		return []rule.Rule{}
+	case 5, 6:
+	case 7, 8:
+		extra = 2
+	case 9, 10:
+		extra = 4
+	}
+	if len(ruleFields) == 2 {
+		extra += 2
+	}
 	fd := inputDescription.Fields[field]
 	numValues := len(fd.Values)
 	if fd.Kind != fieldtype.String &&
 		fd.Kind != fieldtype.Float &&
 		fd.Kind != fieldtype.Int ||
-		numValues <= 3 || numValues > 12 {
+		numValues <= 3 || numValues > (12+extra) {
 		return []rule.Rule{}
 	}
 	rulesMap := make(map[string]rule.Rule)
@@ -412,7 +470,7 @@ func generateInRules(
 		if numOnBits >= numValues {
 			break
 		}
-		if numOnBits >= 2 && numOnBits <= 5 && numOnBits < (numValues-1) {
+		if numOnBits >= 2 && numOnBits <= (5+extra) && numOnBits < (numValues-1) {
 			compareValues := makeCompareValues(fd.Values, i)
 			if len(compareValues) >= 2 {
 				r := rule.NewInFV(field, compareValues)

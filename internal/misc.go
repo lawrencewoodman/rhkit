@@ -36,10 +36,23 @@ func NumDecPlaces(s string) int {
 	return 0
 }
 
-func GeneratePoints(min, max *dlit.Literal, maxDP int) []*dlit.Literal {
-	// Nice DP to work with, in this order to prevent earlier stopping from
-	// rounding a number beyond max at end
-	dps := []int{maxDP, 3, 2, 1, 0}
+// GeneratePoints will generate numbers between two points (min..max).
+// It will round each number to maxDP decimal places and also round each
+// number to 0 to maxShortDP decimal places.
+func GeneratePoints(
+	min, max *dlit.Literal,
+	maxShortDP int,
+	maxDP int,
+) []*dlit.Literal {
+	dps := []int{maxDP}
+	if maxDP < maxShortDP {
+		maxShortDP = maxDP
+	}
+	// The order max to 0 is important to prevent earlier stopping from
+	// round a number beyond max at end
+	for dp := maxShortDP; dp >= 0; dp-- {
+		dps = append(dps, dp)
+	}
 	points := make(map[string]*dlit.Literal)
 	vars := map[string]*dlit.Literal{
 		"min":   min,

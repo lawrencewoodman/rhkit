@@ -25,6 +25,7 @@ import (
 )
 
 func TweakRules(
+	complexity int,
 	stage int,
 	sortedRules []rule.Rule,
 	inputDescription *description.Description,
@@ -33,7 +34,7 @@ func TweakRules(
 	for _, r := range sortedRules {
 		switch x := r.(type) {
 		case rule.Tweaker:
-			rules := x.Tweak(inputDescription, stage)
+			rules := x.Tweak(inputDescription, complexity, stage)
 			newRules = append(newRules, rules...)
 		}
 	}

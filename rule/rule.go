@@ -39,7 +39,7 @@ type Rule interface {
 }
 
 type Tweaker interface {
-	Tweak(*description.Description, int) []Rule
+	Tweak(desc *description.Description, complexity int, stage int) []Rule
 }
 
 type Overlapper interface {
@@ -102,9 +102,21 @@ func (rs byString) Less(i, j int) bool {
 func generateTweakPoints(
 	value, min, max *dlit.Literal,
 	maxDP int,
+	complexity int,
 	stage int,
 ) []*dlit.Literal {
 	matchValueExpr := dexpr.MustNew("value == p", dexprfuncs.CallFuncs)
+	maxShortDP := 0
+	switch complexity {
+	case 1, 2:
+		maxShortDP = 0
+	case 3, 4:
+		maxShortDP = 1
+	case 5, 6:
+		maxShortDP = 2
+	case 7, 8, 9, 10:
+		maxShortDP = 3
+	}
 	vars := map[string]*dlit.Literal{
 		"min":   min,
 		"max":   max,
@@ -120,7 +132,7 @@ func generateTweakPoints(
 		)
 	low := dexpr.Eval("max(min, value - step)", dexprfuncs.CallFuncs, vars)
 	high := dexpr.Eval("min(max, value + step)", dexprfuncs.CallFuncs, vars)
-	points := internal.GeneratePoints(low, high, maxDP)
+	points := internal.GeneratePoints(low, high, maxShortDP, maxDP)
 	r := make([]*dlit.Literal, 0)
 	for _, p := range points {
 		vars["p"] = p

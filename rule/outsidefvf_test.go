@@ -165,6 +165,7 @@ func TestOutsideFVFTweak(t *testing.T) {
 			wantNum: 80,
 		},
 	}
+	complexity := 10
 	for _, c := range cases {
 		description := &description.Description{
 			map[string]*description.Field{
@@ -177,7 +178,7 @@ func TestOutsideFVFTweak(t *testing.T) {
 			},
 		}
 		rule := MustNewOutsideFVF(field, c.low, c.high)
-		got := rule.Tweak(description, 1)
+		got := rule.Tweak(description, complexity, 1)
 		numGot := len(got)
 		if numGot < c.wantNum {
 			t.Errorf("Tweak - got too few rules returned: %d, got: %v", numGot, got)
