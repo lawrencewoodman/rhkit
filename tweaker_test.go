@@ -36,8 +36,7 @@ func TestTweakRules_1(t *testing.T) {
 		rule.NewGTFF("age", "band"),
 		rule.NewInFV("stage", makeStringsDlitSlice("20", "21", "22")),
 	}
-	complexity := 5
-	gotRules := TweakRules(complexity, 1, rulesIn, inputDescription)
+	gotRules := TweakRules(1, rulesIn, inputDescription)
 
 	numAgeGERules := 0
 	numAgeBetweenRules := 0
@@ -115,8 +114,7 @@ func TestTweakRules_2(t *testing.T) {
 		rule.NewLEFVI("age", 50),
 		rule.NewLEFVI("age", 60),
 	}
-	complexity := 5
-	gotRules := TweakRules(complexity, 1, rulesIn, inputDescription)
+	gotRules := TweakRules(1, rulesIn, inputDescription)
 
 	num10To20 := 0
 	num20To40 := 0
@@ -203,8 +201,7 @@ func TestTweakRules_3(t *testing.T) {
 	}
 	wantMaxDP := inputDescription.Fields["flow"].MaxDP
 	wantMinDP := 0
-	complexity := 5
-	gotRules := TweakRules(complexity, 1, rulesIn, inputDescription)
+	gotRules := TweakRules(1, rulesIn, inputDescription)
 
 	num10To24 := 0
 	num24To41 := 0
@@ -307,8 +304,7 @@ func TestTweakRules_4(t *testing.T) {
 		rule.NewTrue(),
 	}
 
-	complexity := 5
-	gotRules := TweakRules(complexity, 1, rulesIn, inputDescription)
+	gotRules := TweakRules(1, rulesIn, inputDescription)
 	trueRuleFound := false
 	for _, r := range gotRules {
 		if _, ruleIsTrue := r.(rule.True); ruleIsTrue {
@@ -350,8 +346,7 @@ func TestTweakRules_5(t *testing.T) {
 		rule.NewGTFF("age", "band"),
 		rule.NewInFV("stage", makeStringsDlitSlice("20", "21", "22")),
 	}
-	complexity := 5
-	gotRules := TweakRules(complexity, 1, rulesIn, inputDescription)
+	gotRules := TweakRules(1, rulesIn, inputDescription)
 
 	for _, gotRule := range gotRules {
 		count := 0

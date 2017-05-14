@@ -132,19 +132,24 @@ func TestLEFVITweak(t *testing.T) {
 			stage: 1,
 			want: []Rule{
 				NewLEFVI(field, int64(792)),
-				NewLEFVI(field, int64(794)),
+				NewLEFVI(field, int64(793)),
+				NewLEFVI(field, int64(795)),
 				NewLEFVI(field, int64(796)),
 				NewLEFVI(field, int64(798)),
+				NewLEFVI(field, int64(799)),
+				NewLEFVI(field, int64(801)),
 				NewLEFVI(field, int64(802)),
 				NewLEFVI(field, int64(804)),
-				NewLEFVI(field, int64(806)),
-				NewLEFVI(field, int64(808)),
+				NewLEFVI(field, int64(805)),
+				NewLEFVI(field, int64(807)),
+				NewLEFVI(field, int64(809)),
 				NewLEFVI(field, int64(810)),
 				NewLEFVI(field, int64(812)),
-				NewLEFVI(field, int64(814)),
+				NewLEFVI(field, int64(813)),
+				NewLEFVI(field, int64(815)),
 				NewLEFVI(field, int64(816)),
 				NewLEFVI(field, int64(818)),
-				NewLEFVI(field, int64(820)),
+				NewLEFVI(field, int64(819)),
 			},
 		},
 		{description: &description.Description{
@@ -168,16 +173,14 @@ func TestLEFVITweak(t *testing.T) {
 				NewLEFVI(field, int64(785)),
 				NewLEFVI(field, int64(787)),
 				NewLEFVI(field, int64(789)),
-				NewLEFVI(field, int64(791)),
-				NewLEFVI(field, int64(793)),
-				NewLEFVI(field, int64(795)),
-				NewLEFVI(field, int64(797)),
-				NewLEFVI(field, int64(799)),
-				NewLEFVI(field, int64(801)),
-				NewLEFVI(field, int64(803)),
-				NewLEFVI(field, int64(805)),
-				NewLEFVI(field, int64(807)),
-				NewLEFVI(field, int64(809)),
+				NewLEFVI(field, int64(792)),
+				NewLEFVI(field, int64(794)),
+				NewLEFVI(field, int64(796)),
+				NewLEFVI(field, int64(798)),
+				NewLEFVI(field, int64(802)),
+				NewLEFVI(field, int64(804)),
+				NewLEFVI(field, int64(806)),
+				NewLEFVI(field, int64(808)),
 			},
 		},
 		{description: &description.Description{
@@ -204,29 +207,30 @@ func TestLEFVITweak(t *testing.T) {
 			stage: 2,
 			want: []Rule{
 				NewLEFVI(field, int64(778)),
-				NewLEFVI(field, int64(781)),
-				NewLEFVI(field, int64(784)),
-				NewLEFVI(field, int64(787)),
+				NewLEFVI(field, int64(780)),
+				NewLEFVI(field, int64(783)),
+				NewLEFVI(field, int64(785)),
+				NewLEFVI(field, int64(788)),
 				NewLEFVI(field, int64(790)),
 				NewLEFVI(field, int64(793)),
-				NewLEFVI(field, int64(796)),
-				NewLEFVI(field, int64(799)),
-				NewLEFVI(field, int64(802)),
+				NewLEFVI(field, int64(795)),
+				NewLEFVI(field, int64(798)),
+				NewLEFVI(field, int64(803)),
 				NewLEFVI(field, int64(805)),
 				NewLEFVI(field, int64(808)),
-				NewLEFVI(field, int64(811)),
-				NewLEFVI(field, int64(814)),
-				NewLEFVI(field, int64(817)),
+				NewLEFVI(field, int64(810)),
+				NewLEFVI(field, int64(813)),
+				NewLEFVI(field, int64(815)),
+				NewLEFVI(field, int64(818)),
 				NewLEFVI(field, int64(820)),
 				NewLEFVI(field, int64(823)),
 			},
 		},
 	}
-	complexity := 10
-	for _, c := range cases {
-		got := rule.Tweak(c.description, complexity, c.stage)
+	for i, c := range cases {
+		got := rule.Tweak(c.description, c.stage)
 		if err := checkRulesMatch(got, c.want); err != nil {
-			t.Errorf("Tweak: %s, got: %s", err, got)
+			t.Errorf("(%d) Tweak: %s, got: %s", i, err, got)
 		}
 	}
 }

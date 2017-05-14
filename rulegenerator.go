@@ -171,7 +171,7 @@ func generateIntRules(
 		return []rule.Rule{}
 	}
 	rulesMap := make(map[string]rule.Rule)
-	points := internal.GeneratePoints(fd.Min, fd.Max, 0, 0)
+	points := internal.GeneratePoints(fd.Min, fd.Max, 0)
 
 	for _, p := range points {
 		pInt, pIsInt := p.Int()
@@ -218,19 +218,7 @@ func generateFloatRules(
 		return []rule.Rule{}
 	}
 	rulesMap := make(map[string]rule.Rule)
-	maxShortDP := 0
-	switch complexity {
-	case 1, 2:
-		maxShortDP = 0
-	case 3, 4:
-		maxShortDP = 1
-	case 5, 6:
-		maxShortDP = 2
-	case 7, 8, 9, 10:
-		maxShortDP = 3
-	}
-
-	points := internal.GeneratePoints(fd.Min, fd.Max, maxShortDP, fd.MaxDP)
+	points := internal.GeneratePoints(fd.Min, fd.Max, fd.MaxDP)
 
 	for _, p := range points {
 		pFloat, pIsFloat := p.Float()
@@ -338,18 +326,8 @@ func generateAddRules(
 	complexity int,
 	field string,
 ) []rule.Rule {
-	maxShortDP := 0
-	switch complexity {
-	case 1, 2:
+	if complexity < 3 {
 		return []rule.Rule{}
-	case 3, 4:
-		maxShortDP = 0
-	case 5, 6:
-		maxShortDP = 1
-	case 7, 8:
-		maxShortDP = 2
-	case 9, 10:
-		maxShortDP = 3
 	}
 
 	fd := inputDescription.Fields[field]
@@ -375,7 +353,7 @@ func generateAddRules(
 			if oFd.MaxDP > maxDP {
 				maxDP = oFd.MaxDP
 			}
-			points := internal.GeneratePoints(min, max, maxShortDP, maxDP)
+			points := internal.GeneratePoints(min, max, maxDP)
 			for _, p := range points {
 				rL := rule.NewAddLEF(field, oField, p)
 				rG := rule.NewAddGEF(field, oField, p)

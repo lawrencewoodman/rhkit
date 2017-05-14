@@ -60,7 +60,6 @@ func (r *GEFVF) IsTrue(record ddataset.Record) (bool, error) {
 
 func (r *GEFVF) Tweak(
 	inputDescription *description.Description,
-	complexity int,
 	stage int,
 ) []Rule {
 	rules := make([]Rule, 0)
@@ -69,7 +68,6 @@ func (r *GEFVF) Tweak(
 		inputDescription.Fields[r.field].Min,
 		inputDescription.Fields[r.field].Max,
 		inputDescription.Fields[r.field].MaxDP,
-		complexity,
 		stage,
 	)
 	for _, p := range points {
@@ -82,6 +80,7 @@ func (r *GEFVF) Tweak(
 	}
 	return rules
 }
+
 func (r *GEFVF) GetFields() []string {
 	return []string{r.field}
 }

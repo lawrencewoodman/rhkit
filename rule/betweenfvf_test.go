@@ -167,7 +167,7 @@ func TestBetweenFVFTweak(t *testing.T) {
 			wantNum: 150,
 		},
 	}
-	complexity := 10
+
 	for _, c := range cases {
 		description := &description.Description{
 			map[string]*description.Field{
@@ -180,7 +180,7 @@ func TestBetweenFVFTweak(t *testing.T) {
 			},
 		}
 		rule := MustNewBetweenFVF(field, c.min, c.max)
-		got := rule.Tweak(description, complexity, 1)
+		got := rule.Tweak(description, 1)
 		numGot := len(got)
 		if numGot < c.wantNum {
 			t.Errorf("Tweak - got too few rules returned: %d", numGot)

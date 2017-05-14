@@ -132,19 +132,24 @@ func TestGEFVITweak(t *testing.T) {
 			stage: 1,
 			want: []Rule{
 				NewGEFVI(field, int64(792)),
-				NewGEFVI(field, int64(794)),
+				NewGEFVI(field, int64(793)),
+				NewGEFVI(field, int64(795)),
 				NewGEFVI(field, int64(796)),
 				NewGEFVI(field, int64(798)),
+				NewGEFVI(field, int64(799)),
+				NewGEFVI(field, int64(801)),
 				NewGEFVI(field, int64(802)),
 				NewGEFVI(field, int64(804)),
-				NewGEFVI(field, int64(806)),
-				NewGEFVI(field, int64(808)),
+				NewGEFVI(field, int64(805)),
+				NewGEFVI(field, int64(807)),
+				NewGEFVI(field, int64(809)),
 				NewGEFVI(field, int64(810)),
 				NewGEFVI(field, int64(812)),
-				NewGEFVI(field, int64(814)),
+				NewGEFVI(field, int64(813)),
+				NewGEFVI(field, int64(815)),
 				NewGEFVI(field, int64(816)),
 				NewGEFVI(field, int64(818)),
-				NewGEFVI(field, int64(820)),
+				NewGEFVI(field, int64(819)),
 			},
 		},
 		{description: &description.Description{
@@ -168,16 +173,14 @@ func TestGEFVITweak(t *testing.T) {
 				NewGEFVI(field, int64(785)),
 				NewGEFVI(field, int64(787)),
 				NewGEFVI(field, int64(789)),
-				NewGEFVI(field, int64(791)),
-				NewGEFVI(field, int64(793)),
-				NewGEFVI(field, int64(795)),
-				NewGEFVI(field, int64(797)),
-				NewGEFVI(field, int64(799)),
-				NewGEFVI(field, int64(801)),
-				NewGEFVI(field, int64(803)),
-				NewGEFVI(field, int64(805)),
-				NewGEFVI(field, int64(807)),
-				NewGEFVI(field, int64(809)),
+				NewGEFVI(field, int64(792)),
+				NewGEFVI(field, int64(794)),
+				NewGEFVI(field, int64(796)),
+				NewGEFVI(field, int64(798)),
+				NewGEFVI(field, int64(802)),
+				NewGEFVI(field, int64(804)),
+				NewGEFVI(field, int64(806)),
+				NewGEFVI(field, int64(808)),
 			},
 		},
 		{description: &description.Description{
@@ -204,29 +207,30 @@ func TestGEFVITweak(t *testing.T) {
 			stage: 2,
 			want: []Rule{
 				NewGEFVI(field, int64(778)),
-				NewGEFVI(field, int64(781)),
-				NewGEFVI(field, int64(784)),
-				NewGEFVI(field, int64(787)),
+				NewGEFVI(field, int64(780)),
+				NewGEFVI(field, int64(783)),
+				NewGEFVI(field, int64(785)),
+				NewGEFVI(field, int64(788)),
 				NewGEFVI(field, int64(790)),
 				NewGEFVI(field, int64(793)),
-				NewGEFVI(field, int64(796)),
-				NewGEFVI(field, int64(799)),
-				NewGEFVI(field, int64(802)),
+				NewGEFVI(field, int64(795)),
+				NewGEFVI(field, int64(798)),
+				NewGEFVI(field, int64(803)),
 				NewGEFVI(field, int64(805)),
 				NewGEFVI(field, int64(808)),
-				NewGEFVI(field, int64(811)),
-				NewGEFVI(field, int64(814)),
-				NewGEFVI(field, int64(817)),
+				NewGEFVI(field, int64(810)),
+				NewGEFVI(field, int64(813)),
+				NewGEFVI(field, int64(815)),
+				NewGEFVI(field, int64(818)),
 				NewGEFVI(field, int64(820)),
 				NewGEFVI(field, int64(823)),
 			},
 		},
 	}
-	complexity := 10
-	for _, c := range cases {
-		got := rule.Tweak(c.description, complexity, c.stage)
+	for i, c := range cases {
+		got := rule.Tweak(c.description, c.stage)
 		if err := checkRulesMatch(got, c.want); err != nil {
-			t.Errorf("Tweak: %s, got: %s", err, got)
+			t.Errorf("(%d) Tweak: %s, got: %s", i, err, got)
 		}
 	}
 }

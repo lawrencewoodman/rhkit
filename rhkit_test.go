@@ -92,7 +92,6 @@ func processDataset(experiment *experiment.Experiment) error {
 	sortedRules := assessment.GetRules()
 
 	tweakableRules := rhkit.TweakRules(
-		complexity,
 		1,
 		sortedRules,
 		fieldDescriptions,
