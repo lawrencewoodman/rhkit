@@ -46,6 +46,10 @@ type Overlapper interface {
 	Overlaps(o Rule) bool
 }
 
+type DPReducer interface {
+	DPReduce() []Rule
+}
+
 type InvalidRuleError struct {
 	Rule Rule
 }
@@ -78,6 +82,21 @@ func Uniq(rules []Rule) []Rule {
 		}
 	}
 	return results
+}
+
+// ReduceDP returns decimal number reduced rules if they can be reduced.
+// Adds True rule at end.
+func ReduceDP(sortedRules []Rule) []Rule {
+	newRules := make([]Rule, 0)
+	for _, r := range sortedRules {
+		switch x := r.(type) {
+		case DPReducer:
+			rules := x.DPReduce()
+			newRules = append(newRules, rules...)
+		}
+	}
+	newRules = append(newRules, NewTrue())
+	return Uniq(newRules)
 }
 
 func commaJoinValues(values []*dlit.Literal) string {
@@ -135,4 +154,20 @@ func generateTweakPoints(
 	}
 
 	return internal.MapLitNumsToSlice(tweakPoints)
+}
+
+type makeRoundRule func(*dlit.Literal) Rule
+
+func roundRules(v *dlit.Literal, makeRule makeRoundRule) []Rule {
+	rulesMap := map[string]Rule{}
+	rules := []Rule{}
+	for dp := 200; dp >= 0; dp-- {
+		p := internal.RoundLit(v, dp)
+		r := makeRule(p)
+		if _, ok := rulesMap[r.String()]; !ok {
+			rulesMap[r.String()] = r
+			rules = append(rules, r)
+		}
+	}
+	return rules
 }

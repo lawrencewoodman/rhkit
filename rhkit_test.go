@@ -8,6 +8,7 @@ import (
 	"github.com/lawrencewoodman/ddataset/dcsv"
 	"github.com/vlifesystems/rhkit"
 	"github.com/vlifesystems/rhkit/experiment"
+	"github.com/vlifesystems/rhkit/rule"
 	"path/filepath"
 	"testing"
 )
@@ -62,6 +63,9 @@ func TestAll(t *testing.T) {
  *  Helper functions
  ******************************/
 func processDataset(experiment *experiment.Experiment) error {
+	var assessment *rhkit.Assessment
+	var newAssessment *rhkit.Assessment
+	var err error
 	fieldDescriptions, err := rhkit.DescribeDataset(experiment.Dataset)
 	if err != nil {
 		return fmt.Errorf("describer.DescribeDataset(experiment.dataset) - err: %s",
@@ -81,7 +85,7 @@ func processDataset(experiment *experiment.Experiment) error {
 		)
 	}
 
-	assessment, err := rhkit.AssessRules(rules, experiment)
+	assessment, err = rhkit.AssessRules(rules, experiment)
 	if err != nil {
 		return fmt.Errorf("rhkit.AssessRules(rules, %v) - err: %s",
 			experiment, err)
@@ -102,41 +106,60 @@ func processDataset(experiment *experiment.Experiment) error {
 			fieldDescriptions)
 	}
 
-	assessment2, err := rhkit.AssessRules(tweakableRules, experiment)
+	newAssessment, err = rhkit.AssessRules(tweakableRules, experiment)
 	if err != nil {
 		return fmt.Errorf("rhkit.assessRules(tweakableRules, %v) - err: %s",
 			experiment, err)
 	}
 
-	assessment3, err := assessment.Merge(assessment2)
+	assessment, err = assessment.Merge(newAssessment)
 	if err != nil {
 		return fmt.Errorf("assessment.Merge(assessment2) - err: %s", err)
 	}
-	assessment3.Sort(experiment.SortOrder)
-	assessment3.Refine()
+	assessment.Sort(experiment.SortOrder)
+	assessment.Refine()
+
+	sortedRules = assessment.GetRules()
+	reducedDPRules := rule.ReduceDP(sortedRules)
+	if len(reducedDPRules) < 2 {
+		return fmt.Errorf("rule.ReduceDP: not enough rules generated")
+	}
+
+	newAssessment, err = rhkit.AssessRules(reducedDPRules, experiment)
+	if err != nil {
+		return fmt.Errorf("rhkit.assessRules(reducedDPRules, %v) - err: %s",
+			experiment, err)
+	}
+
+	assessment, err = assessment.Merge(newAssessment)
+	if err != nil {
+		return fmt.Errorf("assessment.Merge: %s", err)
+	}
+	assessment.Sort(experiment.SortOrder)
+	assessment.Refine()
 
 	numRulesToCombine := 50
-	bestNonCombinedRules := assessment3.GetRules(numRulesToCombine)
+	bestNonCombinedRules := assessment.GetRules(numRulesToCombine)
 	combinedRules :=
 		rhkit.CombineRules(bestNonCombinedRules)
 	if len(combinedRules) < 2 {
 		return fmt.Errorf("rhkit.CombineRules(bestNonCombinedRules) - not enough rules generated")
 	}
 
-	assessment4, err := rhkit.AssessRules(combinedRules, experiment)
+	newAssessment, err = rhkit.AssessRules(combinedRules, experiment)
 	if err != nil {
 		return fmt.Errorf("rhkit.assessRules(combinedRules, %v) - err: %s",
 			experiment, err)
 	}
 
-	assessment5, err := assessment3.Merge(assessment4)
+	assessment, err = assessment.Merge(newAssessment)
 	if err != nil {
-		return fmt.Errorf("assessment3.Merge(assessment4) - err: %s", err)
+		return fmt.Errorf("assessment3.Merge: %s", err)
 	}
-	assessment5.Sort(experiment.SortOrder)
-	assessment5.Refine()
+	assessment.Sort(experiment.SortOrder)
+	assessment.Refine()
 
 	finalNumRuleAssessments := 100
-	assessment5.TruncateRuleAssessments(finalNumRuleAssessments)
+	assessment.TruncateRuleAssessments(finalNumRuleAssessments)
 	return nil
 }

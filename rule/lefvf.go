@@ -20,6 +20,7 @@
 package rule
 
 import (
+	"fmt"
 	"github.com/lawrencewoodman/ddataset"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/description"
@@ -92,4 +93,14 @@ func (r *LEFVF) Overlaps(o Rule) bool {
 		return r.field == oField
 	}
 	return false
+}
+
+func (r *LEFVF) DPReduce() []Rule {
+	return roundRules(dlit.MustNew(r.value), func(p *dlit.Literal) Rule {
+		f, ok := p.Float()
+		if !ok {
+			panic(fmt.Errorf("can't convert to Float: %s", p))
+		}
+		return NewLEFVF(r.field, f)
+	})
 }

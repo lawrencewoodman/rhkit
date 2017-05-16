@@ -198,3 +198,82 @@ func TestGenerateTweakPoints(t *testing.T) {
 		}
 	}
 }
+
+func TestRoundRules(t *testing.T) {
+	field := "income"
+	cases := []struct {
+		in   *dlit.Literal
+		want []Rule
+	}{
+		{in: dlit.MustNew(5), want: []Rule{
+			NewLEFVF(field, 5),
+		}},
+		{in: dlit.MustNew(2.5), want: []Rule{
+			NewLEFVF(field, 2.5),
+			NewLEFVF(field, 3),
+		}},
+		{in: dlit.MustNew(2.25), want: []Rule{
+			NewLEFVF(field, 2.25),
+			NewLEFVF(field, 2.3),
+			NewLEFVF(field, 2),
+		}},
+	}
+
+	makeRule := func(p *dlit.Literal) Rule {
+		if f, ok := p.Float(); ok {
+			return NewLEFVF(field, f)
+		}
+		t.Fatalf("can't make float")
+		return nil
+	}
+	for _, c := range cases {
+		got := roundRules(c.in, makeRule)
+		if len(got) != len(c.want) {
+			t.Errorf("roundRules got: %s, want: %s", got, c.want)
+			continue
+		}
+		for i, n := range got {
+			if n.String() != c.want[i].String() {
+				t.Errorf("roundRules got: %s, want: %s", got, c.want)
+			}
+		}
+	}
+}
+
+func TestReduceDP(t *testing.T) {
+	in := []Rule{
+		NewLEFVF("income", 7.772),
+		NewGEFVF("flow", 7.9265),
+		NewGEFF("flow", "income"),
+		NewAddLEF("balance", "income", dlit.MustNew(1024.23)),
+		NewAddGEF("balance", "income", dlit.MustNew(1024.23)),
+	}
+	want := []Rule{
+		NewLEFVF("income", 7.772),
+		NewLEFVF("income", 7.77),
+		NewLEFVF("income", 7.8),
+		NewLEFVF("income", 8),
+		NewGEFVF("flow", 7.9265),
+		NewGEFVF("flow", 7.927),
+		NewGEFVF("flow", 7.93),
+		NewGEFVF("flow", 7.9),
+		NewGEFVF("flow", 8),
+		NewAddLEF("balance", "income", dlit.MustNew(1024.23)),
+		NewAddLEF("balance", "income", dlit.MustNew(1024.2)),
+		NewAddLEF("balance", "income", dlit.MustNew(1024)),
+		NewAddGEF("balance", "income", dlit.MustNew(1024.23)),
+		NewAddGEF("balance", "income", dlit.MustNew(1024.2)),
+		NewAddGEF("balance", "income", dlit.MustNew(1024)),
+		NewTrue(),
+	}
+	got := ReduceDP(in)
+	if len(got) != len(want) {
+		t.Errorf("ReduceDP got: %s, want: %s", got, want)
+		return
+	}
+	for i, n := range got {
+		if n.String() != want[i].String() {
+			t.Errorf("ReduceDP got: %s, want: %s", got, want)
+		}
+	}
+}

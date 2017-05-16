@@ -117,3 +117,9 @@ func (r *AddGEF) Overlaps(o Rule) bool {
 	}
 	return false
 }
+
+func (r *AddGEF) DPReduce() []Rule {
+	return roundRules(r.value, func(p *dlit.Literal) Rule {
+		return NewAddGEF(r.fieldA, r.fieldB, p)
+	})
+}
