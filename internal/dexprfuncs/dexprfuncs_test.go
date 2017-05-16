@@ -342,7 +342,7 @@ func TestRoundTo(t *testing.T) {
 			want: dlit.MustNew(3)},
 		{in: []*dlit.Literal{dlit.MustNew(3), dlit.MustNew(0)},
 			want: dlit.MustNew(3)},
-		{in: []*dlit.Literal{dlit.MustNew(5), dlit.MustNew(17)},
+		{in: []*dlit.Literal{dlit.MustNew(5), dlit.MustNew(183)},
 			want: dlit.MustNew(5)},
 		{in: []*dlit.Literal{dlit.MustNew(2.445), dlit.MustNew(17)},
 			want: dlit.MustNew(2.445)},
@@ -387,6 +387,41 @@ func TestRoundTo(t *testing.T) {
 		}
 		if got.String() != c.want.String() {
 			t.Errorf("roundTo(%v) got: %s, want: %s", c.in, got, c.want)
+		}
+	}
+}
+
+// Tests that an int is always returned no matter the number of dp
+// This is important because rounding errors can be created because
+// of the use of a float
+func TestRoundTo_int(t *testing.T) {
+	want := dlit.MustNew(5)
+	for dp := 0; dp < 1000; dp++ {
+		in := []*dlit.Literal{dlit.MustNew(5), dlit.MustNew(dp)}
+		got, err := roundTo(in)
+		if err != nil {
+			t.Errorf("roundTo(%v) err: %v", in, err)
+		}
+		if got.String() != want.String() {
+			t.Errorf("roundTo(%v) got: %s, want: %s", in, got, want)
+		}
+	}
+}
+
+// Tests that an float is always returned with a dp less then or equal
+// the original number.
+// This is important because rounding errors can be created because
+// of the use of a float
+func TestRoundTo_float(t *testing.T) {
+	want := dlit.MustNew(5.55)
+	for dp := 2; dp < 1000; dp++ {
+		in := []*dlit.Literal{dlit.MustNew(5.55), dlit.MustNew(dp)}
+		got, err := roundTo(in)
+		if err != nil {
+			t.Errorf("roundTo(%v) err: %v", in, err)
+		}
+		if got.String() != want.String() {
+			t.Errorf("roundTo(%v) got: %s, want: %s", in, got, want)
 		}
 	}
 }
