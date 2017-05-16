@@ -331,6 +331,66 @@ func TestMax_errors(t *testing.T) {
 	}
 }
 
+func TestRoundTo(t *testing.T) {
+	cases := []struct {
+		in   []*dlit.Literal
+		want *dlit.Literal
+	}{
+		{in: []*dlit.Literal{dlit.MustNew(3), dlit.MustNew(5)},
+			want: dlit.MustNew(3)},
+		{in: []*dlit.Literal{dlit.MustNew(3), dlit.MustNew(1)},
+			want: dlit.MustNew(3)},
+		{in: []*dlit.Literal{dlit.MustNew(3), dlit.MustNew(0)},
+			want: dlit.MustNew(3)},
+		{in: []*dlit.Literal{dlit.MustNew(5), dlit.MustNew(17)},
+			want: dlit.MustNew(5)},
+		{in: []*dlit.Literal{dlit.MustNew(2.445), dlit.MustNew(17)},
+			want: dlit.MustNew(2.445)},
+		{in: []*dlit.Literal{dlit.MustNew(2.445), dlit.MustNew(3)},
+			want: dlit.MustNew(2.445)},
+		{in: []*dlit.Literal{dlit.MustNew(2.445), dlit.MustNew(2)},
+			want: dlit.MustNew(2.44)},
+		{in: []*dlit.Literal{dlit.MustNew(2.445), dlit.MustNew(1)},
+			want: dlit.MustNew(2.4)},
+		{in: []*dlit.Literal{dlit.MustNew(2.445), dlit.MustNew(0)},
+			want: dlit.MustNew(2)},
+		{in: []*dlit.Literal{dlit.MustNew(2.512), dlit.MustNew(4)},
+			want: dlit.MustNew(2.512)},
+		{in: []*dlit.Literal{dlit.MustNew(2.512), dlit.MustNew(3)},
+			want: dlit.MustNew(2.512)},
+		{in: []*dlit.Literal{dlit.MustNew(2.512), dlit.MustNew(2)},
+			want: dlit.MustNew(2.51)},
+		{in: []*dlit.Literal{dlit.MustNew(2.512), dlit.MustNew(1)},
+			want: dlit.MustNew(2.5)},
+		{in: []*dlit.Literal{dlit.MustNew(2.5), dlit.MustNew(0)},
+			want: dlit.MustNew(3)},
+		{in: []*dlit.Literal{dlit.MustNew(-23.5), dlit.MustNew(1)},
+			want: dlit.MustNew(-23.5)},
+		{in: []*dlit.Literal{dlit.MustNew(-23.5), dlit.MustNew(0)},
+			want: dlit.MustNew(-23)},
+		{in: []*dlit.Literal{dlit.MustNew(0.268), dlit.MustNew(3)},
+			want: dlit.MustNew(0.268)},
+		{in: []*dlit.Literal{dlit.MustNew(0.268), dlit.MustNew(2)},
+			want: dlit.MustNew(0.27)},
+		{in: []*dlit.Literal{dlit.MustNew(0.268), dlit.MustNew(1)},
+			want: dlit.MustNew(0.3)},
+		{in: []*dlit.Literal{dlit.MustNew(0.268), dlit.MustNew(0)},
+			want: dlit.MustNew(0)},
+		{in: []*dlit.Literal{dlit.MustNew(0.258), dlit.MustNew(2)},
+			want: dlit.MustNew(0.26)},
+	}
+
+	for _, c := range cases {
+		got, err := roundTo(c.in)
+		if err != nil {
+			t.Errorf("roundTo(%v) err: %v", c.in, err)
+		}
+		if got.String() != c.want.String() {
+			t.Errorf("roundTo(%v) got: %s, want: %s", c.in, got, c.want)
+		}
+	}
+}
+
 /*************************
  *       Benchmarks
  *************************/
