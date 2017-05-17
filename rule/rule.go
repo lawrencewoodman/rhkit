@@ -86,9 +86,9 @@ func Uniq(rules []Rule) []Rule {
 
 // ReduceDP returns decimal number reduced rules if they can be reduced.
 // Adds True rule at end.
-func ReduceDP(sortedRules []Rule) []Rule {
+func ReduceDP(rules []Rule) []Rule {
 	newRules := make([]Rule, 0)
-	for _, r := range sortedRules {
+	for _, r := range rules {
 		switch x := r.(type) {
 		case DPReducer:
 			rules := x.DPReduce()
