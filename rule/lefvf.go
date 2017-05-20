@@ -45,6 +45,10 @@ func (r *LEFVF) GetValue() float64 {
 	return r.value
 }
 
+func (r *LEFVF) Value() *dlit.Literal {
+	return dlit.MustNew(r.value)
+}
+
 func (r *LEFVF) GetFields() []string {
 	return []string{r.field}
 }

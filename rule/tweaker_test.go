@@ -129,14 +129,15 @@ func TestTweak_2(t *testing.T) {
 				printTestPurposes(t, testPurposes)
 				t.Fatalf("Tweak(%s) invalid rule(%s): ", rulesIn, gotRule)
 			}
-			n := x.GetValue()
-			if n >= 10 && n < 20 {
+			n := x.Value()
+			nInt, _ := n.Int()
+			if nInt >= 10 && nInt < 20 {
 				num10To20++
-			} else if n >= 20 && n < 40 {
+			} else if nInt >= 20 && nInt < 40 {
 				num20To40++
-			} else if n >= 40 && n < 50 {
+			} else if nInt >= 40 && nInt < 50 {
 				num40To50++
-			} else if n >= 50 && n < 80 {
+			} else if nInt >= 50 && nInt < 80 {
 				num50To80++
 			} else {
 				numOther++
@@ -218,19 +219,20 @@ func TestTweak_3(t *testing.T) {
 				printTestPurposes(t, testPurposes)
 				t.Fatalf("Tweak(%s) invalid rule(%s)", rulesIn, gotRule)
 			}
-			n := x.GetValue()
-			if n >= 10 && n < 24 {
+			n := x.Value()
+			nFloat, _ := n.Float()
+			if nFloat >= 10 && nFloat < 24 {
 				num10To24++
-			} else if n >= 24 && n < 41 {
+			} else if nFloat >= 24 && nFloat < 41 {
 				num24To41++
-			} else if n >= 41 && n < 53 {
+			} else if nFloat >= 41 && nFloat < 53 {
 				num41To53++
-			} else if n >= 53 && n < 80 {
+			} else if nFloat >= 53 && nFloat < 80 {
 				num53To80++
 			} else {
 				numOther++
 			}
-			valueDP := internal.NumDecPlaces(dlit.MustNew(x.GetValue()).String())
+			valueDP := internal.NumDecPlaces(x.Value().String())
 			if valueDP > gotMaxDP {
 				gotMaxDP = valueDP
 			}

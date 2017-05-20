@@ -1,6 +1,7 @@
 package rule
 
 import (
+	"fmt"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/description"
 	"github.com/vlifesystems/rhkit/internal/fieldtype"
@@ -16,6 +17,16 @@ func TestLEFVFString(t *testing.T) {
 	got := r.String()
 	if got != want {
 		t.Errorf("String() got: %s, want: %s", got, want)
+	}
+}
+
+func TestLEFVFValue(t *testing.T) {
+	field := "income"
+	value := 8.93
+	r := NewLEFVF(field, value)
+	got := r.Value()
+	if got.String() != "8.93" {
+		t.Errorf("Value() got: %s, want: %f", got, value)
 	}
 }
 
@@ -96,7 +107,12 @@ func TestLEFVFTweak(t *testing.T) {
 	cases := []struct {
 		description *description.Description
 		stage       int
-		want        []Rule
+		minNumRules int
+		maxNumRules int
+		min         *dlit.Literal
+		max         *dlit.Literal
+		mid         *dlit.Literal
+		maxDP       int
 	}{
 		{description: &description.Description{
 			map[string]*description.Field{
@@ -108,27 +124,13 @@ func TestLEFVFTweak(t *testing.T) {
 				},
 			},
 		},
-			stage: 1,
-			want: []Rule{
-				NewLEFVF(field, float64(755)),
-				NewLEFVF(field, float64(760)),
-				NewLEFVF(field, float64(765)),
-				NewLEFVF(field, float64(770)),
-				NewLEFVF(field, float64(775)),
-				NewLEFVF(field, float64(780)),
-				NewLEFVF(field, float64(785)),
-				NewLEFVF(field, float64(790)),
-				NewLEFVF(field, float64(795)),
-				NewLEFVF(field, float64(805)),
-				NewLEFVF(field, float64(810)),
-				NewLEFVF(field, float64(815)),
-				NewLEFVF(field, float64(820)),
-				NewLEFVF(field, float64(825)),
-				NewLEFVF(field, float64(830)),
-				NewLEFVF(field, float64(835)),
-				NewLEFVF(field, float64(840)),
-				NewLEFVF(field, float64(845)),
-			},
+			stage:       1,
+			minNumRules: 18,
+			maxNumRules: 20,
+			min:         dlit.MustNew(755),
+			max:         dlit.MustNew(845),
+			mid:         dlit.MustNew(800),
+			maxDP:       0,
 		},
 		{description: &description.Description{
 			map[string]*description.Field{
@@ -140,28 +142,13 @@ func TestLEFVFTweak(t *testing.T) {
 				},
 			},
 		},
-			stage: 1,
-			want: []Rule{
-				NewLEFVF(field, float64(791.55)),
-				NewLEFVF(field, float64(793.1)),
-				NewLEFVF(field, float64(794.65)),
-				NewLEFVF(field, float64(796.2)),
-				NewLEFVF(field, float64(797.75)),
-				NewLEFVF(field, float64(799.3)),
-				NewLEFVF(field, float64(800.85)),
-				NewLEFVF(field, float64(802.4)),
-				NewLEFVF(field, float64(803.95)),
-				NewLEFVF(field, float64(805.5)),
-				NewLEFVF(field, float64(807.05)),
-				NewLEFVF(field, float64(808.6)),
-				NewLEFVF(field, float64(810.15)),
-				NewLEFVF(field, float64(811.7)),
-				NewLEFVF(field, float64(813.25)),
-				NewLEFVF(field, float64(814.8)),
-				NewLEFVF(field, float64(816.35)),
-				NewLEFVF(field, float64(817.9)),
-				NewLEFVF(field, float64(819.45)),
-			},
+			stage:       1,
+			minNumRules: 18,
+			maxNumRules: 20,
+			min:         dlit.MustNew(790),
+			max:         dlit.MustNew(820),
+			mid:         dlit.MustNew(803),
+			maxDP:       2,
 		},
 		{description: &description.Description{
 			map[string]*description.Field{
@@ -173,28 +160,13 @@ func TestLEFVFTweak(t *testing.T) {
 				},
 			},
 		},
-			stage: 1,
-			want: []Rule{
-				NewLEFVF(field, float64(771.05)),
-				NewLEFVF(field, float64(773.1)),
-				NewLEFVF(field, float64(775.15)),
-				NewLEFVF(field, float64(777.2)),
-				NewLEFVF(field, float64(779.25)),
-				NewLEFVF(field, float64(781.3)),
-				NewLEFVF(field, float64(783.35)),
-				NewLEFVF(field, float64(785.4)),
-				NewLEFVF(field, float64(787.45)),
-				NewLEFVF(field, float64(789.5)),
-				NewLEFVF(field, float64(791.55)),
-				NewLEFVF(field, float64(793.6)),
-				NewLEFVF(field, float64(795.65)),
-				NewLEFVF(field, float64(797.7)),
-				NewLEFVF(field, float64(799.75)),
-				NewLEFVF(field, float64(801.8)),
-				NewLEFVF(field, float64(803.85)),
-				NewLEFVF(field, float64(805.9)),
-				NewLEFVF(field, float64(807.95)),
-			},
+			stage:       1,
+			minNumRules: 18,
+			maxNumRules: 20,
+			min:         dlit.MustNew(770),
+			max:         dlit.MustNew(808),
+			mid:         dlit.MustNew(787),
+			maxDP:       2,
 		},
 		{description: &description.Description{
 			map[string]*description.Field{
@@ -206,8 +178,13 @@ func TestLEFVFTweak(t *testing.T) {
 				},
 			},
 		},
-			stage: 1,
-			want:  []Rule{},
+			stage:       1,
+			minNumRules: 0,
+			maxNumRules: 0,
+			min:         dlit.MustNew(770),
+			max:         dlit.MustNew(787),
+			mid:         dlit.MustNew(808),
+			maxDP:       0,
 		},
 
 		{description: &description.Description{
@@ -220,33 +197,39 @@ func TestLEFVFTweak(t *testing.T) {
 				},
 			},
 		},
-			stage: 2,
-			want: []Rule{
-				NewLEFVF(field, float64(777.5)),
-				NewLEFVF(field, float64(780)),
-				NewLEFVF(field, float64(782.5)),
-				NewLEFVF(field, float64(785)),
-				NewLEFVF(field, float64(787.5)),
-				NewLEFVF(field, float64(790)),
-				NewLEFVF(field, float64(792.5)),
-				NewLEFVF(field, float64(795)),
-				NewLEFVF(field, float64(797.5)),
-				NewLEFVF(field, float64(802.5)),
-				NewLEFVF(field, float64(805)),
-				NewLEFVF(field, float64(807.5)),
-				NewLEFVF(field, float64(810)),
-				NewLEFVF(field, float64(812.5)),
-				NewLEFVF(field, float64(815)),
-				NewLEFVF(field, float64(817.5)),
-				NewLEFVF(field, float64(820)),
-				NewLEFVF(field, float64(822.5)),
-			},
+			stage:       2,
+			minNumRules: 18,
+			maxNumRules: 20,
+			min:         dlit.MustNew(777),
+			max:         dlit.MustNew(823),
+			mid:         dlit.MustNew(797),
+			maxDP:       1,
 		},
+	}
+	complyFunc := func(r Rule) error {
+		x, ok := r.(*LEFVF)
+		if !ok {
+			return fmt.Errorf("wrong type: %T (%s)", r, r)
+		}
+		if x.field != "income" {
+			return fmt.Errorf("field isn't correct for rule: %s", r)
+		}
+		return nil
 	}
 	for i, c := range cases {
 		got := rule.Tweak(c.description, c.stage)
-		if err := checkRulesMatch(got, c.want); err != nil {
-			t.Errorf("(%d) Tweak: %s, got: %s, want: %s", i, err, got, c.want)
+		err := checkRulesComply(
+			got,
+			c.minNumRules,
+			c.maxNumRules,
+			c.min,
+			c.max,
+			c.mid,
+			c.maxDP,
+			complyFunc,
+		)
+		if err != nil {
+			t.Errorf("(%d) Tweak: %s", i, err)
 		}
 	}
 }

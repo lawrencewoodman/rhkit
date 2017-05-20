@@ -50,6 +50,10 @@ type DPReducer interface {
 	DPReduce() []Rule
 }
 
+type Valuer interface {
+	Value() *dlit.Literal
+}
+
 type InvalidRuleError struct {
 	Rule Rule
 }

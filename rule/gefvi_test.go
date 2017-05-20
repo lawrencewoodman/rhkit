@@ -1,6 +1,7 @@
 package rule
 
 import (
+	"fmt"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/description"
 	"github.com/vlifesystems/rhkit/internal/fieldtype"
@@ -16,6 +17,16 @@ func TestGEFVIString(t *testing.T) {
 	got := r.String()
 	if got != want {
 		t.Errorf("String() got: %s, want: %s", got, want)
+	}
+}
+
+func TestGEFVIValue(t *testing.T) {
+	field := "income"
+	value := int64(893)
+	r := NewGEFVI(field, value)
+	got := r.Value()
+	if got.String() != "893" {
+		t.Errorf("Value() got: %s, want: %f", got, value)
 	}
 }
 
@@ -87,7 +98,12 @@ func TestGEFVITweak(t *testing.T) {
 	cases := []struct {
 		description *description.Description
 		stage       int
-		want        []Rule
+		minNumRules int
+		maxNumRules int
+		min         *dlit.Literal
+		max         *dlit.Literal
+		mid         *dlit.Literal
+		maxDP       int
 	}{
 		{description: &description.Description{
 			map[string]*description.Field{
@@ -98,27 +114,13 @@ func TestGEFVITweak(t *testing.T) {
 				},
 			},
 		},
-			stage: 1,
-			want: []Rule{
-				NewGEFVI(field, int64(755)),
-				NewGEFVI(field, int64(760)),
-				NewGEFVI(field, int64(765)),
-				NewGEFVI(field, int64(770)),
-				NewGEFVI(field, int64(775)),
-				NewGEFVI(field, int64(780)),
-				NewGEFVI(field, int64(785)),
-				NewGEFVI(field, int64(790)),
-				NewGEFVI(field, int64(795)),
-				NewGEFVI(field, int64(805)),
-				NewGEFVI(field, int64(810)),
-				NewGEFVI(field, int64(815)),
-				NewGEFVI(field, int64(820)),
-				NewGEFVI(field, int64(825)),
-				NewGEFVI(field, int64(830)),
-				NewGEFVI(field, int64(835)),
-				NewGEFVI(field, int64(840)),
-				NewGEFVI(field, int64(845)),
-			},
+			stage:       1,
+			minNumRules: 18,
+			maxNumRules: 20,
+			min:         dlit.MustNew(755),
+			max:         dlit.MustNew(845),
+			mid:         dlit.MustNew(800),
+			maxDP:       0,
 		},
 		{description: &description.Description{
 			map[string]*description.Field{
@@ -129,28 +131,13 @@ func TestGEFVITweak(t *testing.T) {
 				},
 			},
 		},
-			stage: 1,
-			want: []Rule{
-				NewGEFVI(field, int64(792)),
-				NewGEFVI(field, int64(793)),
-				NewGEFVI(field, int64(795)),
-				NewGEFVI(field, int64(796)),
-				NewGEFVI(field, int64(798)),
-				NewGEFVI(field, int64(799)),
-				NewGEFVI(field, int64(801)),
-				NewGEFVI(field, int64(802)),
-				NewGEFVI(field, int64(804)),
-				NewGEFVI(field, int64(805)),
-				NewGEFVI(field, int64(807)),
-				NewGEFVI(field, int64(809)),
-				NewGEFVI(field, int64(810)),
-				NewGEFVI(field, int64(812)),
-				NewGEFVI(field, int64(813)),
-				NewGEFVI(field, int64(815)),
-				NewGEFVI(field, int64(816)),
-				NewGEFVI(field, int64(818)),
-				NewGEFVI(field, int64(819)),
-			},
+			stage:       1,
+			minNumRules: 18,
+			maxNumRules: 20,
+			min:         dlit.MustNew(792),
+			max:         dlit.MustNew(819),
+			mid:         dlit.MustNew(805),
+			maxDP:       0,
 		},
 		{description: &description.Description{
 			map[string]*description.Field{
@@ -161,27 +148,13 @@ func TestGEFVITweak(t *testing.T) {
 				},
 			},
 		},
-			stage: 1,
-			want: []Rule{
-				NewGEFVI(field, int64(771)),
-				NewGEFVI(field, int64(773)),
-				NewGEFVI(field, int64(775)),
-				NewGEFVI(field, int64(777)),
-				NewGEFVI(field, int64(779)),
-				NewGEFVI(field, int64(781)),
-				NewGEFVI(field, int64(783)),
-				NewGEFVI(field, int64(785)),
-				NewGEFVI(field, int64(787)),
-				NewGEFVI(field, int64(789)),
-				NewGEFVI(field, int64(792)),
-				NewGEFVI(field, int64(794)),
-				NewGEFVI(field, int64(796)),
-				NewGEFVI(field, int64(798)),
-				NewGEFVI(field, int64(802)),
-				NewGEFVI(field, int64(804)),
-				NewGEFVI(field, int64(806)),
-				NewGEFVI(field, int64(808)),
-			},
+			stage:       1,
+			minNumRules: 18,
+			maxNumRules: 20,
+			min:         dlit.MustNew(771),
+			max:         dlit.MustNew(808),
+			mid:         dlit.MustNew(787),
+			maxDP:       0,
 		},
 		{description: &description.Description{
 			map[string]*description.Field{
@@ -192,8 +165,13 @@ func TestGEFVITweak(t *testing.T) {
 				},
 			},
 		},
-			stage: 1,
-			want:  []Rule{},
+			stage:       1,
+			minNumRules: 0,
+			maxNumRules: 0,
+			min:         dlit.MustNew(798),
+			max:         dlit.MustNew(800),
+			mid:         dlit.MustNew(805),
+			maxDP:       0,
 		},
 		{description: &description.Description{
 			map[string]*description.Field{
@@ -204,33 +182,39 @@ func TestGEFVITweak(t *testing.T) {
 				},
 			},
 		},
-			stage: 2,
-			want: []Rule{
-				NewGEFVI(field, int64(778)),
-				NewGEFVI(field, int64(780)),
-				NewGEFVI(field, int64(783)),
-				NewGEFVI(field, int64(785)),
-				NewGEFVI(field, int64(788)),
-				NewGEFVI(field, int64(790)),
-				NewGEFVI(field, int64(793)),
-				NewGEFVI(field, int64(795)),
-				NewGEFVI(field, int64(798)),
-				NewGEFVI(field, int64(803)),
-				NewGEFVI(field, int64(805)),
-				NewGEFVI(field, int64(808)),
-				NewGEFVI(field, int64(810)),
-				NewGEFVI(field, int64(813)),
-				NewGEFVI(field, int64(815)),
-				NewGEFVI(field, int64(818)),
-				NewGEFVI(field, int64(820)),
-				NewGEFVI(field, int64(823)),
-			},
+			stage:       2,
+			minNumRules: 18,
+			maxNumRules: 20,
+			min:         dlit.MustNew(778),
+			max:         dlit.MustNew(823),
+			mid:         dlit.MustNew(798),
+			maxDP:       0,
 		},
+	}
+	complyFunc := func(r Rule) error {
+		x, ok := r.(*GEFVI)
+		if !ok {
+			return fmt.Errorf("wrong type: %T (%s)", r, r)
+		}
+		if x.field != "income" {
+			return fmt.Errorf("field isn't correct for rule: %s", r)
+		}
+		return nil
 	}
 	for i, c := range cases {
 		got := rule.Tweak(c.description, c.stage)
-		if err := checkRulesMatch(got, c.want); err != nil {
-			t.Errorf("(%d) Tweak: %s, got: %s", i, err, got)
+		err := checkRulesComply(
+			got,
+			c.minNumRules,
+			c.maxNumRules,
+			c.min,
+			c.max,
+			c.mid,
+			c.maxDP,
+			complyFunc,
+		)
+		if err != nil {
+			t.Errorf("(%d) Tweak: %s", i, err)
 		}
 	}
 }

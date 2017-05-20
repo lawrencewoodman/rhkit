@@ -1,6 +1,7 @@
 package rule
 
 import (
+	"fmt"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/description"
 	"github.com/vlifesystems/rhkit/internal/fieldtype"
@@ -18,6 +19,17 @@ func TestGEFVFString(t *testing.T) {
 		t.Errorf("String() got: %s, want: %s", got, want)
 	}
 }
+
+func TestGEFVFValue(t *testing.T) {
+	field := "income"
+	value := 8.93
+	r := NewGEFVF(field, value)
+	got := r.Value()
+	if got.String() != "8.93" {
+		t.Errorf("Value() got: %s, want: %f", got, value)
+	}
+}
+
 func TestGEFVFIsTrue(t *testing.T) {
 	cases := []struct {
 		field string
@@ -95,7 +107,12 @@ func TestGEFVFTweak(t *testing.T) {
 	cases := []struct {
 		description *description.Description
 		stage       int
-		want        []Rule
+		minNumRules int
+		maxNumRules int
+		min         *dlit.Literal
+		max         *dlit.Literal
+		mid         *dlit.Literal
+		maxDP       int
 	}{
 		{description: &description.Description{
 			map[string]*description.Field{
@@ -107,27 +124,13 @@ func TestGEFVFTweak(t *testing.T) {
 				},
 			},
 		},
-			stage: 1,
-			want: []Rule{
-				NewGEFVF(field, float64(755)),
-				NewGEFVF(field, float64(760)),
-				NewGEFVF(field, float64(765)),
-				NewGEFVF(field, float64(770)),
-				NewGEFVF(field, float64(775)),
-				NewGEFVF(field, float64(780)),
-				NewGEFVF(field, float64(785)),
-				NewGEFVF(field, float64(790)),
-				NewGEFVF(field, float64(795)),
-				NewGEFVF(field, float64(805)),
-				NewGEFVF(field, float64(810)),
-				NewGEFVF(field, float64(815)),
-				NewGEFVF(field, float64(820)),
-				NewGEFVF(field, float64(825)),
-				NewGEFVF(field, float64(830)),
-				NewGEFVF(field, float64(835)),
-				NewGEFVF(field, float64(840)),
-				NewGEFVF(field, float64(845)),
-			},
+			stage:       1,
+			minNumRules: 18,
+			maxNumRules: 20,
+			min:         dlit.MustNew(755),
+			max:         dlit.MustNew(845),
+			mid:         dlit.MustNew(800),
+			maxDP:       0,
 		},
 		{description: &description.Description{
 			map[string]*description.Field{
@@ -139,28 +142,13 @@ func TestGEFVFTweak(t *testing.T) {
 				},
 			},
 		},
-			stage: 1,
-			want: []Rule{
-				NewGEFVF(field, float64(791.55)),
-				NewGEFVF(field, float64(793.1)),
-				NewGEFVF(field, float64(794.65)),
-				NewGEFVF(field, float64(796.2)),
-				NewGEFVF(field, float64(797.75)),
-				NewGEFVF(field, float64(799.3)),
-				NewGEFVF(field, float64(800.85)),
-				NewGEFVF(field, float64(802.4)),
-				NewGEFVF(field, float64(803.95)),
-				NewGEFVF(field, float64(805.5)),
-				NewGEFVF(field, float64(807.05)),
-				NewGEFVF(field, float64(808.6)),
-				NewGEFVF(field, float64(810.15)),
-				NewGEFVF(field, float64(811.7)),
-				NewGEFVF(field, float64(813.25)),
-				NewGEFVF(field, float64(814.8)),
-				NewGEFVF(field, float64(816.35)),
-				NewGEFVF(field, float64(817.9)),
-				NewGEFVF(field, float64(819.45)),
-			},
+			stage:       1,
+			minNumRules: 18,
+			maxNumRules: 20,
+			min:         dlit.MustNew(790),
+			max:         dlit.MustNew(820),
+			mid:         dlit.MustNew(803),
+			maxDP:       2,
 		},
 		{description: &description.Description{
 			map[string]*description.Field{
@@ -172,28 +160,13 @@ func TestGEFVFTweak(t *testing.T) {
 				},
 			},
 		},
-			stage: 1,
-			want: []Rule{
-				NewGEFVF(field, float64(771.05)),
-				NewGEFVF(field, float64(773.1)),
-				NewGEFVF(field, float64(775.15)),
-				NewGEFVF(field, float64(777.2)),
-				NewGEFVF(field, float64(779.25)),
-				NewGEFVF(field, float64(781.3)),
-				NewGEFVF(field, float64(783.35)),
-				NewGEFVF(field, float64(785.4)),
-				NewGEFVF(field, float64(787.45)),
-				NewGEFVF(field, float64(789.5)),
-				NewGEFVF(field, float64(791.55)),
-				NewGEFVF(field, float64(793.6)),
-				NewGEFVF(field, float64(795.65)),
-				NewGEFVF(field, float64(797.7)),
-				NewGEFVF(field, float64(799.75)),
-				NewGEFVF(field, float64(801.8)),
-				NewGEFVF(field, float64(803.85)),
-				NewGEFVF(field, float64(805.9)),
-				NewGEFVF(field, float64(807.95)),
-			},
+			stage:       1,
+			minNumRules: 18,
+			maxNumRules: 20,
+			min:         dlit.MustNew(770),
+			max:         dlit.MustNew(808),
+			mid:         dlit.MustNew(787),
+			maxDP:       2,
 		},
 		{description: &description.Description{
 			map[string]*description.Field{
@@ -205,8 +178,13 @@ func TestGEFVFTweak(t *testing.T) {
 				},
 			},
 		},
-			stage: 1,
-			want:  []Rule{},
+			stage:       1,
+			minNumRules: 0,
+			maxNumRules: 0,
+			min:         dlit.MustNew(770),
+			max:         dlit.MustNew(787),
+			mid:         dlit.MustNew(808),
+			maxDP:       0,
 		},
 		{description: &description.Description{
 			map[string]*description.Field{
@@ -218,33 +196,39 @@ func TestGEFVFTweak(t *testing.T) {
 				},
 			},
 		},
-			stage: 2,
-			want: []Rule{
-				NewGEFVF(field, float64(777.5)),
-				NewGEFVF(field, float64(780)),
-				NewGEFVF(field, float64(782.5)),
-				NewGEFVF(field, float64(785)),
-				NewGEFVF(field, float64(787.5)),
-				NewGEFVF(field, float64(790)),
-				NewGEFVF(field, float64(792.5)),
-				NewGEFVF(field, float64(795)),
-				NewGEFVF(field, float64(797.5)),
-				NewGEFVF(field, float64(802.5)),
-				NewGEFVF(field, float64(805)),
-				NewGEFVF(field, float64(807.5)),
-				NewGEFVF(field, float64(810)),
-				NewGEFVF(field, float64(812.5)),
-				NewGEFVF(field, float64(815)),
-				NewGEFVF(field, float64(817.5)),
-				NewGEFVF(field, float64(820)),
-				NewGEFVF(field, float64(822.5)),
-			},
+			stage:       2,
+			minNumRules: 18,
+			maxNumRules: 20,
+			min:         dlit.MustNew(777),
+			max:         dlit.MustNew(823),
+			mid:         dlit.MustNew(797),
+			maxDP:       1,
 		},
+	}
+	complyFunc := func(r Rule) error {
+		x, ok := r.(*GEFVF)
+		if !ok {
+			return fmt.Errorf("wrong type: %T (%s)", r, r)
+		}
+		if x.field != "income" {
+			return fmt.Errorf("field isn't correct for rule: %s", r)
+		}
+		return nil
 	}
 	for i, c := range cases {
 		got := rule.Tweak(c.description, c.stage)
-		if err := checkRulesMatch(got, c.want); err != nil {
-			t.Errorf("(%d) Tweak: %s, got: %s, want: %s", i, err, got, c.want)
+		err := checkRulesComply(
+			got,
+			c.minNumRules,
+			c.maxNumRules,
+			c.min,
+			c.max,
+			c.mid,
+			c.maxDP,
+			complyFunc,
+		)
+		if err != nil {
+			t.Errorf("(%d) Tweak: %s", i, err)
 		}
 	}
 }

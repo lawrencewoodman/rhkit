@@ -120,93 +120,93 @@ func tryJoinRulesWithBetween(
 	fieldA := ruleA.GetFields()[0]
 	fieldB := ruleB.GetFields()[0]
 
-	if fieldA == fieldB {
-		_, ruleAIsBetweenFVI := ruleA.(*BetweenFVI)
-		_, ruleAIsBetweenFVF := ruleA.(*BetweenFVF)
-		_, ruleBIsBetweenFVI := ruleB.(*BetweenFVI)
-		_, ruleBIsBetweenFVF := ruleB.(*BetweenFVF)
-		OutsideFVIRuleA, ruleAIsOutsideFVI := ruleA.(*OutsideFVI)
-		OutsideFVFRuleA, ruleAIsOutsideFVF := ruleA.(*OutsideFVF)
-		OutsideFVIRuleB, ruleBIsOutsideFVI := ruleB.(*OutsideFVI)
-		OutsideFVFRuleB, ruleBIsOutsideFVF := ruleB.(*OutsideFVF)
-
-		if (ruleAIsBetweenFVI && !ruleBIsOutsideFVI) ||
-			(ruleAIsBetweenFVF && !ruleBIsOutsideFVF) ||
-			(!ruleAIsOutsideFVI && ruleBIsBetweenFVI) ||
-			(!ruleAIsOutsideFVF && ruleBIsBetweenFVF) ||
-			(ruleAIsOutsideFVI && ruleBIsOutsideFVI) ||
-			(ruleAIsOutsideFVF && ruleBIsOutsideFVF) {
-			return false, nil
-		}
-
-		GEFVIRuleA, ruleAIsGEFVI := ruleA.(*GEFVI)
-		LEFVIRuleA, ruleAIsLEFVI := ruleA.(*LEFVI)
-		GEFVIRuleB, ruleBIsGEFVI := ruleB.(*GEFVI)
-		LEFVIRuleB, ruleBIsLEFVI := ruleB.(*LEFVI)
-		GEFVFRuleA, ruleAIsGEFVF := ruleA.(*GEFVF)
-		LEFVFRuleA, ruleAIsLEFVF := ruleA.(*LEFVF)
-		GEFVFRuleB, ruleBIsGEFVF := ruleB.(*GEFVF)
-		LEFVFRuleB, ruleBIsLEFVF := ruleB.(*LEFVF)
-
-		if (ruleAIsGEFVI && ruleBIsGEFVI) ||
-			(ruleAIsLEFVI && ruleBIsLEFVI) ||
-			(ruleAIsGEFVF && ruleBIsGEFVF) ||
-			(ruleAIsLEFVF && ruleBIsLEFVF) {
-			return false, nil
-		}
-
-		if (ruleAIsOutsideFVI && ruleBIsLEFVI &&
-			OutsideFVIRuleA.GetHigh() >= LEFVIRuleB.GetValue()) ||
-			(ruleAIsOutsideFVI && ruleBIsGEFVI &&
-				OutsideFVIRuleA.GetLow() <= GEFVIRuleB.GetValue()) ||
-			(ruleAIsOutsideFVF && ruleBIsLEFVF &&
-				OutsideFVFRuleA.GetHigh() >= LEFVFRuleB.GetValue()) ||
-			(ruleAIsOutsideFVF && ruleBIsGEFVF &&
-				OutsideFVFRuleA.GetLow() <= GEFVFRuleB.GetValue()) ||
-			(ruleBIsOutsideFVI && ruleAIsLEFVI &&
-				OutsideFVIRuleB.GetHigh() >= LEFVIRuleA.GetValue()) ||
-			(ruleBIsOutsideFVI && ruleAIsGEFVI &&
-				OutsideFVIRuleB.GetLow() <= GEFVIRuleA.GetValue()) ||
-			(ruleBIsOutsideFVF && ruleAIsLEFVF &&
-				OutsideFVFRuleB.GetHigh() >= LEFVFRuleA.GetValue()) ||
-			(ruleBIsOutsideFVF && ruleAIsGEFVF &&
-				OutsideFVFRuleB.GetLow() <= GEFVFRuleA.GetValue()) {
-			return false, nil
-		}
-
-		if ruleAIsGEFVI && ruleBIsLEFVI {
-			r, err = NewBetweenFVI(
-				fieldA,
-				GEFVIRuleA.GetValue(),
-				LEFVIRuleB.GetValue(),
-			)
-		} else if ruleAIsLEFVI && ruleBIsGEFVI {
-			r, err = NewBetweenFVI(
-				fieldA,
-				GEFVIRuleB.GetValue(),
-				LEFVIRuleA.GetValue(),
-			)
-		} else if ruleAIsGEFVF && ruleBIsLEFVF {
-			r, err = NewBetweenFVF(
-				fieldA,
-				GEFVFRuleA.GetValue(),
-				LEFVFRuleB.GetValue(),
-			)
-		} else if ruleAIsLEFVF && ruleBIsGEFVF {
-			r, err = NewBetweenFVF(
-				fieldA,
-				GEFVFRuleB.GetValue(),
-				LEFVFRuleA.GetValue(),
-			)
-		} else {
-			return true, nil
-		}
-		if err != nil {
-			return false, nil
-		}
-		return false, r
+	if fieldA != fieldB {
+		return true, nil
 	}
-	return true, nil
+	_, ruleAIsBetweenFVI := ruleA.(*BetweenFVI)
+	_, ruleAIsBetweenFVF := ruleA.(*BetweenFVF)
+	_, ruleBIsBetweenFVI := ruleB.(*BetweenFVI)
+	_, ruleBIsBetweenFVF := ruleB.(*BetweenFVF)
+	OutsideFVIRuleA, ruleAIsOutsideFVI := ruleA.(*OutsideFVI)
+	OutsideFVFRuleA, ruleAIsOutsideFVF := ruleA.(*OutsideFVF)
+	OutsideFVIRuleB, ruleBIsOutsideFVI := ruleB.(*OutsideFVI)
+	OutsideFVFRuleB, ruleBIsOutsideFVF := ruleB.(*OutsideFVF)
+
+	if (ruleAIsBetweenFVI && !ruleBIsOutsideFVI) ||
+		(ruleAIsBetweenFVF && !ruleBIsOutsideFVF) ||
+		(!ruleAIsOutsideFVI && ruleBIsBetweenFVI) ||
+		(!ruleAIsOutsideFVF && ruleBIsBetweenFVF) ||
+		(ruleAIsOutsideFVI && ruleBIsOutsideFVI) ||
+		(ruleAIsOutsideFVF && ruleBIsOutsideFVF) {
+		return false, nil
+	}
+
+	GEFVIRuleA, ruleAIsGEFVI := ruleA.(*GEFVI)
+	LEFVIRuleA, ruleAIsLEFVI := ruleA.(*LEFVI)
+	GEFVIRuleB, ruleBIsGEFVI := ruleB.(*GEFVI)
+	LEFVIRuleB, ruleBIsLEFVI := ruleB.(*LEFVI)
+	GEFVFRuleA, ruleAIsGEFVF := ruleA.(*GEFVF)
+	LEFVFRuleA, ruleAIsLEFVF := ruleA.(*LEFVF)
+	GEFVFRuleB, ruleBIsGEFVF := ruleB.(*GEFVF)
+	LEFVFRuleB, ruleBIsLEFVF := ruleB.(*LEFVF)
+
+	if (ruleAIsGEFVI && ruleBIsGEFVI) ||
+		(ruleAIsLEFVI && ruleBIsLEFVI) ||
+		(ruleAIsGEFVF && ruleBIsGEFVF) ||
+		(ruleAIsLEFVF && ruleBIsLEFVF) {
+		return false, nil
+	}
+
+	if (ruleAIsOutsideFVI && ruleBIsLEFVI &&
+		OutsideFVIRuleA.GetHigh() >= LEFVIRuleB.GetValue()) ||
+		(ruleAIsOutsideFVI && ruleBIsGEFVI &&
+			OutsideFVIRuleA.GetLow() <= GEFVIRuleB.GetValue()) ||
+		(ruleAIsOutsideFVF && ruleBIsLEFVF &&
+			OutsideFVFRuleA.GetHigh() >= LEFVFRuleB.GetValue()) ||
+		(ruleAIsOutsideFVF && ruleBIsGEFVF &&
+			OutsideFVFRuleA.GetLow() <= GEFVFRuleB.GetValue()) ||
+		(ruleBIsOutsideFVI && ruleAIsLEFVI &&
+			OutsideFVIRuleB.GetHigh() >= LEFVIRuleA.GetValue()) ||
+		(ruleBIsOutsideFVI && ruleAIsGEFVI &&
+			OutsideFVIRuleB.GetLow() <= GEFVIRuleA.GetValue()) ||
+		(ruleBIsOutsideFVF && ruleAIsLEFVF &&
+			OutsideFVFRuleB.GetHigh() >= LEFVFRuleA.GetValue()) ||
+		(ruleBIsOutsideFVF && ruleAIsGEFVF &&
+			OutsideFVFRuleB.GetLow() <= GEFVFRuleA.GetValue()) {
+		return false, nil
+	}
+
+	if ruleAIsGEFVI && ruleBIsLEFVI {
+		r, err = NewBetweenFVI(
+			fieldA,
+			GEFVIRuleA.GetValue(),
+			LEFVIRuleB.GetValue(),
+		)
+	} else if ruleAIsLEFVI && ruleBIsGEFVI {
+		r, err = NewBetweenFVI(
+			fieldA,
+			GEFVIRuleB.GetValue(),
+			LEFVIRuleA.GetValue(),
+		)
+	} else if ruleAIsGEFVF && ruleBIsLEFVF {
+		r, err = NewBetweenFVF(
+			fieldA,
+			GEFVFRuleA.GetValue(),
+			LEFVFRuleB.GetValue(),
+		)
+	} else if ruleAIsLEFVF && ruleBIsGEFVF {
+		r, err = NewBetweenFVF(
+			fieldA,
+			GEFVFRuleB.GetValue(),
+			LEFVFRuleA.GetValue(),
+		)
+	} else {
+		return true, nil
+	}
+	if err != nil {
+		return false, nil
+	}
+	return false, r
 }
 
 func MustNewAnd(ruleA Rule, ruleB Rule) Rule {

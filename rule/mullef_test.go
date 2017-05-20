@@ -1,6 +1,7 @@
 package rule
 
 import (
+	"fmt"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/description"
 	"github.com/vlifesystems/rhkit/internal/fieldtype"
@@ -17,6 +18,17 @@ func TestMulLEFString(t *testing.T) {
 	got := r.String()
 	if got != want {
 		t.Errorf("String() got: %s, want: %s", got, want)
+	}
+}
+
+func TestMulLEFValue(t *testing.T) {
+	fieldA := "income"
+	fieldB := "balance"
+	value := dlit.MustNew(8.93)
+	r := NewMulLEF(fieldA, fieldB, value)
+	got := r.Value()
+	if got.String() != value.String() {
+		t.Errorf("String() got: %s, want: %s", got, value)
 	}
 }
 
@@ -152,7 +164,12 @@ func TestMulLEFTweak(t *testing.T) {
 	cases := []struct {
 		description *description.Description
 		stage       int
-		want        []Rule
+		minNumRules int
+		maxNumRules int
+		min         *dlit.Literal
+		max         *dlit.Literal
+		mid         *dlit.Literal
+		maxDP       int
 	}{
 		{description: &description.Description{
 			map[string]*description.Field{
@@ -168,27 +185,13 @@ func TestMulLEFTweak(t *testing.T) {
 				},
 			},
 		},
-			stage: 1,
-			want: []Rule{
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(139375)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(141250)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(143125)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(145000)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(146875)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(148750)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(150625)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(152500)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(154375)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(158125)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(160000)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(161875)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(163750)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(165625)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(167500)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(169375)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(171250)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(173125)),
-			},
+			stage:       1,
+			minNumRules: 18,
+			maxNumRules: 20,
+			min:         dlit.MustNew(139375),
+			max:         dlit.MustNew(173125),
+			mid:         dlit.MustNew(152500),
+			maxDP:       0,
 		},
 		{description: &description.Description{
 			map[string]*description.Field{
@@ -204,27 +207,13 @@ func TestMulLEFTweak(t *testing.T) {
 				},
 			},
 		},
-			stage: 1,
-			want: []Rule{
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(149500)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(150250)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(151000)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(151750)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(152500)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(153250)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(154000)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(154750)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(155500)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(157000)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(157750)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(158500)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(159250)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(160000)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(160750)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(161500)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(162250)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(163000)),
-			},
+			stage:       1,
+			minNumRules: 18,
+			maxNumRules: 20,
+			min:         dlit.MustNew(149500),
+			max:         dlit.MustNew(163000),
+			mid:         dlit.MustNew(154750),
+			maxDP:       0,
 		},
 		{description: &description.Description{
 			map[string]*description.Field{
@@ -240,28 +229,13 @@ func TestMulLEFTweak(t *testing.T) {
 				},
 			},
 		},
-			stage: 1,
-			want: []Rule{
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(147253)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(147555)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(147858)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(148160)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(148463)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(148765)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(149068)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(149370)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(149673)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(149975)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(150278)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(150580)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(150883)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(151185)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(151488)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(151790)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(152093)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(152395)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(152698)),
-			},
+			stage:       1,
+			minNumRules: 18,
+			maxNumRules: 20,
+			min:         dlit.MustNew(147253),
+			max:         dlit.MustNew(152698),
+			mid:         dlit.MustNew(149673),
+			maxDP:       0,
 		},
 		{description: &description.Description{
 			map[string]*description.Field{
@@ -279,28 +253,13 @@ func TestMulLEFTweak(t *testing.T) {
 				},
 			},
 		},
-			stage: 1,
-			want: []Rule{
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(147337.556)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(147556.632)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(147775.708)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(147994.784)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(148213.86)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(148432.936)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(148652.012)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(148871.088)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(149090.164)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(149309.24)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(149528.316)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(149747.392)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(149966.468)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(150185.544)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(150404.62)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(150623.696)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(150842.772)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(151061.848)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(151280.924)),
-			},
+			stage:       1,
+			minNumRules: 18,
+			maxNumRules: 20,
+			min:         dlit.MustNew(147337),
+			max:         dlit.MustNew(151281),
+			mid:         dlit.MustNew(149090),
+			maxDP:       3,
 		},
 		{description: &description.Description{
 			map[string]*description.Field{
@@ -316,33 +275,39 @@ func TestMulLEFTweak(t *testing.T) {
 				},
 			},
 		},
-			stage: 2,
-			want: []Rule{
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(149500)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(150250)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(151000)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(151750)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(152500)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(153250)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(154000)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(154750)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(155500)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(157000)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(157750)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(158500)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(159250)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(160000)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(160750)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(161500)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(162250)),
-				NewMulLEF(fieldA, fieldB, dlit.MustNew(163000)),
-			},
+			stage:       2,
+			minNumRules: 18,
+			maxNumRules: 20,
+			min:         dlit.MustNew(149500),
+			max:         dlit.MustNew(163000),
+			mid:         dlit.MustNew(154750),
+			maxDP:       0,
 		},
+	}
+	complyFunc := func(r Rule) error {
+		x, ok := r.(*MulLEF)
+		if !ok {
+			return fmt.Errorf("wrong type: %T (%s)", r, r)
+		}
+		if x.fieldA != "income" || x.fieldB != "balance" {
+			return fmt.Errorf("fields aren't correct for rule: %s", r)
+		}
+		return nil
 	}
 	for i, c := range cases {
 		got := rule.Tweak(c.description, c.stage)
-		if err := checkRulesMatch(got, c.want); err != nil {
-			t.Errorf("(%d) Tweak: %s, got: %s", i, err, got)
+		err := checkRulesComply(
+			got,
+			c.minNumRules,
+			c.maxNumRules,
+			c.min,
+			c.max,
+			c.mid,
+			c.maxDP,
+			complyFunc,
+		)
+		if err != nil {
+			t.Errorf("(%d) Tweak: %s", i, err)
 		}
 	}
 }

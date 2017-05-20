@@ -1,6 +1,7 @@
 package rule
 
 import (
+	"fmt"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/description"
 	"github.com/vlifesystems/rhkit/internal/fieldtype"
@@ -152,7 +153,12 @@ func TestAddLEFTweak(t *testing.T) {
 	cases := []struct {
 		description *description.Description
 		stage       int
-		want        []Rule
+		minNumRules int
+		maxNumRules int
+		min         *dlit.Literal
+		max         *dlit.Literal
+		mid         *dlit.Literal
+		maxDP       int
 	}{
 		{description: &description.Description{
 			map[string]*description.Field{
@@ -168,27 +174,13 @@ func TestAddLEFTweak(t *testing.T) {
 				},
 			},
 		},
-			stage: 1,
-			want: []Rule{
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(755)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(760)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(765)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(770)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(775)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(780)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(785)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(790)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(795)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(805)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(810)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(815)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(820)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(825)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(830)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(835)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(840)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(845)),
-			},
+			stage:       1,
+			minNumRules: 18,
+			maxNumRules: 20,
+			min:         dlit.MustNew(755),
+			max:         dlit.MustNew(845),
+			mid:         dlit.MustNew(800),
+			maxDP:       0,
 		},
 		{description: &description.Description{
 			map[string]*description.Field{
@@ -204,28 +196,13 @@ func TestAddLEFTweak(t *testing.T) {
 				},
 			},
 		},
-			stage: 1,
-			want: []Rule{
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(792)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(793)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(795)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(796)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(798)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(799)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(801)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(802)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(804)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(805)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(807)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(809)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(810)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(812)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(813)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(815)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(816)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(818)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(819)),
-			},
+			stage:       1,
+			minNumRules: 18,
+			maxNumRules: 20,
+			min:         dlit.MustNew(792),
+			max:         dlit.MustNew(819),
+			mid:         dlit.MustNew(804),
+			maxDP:       0,
 		},
 		{description: &description.Description{
 			map[string]*description.Field{
@@ -241,27 +218,13 @@ func TestAddLEFTweak(t *testing.T) {
 				},
 			},
 		},
-			stage: 1,
-			want: []Rule{
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(771)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(773)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(775)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(777)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(779)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(781)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(783)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(785)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(787)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(789)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(792)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(794)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(796)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(798)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(802)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(804)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(806)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(808)),
-			},
+			stage:       1,
+			minNumRules: 18,
+			maxNumRules: 20,
+			min:         dlit.MustNew(771),
+			max:         dlit.MustNew(808),
+			mid:         dlit.MustNew(787),
+			maxDP:       0,
 		},
 		{description: &description.Description{
 			map[string]*description.Field{
@@ -277,11 +240,13 @@ func TestAddLEFTweak(t *testing.T) {
 				},
 			},
 		},
-			stage: 1,
-			want: []Rule{
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(799)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(801)),
-			},
+			stage:       1,
+			minNumRules: 2,
+			maxNumRules: 2,
+			min:         dlit.MustNew(799),
+			max:         dlit.MustNew(801),
+			mid:         dlit.MustNew(800),
+			maxDP:       0,
 		},
 		{description: &description.Description{
 			map[string]*description.Field{
@@ -299,27 +264,13 @@ func TestAddLEFTweak(t *testing.T) {
 				},
 			},
 		},
-			stage: 1,
-			want: []Rule{
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(799.363)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(799.434)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(799.504)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(799.575)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(799.646)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(799.717)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(799.788)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(799.858)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(799.929)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(800.071)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(800.142)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(800.212)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(800.283)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(800.354)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(800.425)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(800.496)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(800.566)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(800.637)),
-			},
+			stage:       1,
+			minNumRules: 18,
+			maxNumRules: 20,
+			min:         dlit.MustNew(799),
+			max:         dlit.MustNew(801),
+			mid:         dlit.MustNew(800),
+			maxDP:       3,
 		},
 		{description: &description.Description{
 			map[string]*description.Field{
@@ -335,33 +286,39 @@ func TestAddLEFTweak(t *testing.T) {
 				},
 			},
 		},
-			stage: 2,
-			want: []Rule{
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(778)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(780)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(783)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(785)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(788)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(790)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(793)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(795)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(798)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(803)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(805)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(808)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(810)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(813)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(815)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(818)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(820)),
-				NewAddLEF(fieldA, fieldB, dlit.MustNew(823)),
-			},
+			stage:       2,
+			minNumRules: 18,
+			maxNumRules: 20,
+			min:         dlit.MustNew(778),
+			max:         dlit.MustNew(824),
+			mid:         dlit.MustNew(800),
+			maxDP:       0,
 		},
+	}
+	complyFunc := func(r Rule) error {
+		x, ok := r.(*AddLEF)
+		if !ok {
+			return fmt.Errorf("wrong type: %T (%s)", r, r)
+		}
+		if x.fieldA != "balance" || x.fieldB != "income" {
+			return fmt.Errorf("fields aren't correct for rule: %s", r)
+		}
+		return nil
 	}
 	for i, c := range cases {
 		got := rule.Tweak(c.description, c.stage)
-		if err := checkRulesMatch(got, c.want); err != nil {
-			t.Errorf("(%d) Tweak: %s, got: %s", i, err, got)
+		err := checkRulesComply(
+			got,
+			c.minNumRules,
+			c.maxNumRules,
+			c.min,
+			c.max,
+			c.mid,
+			c.maxDP,
+			complyFunc,
+		)
+		if err != nil {
+			t.Errorf("(%d) Tweak: %s", i, err)
 		}
 	}
 }

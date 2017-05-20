@@ -44,6 +44,10 @@ func (r *LEFVI) GetValue() int64 {
 	return r.value
 }
 
+func (r *LEFVI) Value() *dlit.Literal {
+	return dlit.MustNew(r.value)
+}
+
 func (r *LEFVI) IsTrue(record ddataset.Record) (bool, error) {
 	lh, ok := record[r.field]
 	if !ok {

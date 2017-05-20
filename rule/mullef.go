@@ -46,6 +46,10 @@ func (r *MulLEF) GetFields() []string {
 	return []string{r.fieldA, r.fieldB}
 }
 
+func (r *MulLEF) Value() *dlit.Literal {
+	return r.value
+}
+
 // IsTrue returns whether the rule is true for this record.
 // This rule relies on making sure that the two fields when
 // added will not overflow, so this must have been checked

@@ -1,6 +1,7 @@
 package rule
 
 import (
+	"fmt"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/description"
 	"github.com/vlifesystems/rhkit/internal/fieldtype"
@@ -152,7 +153,12 @@ func TestAddGEFTweak(t *testing.T) {
 	cases := []struct {
 		description *description.Description
 		stage       int
-		want        []Rule
+		minNumRules int
+		maxNumRules int
+		min         *dlit.Literal
+		max         *dlit.Literal
+		mid         *dlit.Literal
+		maxDP       int
 	}{
 		{description: &description.Description{
 			map[string]*description.Field{
@@ -168,27 +174,13 @@ func TestAddGEFTweak(t *testing.T) {
 				},
 			},
 		},
-			stage: 1,
-			want: []Rule{
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(755)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(760)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(765)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(770)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(775)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(780)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(785)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(790)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(795)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(805)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(810)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(815)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(820)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(825)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(830)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(835)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(840)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(845)),
-			},
+			stage:       1,
+			minNumRules: 18,
+			maxNumRules: 20,
+			min:         dlit.MustNew(755),
+			max:         dlit.MustNew(845),
+			mid:         dlit.MustNew(800),
+			maxDP:       0,
 		},
 		{description: &description.Description{
 			map[string]*description.Field{
@@ -204,28 +196,13 @@ func TestAddGEFTweak(t *testing.T) {
 				},
 			},
 		},
-			stage: 1,
-			want: []Rule{
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(792)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(793)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(795)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(796)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(798)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(799)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(801)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(802)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(804)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(805)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(807)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(809)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(810)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(812)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(813)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(815)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(816)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(818)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(819)),
-			},
+			stage:       1,
+			minNumRules: 18,
+			maxNumRules: 20,
+			min:         dlit.MustNew(792),
+			max:         dlit.MustNew(819),
+			mid:         dlit.MustNew(804),
+			maxDP:       0,
 		},
 		{description: &description.Description{
 			map[string]*description.Field{
@@ -241,27 +218,13 @@ func TestAddGEFTweak(t *testing.T) {
 				},
 			},
 		},
-			stage: 1,
-			want: []Rule{
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(771)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(773)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(775)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(777)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(779)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(781)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(783)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(785)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(787)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(789)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(792)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(794)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(796)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(798)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(802)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(804)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(806)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(808)),
-			},
+			stage:       1,
+			minNumRules: 18,
+			maxNumRules: 20,
+			min:         dlit.MustNew(771),
+			max:         dlit.MustNew(808),
+			mid:         dlit.MustNew(787),
+			maxDP:       0,
 		},
 		{description: &description.Description{
 			map[string]*description.Field{
@@ -277,11 +240,13 @@ func TestAddGEFTweak(t *testing.T) {
 				},
 			},
 		},
-			stage: 1,
-			want: []Rule{
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(799)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(801)),
-			},
+			stage:       1,
+			minNumRules: 2,
+			maxNumRules: 2,
+			min:         dlit.MustNew(799),
+			max:         dlit.MustNew(801),
+			mid:         dlit.MustNew(800),
+			maxDP:       0,
 		},
 		{description: &description.Description{
 			map[string]*description.Field{
@@ -299,27 +264,13 @@ func TestAddGEFTweak(t *testing.T) {
 				},
 			},
 		},
-			stage: 1,
-			want: []Rule{
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(799.363)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(799.434)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(799.504)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(799.575)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(799.646)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(799.717)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(799.788)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(799.858)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(799.929)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(800.071)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(800.142)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(800.212)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(800.283)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(800.354)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(800.425)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(800.496)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(800.566)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(800.637)),
-			},
+			stage:       1,
+			minNumRules: 18,
+			maxNumRules: 20,
+			min:         dlit.MustNew(799),
+			max:         dlit.MustNew(801),
+			mid:         dlit.MustNew(800),
+			maxDP:       3,
 		},
 		{description: &description.Description{
 			map[string]*description.Field{
@@ -335,33 +286,39 @@ func TestAddGEFTweak(t *testing.T) {
 				},
 			},
 		},
-			stage: 2,
-			want: []Rule{
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(778)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(780)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(783)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(785)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(788)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(790)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(793)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(795)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(798)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(803)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(805)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(808)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(810)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(813)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(815)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(818)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(820)),
-				NewAddGEF(fieldA, fieldB, dlit.MustNew(823)),
-			},
+			stage:       2,
+			minNumRules: 18,
+			maxNumRules: 20,
+			min:         dlit.MustNew(778),
+			max:         dlit.MustNew(824),
+			mid:         dlit.MustNew(800),
+			maxDP:       0,
 		},
+	}
+	complyFunc := func(r Rule) error {
+		x, ok := r.(*AddGEF)
+		if !ok {
+			return fmt.Errorf("wrong type: %T (%s)", r, r)
+		}
+		if x.fieldA != "balance" || x.fieldB != "income" {
+			return fmt.Errorf("fields aren't correct for rule: %s", r)
+		}
+		return nil
 	}
 	for i, c := range cases {
 		got := rule.Tweak(c.description, c.stage)
-		if err := checkRulesMatch(got, c.want); err != nil {
-			t.Errorf("(%d) Tweak: %s, got: %s", i, err, got)
+		err := checkRulesComply(
+			got,
+			c.minNumRules,
+			c.maxNumRules,
+			c.min,
+			c.max,
+			c.mid,
+			c.maxDP,
+			complyFunc,
+		)
+		if err != nil {
+			t.Errorf("(%d) Tweak: %s", i, err)
 		}
 	}
 }

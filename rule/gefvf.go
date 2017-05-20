@@ -45,6 +45,10 @@ func (r *GEFVF) GetValue() float64 {
 	return r.value
 }
 
+func (r *GEFVF) Value() *dlit.Literal {
+	return dlit.MustNew(r.value)
+}
+
 func (r *GEFVF) IsTrue(record ddataset.Record) (bool, error) {
 	lh, ok := record[r.field]
 	if !ok {
