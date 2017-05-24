@@ -119,7 +119,7 @@ func TestLEFVTweak(t *testing.T) {
 		{description: &description.Description{
 			map[string]*description.Field{
 				"income": &description.Field{
-					Kind:  fieldtype.Float,
+					Kind:  fieldtype.Number,
 					Min:   dlit.MustNew(500),
 					Max:   dlit.MustNew(1000),
 					MaxDP: 2,
@@ -137,7 +137,7 @@ func TestLEFVTweak(t *testing.T) {
 		{description: &description.Description{
 			map[string]*description.Field{
 				"income": &description.Field{
-					Kind:  fieldtype.Float,
+					Kind:  fieldtype.Number,
 					Min:   dlit.MustNew(790),
 					Max:   dlit.MustNew(1000),
 					MaxDP: 2,
@@ -155,7 +155,7 @@ func TestLEFVTweak(t *testing.T) {
 		{description: &description.Description{
 			map[string]*description.Field{
 				"income": &description.Field{
-					Kind:  fieldtype.Float,
+					Kind:  fieldtype.Number,
 					Min:   dlit.MustNew(500),
 					Max:   dlit.MustNew(810),
 					MaxDP: 2,
@@ -173,7 +173,7 @@ func TestLEFVTweak(t *testing.T) {
 		{description: &description.Description{
 			map[string]*description.Field{
 				"income": &description.Field{
-					Kind:  fieldtype.Float,
+					Kind:  fieldtype.Number,
 					Min:   dlit.MustNew(799),
 					Max:   dlit.MustNew(801),
 					MaxDP: 0,
@@ -192,7 +192,7 @@ func TestLEFVTweak(t *testing.T) {
 		{description: &description.Description{
 			map[string]*description.Field{
 				"income": &description.Field{
-					Kind:  fieldtype.Float,
+					Kind:  fieldtype.Number,
 					Min:   dlit.MustNew(500),
 					Max:   dlit.MustNew(1000),
 					MaxDP: 2,

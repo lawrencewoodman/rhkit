@@ -201,15 +201,13 @@ func (f *Field) updateKind(value *dlit.Literal) {
 	switch f.Kind {
 	case fieldtype.Unknown:
 		fallthrough
-	case fieldtype.Int:
+	case fieldtype.Number:
 		if _, isInt := value.Int(); isInt {
-			f.Kind = fieldtype.Int
+			f.Kind = fieldtype.Number
 			break
 		}
-		fallthrough
-	case fieldtype.Float:
 		if _, isFloat := value.Float(); isFloat {
-			f.Kind = fieldtype.Float
+			f.Kind = fieldtype.Number
 			break
 		}
 		f.Kind = fieldtype.String
@@ -241,7 +239,7 @@ func (f *Field) updateValues(value *dlit.Literal) {
 }
 
 func (f *Field) updateNumBoundaries(value *dlit.Literal) {
-	if f.Kind == fieldtype.Int || f.Kind == fieldtype.Float {
+	if f.Kind == fieldtype.Number {
 		vars := map[string]*dlit.Literal{"min": f.Min, "max": f.Max, "v": value}
 		f.Min = dexpr.Eval("min(min, v)", dexprfuncs.CallFuncs, vars)
 		f.Max = dexpr.Eval("max(max, v)", dexprfuncs.CallFuncs, vars)
@@ -258,14 +256,12 @@ func (f *Field) checkEqual(fdWant *Field) error {
 		return fmt.Errorf("got %d values, want: %d",
 			len(f.Values), len(fdWant.Values))
 	}
-	if f.Kind == fieldtype.Int || f.Kind == fieldtype.Float {
+	if f.Kind == fieldtype.Number {
 		if f.Min.String() != fdWant.Min.String() ||
 			f.Max.String() != fdWant.Max.String() {
 			return fmt.Errorf("got min: %s and max: %s, want min: %s and max: %s",
 				f.Min, f.Max, fdWant.Min, fdWant.Max)
 		}
-	}
-	if f.Kind == fieldtype.Float {
 		if f.MaxDP != fdWant.MaxDP {
 			return fmt.Errorf("got maxDP: %d, want: %d", f.MaxDP, fdWant.MaxDP)
 		}

@@ -13,13 +13,13 @@ func TestTweak_1(t *testing.T) {
 	inputDescription := &description.Description{
 		map[string]*description.Field{
 			"band": &description.Field{
-				fieldtype.Int, dlit.MustNew(3), dlit.MustNew(40), 0,
+				fieldtype.Number, dlit.MustNew(3), dlit.MustNew(40), 0,
 				map[string]description.Value{}, 0},
 			"age": &description.Field{
-				fieldtype.Int, dlit.MustNew(4), dlit.MustNew(90), 0,
+				fieldtype.Number, dlit.MustNew(4), dlit.MustNew(90), 0,
 				map[string]description.Value{}, 0},
 			"flow": &description.Field{
-				fieldtype.Float, dlit.MustNew(50), dlit.MustNew(400), 2,
+				fieldtype.Number, dlit.MustNew(50), dlit.MustNew(400), 2,
 				map[string]description.Value{}, 0},
 		}}
 	rulesIn := []Rule{
@@ -102,7 +102,7 @@ func TestTweak_2(t *testing.T) {
 	inputDescription := &description.Description{
 		map[string]*description.Field{
 			"age": &description.Field{
-				fieldtype.Int, dlit.MustNew(10), dlit.MustNew(80), 0,
+				fieldtype.Number, dlit.MustNew(10), dlit.MustNew(80), 0,
 				map[string]description.Value{}, 0,
 			},
 		}}
@@ -184,7 +184,7 @@ func TestTweak_3(t *testing.T) {
 	inputDescription := &description.Description{
 		map[string]*description.Field{
 			"flow": &description.Field{
-				Kind:      fieldtype.Float,
+				Kind:      fieldtype.Number,
 				Min:       dlit.MustNew(10),
 				Max:       dlit.MustNew(80),
 				MaxDP:     6,
@@ -293,7 +293,7 @@ func TestTweak_4(t *testing.T) {
 	inputDescription := &description.Description{
 		map[string]*description.Field{
 			"flow": &description.Field{
-				fieldtype.Float, dlit.MustNew(4), dlit.MustNew(30), 6,
+				fieldtype.Number, dlit.MustNew(4), dlit.MustNew(30), 6,
 				map[string]description.Value{}, 0,
 			},
 		}}
@@ -323,13 +323,13 @@ func TestTweak_5(t *testing.T) {
 	inputDescription := &description.Description{
 		map[string]*description.Field{
 			"band": &description.Field{
-				fieldtype.Int, dlit.MustNew(3), dlit.MustNew(40), 0,
+				fieldtype.Number, dlit.MustNew(3), dlit.MustNew(40), 0,
 				map[string]description.Value{}, 0},
 			"age": &description.Field{
-				fieldtype.Int, dlit.MustNew(4), dlit.MustNew(30), 0,
+				fieldtype.Number, dlit.MustNew(4), dlit.MustNew(30), 0,
 				map[string]description.Value{}, 0},
 			"flow": &description.Field{
-				fieldtype.Float, dlit.MustNew(50), dlit.MustNew(400), 2,
+				fieldtype.Number, dlit.MustNew(50), dlit.MustNew(400), 2,
 				map[string]description.Value{}, 0},
 		}}
 	rulesIn := []Rule{

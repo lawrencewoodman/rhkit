@@ -174,12 +174,12 @@ func TestMulGEFTweak(t *testing.T) {
 		{description: &description.Description{
 			map[string]*description.Field{
 				"balance": &description.Field{
-					Kind: fieldtype.Int,
+					Kind: fieldtype.Number,
 					Min:  dlit.MustNew(250),
 					Max:  dlit.MustNew(500),
 				},
 				"income": &description.Field{
-					Kind: fieldtype.Int,
+					Kind: fieldtype.Number,
 					Min:  dlit.MustNew(250),
 					Max:  dlit.MustNew(500),
 				},
@@ -196,12 +196,12 @@ func TestMulGEFTweak(t *testing.T) {
 		{description: &description.Description{
 			map[string]*description.Field{
 				"balance": &description.Field{
-					Kind: fieldtype.Int,
+					Kind: fieldtype.Number,
 					Min:  dlit.MustNew(250),
 					Max:  dlit.MustNew(300),
 				},
 				"income": &description.Field{
-					Kind: fieldtype.Int,
+					Kind: fieldtype.Number,
 					Min:  dlit.MustNew(540),
 					Max:  dlit.MustNew(700),
 				},
@@ -218,12 +218,12 @@ func TestMulGEFTweak(t *testing.T) {
 		{description: &description.Description{
 			map[string]*description.Field{
 				"balance": &description.Field{
-					Kind: fieldtype.Int,
+					Kind: fieldtype.Number,
 					Min:  dlit.MustNew(200),
 					Max:  dlit.MustNew(300),
 				},
 				"income": &description.Field{
-					Kind: fieldtype.Int,
+					Kind: fieldtype.Number,
 					Min:  dlit.MustNew(300),
 					Max:  dlit.MustNew(510),
 				},
@@ -240,13 +240,13 @@ func TestMulGEFTweak(t *testing.T) {
 		{description: &description.Description{
 			map[string]*description.Field{
 				"balance": &description.Field{
-					Kind:  fieldtype.Float,
+					Kind:  fieldtype.Number,
 					Min:   dlit.MustNew(200),
 					Max:   dlit.MustNew(300),
 					MaxDP: 0,
 				},
 				"income": &description.Field{
-					Kind:  fieldtype.Float,
+					Kind:  fieldtype.Number,
 					Min:   dlit.MustNew(300.924),
 					Max:   dlit.MustNew(505),
 					MaxDP: 3,
@@ -264,12 +264,12 @@ func TestMulGEFTweak(t *testing.T) {
 		{description: &description.Description{
 			map[string]*description.Field{
 				"balance": &description.Field{
-					Kind: fieldtype.Int,
+					Kind: fieldtype.Number,
 					Min:  dlit.MustNew(200),
 					Max:  dlit.MustNew(300),
 				},
 				"income": &description.Field{
-					Kind: fieldtype.Int,
+					Kind: fieldtype.Number,
 					Min:  dlit.MustNew(300),
 					Max:  dlit.MustNew(700),
 				},

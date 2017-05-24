@@ -36,7 +36,7 @@ func TestGenerateRules_1(t *testing.T) {
 				},
 			},
 			"level": &description.Field{
-				Kind:  fieldtype.Int,
+				Kind:  fieldtype.Number,
 				Min:   dlit.MustNew(0),
 				Max:   dlit.MustNew(5),
 				MaxDP: 0,
@@ -50,7 +50,7 @@ func TestGenerateRules_1(t *testing.T) {
 				},
 			},
 			"flow": &description.Field{
-				Kind:  fieldtype.Float,
+				Kind:  fieldtype.Number,
 				Min:   dlit.MustNew(0),
 				Max:   dlit.MustNew(10.5),
 				MaxDP: 2,
@@ -61,7 +61,7 @@ func TestGenerateRules_1(t *testing.T) {
 				},
 			},
 			"position": &description.Field{
-				Kind:  fieldtype.Int,
+				Kind:  fieldtype.Number,
 				Min:   dlit.MustNew(1),
 				Max:   dlit.MustNew(13),
 				MaxDP: 0,
@@ -248,14 +248,14 @@ func TestGenerateNumRules(t *testing.T) {
 	inputDescription := &description.Description{
 		map[string]*description.Field{
 			"flow": &description.Field{
-				Kind:   fieldtype.Float,
+				Kind:   fieldtype.Number,
 				Min:    dlit.MustNew(0),
 				Max:    dlit.MustNew(10.5),
 				MaxDP:  2,
 				Values: map[string]description.Value{},
 			},
 			"flowConstant": &description.Field{
-				Kind:   fieldtype.Float,
+				Kind:   fieldtype.Number,
 				Min:    dlit.MustNew(10.5),
 				Max:    dlit.MustNew(10.5),
 				MaxDP:  1,
@@ -458,28 +458,28 @@ func TestGenerateAddRules(t *testing.T) {
 	inputDescription := &description.Description{
 		map[string]*description.Field{
 			"flowIn": &description.Field{
-				Kind:   fieldtype.Float,
+				Kind:   fieldtype.Number,
 				Min:    dlit.MustNew(0),
 				Max:    dlit.MustNew(10.5),
 				MaxDP:  2,
 				Values: map[string]description.Value{},
 			},
 			"flowOut": &description.Field{
-				Kind:   fieldtype.Float,
+				Kind:   fieldtype.Number,
 				Min:    dlit.MustNew(1.2),
 				Max:    dlit.MustNew(5.2),
 				MaxDP:  2,
 				Values: map[string]description.Value{},
 			},
 			"flowSideA": &description.Field{
-				Kind:   fieldtype.Float,
+				Kind:   fieldtype.Number,
 				Min:    dlit.MustNew(2.2),
 				Max:    dlit.MustNew(2.2),
 				MaxDP:  1,
 				Values: map[string]description.Value{},
 			},
 			"flowSideB": &description.Field{
-				Kind:   fieldtype.Float,
+				Kind:   fieldtype.Number,
 				Min:    dlit.MustNew(2.2),
 				Max:    dlit.MustNew(2.2),
 				MaxDP:  1,
@@ -726,28 +726,28 @@ func TestGenerateMulRules(t *testing.T) {
 	inputDescription := &description.Description{
 		map[string]*description.Field{
 			"flowIn": &description.Field{
-				Kind:   fieldtype.Float,
+				Kind:   fieldtype.Number,
 				Min:    dlit.MustNew(0),
 				Max:    dlit.MustNew(10.5),
 				MaxDP:  2,
 				Values: map[string]description.Value{},
 			},
 			"flowOut": &description.Field{
-				Kind:   fieldtype.Float,
+				Kind:   fieldtype.Number,
 				Min:    dlit.MustNew(1.2),
 				Max:    dlit.MustNew(5.2),
 				MaxDP:  2,
 				Values: map[string]description.Value{},
 			},
 			"flowSideA": &description.Field{
-				Kind:   fieldtype.Float,
+				Kind:   fieldtype.Number,
 				Min:    dlit.MustNew(2.2),
 				Max:    dlit.MustNew(2.2),
 				MaxDP:  1,
 				Values: map[string]description.Value{},
 			},
 			"flowSideB": &description.Field{
-				Kind:   fieldtype.Float,
+				Kind:   fieldtype.Number,
 				Min:    dlit.MustNew(2.2),
 				Max:    dlit.MustNew(2.2),
 				MaxDP:  1,
@@ -1005,34 +1005,34 @@ func TestGenerateCompareNumericRules(t *testing.T) {
 	inputDescription := &description.Description{
 		map[string]*description.Field{
 			"band": &description.Field{
-				Kind:   fieldtype.Int,
+				Kind:   fieldtype.Number,
 				Min:    dlit.MustNew(1),
 				Max:    dlit.MustNew(3),
 				Values: map[string]description.Value{},
 			},
 			"flowIn": &description.Field{
-				Kind:   fieldtype.Float,
+				Kind:   fieldtype.Number,
 				Min:    dlit.MustNew(1),
 				Max:    dlit.MustNew(4),
 				MaxDP:  2,
 				Values: map[string]description.Value{},
 			},
 			"flowOut": &description.Field{
-				Kind:   fieldtype.Float,
+				Kind:   fieldtype.Number,
 				Min:    dlit.MustNew(0.95),
 				Max:    dlit.MustNew(4.1),
 				MaxDP:  2,
 				Values: map[string]description.Value{},
 			},
 			"rateIn": &description.Field{
-				Kind:   fieldtype.Float,
+				Kind:   fieldtype.Number,
 				Min:    dlit.MustNew(4.2),
 				Max:    dlit.MustNew(8.9),
 				MaxDP:  2,
 				Values: map[string]description.Value{},
 			},
 			"rateOut": &description.Field{
-				Kind:   fieldtype.Float,
+				Kind:   fieldtype.Number,
 				Min:    dlit.MustNew(0.1),
 				Max:    dlit.MustNew(0.9),
 				MaxDP:  2,
@@ -1115,7 +1115,7 @@ func TestGenerateCompareStringRules(t *testing.T) {
 	inputDescription := &description.Description{
 		map[string]*description.Field{
 			"band": &description.Field{
-				Kind:   fieldtype.Int,
+				Kind:   fieldtype.Number,
 				Min:    dlit.MustNew(1),
 				Max:    dlit.MustNew(3),
 				Values: map[string]description.Value{},
@@ -1235,13 +1235,13 @@ func TestGenerateInRules_1(t *testing.T) {
 	inputDescription := &description.Description{
 		map[string]*description.Field{
 			"band": &description.Field{
-				Kind:   fieldtype.Int,
+				Kind:   fieldtype.Number,
 				Min:    dlit.MustNew(1),
 				Max:    dlit.MustNew(3),
 				Values: map[string]description.Value{},
 			},
 			"flow": &description.Field{
-				Kind:   fieldtype.Float,
+				Kind:   fieldtype.Number,
 				Min:    dlit.MustNew(1),
 				Max:    dlit.MustNew(3),
 				MaxDP:  2,
@@ -1563,7 +1563,7 @@ func TestGenerateValueRules(t *testing.T) {
 	inputDescription := &description.Description{
 		map[string]*description.Field{
 			"band": &description.Field{
-				Kind: fieldtype.Int,
+				Kind: fieldtype.Number,
 				Min:  dlit.MustNew(1),
 				Max:  dlit.MustNew(4),
 				Values: map[string]description.Value{
@@ -1574,7 +1574,7 @@ func TestGenerateValueRules(t *testing.T) {
 				},
 			},
 			"flow": &description.Field{
-				Kind:  fieldtype.Float,
+				Kind:  fieldtype.Number,
 				Min:   dlit.MustNew(1),
 				Max:   dlit.MustNew(4),
 				MaxDP: 2,

@@ -134,7 +134,7 @@ func generateNumRules(
 	field string,
 ) []rule.Rule {
 	fd := inputDescription.Fields[field]
-	if fd.Kind != fieldtype.Float && fd.Kind != fieldtype.Int {
+	if fd.Kind != fieldtype.Number {
 		return []rule.Rule{}
 	}
 	rulesMap := make(map[string]rule.Rule)
@@ -175,7 +175,7 @@ func generateCompareNumericRules(
 	field string,
 ) []rule.Rule {
 	fd := inputDescription.Fields[field]
-	if fd.Kind != fieldtype.Int && fd.Kind != fieldtype.Float {
+	if fd.Kind != fieldtype.Number {
 		return []rule.Rule{}
 	}
 	fieldNum := calcFieldNum(inputDescription.Fields, field)
@@ -341,7 +341,7 @@ func calcNumSharedValues(
 }
 
 func isNumberField(fd *description.Field) bool {
-	return fd.Kind == fieldtype.Int || fd.Kind == fieldtype.Float
+	return fd.Kind == fieldtype.Number
 }
 
 var compareExpr *dexpr.Expr = dexpr.MustNew(
@@ -399,8 +399,7 @@ func generateInRules(
 	fd := inputDescription.Fields[field]
 	numValues := len(fd.Values)
 	if fd.Kind != fieldtype.String &&
-		fd.Kind != fieldtype.Float &&
-		fd.Kind != fieldtype.Int ||
+		fd.Kind != fieldtype.Number ||
 		numValues <= 3 || numValues > (12+extra) {
 		return []rule.Rule{}
 	}

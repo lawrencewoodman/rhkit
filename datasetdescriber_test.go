@@ -93,7 +93,7 @@ func TestDescribeDataset(t *testing.T) {
 				31,
 			},
 			"inputA": &description.Field{
-				fieldtype.Float,
+				fieldtype.Number,
 				dlit.MustNew(7),
 				dlit.MustNew(15.1),
 				1,
@@ -107,7 +107,7 @@ func TestDescribeDataset(t *testing.T) {
 				5,
 			},
 			"inputB": &description.Field{
-				fieldtype.Float,
+				fieldtype.Number,
 				dlit.MustNew(2),
 				dlit.MustNew(5),
 				4,
@@ -133,13 +133,13 @@ func TestDescribeDataset(t *testing.T) {
 				6,
 			},
 			"flow": &description.Field{
-				fieldtype.Int,
+				fieldtype.Number,
 				dlit.MustNew(21),
 				dlit.MustNew(87),
 				0,
 				map[string]description.Value{}, -1},
 			"score": &description.Field{
-				fieldtype.Int,
+				fieldtype.Number,
 				dlit.MustNew(1),
 				dlit.MustNew(5),
 				0,

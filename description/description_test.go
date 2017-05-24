@@ -23,7 +23,7 @@ func TestDescriptionWriteLoadJSON(t *testing.T) {
 				31,
 			},
 			"inputA": &Field{
-				fieldtype.Float,
+				fieldtype.Number,
 				dlit.MustNew(7),
 				dlit.MustNew(15.1),
 				1,
@@ -37,7 +37,7 @@ func TestDescriptionWriteLoadJSON(t *testing.T) {
 				5,
 			},
 			"inputB": &Field{
-				fieldtype.Float,
+				fieldtype.Number,
 				dlit.MustNew(2),
 				dlit.MustNew(5),
 				4,
@@ -63,13 +63,13 @@ func TestDescriptionWriteLoadJSON(t *testing.T) {
 				6,
 			},
 			"flow": &Field{
-				fieldtype.Int,
+				fieldtype.Number,
 				dlit.MustNew(21),
 				dlit.MustNew(87),
 				0,
 				map[string]Value{}, -1},
 			"score": &Field{
-				fieldtype.Int,
+				fieldtype.Number,
 				dlit.MustNew(1),
 				dlit.MustNew(5),
 				0,

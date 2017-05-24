@@ -12,8 +12,7 @@ func TestFieldTypeString(t *testing.T) {
 	}{
 		{Unknown, "Unknown"},
 		{Ignore, "Ignore"},
-		{Int, "Int"},
-		{Float, "Float"},
+		{Number, "Number"},
 		{String, "String"},
 	}
 

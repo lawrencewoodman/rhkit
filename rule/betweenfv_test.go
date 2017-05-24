@@ -199,7 +199,7 @@ func TestBetweenFVTweak(t *testing.T) {
 		description := &description.Description{
 			map[string]*description.Field{
 				"income": &description.Field{
-					Kind:  fieldtype.Float,
+					Kind:  fieldtype.Number,
 					Min:   c.fdMin,
 					Max:   c.fdMax,
 					MaxDP: 2,
