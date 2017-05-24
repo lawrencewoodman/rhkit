@@ -13,9 +13,9 @@ import (
 
 func TestAssessRules(t *testing.T) {
 	rules := []rule.Rule{
-		rule.NewGEFVI("band", 5),
-		rule.NewGEFVI("band", 4),
-		rule.NewGEFVF("cost", 1.3),
+		rule.NewGEFV("band", dlit.MustNew(5)),
+		rule.NewGEFV("band", dlit.MustNew(4)),
+		rule.NewGEFV("cost", dlit.MustNew(1.3)),
 	}
 	aggregators := []*experiment.AggregatorDesc{
 		&experiment.AggregatorDesc{"numIncomeGt2", "count", "income > 2"},
@@ -53,7 +53,7 @@ func TestAssessRules(t *testing.T) {
 	wantNumRecords := int64(len(records))
 	wantRuleAssessments := []*RuleAssessment{
 		&RuleAssessment{
-			Rule: rule.NewGEFVI("band", 5),
+			Rule: rule.NewGEFV("band", dlit.MustNew(5)),
 			Aggregators: map[string]*dlit.Literal{
 				"numMatches":     dlit.MustNew("2"),
 				"percentMatches": dlit.MustNew("50"),
@@ -73,7 +73,7 @@ func TestAssessRules(t *testing.T) {
 			},
 		},
 		&RuleAssessment{
-			Rule: rule.NewGEFVI("band", 4),
+			Rule: rule.NewGEFV("band", dlit.MustNew(4)),
 			Aggregators: map[string]*dlit.Literal{
 				"numMatches":     dlit.MustNew("4"),
 				"percentMatches": dlit.MustNew("100"),
@@ -93,7 +93,7 @@ func TestAssessRules(t *testing.T) {
 			},
 		},
 		&RuleAssessment{
-			Rule: rule.NewGEFVF("cost", 1.3),
+			Rule: rule.NewGEFV("cost", dlit.MustNew(1.3)),
 			Aggregators: map[string]*dlit.Literal{
 				"numMatches":     dlit.MustNew("2"),
 				"percentMatches": dlit.MustNew("50"),
@@ -139,14 +139,14 @@ func TestAssessRules_errors(t *testing.T) {
 		goals       []string
 		wantErr     error
 	}{
-		{[]rule.Rule{rule.NewGEFVI("hand", 3)},
+		{[]rule.Rule{rule.NewGEFV("hand", dlit.MustNew(3))},
 			[]*experiment.AggregatorDesc{
 				&experiment.AggregatorDesc{"numIncomeGt2", "count", "income > 2"},
 			},
 			[]string{"numIncomeGt2 == 1"},
-			rule.InvalidRuleError{Rule: rule.NewGEFVI("hand", 3)},
+			rule.InvalidRuleError{Rule: rule.NewGEFV("hand", dlit.MustNew(3))},
 		},
-		{[]rule.Rule{rule.NewGEFVI("band", 3)},
+		{[]rule.Rule{rule.NewGEFV("band", dlit.MustNew(3))},
 			[]*experiment.AggregatorDesc{
 				&experiment.AggregatorDesc{"numIncomeGt2", "count", "bincome > 2"},
 			},
@@ -156,7 +156,7 @@ func TestAssessRules_errors(t *testing.T) {
 				Err:  dexpr.VarNotExistError("bincome"),
 			},
 		},
-		{[]rule.Rule{rule.NewGEFVI("band", 3)},
+		{[]rule.Rule{rule.NewGEFV("band", dlit.MustNew(3))},
 			[]*experiment.AggregatorDesc{
 				&experiment.AggregatorDesc{"numIncomeGt2", "count", "income > 2"},
 			},
@@ -199,9 +199,9 @@ func BenchmarkAssessRules(b *testing.B) {
 	rules := make([]rule.Rule, numRules)
 	for i := int64(0); i < numRules; i++ {
 		if i%2 == 0 {
-			rules[i] = rule.NewGEFVI("age", i%50)
+			rules[i] = rule.NewGEFV("age", dlit.MustNew(i%50))
 		} else {
-			rules[i] = rule.NewGEFVI("day", i%20)
+			rules[i] = rule.NewGEFV("day", dlit.MustNew(i%20))
 		}
 	}
 

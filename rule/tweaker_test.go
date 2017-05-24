@@ -23,15 +23,15 @@ func TestTweak_1(t *testing.T) {
 				map[string]description.Value{}, 0},
 		}}
 	rulesIn := []Rule{
-		NewGEFVI("band", 4),
-		NewGEFVI("band", 20),
+		NewGEFV("band", dlit.MustNew(4)),
+		NewGEFV("band", dlit.MustNew(20)),
 		NewGTFF("band", "team"),
-		NewGEFVI("age", 7),
-		NewGEFVI("age", 8),
-		MustNewBetweenFVI("age", 21, 39),
-		NewGEFVF("flow", 60.7),
-		NewGEFVF("flow", 70.20),
-		NewGEFVF("flow", 100.5),
+		NewGEFV("age", dlit.MustNew(7)),
+		NewGEFV("age", dlit.MustNew(8)),
+		MustNewBetweenFV("age", dlit.MustNew(21), dlit.MustNew(39)),
+		NewGEFV("flow", dlit.MustNew(60.7)),
+		NewGEFV("flow", dlit.MustNew(70.20)),
+		NewGEFV("flow", dlit.MustNew(100.5)),
 		NewGTFF("age", "band"),
 		NewInFV("stage", makeStringsDlitSlice("20", "21", "22")),
 	}
@@ -46,18 +46,17 @@ func TestTweak_1(t *testing.T) {
 		switch x := gotRule.(type) {
 		case True:
 			continue
-		case *GEFVI:
+		case *GEFV:
 			field := x.GetFields()[0]
 			if field == "band" {
 				numBandGERules++
 			} else if field == "age" {
 				numAgeGERules++
 			}
-		case *GEFVF:
 			if x.GetFields()[0] == "flow" {
 				numFlowGERules++
 			}
-		case *BetweenFVI:
+		case *BetweenFV:
 			if x.GetFields()[0] == "age" {
 				numAgeBetweenRules++
 			}
@@ -108,10 +107,10 @@ func TestTweak_2(t *testing.T) {
 			},
 		}}
 	rulesIn := []Rule{
-		NewLEFVI("age", 40),
-		NewLEFVI("age", 20),
-		NewLEFVI("age", 50),
-		NewLEFVI("age", 60),
+		NewLEFV("age", dlit.MustNew(40)),
+		NewLEFV("age", dlit.MustNew(20)),
+		NewLEFV("age", dlit.MustNew(50)),
+		NewLEFV("age", dlit.MustNew(60)),
 	}
 	gotRules := Tweak(1, rulesIn, inputDescription)
 
@@ -124,7 +123,7 @@ func TestTweak_2(t *testing.T) {
 		switch x := gotRule.(type) {
 		case True:
 			continue
-		case *LEFVI:
+		case *LEFV:
 			if x.GetFields()[0] != "age" {
 				printTestPurposes(t, testPurposes)
 				t.Fatalf("Tweak(%s) invalid rule(%s): ", rulesIn, gotRule)
@@ -194,10 +193,10 @@ func TestTweak_3(t *testing.T) {
 			},
 		}}
 	rulesIn := []Rule{
-		NewLEFVF("flow", 40.78234),
-		NewLEFVF("flow", 24.89),
-		NewLEFVF("flow", 52.604956),
-		NewLEFVF("flow", 65.80),
+		NewLEFV("flow", dlit.MustNew(40.78234)),
+		NewLEFV("flow", dlit.MustNew(24.89)),
+		NewLEFV("flow", dlit.MustNew(52.604956)),
+		NewLEFV("flow", dlit.MustNew(65.80)),
 	}
 	wantMaxDP := inputDescription.Fields["flow"].MaxDP
 	wantMinDP := 0
@@ -214,7 +213,7 @@ func TestTweak_3(t *testing.T) {
 		switch x := gotRule.(type) {
 		case True:
 			continue
-		case *LEFVF:
+		case *LEFV:
 			if x.GetFields()[0] != "flow" {
 				printTestPurposes(t, testPurposes)
 				t.Fatalf("Tweak(%s) invalid rule(%s)", rulesIn, gotRule)
@@ -299,9 +298,9 @@ func TestTweak_4(t *testing.T) {
 			},
 		}}
 	rulesIn := []Rule{
-		NewLEFVF("flow", 40.78234),
-		NewLEFVF("flow", 24.89),
-		NewLEFVF("flow", 52.604956),
+		NewLEFV("flow", dlit.MustNew(40.78234)),
+		NewLEFV("flow", dlit.MustNew(24.89)),
+		NewLEFV("flow", dlit.MustNew(52.604956)),
 		NewTrue(),
 	}
 
@@ -334,16 +333,16 @@ func TestTweak_5(t *testing.T) {
 				map[string]description.Value{}, 0},
 		}}
 	rulesIn := []Rule{
-		NewGEFVI("band", 4),
-		NewGEFVI("band", 5),
-		NewGEFVI("band", 6),
-		NewGEFVI("band", 20),
+		NewGEFV("band", dlit.MustNew(4)),
+		NewGEFV("band", dlit.MustNew(5)),
+		NewGEFV("band", dlit.MustNew(6)),
+		NewGEFV("band", dlit.MustNew(20)),
 		NewGTFF("band", "team"),
-		NewGEFVI("age", 7),
-		NewGEFVI("age", 8),
-		NewGEFVF("flow", 60.7),
-		NewGEFVF("flow", 70.20),
-		NewGEFVF("flow", 100.5),
+		NewGEFV("age", dlit.MustNew(7)),
+		NewGEFV("age", dlit.MustNew(8)),
+		NewGEFV("flow", dlit.MustNew(60.7)),
+		NewGEFV("flow", dlit.MustNew(70.20)),
+		NewGEFV("flow", dlit.MustNew(100.5)),
 		NewGTFF("age", "band"),
 		NewInFV("stage", makeStringsDlitSlice("20", "21", "22")),
 	}

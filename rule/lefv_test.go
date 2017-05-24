@@ -9,37 +9,41 @@ import (
 	"testing"
 )
 
-func TestGEFVIString(t *testing.T) {
+func TestLEFVString(t *testing.T) {
 	field := "income"
-	value := int64(893)
-	want := "income >= 893"
-	r := NewGEFVI(field, value)
+	value := dlit.MustNew(8.93)
+	want := "income <= 8.93"
+	r := NewLEFV(field, value)
 	got := r.String()
 	if got != want {
 		t.Errorf("String() got: %s, want: %s", got, want)
 	}
 }
 
-func TestGEFVIValue(t *testing.T) {
+func TestLEFVValue(t *testing.T) {
 	field := "income"
-	value := int64(893)
-	r := NewGEFVI(field, value)
+	value := dlit.MustNew(8.93)
+	r := NewLEFV(field, value)
 	got := r.Value()
-	if got.String() != "893" {
+	if got.String() != "8.93" {
 		t.Errorf("Value() got: %s, want: %f", got, value)
 	}
 }
 
-func TestGEFVIIsTrue(t *testing.T) {
+func TestLEFVIsTrue(t *testing.T) {
 	cases := []struct {
 		field string
-		value int64
+		value *dlit.Literal
 		want  bool
 	}{
-		{"income", 19, true},
-		{"income", 18, true},
-		{"income", 20, false},
-		{"income", -20, true},
+		{"income", dlit.MustNew(19), true},
+		{"income", dlit.MustNew(19.12), true},
+		{"income", dlit.MustNew(20), true},
+		{"income", dlit.MustNew(-20), false},
+		{"income", dlit.MustNew(18.34), false},
+		{"flow", dlit.MustNew(124.564), true},
+		{"flow", dlit.MustNew(124.565), true},
+		{"flow", dlit.MustNew(124.563), false},
 	}
 	record := map[string]*dlit.Literal{
 		"income": dlit.MustNew(19),
@@ -47,7 +51,7 @@ func TestGEFVIIsTrue(t *testing.T) {
 		"flow":   dlit.MustNew(124.564),
 	}
 	for _, c := range cases {
-		r := NewGEFVI(c.field, c.value)
+		r := NewLEFV(c.field, c.value)
 		got, err := r.IsTrue(record)
 		if err != nil {
 			t.Errorf("IsTrue(record) (rule: %s) err: %v", r, err)
@@ -58,23 +62,21 @@ func TestGEFVIIsTrue(t *testing.T) {
 	}
 }
 
-func TestGEFVIIsTrue_errors(t *testing.T) {
+func TestLEFVIsTrue_errors(t *testing.T) {
 	cases := []struct {
 		field   string
-		value   int64
+		value   *dlit.Literal
 		wantErr error
 	}{
 		{field: "fred",
-			value:   7,
-			wantErr: InvalidRuleError{Rule: NewGEFVI("fred", 7)},
+			value:   dlit.MustNew(7.894),
+			wantErr: InvalidRuleError{Rule: NewLEFV("fred", dlit.MustNew(7.894))},
 		},
 		{field: "band",
-			value:   7894,
-			wantErr: IncompatibleTypesRuleError{Rule: NewGEFVI("band", 7894)},
-		},
-		{field: "flow",
-			value:   7894,
-			wantErr: IncompatibleTypesRuleError{Rule: NewGEFVI("flow", 7894)},
+			value: dlit.MustNew(7.894),
+			wantErr: IncompatibleTypesRuleError{
+				Rule: NewLEFV("band", dlit.MustNew(7.894)),
+			},
 		},
 	}
 	record := map[string]*dlit.Literal{
@@ -83,7 +85,7 @@ func TestGEFVIIsTrue_errors(t *testing.T) {
 		"band":   dlit.NewString("alpha"),
 	}
 	for _, c := range cases {
-		r := NewGEFVI(c.field, c.value)
+		r := NewLEFV(c.field, c.value)
 		_, gotErr := r.IsTrue(record)
 		if err := checkErrorMatch(gotErr, c.wantErr); err != nil {
 			t.Errorf("IsTrue(record) rule: %s - %s", r, err)
@@ -91,10 +93,19 @@ func TestGEFVIIsTrue_errors(t *testing.T) {
 	}
 }
 
-func TestGEFVITweak(t *testing.T) {
+func TestLEFVGetFields(t *testing.T) {
+	r := NewLEFV("income", dlit.MustNew(5.5))
+	want := []string{"income"}
+	got := r.GetFields()
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("GetFields() got: %s, want: %s", got, want)
+	}
+}
+
+func TestLEFVTweak(t *testing.T) {
 	field := "income"
-	value := int64(800)
-	rule := NewGEFVI(field, value)
+	value := dlit.MustNew(800)
+	rule := NewLEFV(field, value)
 	cases := []struct {
 		description *description.Description
 		stage       int
@@ -108,9 +119,10 @@ func TestGEFVITweak(t *testing.T) {
 		{description: &description.Description{
 			map[string]*description.Field{
 				"income": &description.Field{
-					Kind: fieldtype.Int,
-					Min:  dlit.MustNew(500),
-					Max:  dlit.MustNew(1000),
+					Kind:  fieldtype.Float,
+					Min:   dlit.MustNew(500),
+					Max:   dlit.MustNew(1000),
+					MaxDP: 2,
 				},
 			},
 		},
@@ -125,74 +137,79 @@ func TestGEFVITweak(t *testing.T) {
 		{description: &description.Description{
 			map[string]*description.Field{
 				"income": &description.Field{
-					Kind: fieldtype.Int,
-					Min:  dlit.MustNew(790),
-					Max:  dlit.MustNew(1000),
+					Kind:  fieldtype.Float,
+					Min:   dlit.MustNew(790),
+					Max:   dlit.MustNew(1000),
+					MaxDP: 2,
 				},
 			},
 		},
 			stage:       1,
 			minNumRules: 18,
 			maxNumRules: 20,
-			min:         dlit.MustNew(792),
-			max:         dlit.MustNew(819),
-			mid:         dlit.MustNew(805),
-			maxDP:       0,
+			min:         dlit.MustNew(790),
+			max:         dlit.MustNew(820),
+			mid:         dlit.MustNew(803),
+			maxDP:       2,
 		},
 		{description: &description.Description{
 			map[string]*description.Field{
 				"income": &description.Field{
-					Kind: fieldtype.Int,
-					Min:  dlit.MustNew(500),
-					Max:  dlit.MustNew(810),
+					Kind:  fieldtype.Float,
+					Min:   dlit.MustNew(500),
+					Max:   dlit.MustNew(810),
+					MaxDP: 2,
 				},
 			},
 		},
 			stage:       1,
 			minNumRules: 18,
 			maxNumRules: 20,
-			min:         dlit.MustNew(771),
+			min:         dlit.MustNew(770),
 			max:         dlit.MustNew(808),
 			mid:         dlit.MustNew(787),
-			maxDP:       0,
+			maxDP:       2,
 		},
 		{description: &description.Description{
 			map[string]*description.Field{
 				"income": &description.Field{
-					Kind: fieldtype.Int,
-					Min:  dlit.MustNew(798),
-					Max:  dlit.MustNew(805),
+					Kind:  fieldtype.Float,
+					Min:   dlit.MustNew(799),
+					Max:   dlit.MustNew(801),
+					MaxDP: 0,
 				},
 			},
 		},
 			stage:       1,
 			minNumRules: 0,
 			maxNumRules: 0,
-			min:         dlit.MustNew(798),
-			max:         dlit.MustNew(800),
-			mid:         dlit.MustNew(805),
+			min:         dlit.MustNew(770),
+			max:         dlit.MustNew(787),
+			mid:         dlit.MustNew(808),
 			maxDP:       0,
 		},
+
 		{description: &description.Description{
 			map[string]*description.Field{
 				"income": &description.Field{
-					Kind: fieldtype.Int,
-					Min:  dlit.MustNew(500),
-					Max:  dlit.MustNew(1000),
+					Kind:  fieldtype.Float,
+					Min:   dlit.MustNew(500),
+					Max:   dlit.MustNew(1000),
+					MaxDP: 2,
 				},
 			},
 		},
 			stage:       2,
 			minNumRules: 18,
 			maxNumRules: 20,
-			min:         dlit.MustNew(778),
+			min:         dlit.MustNew(777),
 			max:         dlit.MustNew(823),
-			mid:         dlit.MustNew(798),
-			maxDP:       0,
+			mid:         dlit.MustNew(797),
+			maxDP:       1,
 		},
 	}
 	complyFunc := func(r Rule) error {
-		x, ok := r.(*GEFVI)
+		x, ok := r.(*LEFV)
 		if !ok {
 			return fmt.Errorf("wrong type: %T (%s)", r, r)
 		}
@@ -219,31 +236,22 @@ func TestGEFVITweak(t *testing.T) {
 	}
 }
 
-func TestGEFVIGetFields(t *testing.T) {
-	r := NewGEFVI("income", 5)
-	want := []string{"income"}
-	got := r.GetFields()
-	if !reflect.DeepEqual(got, want) {
-		t.Errorf("GetFields() got: %s, want: %s", got, want)
-	}
-}
-
-func TestGEFVIOverlaps(t *testing.T) {
+func TestLEFVOverlaps(t *testing.T) {
 	cases := []struct {
-		ruleA *GEFVI
+		ruleA *LEFV
 		ruleB Rule
 		want  bool
 	}{
-		{ruleA: NewGEFVI("band", 7),
-			ruleB: NewGEFVI("band", 6),
+		{ruleA: NewLEFV("band", dlit.MustNew(7.3)),
+			ruleB: NewLEFV("band", dlit.MustNew(6.5)),
 			want:  true,
 		},
-		{ruleA: NewGEFVI("band", 7),
-			ruleB: NewGEFVI("rate", 6),
+		{ruleA: NewLEFV("band", dlit.MustNew(7.3)),
+			ruleB: NewLEFV("rate", dlit.MustNew(6.5)),
 			want:  false,
 		},
-		{ruleA: NewGEFVI("band", 7),
-			ruleB: NewLEFVI("band", 6),
+		{ruleA: NewLEFV("band", dlit.MustNew(7.3)),
+			ruleB: NewGEFV("band", dlit.MustNew(6.5)),
 			want:  false,
 		},
 	}
@@ -253,5 +261,22 @@ func TestGEFVIOverlaps(t *testing.T) {
 			t.Errorf("Overlaps - ruleA: %s, ruleB: %s - got: %t, want: %t",
 				c.ruleA, c.ruleB, got, c.want)
 		}
+	}
+}
+
+/**************************
+ *  Benchmarks
+ **************************/
+
+func BenchmarkLEFVIsTrue(b *testing.B) {
+	record := map[string]*dlit.Literal{
+		"band":   dlit.MustNew(23),
+		"income": dlit.MustNew(1024),
+		"cost":   dlit.MustNew(890.32),
+	}
+	r := NewLEFV("cost", dlit.MustNew(900.47))
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, _ = r.IsTrue(record)
 	}
 }

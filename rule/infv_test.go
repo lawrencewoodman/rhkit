@@ -232,7 +232,7 @@ func TestInFVOverlaps(t *testing.T) {
 		{ruleA: NewInFV("band", []*dlit.Literal{
 			dlit.NewString("4"), dlit.NewString("3"), dlit.NewString("2")},
 		),
-			ruleB: NewLEFVI("band", 6),
+			ruleB: NewLEFV("band", dlit.MustNew(6)),
 			want:  false,
 		},
 	}

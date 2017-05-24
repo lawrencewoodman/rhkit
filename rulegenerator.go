@@ -52,7 +52,7 @@ func GenerateRules(
 	}
 	rules := make([]rule.Rule, 1)
 	ruleGenerators := []ruleGeneratorFunc{
-		generateIntRules, generateFloatRules, generateValueRules,
+		generateNumRules, generateValueRules,
 		generateCompareNumericRules, generateCompareStringRules,
 		generateAddRules, generateMulRules, generateInRules,
 	}
@@ -110,48 +110,15 @@ func generateValueRules(
 	fd := inputDescription.Fields[field]
 	rulesMap := make(map[string]rule.Rule)
 	values := fd.Values
-	if len(values) < 2 {
+	if len(values) < 2 || fd.Kind == fieldtype.Ignore {
 		return []rule.Rule{}
 	}
-	switch fd.Kind {
-	case fieldtype.Int:
-		for _, vd := range values {
-			if vd.Num < 2 {
-				continue
-			}
-			n, isInt := vd.Value.Int()
-			if !isInt {
-				panic(fmt.Sprintf("value isn't int: %s", vd.Value))
-			}
-			eqRule := rule.NewEQFVI(field, n)
-			neRule := rule.NewNEFVI(field, n)
-			rulesMap[eqRule.String()] = eqRule
-			rulesMap[neRule.String()] = neRule
-		}
-	case fieldtype.Float:
-		for _, vd := range values {
-			if vd.Num < 2 {
-				continue
-			}
-			n, isFloat := vd.Value.Float()
-			if !isFloat {
-				panic(fmt.Sprintf("value isn't float: %s", vd.Value))
-			}
-			eqRule := rule.NewEQFVF(field, n)
-			neRule := rule.NewNEFVF(field, n)
-			rulesMap[eqRule.String()] = eqRule
-			rulesMap[neRule.String()] = neRule
-		}
-	case fieldtype.String:
-		for _, vd := range values {
-			if vd.Num < 2 {
-				continue
-			}
-			s := vd.Value.String()
-			eqRule := rule.NewEQFVS(field, s)
+	for _, vd := range values {
+		if vd.Num >= 2 {
+			eqRule := rule.NewEQFV(field, vd.Value)
 			rulesMap[eqRule.String()] = eqRule
 			if len(values) > 2 {
-				neRule := rule.NewNEFVS(field, s)
+				neRule := rule.NewNEFV(field, vd.Value)
 				rulesMap[neRule.String()] = neRule
 			}
 		}
@@ -160,88 +127,38 @@ func generateValueRules(
 	return rules
 }
 
-func generateIntRules(
+func generateNumRules(
 	inputDescription *description.Description,
 	ruleFields []string,
 	complexity int,
 	field string,
 ) []rule.Rule {
 	fd := inputDescription.Fields[field]
-	if fd.Kind != fieldtype.Int {
-		return []rule.Rule{}
-	}
-	rulesMap := make(map[string]rule.Rule)
-	points := internal.GeneratePoints(fd.Min, fd.Max, 0)
-
-	for _, p := range points {
-		pInt, pIsInt := p.Int()
-		if !pIsInt {
-			continue
-		}
-		rL := rule.NewLEFVI(field, pInt)
-		rG := rule.NewGEFVI(field, pInt)
-		rulesMap[rL.String()] = rL
-		rulesMap[rG.String()] = rG
-	}
-
-	for iL, pL := range points {
-		for iH, pH := range points {
-			pLInt, pLIsInt := pL.Int()
-			pHInt, pHIsInt := pH.Int()
-			if !pLIsInt || !pHIsInt {
-				continue
-			}
-			if iH > iL {
-				rB, err := rule.NewBetweenFVI(field, pLInt, pHInt)
-				if err == nil {
-					rulesMap[rB.String()] = rB
-				}
-				rO, err := rule.NewOutsideFVI(field, pLInt, pHInt)
-				if err == nil {
-					rulesMap[rO.String()] = rO
-				}
-			}
-		}
-	}
-
-	return rulesMapToArray(rulesMap)
-}
-
-func generateFloatRules(
-	inputDescription *description.Description,
-	ruleFields []string,
-	complexity int,
-	field string,
-) []rule.Rule {
-	fd := inputDescription.Fields[field]
-	if fd.Kind != fieldtype.Float {
+	if fd.Kind != fieldtype.Float && fd.Kind != fieldtype.Int {
 		return []rule.Rule{}
 	}
 	rulesMap := make(map[string]rule.Rule)
 	points := internal.GeneratePoints(fd.Min, fd.Max, fd.MaxDP)
 
 	for _, p := range points {
-		pFloat, pIsFloat := p.Float()
-		if !pIsFloat {
-			continue
-		}
-		rL := rule.NewLEFVF(field, pFloat)
-		rG := rule.NewGEFVF(field, pFloat)
+		rL := rule.NewLEFV(field, p)
+		rG := rule.NewGEFV(field, p)
 		rulesMap[rL.String()] = rL
 		rulesMap[rG.String()] = rG
 	}
 
-	for iL, pL := range points {
-		for iH, pH := range points {
-			pLFloat, pLIsFloat := pL.Float()
-			pHFloat, pHIsFloat := pH.Float()
-			if pLIsFloat && pHIsFloat && iH > iL {
-				rB, err := rule.NewBetweenFVF(field, pLFloat, pHFloat)
-				if err == nil {
+	isValidExpr := dexpr.MustNew("pH > pL", dexprfuncs.CallFuncs)
+	for _, pL := range points {
+		for _, pH := range points {
+			vars := map[string]*dlit.Literal{
+				"pL": pL,
+				"pH": pH,
+			}
+			if ok, err := isValidExpr.EvalBool(vars); ok && err == nil {
+				if rB, err := rule.NewBetweenFV(field, pL, pH); err == nil {
 					rulesMap[rB.String()] = rB
 				}
-				rO, err := rule.NewOutsideFVF(field, pLFloat, pHFloat)
-				if err == nil {
+				if rO, err := rule.NewOutsideFV(field, pL, pH); err == nil {
 					rulesMap[rO.String()] = rO
 				}
 			}

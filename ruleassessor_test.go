@@ -50,9 +50,9 @@ func TestNextRecord(t *testing.T) {
 		wantNumBandGt4   int64
 		wantGoalsScore   float64
 	}{
-		{rule.NewGEFVI("band", 5), 1, 2, 2.0},
-		{rule.NewGEFVI("band", 3), 2, 2, 0.001},
-		{rule.NewGEFVF("cost", 1.3), 2, 1, 0},
+		{rule.NewGEFV("band", dlit.MustNew(5)), 1, 2, 2.0},
+		{rule.NewGEFV("band", dlit.MustNew(3)), 2, 2, 0.001},
+		{rule.NewGEFV("cost", dlit.MustNew(1.3)), 2, 1, 0},
 	}
 	for _, c := range cases {
 		ra := newRuleAssessor(c.rule, inAggregators, goals)
@@ -118,7 +118,7 @@ func TestNextRecord_Errors(t *testing.T) {
 		aggregators []aggregators.AggregatorSpec
 		wantErr     error
 	}{
-		{rule.NewGEFVI("band", 4),
+		{rule.NewGEFV("band", dlit.MustNew(4)),
 			[]aggregators.AggregatorSpec{
 				aggregators.MustNew("numIncomeGt2", "count", "fred > 2")},
 			dexpr.InvalidExprError{
@@ -126,13 +126,13 @@ func TestNextRecord_Errors(t *testing.T) {
 				Err:  dexpr.VarNotExistError("fred"),
 			},
 		},
-		{rule.NewGEFVI("band", 4),
+		{rule.NewGEFV("band", dlit.MustNew(4)),
 			[]aggregators.AggregatorSpec{
 				aggregators.MustNew("numIncomeGt2", "count", "income > 2")}, nil},
-		{rule.NewGEFVI("hand", 4),
+		{rule.NewGEFV("hand", dlit.MustNew(4)),
 			[]aggregators.AggregatorSpec{
 				aggregators.MustNew("numIncomeGt2", "count", "income > 2")},
-			rule.InvalidRuleError{Rule: rule.NewGEFVI("hand", 4)},
+			rule.InvalidRuleError{Rule: rule.NewGEFV("hand", dlit.MustNew(4))},
 		},
 	}
 	for _, c := range cases {

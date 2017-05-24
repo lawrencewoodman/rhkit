@@ -61,24 +61,22 @@ func (r *AddLEF) IsTrue(record ddataset.Record) (bool, error) {
 		return false, InvalidRuleError{Rule: r}
 	}
 
-	vAInt, vAIsInt := vA.Int()
-	if vAIsInt {
-		vBInt, vBIsInt := vB.Int()
-		if vBIsInt {
-			if i, ok := r.value.Int(); ok {
+	if vAInt, vAIsInt := vA.Int(); vAIsInt {
+		if vBInt, vBIsInt := vB.Int(); vBIsInt {
+			if i, iIsInt := r.value.Int(); iIsInt {
 				return vAInt+vBInt <= i, nil
 			}
 		}
 	}
 
-	vAFloat, vAIsFloat := vA.Float()
-	vBFloat, vBIsFloat := vB.Float()
-	valueFloat, valueIsFloat := r.value.Float()
-	if !vAIsFloat || !vBIsFloat || !valueIsFloat {
-		return false, IncompatibleTypesRuleError{Rule: r}
+	if vAFloat, vAIsFloat := vA.Float(); vAIsFloat {
+		if vBFloat, vBIsFloat := vB.Float(); vBIsFloat {
+			if f, fIsFloat := r.value.Float(); fIsFloat {
+				return vAFloat+vBFloat <= f, nil
+			}
+		}
 	}
-
-	return vAFloat+vBFloat <= valueFloat, nil
+	return false, IncompatibleTypesRuleError{Rule: r}
 }
 
 func (r *AddLEF) Tweak(

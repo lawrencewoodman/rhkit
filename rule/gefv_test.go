@@ -9,41 +9,41 @@ import (
 	"testing"
 )
 
-func TestGEFVFString(t *testing.T) {
+func TestGEFVString(t *testing.T) {
 	field := "income"
-	value := 8.93
+	value := dlit.MustNew(8.93)
 	want := "income >= 8.93"
-	r := NewGEFVF(field, value)
+	r := NewGEFV(field, value)
 	got := r.String()
 	if got != want {
 		t.Errorf("String() got: %s, want: %s", got, want)
 	}
 }
 
-func TestGEFVFValue(t *testing.T) {
+func TestGEFVValue(t *testing.T) {
 	field := "income"
-	value := 8.93
-	r := NewGEFVF(field, value)
+	value := dlit.MustNew(8.93)
+	r := NewGEFV(field, value)
 	got := r.Value()
 	if got.String() != "8.93" {
 		t.Errorf("Value() got: %s, want: %f", got, value)
 	}
 }
 
-func TestGEFVFIsTrue(t *testing.T) {
+func TestGEFVIsTrue(t *testing.T) {
 	cases := []struct {
 		field string
-		value float64
+		value *dlit.Literal
 		want  bool
 	}{
-		{"income", 19, true},
-		{"income", 19.12, false},
-		{"income", 20, false},
-		{"income", -20, true},
-		{"income", 18.34, true},
-		{"flow", 124.564, true},
-		{"flow", 124.565, false},
-		{"flow", 124.563, true},
+		{"income", dlit.MustNew(19), true},
+		{"income", dlit.MustNew(19.12), false},
+		{"income", dlit.MustNew(20), false},
+		{"income", dlit.MustNew(-20), true},
+		{"income", dlit.MustNew(18.34), true},
+		{"flow", dlit.MustNew(124.564), true},
+		{"flow", dlit.MustNew(124.565), false},
+		{"flow", dlit.MustNew(124.563), true},
 	}
 	record := map[string]*dlit.Literal{
 		"income": dlit.MustNew(19),
@@ -51,7 +51,7 @@ func TestGEFVFIsTrue(t *testing.T) {
 		"flow":   dlit.MustNew(124.564),
 	}
 	for _, c := range cases {
-		r := NewGEFVF(c.field, c.value)
+		r := NewGEFV(c.field, c.value)
 		got, err := r.IsTrue(record)
 		if err != nil {
 			t.Errorf("IsTrue(record) (rule: %s) err: %v", r, err)
@@ -62,19 +62,21 @@ func TestGEFVFIsTrue(t *testing.T) {
 	}
 }
 
-func TestGEFVFIsTrue_errors(t *testing.T) {
+func TestGEFVIsTrue_errors(t *testing.T) {
 	cases := []struct {
 		field   string
-		value   float64
+		value   *dlit.Literal
 		wantErr error
 	}{
 		{field: "fred",
-			value:   7.894,
-			wantErr: InvalidRuleError{Rule: NewGEFVF("fred", 7.894)},
+			value:   dlit.MustNew(7.894),
+			wantErr: InvalidRuleError{Rule: NewGEFV("fred", dlit.MustNew(7.894))},
 		},
 		{field: "band",
-			value:   7.894,
-			wantErr: IncompatibleTypesRuleError{Rule: NewGEFVF("band", 7.894)},
+			value: dlit.MustNew(7.894),
+			wantErr: IncompatibleTypesRuleError{
+				Rule: NewGEFV("band", dlit.MustNew(7.894)),
+			},
 		},
 	}
 	record := map[string]*dlit.Literal{
@@ -83,7 +85,7 @@ func TestGEFVFIsTrue_errors(t *testing.T) {
 		"band":   dlit.NewString("alpha"),
 	}
 	for _, c := range cases {
-		r := NewGEFVF(c.field, c.value)
+		r := NewGEFV(c.field, c.value)
 		_, gotErr := r.IsTrue(record)
 		if err := checkErrorMatch(gotErr, c.wantErr); err != nil {
 			t.Errorf("IsTrue(record) rule: %s - %s", r, err)
@@ -91,8 +93,8 @@ func TestGEFVFIsTrue_errors(t *testing.T) {
 	}
 }
 
-func TestGEFVFGetFields(t *testing.T) {
-	r := NewGEFVF("income", 5.5)
+func TestGEFVGetFields(t *testing.T) {
+	r := NewGEFV("income", dlit.MustNew(5.5))
 	want := []string{"income"}
 	got := r.GetFields()
 	if !reflect.DeepEqual(got, want) {
@@ -100,10 +102,10 @@ func TestGEFVFGetFields(t *testing.T) {
 	}
 }
 
-func TestGEFVFTweak(t *testing.T) {
+func TestGEFVTweak(t *testing.T) {
 	field := "income"
-	value := float64(800)
-	rule := NewGEFVF(field, value)
+	value := dlit.MustNew(800)
+	rule := NewGEFV(field, value)
 	cases := []struct {
 		description *description.Description
 		stage       int
@@ -206,7 +208,7 @@ func TestGEFVFTweak(t *testing.T) {
 		},
 	}
 	complyFunc := func(r Rule) error {
-		x, ok := r.(*GEFVF)
+		x, ok := r.(*GEFV)
 		if !ok {
 			return fmt.Errorf("wrong type: %T (%s)", r, r)
 		}
@@ -233,22 +235,22 @@ func TestGEFVFTweak(t *testing.T) {
 	}
 }
 
-func TestGEFVFOverlaps(t *testing.T) {
+func TestGEFVOverlaps(t *testing.T) {
 	cases := []struct {
-		ruleA *GEFVF
+		ruleA *GEFV
 		ruleB Rule
 		want  bool
 	}{
-		{ruleA: NewGEFVF("band", 7.3),
-			ruleB: NewGEFVF("band", 6.5),
+		{ruleA: NewGEFV("band", dlit.MustNew(7.3)),
+			ruleB: NewGEFV("band", dlit.MustNew(6.5)),
 			want:  true,
 		},
-		{ruleA: NewGEFVF("band", 7.3),
-			ruleB: NewGEFVF("rate", 6.5),
+		{ruleA: NewGEFV("band", dlit.MustNew(7.3)),
+			ruleB: NewGEFV("rate", dlit.MustNew(6.5)),
 			want:  false,
 		},
-		{ruleA: NewGEFVF("band", 7.3),
-			ruleB: NewLEFVF("band", 6.5),
+		{ruleA: NewGEFV("band", dlit.MustNew(7.3)),
+			ruleB: NewLEFV("band", dlit.MustNew(6.5)),
 			want:  false,
 		},
 	}
@@ -258,5 +260,21 @@ func TestGEFVFOverlaps(t *testing.T) {
 			t.Errorf("Overlaps - ruleA: %s, ruleB: %s - got: %t, want: %t",
 				c.ruleA, c.ruleB, got, c.want)
 		}
+	}
+}
+
+/**************************
+ *  Benchmarks
+ **************************/
+func BenchmarkGEFVIsTrue(b *testing.B) {
+	record := map[string]*dlit.Literal{
+		"band":   dlit.MustNew(23),
+		"income": dlit.MustNew(1024),
+		"cost":   dlit.MustNew(890.32),
+	}
+	r := NewGEFV("cost", dlit.MustNew(900.47))
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, _ = r.IsTrue(record)
 	}
 }

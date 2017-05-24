@@ -143,7 +143,7 @@ func TestMulLEFOverlaps(t *testing.T) {
 			want:  false,
 		},
 		{ruleA: NewMulLEF("band", "cost", dlit.MustNew(7.3)),
-			ruleB: NewGEFVF("band", 6.5),
+			ruleB: NewGEFV("band", dlit.MustNew(6.5)),
 			want:  false,
 		},
 	}

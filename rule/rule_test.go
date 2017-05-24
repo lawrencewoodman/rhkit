@@ -30,16 +30,16 @@ func TestIncompatibleTypesRuleErrorError(t *testing.T) {
 
 func TestSort(t *testing.T) {
 	in := []Rule{
-		NewEQFVS("band", "b"),
-		NewGEFVI("flow", 3),
-		NewEQFVS("band", "a"),
-		NewGEFVI("flow", 2),
+		NewEQFV("band", dlit.MustNew("b")),
+		NewGEFV("flow", dlit.MustNew(3)),
+		NewEQFV("band", dlit.MustNew("a")),
+		NewGEFV("flow", dlit.MustNew(2)),
 	}
 	want := []Rule{
-		NewEQFVS("band", "a"),
-		NewEQFVS("band", "b"),
-		NewGEFVI("flow", 2),
-		NewGEFVI("flow", 3),
+		NewEQFV("band", dlit.MustNew("a")),
+		NewEQFV("band", dlit.MustNew("b")),
+		NewGEFV("flow", dlit.MustNew(2)),
+		NewGEFV("flow", dlit.MustNew(3)),
 	}
 	Sort(in)
 	if len(in) != len(want) {
@@ -54,17 +54,17 @@ func TestSort(t *testing.T) {
 
 func TestUniq(t *testing.T) {
 	in := []Rule{
-		NewEQFVS("band", "b"),
-		NewEQFVS("band", "a"),
-		NewGEFVI("flow", 3),
-		NewEQFVS("band", "a"),
-		NewGEFVI("flow", 2),
+		NewEQFV("band", dlit.MustNew("b")),
+		NewEQFV("band", dlit.MustNew("a")),
+		NewGEFV("flow", dlit.MustNew(3)),
+		NewEQFV("band", dlit.MustNew("a")),
+		NewGEFV("flow", dlit.MustNew(2)),
 	}
 	want := []Rule{
-		NewEQFVS("band", "b"),
-		NewEQFVS("band", "a"),
-		NewGEFVI("flow", 3),
-		NewGEFVI("flow", 2),
+		NewEQFV("band", dlit.MustNew("b")),
+		NewEQFV("band", dlit.MustNew("a")),
+		NewGEFV("flow", dlit.MustNew(3)),
+		NewGEFV("flow", dlit.MustNew(2)),
 	}
 	got := Uniq(in)
 	if len(got) != len(want) {
@@ -206,25 +206,21 @@ func TestRoundRules(t *testing.T) {
 		want []Rule
 	}{
 		{in: dlit.MustNew(5), want: []Rule{
-			NewLEFVF(field, 5),
+			NewLEFV(field, dlit.MustNew(5)),
 		}},
 		{in: dlit.MustNew(2.5), want: []Rule{
-			NewLEFVF(field, 2.5),
-			NewLEFVF(field, 3),
+			NewLEFV(field, dlit.MustNew(2.5)),
+			NewLEFV(field, dlit.MustNew(3)),
 		}},
 		{in: dlit.MustNew(2.25), want: []Rule{
-			NewLEFVF(field, 2.25),
-			NewLEFVF(field, 2.3),
-			NewLEFVF(field, 2),
+			NewLEFV(field, dlit.MustNew(2.25)),
+			NewLEFV(field, dlit.MustNew(2.3)),
+			NewLEFV(field, dlit.MustNew(2)),
 		}},
 	}
 
 	makeRule := func(p *dlit.Literal) Rule {
-		if f, ok := p.Float(); ok {
-			return NewLEFVF(field, f)
-		}
-		t.Fatalf("can't make float")
-		return nil
+		return NewLEFV(field, p)
 	}
 	for _, c := range cases {
 		got := roundRules(c.in, makeRule)
@@ -242,22 +238,22 @@ func TestRoundRules(t *testing.T) {
 
 func TestReduceDP(t *testing.T) {
 	in := []Rule{
-		NewLEFVF("income", 7.772),
-		NewGEFVF("flow", 7.9265),
+		NewLEFV("income", dlit.MustNew(7.772)),
+		NewGEFV("flow", dlit.MustNew(7.9265)),
 		NewGEFF("flow", "income"),
 		NewAddLEF("balance", "income", dlit.MustNew(1024.23)),
 		NewAddGEF("balance", "income", dlit.MustNew(1024.23)),
 	}
 	want := []Rule{
-		NewLEFVF("income", 7.772),
-		NewLEFVF("income", 7.77),
-		NewLEFVF("income", 7.8),
-		NewLEFVF("income", 8),
-		NewGEFVF("flow", 7.9265),
-		NewGEFVF("flow", 7.927),
-		NewGEFVF("flow", 7.93),
-		NewGEFVF("flow", 7.9),
-		NewGEFVF("flow", 8),
+		NewLEFV("income", dlit.MustNew(7.772)),
+		NewLEFV("income", dlit.MustNew(7.77)),
+		NewLEFV("income", dlit.MustNew(7.8)),
+		NewLEFV("income", dlit.MustNew(8)),
+		NewGEFV("flow", dlit.MustNew(7.9265)),
+		NewGEFV("flow", dlit.MustNew(7.927)),
+		NewGEFV("flow", dlit.MustNew(7.93)),
+		NewGEFV("flow", dlit.MustNew(7.9)),
+		NewGEFV("flow", dlit.MustNew(8)),
 		NewAddLEF("balance", "income", dlit.MustNew(1024.23)),
 		NewAddLEF("balance", "income", dlit.MustNew(1024.2)),
 		NewAddLEF("balance", "income", dlit.MustNew(1024)),
