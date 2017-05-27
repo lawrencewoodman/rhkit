@@ -48,14 +48,14 @@ func TestInFVString(t *testing.T) {
 	}
 }
 
-func TestInFVGetFields(t *testing.T) {
+func TestInFVFields(t *testing.T) {
 	field := "station"
 	values := []*dlit.Literal{dlit.MustNew(7.892)}
 	r := NewInFV(field, values)
 	wantFields := []string{field}
-	gotFields := r.GetFields()
+	gotFields := r.Fields()
 	if !reflect.DeepEqual(gotFields, wantFields) {
-		t.Errorf("GetFields() got: %v, want: %v", gotFields, wantFields)
+		t.Errorf("Fields() got: %v, want: %v", gotFields, wantFields)
 	}
 }
 

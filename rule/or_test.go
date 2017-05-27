@@ -397,7 +397,7 @@ func TestOrIsTrue_errors(t *testing.T) {
 	}
 }
 
-func TestOrGetFields(t *testing.T) {
+func TestOrFields(t *testing.T) {
 	cases := []struct {
 		ruleA Rule
 		ruleB Rule
@@ -423,11 +423,11 @@ func TestOrGetFields(t *testing.T) {
 	}
 	for _, c := range cases {
 		r := MustNewOr(c.ruleA, c.ruleB)
-		got := r.GetFields()
+		got := r.Fields()
 		sort.Strings(got)
 		sort.Strings(c.want)
 		if !reflect.DeepEqual(got, c.want) {
-			t.Errorf("GetFields() got: %s, want: %s", got, c.want)
+			t.Errorf("Fields() got: %s, want: %s", got, c.want)
 		}
 	}
 }

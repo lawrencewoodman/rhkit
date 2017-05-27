@@ -115,12 +115,12 @@ func TestMulGEFIsTrue_errors(t *testing.T) {
 	}
 }
 
-func TestMulGEFGetFields(t *testing.T) {
+func TestMulGEFFields(t *testing.T) {
 	r := NewMulGEF("income", "cost", dlit.MustNew(5.5))
 	want := []string{"income", "cost"}
-	got := r.GetFields()
+	got := r.Fields()
 	if !reflect.DeepEqual(got, want) {
-		t.Errorf("GetFields() got: %s, want: %s", got, want)
+		t.Errorf("Fields() got: %s, want: %s", got, want)
 	}
 }
 

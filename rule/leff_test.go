@@ -95,11 +95,11 @@ func TestLEFFIsTrue_errors(t *testing.T) {
 	}
 }
 
-func TestLEFFGetFields(t *testing.T) {
+func TestLEFFFields(t *testing.T) {
 	r := NewLEFF("income", "cost")
 	want := []string{"income", "cost"}
-	got := r.GetFields()
+	got := r.Fields()
 	if !reflect.DeepEqual(got, want) {
-		t.Errorf("GetFields() got: %s, want: %s", got, want)
+		t.Errorf("Fields() got: %s, want: %s", got, want)
 	}
 }

@@ -47,17 +47,17 @@ func TestTweak_1(t *testing.T) {
 		case True:
 			continue
 		case *GEFV:
-			field := x.GetFields()[0]
+			field := x.Fields()[0]
 			if field == "band" {
 				numBandGERules++
 			} else if field == "age" {
 				numAgeGERules++
 			}
-			if x.GetFields()[0] == "flow" {
+			if x.Fields()[0] == "flow" {
 				numFlowGERules++
 			}
 		case *BetweenFV:
-			if x.GetFields()[0] == "age" {
+			if x.Fields()[0] == "age" {
 				numAgeBetweenRules++
 			}
 		case Tweaker:
@@ -124,7 +124,7 @@ func TestTweak_2(t *testing.T) {
 		case True:
 			continue
 		case *LEFV:
-			if x.GetFields()[0] != "age" {
+			if x.Fields()[0] != "age" {
 				printTestPurposes(t, testPurposes)
 				t.Fatalf("Tweak(%s) invalid rule(%s): ", rulesIn, gotRule)
 			}
@@ -214,7 +214,7 @@ func TestTweak_3(t *testing.T) {
 		case True:
 			continue
 		case *LEFV:
-			if x.GetFields()[0] != "flow" {
+			if x.Fields()[0] != "flow" {
 				printTestPurposes(t, testPurposes)
 				t.Fatalf("Tweak(%s) invalid rule(%s)", rulesIn, gotRule)
 			}

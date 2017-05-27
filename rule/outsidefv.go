@@ -105,7 +105,7 @@ func (r *OutsideFV) IsTrue(record ddataset.Record) (bool, error) {
 	return false, IncompatibleTypesRuleError{Rule: r}
 }
 
-func (r *OutsideFV) GetFields() []string {
+func (r *OutsideFV) Fields() []string {
 	return []string{r.field}
 }
 
@@ -147,7 +147,7 @@ func (r *OutsideFV) Tweak(
 func (r *OutsideFV) Overlaps(o Rule) bool {
 	switch x := o.(type) {
 	case *OutsideFV:
-		oField := x.GetFields()[0]
+		oField := x.Fields()[0]
 		return oField == r.field
 	}
 	return false

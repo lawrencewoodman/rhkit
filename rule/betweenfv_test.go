@@ -154,7 +154,7 @@ func TestBetweenFVIsTrue_errors(t *testing.T) {
 	}
 }
 
-func TestBetweenFVGetFields(t *testing.T) {
+func TestBetweenFVFields(t *testing.T) {
 	field := "rate"
 	min := dlit.MustNew(18.72)
 	max := dlit.MustNew(20.72)
@@ -163,9 +163,9 @@ func TestBetweenFVGetFields(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewBetweenFV: %s", err)
 	}
-	got := r.GetFields()
+	got := r.Fields()
 	if !reflect.DeepEqual(got, want) {
-		t.Errorf("GetFields() got: %s, want: %s", got, want)
+		t.Errorf("Fields() got: %s, want: %s", got, want)
 	}
 }
 

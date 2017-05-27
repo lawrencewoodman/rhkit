@@ -95,12 +95,12 @@ func TestLTFFIsTrue_errors(t *testing.T) {
 	}
 }
 
-func TestLTFFGetFields(t *testing.T) {
+func TestLTFFFields(t *testing.T) {
 	r := NewLTFF("income", "cost")
 	want := []string{"income", "cost"}
-	got := r.GetFields()
+	got := r.Fields()
 	if !reflect.DeepEqual(got, want) {
-		t.Errorf("GetFields() got: %s, want: %s", got, want)
+		t.Errorf("Fields() got: %s, want: %s", got, want)
 	}
 }
 

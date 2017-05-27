@@ -98,11 +98,11 @@ func TestNEFFIsTrue_errors(t *testing.T) {
 	}
 }
 
-func TestNEFFGetFields(t *testing.T) {
+func TestNEFFFields(t *testing.T) {
 	r := NewNEFF("income", "cost")
 	want := []string{"income", "cost"}
-	got := r.GetFields()
+	got := r.Fields()
 	if !reflect.DeepEqual(got, want) {
-		t.Errorf("GetFields() got: %s, want: %s", got, want)
+		t.Errorf("Fields() got: %s, want: %s", got, want)
 	}
 }

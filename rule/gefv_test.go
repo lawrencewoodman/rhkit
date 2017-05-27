@@ -93,12 +93,12 @@ func TestGEFVIsTrue_errors(t *testing.T) {
 	}
 }
 
-func TestGEFVGetFields(t *testing.T) {
+func TestGEFVFields(t *testing.T) {
 	r := NewGEFV("income", dlit.MustNew(5.5))
 	want := []string{"income"}
-	got := r.GetFields()
+	got := r.Fields()
 	if !reflect.DeepEqual(got, want) {
-		t.Errorf("GetFields() got: %s, want: %s", got, want)
+		t.Errorf("Fields() got: %s, want: %s", got, want)
 	}
 }
 

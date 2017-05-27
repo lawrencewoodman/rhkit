@@ -95,11 +95,11 @@ func TestGTFFIsTrue_errors(t *testing.T) {
 	}
 }
 
-func TestGTFFGetFields(t *testing.T) {
+func TestGTFFFields(t *testing.T) {
 	r := NewGTFF("income", "cost")
 	want := []string{"income", "cost"}
-	got := r.GetFields()
+	got := r.Fields()
 	if !reflect.DeepEqual(got, want) {
-		t.Errorf("GetFields() got: %s, want: %s", got, want)
+		t.Errorf("Fields() got: %s, want: %s", got, want)
 	}
 }

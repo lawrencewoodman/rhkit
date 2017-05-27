@@ -104,7 +104,7 @@ func (r *BetweenFV) IsTrue(record ddataset.Record) (bool, error) {
 	return false, IncompatibleTypesRuleError{Rule: r}
 }
 
-func (r *BetweenFV) GetFields() []string {
+func (r *BetweenFV) Fields() []string {
 	return []string{r.field}
 }
 
@@ -156,7 +156,7 @@ func (r *BetweenFV) Overlaps(o Rule) bool {
 			"min":  r.min,
 			"max":  r.max,
 		}
-		oField := x.GetFields()[0]
+		oField := x.Fields()[0]
 		overlap, err := rangeOverlaps.EvalBool(vars)
 		if err != nil {
 			panic(err)

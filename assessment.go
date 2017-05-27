@@ -290,7 +290,7 @@ func (sortedAssessment *Assessment) excludePoorerInRules(
 	for _, a := range sortedAssessment.RuleAssessments {
 		switch x := a.Rule.(type) {
 		case *rule.InFV:
-			field := x.GetFields()[0]
+			field := x.Fields()[0]
 			n, ok := inFields[field]
 			if !ok {
 				goodRuleAssessments = append(goodRuleAssessments, a)

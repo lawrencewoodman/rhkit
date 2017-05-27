@@ -30,10 +30,10 @@ func TestTrueIsTrue(t *testing.T) {
 	}
 }
 
-func TestTrueGetFields(t *testing.T) {
+func TestTrueFields(t *testing.T) {
 	r := NewTrue()
-	got := r.GetFields()
+	got := r.Fields()
 	if len(got) != 0 {
-		t.Errorf("GetFields() got: %s, want: {}", got)
+		t.Errorf("Fields() got: %s, want: {}", got)
 	}
 }

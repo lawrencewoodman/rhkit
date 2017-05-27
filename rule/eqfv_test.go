@@ -104,11 +104,11 @@ func TestEQFVIsTrue_errors(t *testing.T) {
 	}
 }
 
-func TestEQFVGetFields(t *testing.T) {
+func TestEQFVFields(t *testing.T) {
 	r := NewEQFV("income", dlit.MustNew(5.5))
 	want := []string{"income"}
-	got := r.GetFields()
+	got := r.Fields()
 	if !reflect.DeepEqual(got, want) {
-		t.Errorf("GetFields() got: %s, want: %s", got, want)
+		t.Errorf("Fields() got: %s, want: %s", got, want)
 	}
 }

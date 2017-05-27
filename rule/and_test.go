@@ -529,7 +529,7 @@ func TestAndIsTrue_errors(t *testing.T) {
 	}
 }
 
-func TestAndGetFields(t *testing.T) {
+func TestAndFields(t *testing.T) {
 	cases := []struct {
 		ruleA Rule
 		ruleB Rule
@@ -555,11 +555,11 @@ func TestAndGetFields(t *testing.T) {
 	}
 	for _, c := range cases {
 		r := MustNewAnd(c.ruleA, c.ruleB)
-		got := r.GetFields()
+		got := r.Fields()
 		sort.Strings(got)
 		sort.Strings(c.want)
 		if !reflect.DeepEqual(got, c.want) {
-			t.Errorf("GetFields() got: %s, want: %s", got, c.want)
+			t.Errorf("Fields() got: %s, want: %s", got, c.want)
 		}
 	}
 }

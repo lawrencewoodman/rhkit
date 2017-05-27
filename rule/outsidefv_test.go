@@ -148,7 +148,7 @@ func TestOutsideFVIsTrue_errors(t *testing.T) {
 	}
 }
 
-func TestOutsideFVGetFields(t *testing.T) {
+func TestOutsideFVFields(t *testing.T) {
 	field := "rate"
 	low := dlit.MustNew(18.54)
 	high := dlit.MustNew(20.302)
@@ -157,9 +157,9 @@ func TestOutsideFVGetFields(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewOutsideFV: %s", err)
 	}
-	got := r.GetFields()
+	got := r.Fields()
 	if !reflect.DeepEqual(got, want) {
-		t.Errorf("GetFields() got: %s, want: %s", got, want)
+		t.Errorf("Fields() got: %s, want: %s", got, want)
 	}
 }
 
