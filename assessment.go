@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2016 vLife Systems Ltd <http://vlifesystems.com>
+	Copyright (C) 2016-2017 vLife Systems Ltd <http://vlifesystems.com>
 	This file is part of rhkit.
 
 	rhkit is free software: you can redistribute it and/or modify
@@ -200,7 +200,7 @@ func (a *Assessment) TruncateRuleAssessments(
 }
 
 // Can optionally pass maximum number of rules to return
-func (a *Assessment) GetRules(args ...int) []rule.Rule {
+func (a *Assessment) Rules(args ...int) []rule.Rule {
 	var numRules int
 	switch len(args) {
 	case 0:

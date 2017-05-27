@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestMeanGetResult(t *testing.T) {
+func TestMeanResult(t *testing.T) {
 	records := []map[string]*dlit.Literal{
 		map[string]*dlit.Literal{
 			"income": dlit.MustNew(3),
@@ -53,37 +53,37 @@ func TestMeanGetResult(t *testing.T) {
 			meanProfit.NextRecord(record, c.rule(i))
 		}
 		numRecords := int64(len(records))
-		got := meanProfit.GetResult(instances, goals, numRecords)
+		got := meanProfit.Result(instances, goals, numRecords)
 		gotFloat, gotIsFloat := got.Float()
 		if !gotIsFloat || gotFloat != c.want {
-			t.Errorf("GetResult() got: %v, want: %f", got, c.want)
+			t.Errorf("Result() got: %v, want: %f", got, c.want)
 		}
 	}
 }
 
-func TestMeanSpecGetName(t *testing.T) {
+func TestMeanSpecName(t *testing.T) {
 	name := "a"
 	as := MustNew(name, "mean", "income - cost")
-	got := as.GetName()
+	got := as.Name()
 	if got != name {
-		t.Errorf("GetName - got: %s, want: %s", got, name)
+		t.Errorf("Name - got: %s, want: %s", got, name)
 	}
 }
 
-func TestMeanSpecGetKind(t *testing.T) {
+func TestMeanSpecKind(t *testing.T) {
 	kind := "mean"
 	as := MustNew("a", kind, "income - cost")
-	got := as.GetKind()
+	got := as.Kind()
 	if got != kind {
-		t.Errorf("GetKind - got: %s, want: %s", got, kind)
+		t.Errorf("Kind - got: %s, want: %s", got, kind)
 	}
 }
 
-func TestMeanSpecGetArg(t *testing.T) {
+func TestMeanSpecArg(t *testing.T) {
 	arg := "income - cost"
 	as := MustNew("a", "mean", arg)
-	got := as.GetArg()
+	got := as.Arg()
 	if got != arg {
-		t.Errorf("GetArg - got: %s, want: %s", got, arg)
+		t.Errorf("Arg - got: %s, want: %s", got, arg)
 	}
 }

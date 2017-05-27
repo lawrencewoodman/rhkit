@@ -93,7 +93,7 @@ func processDataset(experiment *experiment.Experiment) error {
 
 	assessment.Sort(experiment.SortOrder)
 	assessment.Refine()
-	rules = assessment.GetRules()
+	rules = assessment.Rules()
 
 	tweakableRules := rule.Tweak(
 		1,
@@ -119,7 +119,7 @@ func processDataset(experiment *experiment.Experiment) error {
 	assessment.Sort(experiment.SortOrder)
 	assessment.Refine()
 
-	rules = assessment.GetRules()
+	rules = assessment.Rules()
 	reducedDPRules := rule.ReduceDP(rules)
 	if len(reducedDPRules) < 2 {
 		return fmt.Errorf("rule.ReduceDP: not enough rules generated")
@@ -139,7 +139,7 @@ func processDataset(experiment *experiment.Experiment) error {
 	assessment.Refine()
 
 	numRulesToCombine := 50
-	bestNonCombinedRules := assessment.GetRules(numRulesToCombine)
+	bestNonCombinedRules := assessment.Rules(numRulesToCombine)
 	combinedRules :=
 		rhkit.CombineRules(bestNonCombinedRules)
 	if len(combinedRules) < 2 {

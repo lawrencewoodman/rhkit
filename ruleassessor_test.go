@@ -64,7 +64,7 @@ func TestNextRecord(t *testing.T) {
 			}
 		}
 		gotNumIncomeGt2, gt2Exists :=
-			ra.GetAggregatorValue("numIncomeGt2", numRecords)
+			ra.AggregatorValue("numIncomeGt2", numRecords)
 		if !gt2Exists {
 			t.Errorf("numIncomeGt2 aggregator doesn't exist")
 		}
@@ -77,7 +77,7 @@ func TestNextRecord(t *testing.T) {
 				c.rule, inAggregators, goals, c.wantNumIncomeGt2, gotNumIncomeGt2Int)
 		}
 		gotNumBandGt4, gt4Exists :=
-			ra.GetAggregatorValue("numBandGt4", numRecords)
+			ra.AggregatorValue("numBandGt4", numRecords)
 		if !gt4Exists {
 			t.Errorf("numBandGt4 aggregator doesn't exist")
 		}
@@ -90,7 +90,7 @@ func TestNextRecord(t *testing.T) {
 				c.rule, inAggregators, goals, c.wantNumBandGt4, gotNumBandGt4Int)
 		}
 		gotGoalsScore, goalsScoreExists :=
-			ra.GetAggregatorValue("goalsScore", numRecords)
+			ra.AggregatorValue("goalsScore", numRecords)
 		if !goalsScoreExists {
 			t.Errorf("goalsScore aggregator doesn't exist")
 		}

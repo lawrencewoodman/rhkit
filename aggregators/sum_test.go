@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestSumGetResult(t *testing.T) {
+func TestSumResult(t *testing.T) {
 	records := []map[string]*dlit.Literal{
 		map[string]*dlit.Literal{
 			"income": dlit.MustNew(3),
@@ -39,36 +39,36 @@ func TestSumGetResult(t *testing.T) {
 	}
 	want := 5.3
 	numRecords := int64(len(records))
-	got := profit.GetResult(instances, goals, numRecords)
+	got := profit.Result(instances, goals, numRecords)
 	gotFloat, gotIsFloat := got.Float()
 	if !gotIsFloat || gotFloat != want {
-		t.Errorf("GetResult() got: %f, want: %f", got, want)
+		t.Errorf("Result() got: %f, want: %f", got, want)
 	}
 }
 
-func TestSumSpecGetName(t *testing.T) {
+func TestSumSpecName(t *testing.T) {
 	name := "a"
 	as := MustNew(name, "sum", "income-cost")
-	got := as.GetName()
+	got := as.Name()
 	if got != name {
-		t.Errorf("GetName - got: %s, want: %s", got, name)
+		t.Errorf("Name - got: %s, want: %s", got, name)
 	}
 }
 
-func TestSumSpecGetKind(t *testing.T) {
+func TestSumSpecKind(t *testing.T) {
 	kind := "sum"
 	as := MustNew("a", kind, "income-cost")
-	got := as.GetKind()
+	got := as.Kind()
 	if got != kind {
-		t.Errorf("GetKind - got: %s, want: %s", got, kind)
+		t.Errorf("Kind - got: %s, want: %s", got, kind)
 	}
 }
 
-func TestSumSpecGetArg(t *testing.T) {
+func TestSumSpecArg(t *testing.T) {
 	arg := "income-cost"
 	as := MustNew("a", "sum", arg)
-	got := as.GetArg()
+	got := as.Arg()
 	if got != arg {
-		t.Errorf("GetArg - got: %s, want: %s", got, arg)
+		t.Errorf("Arg - got: %s, want: %s", got, arg)
 	}
 }

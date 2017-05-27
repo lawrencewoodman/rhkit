@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestRecallGetResult(t *testing.T) {
+func TestRecallResult(t *testing.T) {
 	records := []map[string]*dlit.Literal{
 		map[string]*dlit.Literal{
 			"income": dlit.MustNew(3),
@@ -73,38 +73,38 @@ func TestRecallGetResult(t *testing.T) {
 				recallCostGt2.NextRecord(record, i != 1 && i != 2)
 			}
 			numRecords := int64(len(c.records))
-			got := recallCostGt2.GetResult(instances, goals, numRecords)
+			got := recallCostGt2.Result(instances, goals, numRecords)
 			gotFloat, gotIsFloat := got.Float()
 			if !gotIsFloat || gotFloat != c.want {
-				t.Errorf("GetResult() got: %v, want: %v", got, c.want)
+				t.Errorf("Result() got: %v, want: %v", got, c.want)
 			}
 		}
 	}
 }
 
-func TestRecallSpecGetName(t *testing.T) {
+func TestRecallSpecName(t *testing.T) {
 	name := "a"
 	as := MustNew(name, "recall", "cost > 2")
-	got := as.GetName()
+	got := as.Name()
 	if got != name {
-		t.Errorf("GetName - got: %s, want: %s", got, name)
+		t.Errorf("Name - got: %s, want: %s", got, name)
 	}
 }
 
-func TestRecallSpecGetKind(t *testing.T) {
+func TestRecallSpecKind(t *testing.T) {
 	kind := "recall"
 	as := MustNew("a", kind, "cost > 2")
-	got := as.GetKind()
+	got := as.Kind()
 	if got != kind {
-		t.Errorf("GetKind - got: %s, want: %s", got, kind)
+		t.Errorf("Kind - got: %s, want: %s", got, kind)
 	}
 }
 
-func TestRecallSpecGetArg(t *testing.T) {
+func TestRecallSpecArg(t *testing.T) {
 	arg := "cost > 2"
 	as := MustNew("a", "recall", arg)
-	got := as.GetArg()
+	got := as.Arg()
 	if got != arg {
-		t.Errorf("GetArg - got: %s, want: %s", got, arg)
+		t.Errorf("Arg - got: %s, want: %s", got, arg)
 	}
 }

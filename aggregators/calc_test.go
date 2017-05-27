@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestCalcGetResult(t *testing.T) {
+func TestCalcResult(t *testing.T) {
 	aggregatorSpecs := []AggregatorSpec{
 		MustNew("a", "calc", "3 + 4"),
 		MustNew("b", "calc", "5 + 6"),
@@ -32,36 +32,36 @@ func TestCalcGetResult(t *testing.T) {
 		instances[i] = aggregatorSpec.New()
 	}
 	for i, instance := range instances {
-		got := instance.GetResult(instances, goals, numRecords)
+		got := instance.Result(instances, goals, numRecords)
 		if got.String() != want[i].String() {
-			t.Errorf("GetResult() i: %d got: %s, want: %s", i, got, want[i])
+			t.Errorf("Result() i: %d got: %s, want: %s", i, got, want[i])
 		}
 	}
 }
 
-func TestCalcSpecGetName(t *testing.T) {
+func TestCalcSpecName(t *testing.T) {
 	name := "a"
 	as := MustNew(name, "calc", "3+4")
-	got := as.GetName()
+	got := as.Name()
 	if got != name {
-		t.Errorf("GetName - got: %s, want: %s", got, name)
+		t.Errorf("Name - got: %s, want: %s", got, name)
 	}
 }
 
-func TestCalcSpecGetKind(t *testing.T) {
+func TestCalcSpecKind(t *testing.T) {
 	kind := "calc"
 	as := MustNew("a", kind, "3+4")
-	got := as.GetKind()
+	got := as.Kind()
 	if got != kind {
-		t.Errorf("GetKind - got: %s, want: %s", got, kind)
+		t.Errorf("Kind - got: %s, want: %s", got, kind)
 	}
 }
 
-func TestCalcSpecGetArg(t *testing.T) {
+func TestCalcSpecArg(t *testing.T) {
 	arg := "3+4"
 	as := MustNew("a", "calc", arg)
-	got := as.GetArg()
+	got := as.Arg()
 	if got != arg {
-		t.Errorf("GetArg - got: %s, want: %s", got, arg)
+		t.Errorf("Arg - got: %s, want: %s", got, arg)
 	}
 }

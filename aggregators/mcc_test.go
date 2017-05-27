@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func TestMCCGetResult(t *testing.T) {
+func TestMCCResult(t *testing.T) {
 	records := []map[string]*dlit.Literal{
 		map[string]*dlit.Literal{
 			"income": dlit.MustNew(3),
@@ -105,42 +105,42 @@ func TestMCCGetResult(t *testing.T) {
 			mccCostGt2.NextRecord(record, isTrue)
 		}
 		numRecords := int64(len(c.records))
-		got := mccCostGt2.GetResult(instances, goals, numRecords)
+		got := mccCostGt2.Result(instances, goals, numRecords)
 		vars := map[string]*dlit.Literal{"got": got}
 		isCorrect, err := c.checkExpr.EvalBool(vars)
 		if err != nil {
 			t.Fatalf("EvalBool(%v, callFuncs) err: %v", vars, err)
 		}
 		if !isCorrect {
-			t.Errorf("GetResult() (c.ruleExpr: %s) got: %v, want: %v",
+			t.Errorf("Result() (c.ruleExpr: %s) got: %v, want: %v",
 				c.ruleExpr, got, c.checkExpr)
 		}
 	}
 }
 
-func TestMCCSpecGetName(t *testing.T) {
+func TestMCCSpecName(t *testing.T) {
 	name := "a"
 	as := MustNew(name, "mcc", "band > 4")
-	got := as.GetName()
+	got := as.Name()
 	if got != name {
-		t.Errorf("GetName - got: %s, want: %s", got, name)
+		t.Errorf("Name - got: %s, want: %s", got, name)
 	}
 }
 
-func TestMCCSpecGetKind(t *testing.T) {
+func TestMCCSpecKind(t *testing.T) {
 	kind := "mcc"
 	as := MustNew("a", kind, "band > 4")
-	got := as.GetKind()
+	got := as.Kind()
 	if got != kind {
-		t.Errorf("GetKind - got: %s, want: %s", got, kind)
+		t.Errorf("Kind - got: %s, want: %s", got, kind)
 	}
 }
 
-func TestMCCSpecGetArg(t *testing.T) {
+func TestMCCSpecArg(t *testing.T) {
 	arg := "band > 4"
 	as := MustNew("a", "mcc", arg)
-	got := as.GetArg()
+	got := as.Arg()
 	if got != arg {
-		t.Errorf("GetArg - got: %s, want: %s", got, arg)
+		t.Errorf("Arg - got: %s, want: %s", got, arg)
 	}
 }

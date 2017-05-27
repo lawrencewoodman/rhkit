@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-func TestGetRules(t *testing.T) {
+func TestRules(t *testing.T) {
 	var gotRules []rule.Rule
 	assessment := Assessment{NumRecords: 8,
 		RuleAssessments: []*RuleAssessment{
@@ -90,12 +90,12 @@ func TestGetRules(t *testing.T) {
 	}
 	for _, c := range cases {
 		if c.passNumRules {
-			gotRules = assessment.GetRules(c.numRules)
+			gotRules = assessment.Rules(c.numRules)
 		} else {
-			gotRules = assessment.GetRules()
+			gotRules = assessment.Rules()
 		}
 		if !reflect.DeepEqual(gotRules, c.wantRules) {
-			t.Errorf("GetRules() passNumRules: %t, numRules: %d rules don't match\ngot: %s\nwant: %s\n",
+			t.Errorf("Rules() passNumRules: %t, numRules: %d rules don't match\ngot: %s\nwant: %s\n",
 				c.passNumRules, c.numRules, gotRules, c.wantRules)
 		}
 	}
@@ -538,7 +538,7 @@ func TestRefine(t *testing.T) {
 		rule.NewTrue(),
 	}
 	sortedAssessment.Refine()
-	gotRules := sortedAssessment.GetRules()
+	gotRules := sortedAssessment.Rules()
 
 	if !matchRules(gotRules, wantRules) {
 		t.Errorf("matchRules() rules don't match:\ngot: %s\nwant: %s\n",
@@ -800,7 +800,7 @@ func TestRefine_between(t *testing.T) {
 		rule.NewTrue(),
 	}
 	sortedAssessment.Refine()
-	gotRules := sortedAssessment.GetRules()
+	gotRules := sortedAssessment.Rules()
 
 	if !matchRules(gotRules, wantRules) {
 		t.Errorf("matchRules() rules don't match:\ngot: %s\nwant: %s\n",
@@ -953,7 +953,7 @@ func TestRefine_outside(t *testing.T) {
 		rule.NewTrue(),
 	}
 	sortedAssessment.Refine()
-	gotRules := sortedAssessment.GetRules()
+	gotRules := sortedAssessment.Rules()
 
 	if !matchRules(gotRules, wantRules) {
 		t.Errorf("matchRules() rules don't match:\ngot: %s\nwant: %s\n",
@@ -1161,7 +1161,7 @@ func TestTruncateRuleAssessments(t *testing.T) {
 	}
 	for _, c := range cases {
 		limitedAssessment := refinedAssessment.TruncateRuleAssessments(c.numRules)
-		gotRules := limitedAssessment.GetRules()
+		gotRules := limitedAssessment.Rules()
 		if !matchRules(gotRules, c.wantRules) {
 			t.Errorf("matchRules() rules don't match:\nnumRules: %d\ngot: %s\nwant: %s\n",
 				c.numRules, gotRules, c.wantRules)
@@ -1413,7 +1413,7 @@ func TestSort(t *testing.T) {
 		if !assessment.IsSorted() {
 			t.Errorf("Sort(%s) 'sorted' flag not set", c.sortOrder)
 		}
-		gotRules := assessment.GetRules()
+		gotRules := assessment.Rules()
 		if !matchRules(gotRules, c.wantRules) {
 			t.Errorf("matchRules() rules don't match:\n - sortOrder: %s\n - got: %s\n - want: %s\n",
 				c.sortOrder, gotRules, c.wantRules)

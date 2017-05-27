@@ -102,7 +102,7 @@ func MustNewLitInstance(name, result string) *LitInstance {
 	return &LitInstance{name: name, result: result}
 }
 
-func (li *LitInstance) GetName() string {
+func (li *LitInstance) Name() string {
 	return li.name
 }
 
@@ -113,7 +113,7 @@ func (li *LitInstance) NextRecord(
 	return nil
 }
 
-func (li *LitInstance) GetResult(
+func (li *LitInstance) Result(
 	aggregatorInstances []AggregatorInstance,
 	goals []*goal.Goal,
 	numRecords int64,

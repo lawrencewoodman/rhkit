@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestCountGetResult(t *testing.T) {
+func TestCountResult(t *testing.T) {
 	records := []map[string]*dlit.Literal{
 		map[string]*dlit.Literal{"income": dlit.MustNew(3), "band": dlit.MustNew(4)},
 		map[string]*dlit.Literal{"income": dlit.MustNew(3), "band": dlit.MustNew(7)},
@@ -24,7 +24,7 @@ func TestCountGetResult(t *testing.T) {
 	}
 	numRecords := int64(len(records))
 	want := int64(2)
-	got := numBandGt4.GetResult(instances, goals, numRecords)
+	got := numBandGt4.Result(instances, goals, numRecords)
 	gotInt, gotIsInt := got.Int()
 	if !gotIsInt || gotInt != want {
 		t.Errorf("New(\"numBandGt4\", \"count\", \"band > 4\") got: %v, want: %v",
@@ -32,29 +32,29 @@ func TestCountGetResult(t *testing.T) {
 	}
 }
 
-func TestCountSpecGetName(t *testing.T) {
+func TestCountSpecName(t *testing.T) {
 	name := "a"
 	as := MustNew(name, "count", "band > 4")
-	got := as.GetName()
+	got := as.Name()
 	if got != name {
-		t.Errorf("GetName - got: %s, want: %s", got, name)
+		t.Errorf("Name - got: %s, want: %s", got, name)
 	}
 }
 
-func TestCountSpecGetKind(t *testing.T) {
+func TestCountSpecKind(t *testing.T) {
 	kind := "count"
 	as := MustNew("a", kind, "band > 4")
-	got := as.GetKind()
+	got := as.Kind()
 	if got != kind {
-		t.Errorf("GetKind - got: %s, want: %s", got, kind)
+		t.Errorf("Kind - got: %s, want: %s", got, kind)
 	}
 }
 
-func TestCountSpecGetArg(t *testing.T) {
+func TestCountSpecArg(t *testing.T) {
 	arg := "band > 4"
 	as := MustNew("a", "count", arg)
-	got := as.GetArg()
+	got := as.Arg()
 	if got != arg {
-		t.Errorf("GetArg - got: %s, want: %s", got, arg)
+		t.Errorf("Arg - got: %s, want: %s", got, arg)
 	}
 }

@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestPrecisionGetResult(t *testing.T) {
+func TestPrecisionResult(t *testing.T) {
 	records := []map[string]*dlit.Literal{
 		map[string]*dlit.Literal{
 			"income": dlit.MustNew(3),
@@ -74,38 +74,38 @@ func TestPrecisionGetResult(t *testing.T) {
 				precisionCostGt2.NextRecord(record, c.rule(i))
 			}
 			numRecords := int64(len(c.records))
-			got := precisionCostGt2.GetResult(instances, goals, numRecords)
+			got := precisionCostGt2.Result(instances, goals, numRecords)
 			gotFloat, gotIsFloat := got.Float()
 			if !gotIsFloat || gotFloat != c.want {
-				t.Errorf("GetResult() got: %v, want: %v", got, c.want)
+				t.Errorf("Result() got: %v, want: %v", got, c.want)
 			}
 		}
 	}
 }
 
-func TestPrecisionSpecGetName(t *testing.T) {
+func TestPrecisionSpecName(t *testing.T) {
 	name := "a"
 	as := MustNew(name, "precision", "cost > 2")
-	got := as.GetName()
+	got := as.Name()
 	if got != name {
-		t.Errorf("GetName - got: %s, want: %s", got, name)
+		t.Errorf("Name - got: %s, want: %s", got, name)
 	}
 }
 
-func TestPrecisionSpecGetKind(t *testing.T) {
+func TestPrecisionSpecKind(t *testing.T) {
 	kind := "precision"
 	as := MustNew("a", kind, "cost > 2")
-	got := as.GetKind()
+	got := as.Kind()
 	if got != kind {
-		t.Errorf("GetKind - got: %s, want: %s", got, kind)
+		t.Errorf("Kind - got: %s, want: %s", got, kind)
 	}
 }
 
-func TestPrecisionSpecGetArg(t *testing.T) {
+func TestPrecisionSpecArg(t *testing.T) {
 	arg := "cost > 2"
 	as := MustNew("a", "precision", arg)
-	got := as.GetArg()
+	got := as.Arg()
 	if got != arg {
-		t.Errorf("GetArg - got: %s, want: %s", got, arg)
+		t.Errorf("Arg - got: %s, want: %s", got, arg)
 	}
 }
