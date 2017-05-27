@@ -52,7 +52,7 @@ func (l *LiteralDataset) Open() (ddataset.Conn, error) {
 	}, nil
 }
 
-func (l *LiteralDataset) GetFieldNames() []string {
+func (l *LiteralDataset) Fields() []string {
 	return l.fieldNames
 }
 
