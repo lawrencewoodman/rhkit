@@ -50,7 +50,7 @@ func (r *InFV) Fields() []string {
 	return []string{r.field}
 }
 
-func (r *InFV) GetValues() []*dlit.Literal {
+func (r *InFV) Values() []*dlit.Literal {
 	return r.values
 }
 
@@ -73,7 +73,7 @@ func (r *InFV) IsTrue(record ddataset.Record) (bool, error) {
 func (r *InFV) Overlaps(o Rule) bool {
 	switch x := o.(type) {
 	case *InFV:
-		oValues := x.GetValues()
+		oValues := x.Values()
 		oField := x.Fields()[0]
 		if r.field != oField {
 			return false

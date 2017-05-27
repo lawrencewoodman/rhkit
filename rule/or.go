@@ -174,13 +174,13 @@ func handleInRules(ruleA, ruleB *InFV) Rule {
 	}
 	newValues := []*dlit.Literal{}
 	mNewValues := map[string]interface{}{}
-	for _, v := range ruleA.GetValues() {
+	for _, v := range ruleA.Values() {
 		if _, ok := mNewValues[v.String()]; !ok {
 			mNewValues[v.String()] = nil
 			newValues = append(newValues, v)
 		}
 	}
-	for _, v := range ruleB.GetValues() {
+	for _, v := range ruleB.Values() {
 		if _, ok := mNewValues[v.String()]; !ok {
 			mNewValues[v.String()] = nil
 			newValues = append(newValues, v)
