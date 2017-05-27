@@ -68,11 +68,11 @@ func MustNewBetweenFV(
 	return r
 }
 
-func (r *BetweenFV) GetMin() *dlit.Literal {
+func (r *BetweenFV) Min() *dlit.Literal {
 	return r.min
 }
 
-func (r *BetweenFV) GetMax() *dlit.Literal {
+func (r *BetweenFV) Max() *dlit.Literal {
 	return r.max
 }
 
@@ -151,8 +151,8 @@ func (r *BetweenFV) Overlaps(o Rule) bool {
 	switch x := o.(type) {
 	case *BetweenFV:
 		vars := map[string]*dlit.Literal{
-			"oMin": x.GetMin(),
-			"oMax": x.GetMax(),
+			"oMin": x.Min(),
+			"oMax": x.Max(),
 			"min":  r.min,
 			"max":  r.max,
 		}

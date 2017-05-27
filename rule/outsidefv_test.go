@@ -223,8 +223,8 @@ func TestOutsideFVTweak(t *testing.T) {
 		for _, r := range got {
 			switch x := r.(type) {
 			case *OutsideFV:
-				vars["lowV"] = x.GetLow()
-				vars["highV"] = x.GetHigh()
+				vars["lowV"] = x.Low()
+				vars["highV"] = x.High()
 				if ok, err := inRangeExpr.EvalBool(vars); !ok || err != nil {
 					t.Errorf("Tweak - invalid rule: %s", r)
 				}

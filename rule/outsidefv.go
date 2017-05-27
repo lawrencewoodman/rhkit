@@ -69,11 +69,11 @@ func MustNewOutsideFV(
 	return r
 }
 
-func (r *OutsideFV) GetHigh() *dlit.Literal {
+func (r *OutsideFV) High() *dlit.Literal {
 	return r.high
 }
 
-func (r *OutsideFV) GetLow() *dlit.Literal {
+func (r *OutsideFV) Low() *dlit.Literal {
 	return r.low
 }
 

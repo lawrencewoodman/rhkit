@@ -169,12 +169,12 @@ func tryJoinRulesWithBetween(
 		vars["GEFVRuleBValue"] = GEFVRuleB.Value()
 	}
 	if ruleAIsOutsideFV {
-		vars["OutsideFVRuleALow"] = OutsideFVRuleA.GetLow()
-		vars["OutsideFVRuleAHigh"] = OutsideFVRuleA.GetHigh()
+		vars["OutsideFVRuleALow"] = OutsideFVRuleA.Low()
+		vars["OutsideFVRuleAHigh"] = OutsideFVRuleA.High()
 	}
 	if ruleBIsOutsideFV {
-		vars["OutsideFVRuleBLow"] = OutsideFVRuleB.GetLow()
-		vars["OutsideFVRuleBHigh"] = OutsideFVRuleB.GetHigh()
+		vars["OutsideFVRuleBLow"] = OutsideFVRuleB.Low()
+		vars["OutsideFVRuleBHigh"] = OutsideFVRuleB.High()
 	}
 	invalidExpr, err := dexpr.EvalBool(
 		"(ruleAIsOutsideFV && ruleBIsLEFV && "+

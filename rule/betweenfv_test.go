@@ -226,8 +226,8 @@ func TestBetweenFVTweak(t *testing.T) {
 		for _, r := range got {
 			switch x := r.(type) {
 			case *BetweenFV:
-				vars["minV"] = x.GetMin()
-				vars["maxV"] = x.GetMax()
+				vars["minV"] = x.Min()
+				vars["maxV"] = x.Max()
 				if ok, err := inRangeExpr.EvalBool(vars); !ok || err != nil {
 					t.Errorf("Tweak - invalid rule: %s", r)
 				}
