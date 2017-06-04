@@ -54,7 +54,7 @@ func GenerateRules(
 	ruleGenerators := []ruleGeneratorFunc{
 		generateValueRules,
 		generateCompareNumericRules, generateCompareStringRules,
-		generateAddRules, generateMulRules, generateInRules,
+		generateMulRules, generateInRules,
 	}
 	rules[0] = rule.NewTrue()
 	for field := range inputDescription.Fields {
@@ -130,7 +130,7 @@ func generateCompareNumericRules(
 	if fd.Kind != fieldtype.Number {
 		return []rule.Rule{}
 	}
-	fieldNum := calcFieldNum(inputDescription.Fields, field)
+	fieldNum := description.CalcFieldNum(inputDescription.Fields, field)
 	rulesMap := make(map[string]rule.Rule)
 	ruleNewFuncs := []func(string, string) rule.Rule{
 		rule.NewLTFF,
@@ -142,7 +142,7 @@ func generateCompareNumericRules(
 	}
 
 	for oField, oFd := range inputDescription.Fields {
-		oFieldNum := calcFieldNum(inputDescription.Fields, oField)
+		oFieldNum := description.CalcFieldNum(inputDescription.Fields, oField)
 		isComparable := hasComparableNumberRange(fd, oFd)
 		if fieldNum < oFieldNum && isComparable &&
 			internal.StringInSlice(oField, ruleFields) {
@@ -166,7 +166,7 @@ func generateCompareStringRules(
 	if fd.Kind != fieldtype.String {
 		return []rule.Rule{}
 	}
-	fieldNum := calcFieldNum(inputDescription.Fields, field)
+	fieldNum := description.CalcFieldNum(inputDescription.Fields, field)
 	rulesMap := make(map[string]rule.Rule)
 	ruleNewFuncs := []func(string, string) rule.Rule{
 		rule.NewEQFF,
@@ -174,7 +174,7 @@ func generateCompareStringRules(
 	}
 	for oField, oFd := range inputDescription.Fields {
 		if oFd.Kind == fieldtype.String {
-			oFieldNum := calcFieldNum(inputDescription.Fields, oField)
+			oFieldNum := description.CalcFieldNum(inputDescription.Fields, oField)
 			numSharedValues := calcNumSharedValues(fd, oFd)
 			if fieldNum < oFieldNum && numSharedValues >= 2 &&
 				internal.StringInSlice(oField, ruleFields) {
@@ -186,51 +186,6 @@ func generateCompareStringRules(
 		}
 	}
 	rules := rulesMapToArray(rulesMap)
-	return rules
-}
-
-func generateAddRules(
-	inputDescription *description.Description,
-	ruleFields []string,
-	complexity int,
-	field string,
-) []rule.Rule {
-	if complexity < 3 {
-		return []rule.Rule{}
-	}
-
-	fd := inputDescription.Fields[field]
-	if !isNumberField(fd) {
-		return []rule.Rule{}
-	}
-	fieldNum := calcFieldNum(inputDescription.Fields, field)
-	rules := make([]rule.Rule, 0)
-
-	for oField, oFd := range inputDescription.Fields {
-		oFieldNum := calcFieldNum(inputDescription.Fields, oField)
-		if fieldNum < oFieldNum && isNumberField(oFd) &&
-			internal.StringInSlice(oField, ruleFields) {
-			vars := map[string]*dlit.Literal{
-				"min":  fd.Min,
-				"max":  fd.Max,
-				"oMin": oFd.Min,
-				"oMax": oFd.Max,
-			}
-			min := dexpr.Eval("min + oMin", dexprfuncs.CallFuncs, vars)
-			max := dexpr.Eval("max + oMax", dexprfuncs.CallFuncs, vars)
-			maxDP := fd.MaxDP
-			if oFd.MaxDP > maxDP {
-				maxDP = oFd.MaxDP
-			}
-			points := internal.GeneratePoints(min, max, maxDP)
-			for _, p := range points {
-				rL := rule.NewAddLEF(field, oField, p)
-				rG := rule.NewAddGEF(field, oField, p)
-				rules = append(rules, rL)
-				rules = append(rules, rG)
-			}
-		}
-	}
 	return rules
 }
 
@@ -248,11 +203,11 @@ func generateMulRules(
 	if !isNumberField(fd) {
 		return []rule.Rule{}
 	}
-	fieldNum := calcFieldNum(inputDescription.Fields, field)
+	fieldNum := description.CalcFieldNum(inputDescription.Fields, field)
 	rules := make([]rule.Rule, 0)
 
 	for oField, oFd := range inputDescription.Fields {
-		oFieldNum := calcFieldNum(inputDescription.Fields, oField)
+		oFieldNum := description.CalcFieldNum(inputDescription.Fields, oField)
 		if fieldNum < oFieldNum && isNumberField(oFd) &&
 			internal.StringInSlice(oField, ruleFields) {
 			vars := map[string]*dlit.Literal{
@@ -423,25 +378,4 @@ func reverseString(s string) (r string) {
 func calcNumOnBits(i int) int {
 	bStr := fmt.Sprintf("%b", i)
 	return strings.Count(bStr, "1")
-}
-
-func calcFieldNum(
-	fieldDescriptions map[string]*description.Field,
-	fieldN string,
-) int {
-	fields := make([]string, len(fieldDescriptions))
-	i := 0
-	for field := range fieldDescriptions {
-		fields[i] = field
-		i++
-	}
-	sort.Strings(fields)
-	j := 0
-	for _, field := range fields {
-		if field == fieldN {
-			return j
-		}
-		j++
-	}
-	panic("can't find field in fieldDescriptions")
 }

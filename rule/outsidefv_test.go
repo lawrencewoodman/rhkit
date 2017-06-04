@@ -378,8 +378,5 @@ func TestGenerateOutsideFV(t *testing.T) {
 		if err != nil {
 			t.Errorf("(%d) generateOutsideFV: %s", i, err)
 		}
-		if err := checkMaxDP(got, c.maxDP); err != nil {
-			t.Errorf("(%d) generateOutsideFV: %s", i, err)
-		}
 	}
 }

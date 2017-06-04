@@ -332,6 +332,229 @@ func TestAddGEFTweak(t *testing.T) {
 	}
 }
 
+func TestGenerateAddGEF(t *testing.T) {
+	fieldA := "balance"
+	cases := []struct {
+		description *description.Description
+		minNumRules int
+		maxNumRules int
+		min         *dlit.Literal
+		max         *dlit.Literal
+		mid         *dlit.Literal
+		maxDP       int
+	}{
+		{description: &description.Description{
+			map[string]*description.Field{
+				"balance": &description.Field{
+					Kind: fieldtype.Number,
+					Min:  dlit.MustNew(250),
+					Max:  dlit.MustNew(500),
+				},
+				"income": &description.Field{
+					Kind: fieldtype.Number,
+					Min:  dlit.MustNew(250),
+					Max:  dlit.MustNew(500),
+				},
+			},
+		},
+			minNumRules: 18,
+			maxNumRules: 20,
+			min:         dlit.MustNew(500),
+			max:         dlit.MustNew(1000),
+			mid:         dlit.MustNew(850),
+			maxDP:       0,
+		},
+		{description: &description.Description{
+			map[string]*description.Field{
+				"balance": &description.Field{
+					Kind: fieldtype.Number,
+					Min:  dlit.MustNew(250),
+					Max:  dlit.MustNew(300),
+				},
+				"income": &description.Field{
+					Kind: fieldtype.Number,
+					Min:  dlit.MustNew(540),
+					Max:  dlit.MustNew(700),
+				},
+			},
+		},
+			minNumRules: 18,
+			maxNumRules: 20,
+			min:         dlit.MustNew(790),
+			max:         dlit.MustNew(1000),
+			mid:         dlit.MustNew(895),
+			maxDP:       0,
+		},
+		{description: &description.Description{
+			map[string]*description.Field{
+				"balance": &description.Field{
+					Kind: fieldtype.Number,
+					Min:  dlit.MustNew(200),
+					Max:  dlit.MustNew(300),
+				},
+				"income": &description.Field{
+					Kind: fieldtype.Number,
+					Min:  dlit.MustNew(300),
+					Max:  dlit.MustNew(510),
+				},
+			},
+		},
+			minNumRules: 18,
+			maxNumRules: 20,
+			min:         dlit.MustNew(500),
+			max:         dlit.MustNew(810),
+			mid:         dlit.MustNew(655),
+			maxDP:       0,
+		},
+		{description: &description.Description{
+			map[string]*description.Field{
+				"balance": &description.Field{
+					Kind: fieldtype.Number,
+					Min:  dlit.MustNew(200),
+					Max:  dlit.MustNew(300),
+				},
+				"income": &description.Field{
+					Kind: fieldtype.Number,
+					Min:  dlit.MustNew(590),
+					Max:  dlit.MustNew(510),
+				},
+			},
+		},
+			minNumRules: 18,
+			maxNumRules: 19,
+			min:         dlit.MustNew(790),
+			max:         dlit.MustNew(810),
+			mid:         dlit.MustNew(800),
+			maxDP:       0,
+		},
+		{description: &description.Description{
+			map[string]*description.Field{
+				"balance": &description.Field{
+					Kind:  fieldtype.Number,
+					Min:   dlit.MustNew(200),
+					Max:   dlit.MustNew(300),
+					MaxDP: 0,
+				},
+				"income": &description.Field{
+					Kind:  fieldtype.Number,
+					Min:   dlit.MustNew(597.924),
+					Max:   dlit.MustNew(505),
+					MaxDP: 3,
+				},
+			},
+		},
+			minNumRules: 18,
+			maxNumRules: 20,
+			min:         dlit.MustNew(797.924),
+			max:         dlit.MustNew(805),
+			mid:         dlit.MustNew(800),
+			maxDP:       3,
+		},
+		{description: &description.Description{
+			map[string]*description.Field{
+				"balance": &description.Field{
+					Kind: fieldtype.Number,
+					Min:  dlit.MustNew(200),
+					Max:  dlit.MustNew(200),
+				},
+				"income": &description.Field{
+					Kind: fieldtype.Number,
+					Min:  dlit.MustNew(200),
+					Max:  dlit.MustNew(205),
+				},
+			},
+		},
+			minNumRules: 4,
+			maxNumRules: 4,
+			min:         dlit.MustNew(400),
+			max:         dlit.MustNew(405),
+			mid:         dlit.MustNew(403),
+			maxDP:       0,
+		},
+	}
+	complyFunc := func(r Rule) error {
+		x, ok := r.(*AddGEF)
+		if !ok {
+			return fmt.Errorf("wrong type: %T (%s)", r, r)
+		}
+		if x.fieldA != "balance" || x.fieldB != "income" {
+			return fmt.Errorf("fields aren't correct for rule: %s", r)
+		}
+		return nil
+	}
+	ruleFields := []string{"balance", "income"}
+	complexity := 5
+	for i, c := range cases {
+		got := generateAddGEF(c.description, ruleFields, complexity, fieldA)
+		err := checkRulesComply(
+			got,
+			c.minNumRules,
+			c.maxNumRules,
+			c.min,
+			c.max,
+			c.mid,
+			c.maxDP,
+			complyFunc,
+		)
+		if err != nil {
+			t.Errorf("(%d) GenerateAddGEF: %s", i, err)
+		}
+	}
+}
+
+func TestGenerateAddGEF_multiple_fields(t *testing.T) {
+	fieldA := "balance"
+	description := &description.Description{
+		map[string]*description.Field{
+			"balance": &description.Field{
+				Kind: fieldtype.Number,
+				Min:  dlit.MustNew(250),
+				Max:  dlit.MustNew(500),
+			},
+			"income": &description.Field{
+				Kind: fieldtype.Number,
+				Min:  dlit.MustNew(250),
+				Max:  dlit.MustNew(500),
+			},
+			"day": &description.Field{
+				Kind: fieldtype.String,
+			},
+			"reserve": &description.Field{
+				Kind: fieldtype.Number,
+				Min:  dlit.MustNew(660),
+				Max:  dlit.MustNew(990),
+			},
+		},
+	}
+
+	ruleFields := []string{"balance", "income", "reserve"}
+	complexity := 5
+	got := generateAddGEF(description, ruleFields, complexity, fieldA)
+
+	numIncome := 0
+	numReserve := 0
+	for _, r := range got {
+		x, ok := r.(*AddGEF)
+		if !ok {
+			t.Errorf("wrong type: %T (%s)", r, r)
+		}
+		if x.fieldA != "balance" {
+			t.Errorf("fields aren't correct for rule: %s", r)
+		}
+		if x.fieldB == "income" {
+			numIncome++
+		} else if x.fieldB == "reserve" {
+			numReserve++
+		} else {
+			t.Errorf("fields aren't correct for rule: %s", r)
+		}
+	}
+
+	if numIncome == 0 || numReserve == 0 {
+		t.Errorf("rules aren't using all fields: %s", got)
+	}
+}
+
 /**************************
  *  Benchmarks
  **************************/
