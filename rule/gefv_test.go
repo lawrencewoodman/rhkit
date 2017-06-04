@@ -263,6 +263,123 @@ func TestGEFVOverlaps(t *testing.T) {
 	}
 }
 
+func TestGenerateGEFV(t *testing.T) {
+	cases := []struct {
+		description *description.Description
+		field       string
+		minNumRules int
+		maxNumRules int
+		min         *dlit.Literal
+		max         *dlit.Literal
+		mid         *dlit.Literal
+		maxDP       int
+	}{
+		{description: &description.Description{
+			map[string]*description.Field{
+				"income": &description.Field{
+					Kind:  fieldtype.Number,
+					Min:   dlit.MustNew(500),
+					Max:   dlit.MustNew(1000),
+					MaxDP: 2,
+				},
+			},
+		},
+			field:       "income",
+			minNumRules: 18,
+			maxNumRules: 20,
+			min:         dlit.MustNew(500),
+			max:         dlit.MustNew(1000),
+			mid:         dlit.MustNew(750),
+			maxDP:       0,
+		},
+		{description: &description.Description{
+			map[string]*description.Field{
+				"income": &description.Field{
+					Kind:  fieldtype.Number,
+					Min:   dlit.MustNew(790.73),
+					Max:   dlit.MustNew(1000),
+					MaxDP: 2,
+				},
+			},
+		},
+			field:       "income",
+			minNumRules: 18,
+			maxNumRules: 20,
+			min:         dlit.MustNew(790),
+			max:         dlit.MustNew(1000),
+			mid:         dlit.MustNew(903),
+			maxDP:       2,
+		},
+		{description: &description.Description{
+			map[string]*description.Field{
+				"income": &description.Field{
+					Kind:  fieldtype.Number,
+					Min:   dlit.MustNew(799),
+					Max:   dlit.MustNew(801),
+					MaxDP: 0,
+				},
+			},
+		},
+			field:       "income",
+			minNumRules: 1,
+			maxNumRules: 1,
+			min:         dlit.MustNew(799),
+			max:         dlit.MustNew(801),
+			mid:         dlit.MustNew(800),
+			maxDP:       0,
+		},
+		{description: &description.Description{
+			map[string]*description.Field{
+				"income": &description.Field{
+					Kind:  fieldtype.Number,
+					Min:   dlit.MustNew(799),
+					Max:   dlit.MustNew(801),
+					MaxDP: 0,
+				},
+				"month": &description.Field{
+					Kind: fieldtype.String,
+				},
+			},
+		},
+			field:       "month",
+			minNumRules: 0,
+			maxNumRules: 0,
+			min:         dlit.MustNew(0),
+			max:         dlit.MustNew(0),
+			mid:         dlit.MustNew(0),
+			maxDP:       0,
+		},
+	}
+	complyFunc := func(r Rule) error {
+		x, ok := r.(*GEFV)
+		if !ok {
+			return fmt.Errorf("wrong type: %T (%s)", r, r)
+		}
+		if x.field != "income" {
+			return fmt.Errorf("field isn't correct for rule: %s", r)
+		}
+		return nil
+	}
+	complexity := 5
+	ruleFields := []string{"income"}
+	for i, c := range cases {
+		got := generateGEFV(c.description, ruleFields, complexity, c.field)
+		err := checkRulesComply(
+			got,
+			c.minNumRules,
+			c.maxNumRules,
+			c.min,
+			c.max,
+			c.mid,
+			c.maxDP,
+			complyFunc,
+		)
+		if err != nil {
+			t.Errorf("(%d) generateGEFV: %s", i, err)
+		}
+	}
+}
+
 /**************************
  *  Benchmarks
  **************************/

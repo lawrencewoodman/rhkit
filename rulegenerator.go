@@ -52,13 +52,13 @@ func GenerateRules(
 	}
 	rules := make([]rule.Rule, 1)
 	ruleGenerators := []ruleGeneratorFunc{
-		generateNumRules, generateValueRules,
+		generateValueRules,
 		generateCompareNumericRules, generateCompareStringRules,
 		generateAddRules, generateMulRules, generateInRules,
 	}
 	rules[0] = rule.NewTrue()
 	for field := range inputDescription.Fields {
-		if stringInSlice(field, ruleFields) {
+		if internal.StringInSlice(field, ruleFields) {
 			for _, ruleGenerator := range ruleGenerators {
 				newRules :=
 					ruleGenerator(inputDescription, ruleFields, complexity, field)
@@ -66,6 +66,8 @@ func GenerateRules(
 			}
 		}
 	}
+	extraRules := rule.Generate(inputDescription, ruleFields, complexity)
+	rules = append(rules, extraRules...)
 
 	if len(ruleFields) == 2 {
 		cRules := CombineRules(rules)
@@ -90,15 +92,6 @@ func CombineRules(rules []rule.Rule) []rule.Rule {
 		}
 	}
 	return rule.Uniq(combinedRules)
-}
-
-func stringInSlice(s string, strings []string) bool {
-	for _, x := range strings {
-		if x == s {
-			return true
-		}
-	}
-	return false
 }
 
 func generateValueRules(
@@ -127,47 +120,6 @@ func generateValueRules(
 	return rules
 }
 
-func generateNumRules(
-	inputDescription *description.Description,
-	ruleFields []string,
-	complexity int,
-	field string,
-) []rule.Rule {
-	fd := inputDescription.Fields[field]
-	if fd.Kind != fieldtype.Number {
-		return []rule.Rule{}
-	}
-	rulesMap := make(map[string]rule.Rule)
-	points := internal.GeneratePoints(fd.Min, fd.Max, fd.MaxDP)
-
-	for _, p := range points {
-		rL := rule.NewLEFV(field, p)
-		rG := rule.NewGEFV(field, p)
-		rulesMap[rL.String()] = rL
-		rulesMap[rG.String()] = rG
-	}
-
-	isValidExpr := dexpr.MustNew("pH > pL", dexprfuncs.CallFuncs)
-	for _, pL := range points {
-		for _, pH := range points {
-			vars := map[string]*dlit.Literal{
-				"pL": pL,
-				"pH": pH,
-			}
-			if ok, err := isValidExpr.EvalBool(vars); ok && err == nil {
-				if rB, err := rule.NewBetweenFV(field, pL, pH); err == nil {
-					rulesMap[rB.String()] = rB
-				}
-				if rO, err := rule.NewOutsideFV(field, pL, pH); err == nil {
-					rulesMap[rO.String()] = rO
-				}
-			}
-		}
-	}
-
-	return rulesMapToArray(rulesMap)
-}
-
 func generateCompareNumericRules(
 	inputDescription *description.Description,
 	ruleFields []string,
@@ -193,7 +145,7 @@ func generateCompareNumericRules(
 		oFieldNum := calcFieldNum(inputDescription.Fields, oField)
 		isComparable := hasComparableNumberRange(fd, oFd)
 		if fieldNum < oFieldNum && isComparable &&
-			stringInSlice(oField, ruleFields) {
+			internal.StringInSlice(oField, ruleFields) {
 			for _, ruleNewFunc := range ruleNewFuncs {
 				r := ruleNewFunc(field, oField)
 				rulesMap[r.String()] = r
@@ -225,7 +177,7 @@ func generateCompareStringRules(
 			oFieldNum := calcFieldNum(inputDescription.Fields, oField)
 			numSharedValues := calcNumSharedValues(fd, oFd)
 			if fieldNum < oFieldNum && numSharedValues >= 2 &&
-				stringInSlice(oField, ruleFields) {
+				internal.StringInSlice(oField, ruleFields) {
 				for _, ruleNewFunc := range ruleNewFuncs {
 					r := ruleNewFunc(field, oField)
 					rulesMap[r.String()] = r
@@ -257,7 +209,7 @@ func generateAddRules(
 	for oField, oFd := range inputDescription.Fields {
 		oFieldNum := calcFieldNum(inputDescription.Fields, oField)
 		if fieldNum < oFieldNum && isNumberField(oFd) &&
-			stringInSlice(oField, ruleFields) {
+			internal.StringInSlice(oField, ruleFields) {
 			vars := map[string]*dlit.Literal{
 				"min":  fd.Min,
 				"max":  fd.Max,
@@ -302,7 +254,7 @@ func generateMulRules(
 	for oField, oFd := range inputDescription.Fields {
 		oFieldNum := calcFieldNum(inputDescription.Fields, oField)
 		if fieldNum < oFieldNum && isNumberField(oFd) &&
-			stringInSlice(oField, ruleFields) {
+			internal.StringInSlice(oField, ruleFields) {
 			vars := map[string]*dlit.Literal{
 				"min":  fd.Min,
 				"max":  fd.Max,

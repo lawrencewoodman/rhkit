@@ -104,6 +104,15 @@ func TestAddLEFIsTrue_errors(t *testing.T) {
 	}
 }
 
+func TestAddLEFValue(t *testing.T) {
+	r := NewAddLEF("income", "cost", dlit.MustNew(5.5))
+	want := "5.5"
+	got := r.Value()
+	if got.String() != want {
+		t.Errorf("Value() got: %s, want: %s", got, want)
+	}
+}
+
 func TestAddLEFFields(t *testing.T) {
 	r := NewAddLEF("income", "cost", dlit.MustNew(5.5))
 	want := []string{"income", "cost"}
@@ -300,7 +309,7 @@ func TestAddLEFTweak(t *testing.T) {
 		if !ok {
 			return fmt.Errorf("wrong type: %T (%s)", r, r)
 		}
-		if x.fieldA != "balance" || x.fieldB != "income" {
+		if x.fieldA != "income" || x.fieldB != "balance" {
 			return fmt.Errorf("fields aren't correct for rule: %s", r)
 		}
 		return nil

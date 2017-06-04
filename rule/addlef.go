@@ -42,6 +42,10 @@ func (r *AddLEF) String() string {
 	return r.fieldA + " + " + r.fieldB + " <= " + r.value.String()
 }
 
+func (r *AddLEF) Value() *dlit.Literal {
+	return r.value
+}
+
 func (r *AddLEF) Fields() []string {
 	return []string{r.fieldA, r.fieldB}
 }

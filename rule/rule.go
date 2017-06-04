@@ -30,7 +30,20 @@ import (
 	"github.com/vlifesystems/rhkit/internal/dexprfuncs"
 	"sort"
 	"strings"
+	"sync"
 )
+
+var (
+	generatorsMu sync.RWMutex
+	generators   = make(map[string]generatorFunc)
+)
+
+type generatorFunc func(
+	desc *description.Description,
+	ruleFields []string,
+	complexity int,
+	field string,
+) []Rule
 
 type Rule interface {
 	fmt.Stringer
@@ -68,6 +81,27 @@ func (e InvalidRuleError) Error() string {
 
 func (e IncompatibleTypesRuleError) Error() string {
 	return "incompatible types in rule: " + e.Rule.String()
+}
+
+// Generate generates rules for rules that have registered a generator.
+func Generate(
+	inputDescription *description.Description,
+	ruleFields []string,
+	complexity int,
+) []Rule {
+	if complexity < 1 || complexity > 10 {
+		panic("complexity must be in range 1..10")
+	}
+	rules := make([]Rule, 0)
+	for field := range inputDescription.Fields {
+		if internal.StringInSlice(field, ruleFields) {
+			for _, generator := range generators {
+				newRules := generator(inputDescription, ruleFields, complexity, field)
+				rules = append(rules, newRules...)
+			}
+		}
+	}
+	return rules
 }
 
 // Sort sorts the rules in place using their .String() method
@@ -120,6 +154,17 @@ func (rs byString) Swap(i, j int) {
 }
 func (rs byString) Less(i, j int) bool {
 	return strings.Compare(rs[i].String(), rs[j].String()) == -1
+}
+
+// registerGenerator makes a rule generator available.
+// If called twice with the same ruleName it panics.
+func registerGenerator(ruleType string, generator generatorFunc) {
+	generatorsMu.Lock()
+	defer generatorsMu.Unlock()
+	if _, dup := generators[ruleType]; dup {
+		panic("rule.registerGenerator called twice for ruleType: " + ruleType)
+	}
+	generators[ruleType] = generator
 }
 
 func generateTweakPoints(
