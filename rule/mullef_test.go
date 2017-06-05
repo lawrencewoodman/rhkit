@@ -312,6 +312,229 @@ func TestMulLEFTweak(t *testing.T) {
 	}
 }
 
+func TestGenerateMulLEF(t *testing.T) {
+	fieldA := "balance"
+	cases := []struct {
+		description *description.Description
+		minNumRules int
+		maxNumRules int
+		min         *dlit.Literal
+		max         *dlit.Literal
+		mid         *dlit.Literal
+		maxDP       int
+	}{
+		{description: &description.Description{
+			map[string]*description.Field{
+				"balance": &description.Field{
+					Kind: fieldtype.Number,
+					Min:  dlit.MustNew(250),
+					Max:  dlit.MustNew(500),
+				},
+				"income": &description.Field{
+					Kind: fieldtype.Number,
+					Min:  dlit.MustNew(250),
+					Max:  dlit.MustNew(500),
+				},
+			},
+		},
+			minNumRules: 18,
+			maxNumRules: 20,
+			min:         dlit.MustNew(62500),
+			max:         dlit.MustNew(250000),
+			mid:         dlit.MustNew(156250),
+			maxDP:       0,
+		},
+		{description: &description.Description{
+			map[string]*description.Field{
+				"balance": &description.Field{
+					Kind: fieldtype.Number,
+					Min:  dlit.MustNew(250),
+					Max:  dlit.MustNew(300),
+				},
+				"income": &description.Field{
+					Kind: fieldtype.Number,
+					Min:  dlit.MustNew(540),
+					Max:  dlit.MustNew(700),
+				},
+			},
+		},
+			minNumRules: 18,
+			maxNumRules: 20,
+			min:         dlit.MustNew(135000),
+			max:         dlit.MustNew(210000),
+			mid:         dlit.MustNew(172500),
+			maxDP:       0,
+		},
+		{description: &description.Description{
+			map[string]*description.Field{
+				"balance": &description.Field{
+					Kind: fieldtype.Number,
+					Min:  dlit.MustNew(200),
+					Max:  dlit.MustNew(300),
+				},
+				"income": &description.Field{
+					Kind: fieldtype.Number,
+					Min:  dlit.MustNew(300),
+					Max:  dlit.MustNew(510),
+				},
+			},
+		},
+			minNumRules: 18,
+			maxNumRules: 20,
+			min:         dlit.MustNew(60000),
+			max:         dlit.MustNew(153000),
+			mid:         dlit.MustNew(106500),
+			maxDP:       0,
+		},
+		{description: &description.Description{
+			map[string]*description.Field{
+				"balance": &description.Field{
+					Kind: fieldtype.Number,
+					Min:  dlit.MustNew(200),
+					Max:  dlit.MustNew(300),
+				},
+				"income": &description.Field{
+					Kind: fieldtype.Number,
+					Min:  dlit.MustNew(590),
+					Max:  dlit.MustNew(510),
+				},
+			},
+		},
+			minNumRules: 18,
+			maxNumRules: 19,
+			min:         dlit.MustNew(118000),
+			max:         dlit.MustNew(153000),
+			mid:         dlit.MustNew(135500),
+			maxDP:       0,
+		},
+		{description: &description.Description{
+			map[string]*description.Field{
+				"balance": &description.Field{
+					Kind:  fieldtype.Number,
+					Min:   dlit.MustNew(200.172),
+					Max:   dlit.MustNew(300),
+					MaxDP: 0,
+				},
+				"income": &description.Field{
+					Kind:  fieldtype.Number,
+					Min:   dlit.MustNew(597.924),
+					Max:   dlit.MustNew(505),
+					MaxDP: 3,
+				},
+			},
+		},
+			minNumRules: 18,
+			maxNumRules: 20,
+			min:         dlit.MustNew(119687.642928),
+			max:         dlit.MustNew(151500),
+			mid:         dlit.MustNew(135542.4),
+			maxDP:       3,
+		},
+		{description: &description.Description{
+			map[string]*description.Field{
+				"balance": &description.Field{
+					Kind: fieldtype.Number,
+					Min:  dlit.MustNew(1),
+					Max:  dlit.MustNew(2),
+				},
+				"income": &description.Field{
+					Kind: fieldtype.Number,
+					Min:  dlit.MustNew(1),
+					Max:  dlit.MustNew(3),
+				},
+			},
+		},
+			minNumRules: 4,
+			maxNumRules: 4,
+			min:         dlit.MustNew(1),
+			max:         dlit.MustNew(6),
+			mid:         dlit.MustNew(3),
+			maxDP:       0,
+		},
+	}
+	complyFunc := func(r Rule) error {
+		x, ok := r.(*MulLEF)
+		if !ok {
+			return fmt.Errorf("wrong type: %T (%s)", r, r)
+		}
+		if x.fieldA != "balance" || x.fieldB != "income" {
+			return fmt.Errorf("fields aren't correct for rule: %s", r)
+		}
+		return nil
+	}
+	ruleFields := []string{"balance", "income"}
+	complexity := 5
+	for i, c := range cases {
+		got := generateMulLEF(c.description, ruleFields, complexity, fieldA)
+		err := checkRulesComply(
+			got,
+			c.minNumRules,
+			c.maxNumRules,
+			c.min,
+			c.max,
+			c.mid,
+			c.maxDP,
+			complyFunc,
+		)
+		if err != nil {
+			t.Errorf("(%d) GenerateMulLEF: %s", i, err)
+		}
+	}
+}
+
+func TestGenerateMulLEF_multiple_fields(t *testing.T) {
+	fieldA := "balance"
+	description := &description.Description{
+		map[string]*description.Field{
+			"balance": &description.Field{
+				Kind: fieldtype.Number,
+				Min:  dlit.MustNew(250),
+				Max:  dlit.MustNew(500),
+			},
+			"income": &description.Field{
+				Kind: fieldtype.Number,
+				Min:  dlit.MustNew(250),
+				Max:  dlit.MustNew(500),
+			},
+			"day": &description.Field{
+				Kind: fieldtype.String,
+			},
+			"reserve": &description.Field{
+				Kind: fieldtype.Number,
+				Min:  dlit.MustNew(660),
+				Max:  dlit.MustNew(990),
+			},
+		},
+	}
+
+	ruleFields := []string{"balance", "income", "reserve"}
+	complexity := 5
+	got := generateMulLEF(description, ruleFields, complexity, fieldA)
+
+	numIncome := 0
+	numReserve := 0
+	for _, r := range got {
+		x, ok := r.(*MulLEF)
+		if !ok {
+			t.Errorf("wrong type: %T (%s)", r, r)
+		}
+		if x.fieldA != "balance" {
+			t.Errorf("fields aren't correct for rule: %s", r)
+		}
+		if x.fieldB == "income" {
+			numIncome++
+		} else if x.fieldB == "reserve" {
+			numReserve++
+		} else {
+			t.Errorf("fields aren't correct for rule: %s", r)
+		}
+	}
+
+	if numIncome == 0 || numReserve == 0 {
+		t.Errorf("rules aren't using all fields: %s", got)
+	}
+}
+
 /**************************
  *  Benchmarks
  **************************/

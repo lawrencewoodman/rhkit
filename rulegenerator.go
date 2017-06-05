@@ -54,7 +54,7 @@ func GenerateRules(
 	ruleGenerators := []ruleGeneratorFunc{
 		generateValueRules,
 		generateCompareNumericRules, generateCompareStringRules,
-		generateMulRules, generateInRules,
+		generateInRules,
 	}
 	rules[0] = rule.NewTrue()
 	for field := range inputDescription.Fields {
@@ -186,51 +186,6 @@ func generateCompareStringRules(
 		}
 	}
 	rules := rulesMapToArray(rulesMap)
-	return rules
-}
-
-func generateMulRules(
-	inputDescription *description.Description,
-	ruleFields []string,
-	complexity int,
-	field string,
-) []rule.Rule {
-	if complexity < 3 {
-		return []rule.Rule{}
-	}
-
-	fd := inputDescription.Fields[field]
-	if !isNumberField(fd) {
-		return []rule.Rule{}
-	}
-	fieldNum := description.CalcFieldNum(inputDescription.Fields, field)
-	rules := make([]rule.Rule, 0)
-
-	for oField, oFd := range inputDescription.Fields {
-		oFieldNum := description.CalcFieldNum(inputDescription.Fields, oField)
-		if fieldNum < oFieldNum && isNumberField(oFd) &&
-			internal.StringInSlice(oField, ruleFields) {
-			vars := map[string]*dlit.Literal{
-				"min":  fd.Min,
-				"max":  fd.Max,
-				"oMin": oFd.Min,
-				"oMax": oFd.Max,
-			}
-			min := dexpr.Eval("min * oMin", dexprfuncs.CallFuncs, vars)
-			max := dexpr.Eval("max * oMax", dexprfuncs.CallFuncs, vars)
-			maxDP := fd.MaxDP
-			if oFd.MaxDP > maxDP {
-				maxDP = oFd.MaxDP
-			}
-			points := internal.GeneratePoints(min, max, maxDP)
-			for _, p := range points {
-				rL := rule.NewMulLEF(field, oField, p)
-				rG := rule.NewMulGEF(field, oField, p)
-				rules = append(rules, rL)
-				rules = append(rules, rG)
-			}
-		}
-	}
 	return rules
 }
 
