@@ -3,6 +3,8 @@ package rule
 import (
 	"errors"
 	"github.com/lawrencewoodman/dlit"
+	"github.com/vlifesystems/rhkit/description"
+	"github.com/vlifesystems/rhkit/internal/fieldtype"
 	"reflect"
 	"testing"
 )
@@ -104,5 +106,154 @@ func TestEQFFFields(t *testing.T) {
 	got := r.Fields()
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("Fields() got: %s, want: %s", got, want)
+	}
+}
+
+func TestGenerateEQFF(t *testing.T) {
+	inputDescription := &description.Description{
+		map[string]*description.Field{
+			"bandA": &description.Field{
+				Kind:   fieldtype.Number,
+				Min:    dlit.MustNew(1),
+				Max:    dlit.MustNew(3),
+				Values: map[string]description.Value{},
+			},
+			"groupA": &description.Field{
+				Kind: fieldtype.String,
+				Values: map[string]description.Value{
+					"Nelson":      description.Value{dlit.NewString("Nelson"), 3},
+					"Collingwood": description.Value{dlit.NewString("Collingwood"), 1},
+					"Mountbatten": description.Value{dlit.NewString("Mountbatten"), 1},
+					"Drake":       description.Value{dlit.NewString("Drake"), 2},
+				},
+			},
+			"groupB": &description.Field{
+				Kind: fieldtype.String,
+				Values: map[string]description.Value{
+					"Nelson":      description.Value{dlit.NewString("Nelson"), 3},
+					"Mountbatten": description.Value{dlit.NewString("Mountbatten"), 1},
+					"Drake":       description.Value{dlit.NewString("Drake"), 2},
+				},
+			},
+			"groupC": &description.Field{
+				Kind: fieldtype.String,
+				Values: map[string]description.Value{
+					"Nelson": description.Value{dlit.NewString("Nelson"), 3},
+					"Drake":  description.Value{dlit.NewString("Drake"), 2},
+				},
+			},
+			"groupD": &description.Field{
+				Kind: fieldtype.String,
+				Values: map[string]description.Value{
+					"Drake": description.Value{dlit.NewString("Drake"), 2},
+				},
+			},
+			"groupE": &description.Field{
+				Kind: fieldtype.String,
+				Values: map[string]description.Value{
+					"Drake":       description.Value{dlit.NewString("Drake"), 2},
+					"Chaucer":     description.Value{dlit.NewString("Chaucer"), 2},
+					"Shakespeare": description.Value{dlit.NewString("Shakespeare"), 2},
+					"Marlowe":     description.Value{dlit.NewString("Marlowe"), 2},
+				},
+			},
+			"groupF": &description.Field{
+				Kind: fieldtype.String,
+				Values: map[string]description.Value{
+					"Nelson":      description.Value{dlit.NewString("Nelson"), 3},
+					"Drake":       description.Value{dlit.NewString("Drake"), 2},
+					"Chaucer":     description.Value{dlit.NewString("Chaucer"), 2},
+					"Shakespeare": description.Value{dlit.NewString("Shakespeare"), 2},
+					"Marlowe":     description.Value{dlit.NewString("Marlowe"), 2},
+				},
+			},
+			"bandB": &description.Field{
+				Kind: fieldtype.Number,
+				Min:  dlit.MustNew(1),
+				Max:  dlit.MustNew(3),
+				Values: map[string]description.Value{
+					"1": description.Value{dlit.NewString("1"), 3},
+					"2": description.Value{dlit.NewString("2"), 2},
+					"3": description.Value{dlit.NewString("3"), 1},
+				},
+			},
+			"bandC": &description.Field{
+				Kind: fieldtype.Number,
+				Min:  dlit.MustNew(2),
+				Max:  dlit.MustNew(7),
+				Values: map[string]description.Value{
+					"7": description.Value{dlit.NewString("7"), 3},
+					"2": description.Value{dlit.NewString("2"), 2},
+					"6": description.Value{dlit.NewString("6"), 1},
+				},
+			},
+			"bandD": &description.Field{
+				Kind: fieldtype.Number,
+				Min:  dlit.MustNew(2),
+				Max:  dlit.MustNew(8),
+				Values: map[string]description.Value{
+					"3": description.Value{dlit.NewString("3"), 3},
+					"2": description.Value{dlit.NewString("2"), 2},
+					"8": description.Value{dlit.NewString("8"), 1},
+				},
+			},
+		},
+	}
+	cases := []struct {
+		field string
+		want  []Rule
+	}{
+		{field: "bandA",
+			want: []Rule{},
+		},
+		{field: "groupA",
+			want: []Rule{
+				NewEQFF("groupA", "groupB"),
+				NewEQFF("groupA", "groupC"),
+				NewEQFF("groupA", "groupF"),
+			},
+		},
+		{field: "groupB",
+			want: []Rule{
+				NewEQFF("groupB", "groupC"),
+				NewEQFF("groupB", "groupF"),
+			},
+		},
+		{field: "groupC",
+			want: []Rule{
+				NewEQFF("groupC", "groupF"),
+			},
+		},
+		{field: "groupD",
+			want: []Rule{},
+		},
+		{field: "groupE",
+			want: []Rule{
+				NewEQFF("groupE", "groupF"),
+			},
+		},
+		{field: "bandB",
+			want: []Rule{
+				NewEQFF("bandB", "bandD"),
+			},
+		},
+	}
+	ruleFields :=
+		[]string{
+			"bandA", "groupA", "groupB", "groupC", "groupD",
+			"groupE", "groupF", "bandB", "bandC", "bandD",
+		}
+	complexity := 10
+	for _, c := range cases {
+		got := generateEQFF(
+			inputDescription,
+			ruleFields,
+			complexity,
+			c.field,
+		)
+		if err := matchRulesUnordered(got, c.want); err != nil {
+			t.Errorf("matchRulesUnordered() rules don't match: %s\ngot: %s\nwant: %s\n",
+				err, got, c.want)
+		}
 	}
 }

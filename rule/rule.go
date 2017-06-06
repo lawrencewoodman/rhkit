@@ -220,3 +220,13 @@ func roundRules(v *dlit.Literal, makeRule makeRoundRule) []Rule {
 	}
 	return rules
 }
+
+func calcNumSharedValues(fd1 *description.Field, fd2 *description.Field) int {
+	numShared := 0
+	for _, vd1 := range fd1.Values {
+		if _, ok := fd2.Values[vd1.Value.String()]; ok {
+			numShared++
+		}
+	}
+	return numShared
+}

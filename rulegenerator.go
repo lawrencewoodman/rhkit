@@ -49,7 +49,7 @@ func GenerateRules(
 	}
 	rules := make([]rule.Rule, 1)
 	ruleGenerators := []ruleGeneratorFunc{
-		generateCompareNumericRules, generateCompareStringRules,
+		generateCompareNumericRules,
 	}
 	rules[0] = rule.NewTrue()
 	for field := range inputDescription.Fields {
@@ -104,8 +104,6 @@ func generateCompareNumericRules(
 	ruleNewFuncs := []func(string, string) rule.Rule{
 		rule.NewLTFF,
 		rule.NewLEFF,
-		rule.NewEQFF,
-		rule.NewNEFF,
 		rule.NewGEFF,
 		rule.NewGTFF,
 	}
@@ -123,52 +121,6 @@ func generateCompareNumericRules(
 	}
 	rules := rulesMapToArray(rulesMap)
 	return rules
-}
-
-func generateCompareStringRules(
-	inputDescription *description.Description,
-	ruleFields []string,
-	complexity int,
-	field string,
-) []rule.Rule {
-	fd := inputDescription.Fields[field]
-	if fd.Kind != fieldtype.String {
-		return []rule.Rule{}
-	}
-	fieldNum := description.CalcFieldNum(inputDescription.Fields, field)
-	rulesMap := make(map[string]rule.Rule)
-	ruleNewFuncs := []func(string, string) rule.Rule{
-		rule.NewEQFF,
-		rule.NewNEFF,
-	}
-	for oField, oFd := range inputDescription.Fields {
-		if oFd.Kind == fieldtype.String {
-			oFieldNum := description.CalcFieldNum(inputDescription.Fields, oField)
-			numSharedValues := calcNumSharedValues(fd, oFd)
-			if fieldNum < oFieldNum && numSharedValues >= 2 &&
-				internal.StringInSlice(oField, ruleFields) {
-				for _, ruleNewFunc := range ruleNewFuncs {
-					r := ruleNewFunc(field, oField)
-					rulesMap[r.String()] = r
-				}
-			}
-		}
-	}
-	rules := rulesMapToArray(rulesMap)
-	return rules
-}
-
-func calcNumSharedValues(
-	fd1 *description.Field,
-	fd2 *description.Field,
-) int {
-	numShared := 0
-	for _, vd1 := range fd1.Values {
-		if _, ok := fd2.Values[vd1.Value.String()]; ok {
-			numShared++
-		}
-	}
-	return numShared
 }
 
 func isNumberField(fd *description.Field) bool {

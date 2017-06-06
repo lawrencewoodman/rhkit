@@ -297,14 +297,10 @@ func TestGenerateCompareNumericRules(t *testing.T) {
 	}{
 		{field: "band",
 			want: []rule.Rule{
-				rule.NewNEFF("band", "flowIn"),
-				rule.NewNEFF("band", "flowOut"),
 				rule.NewLTFF("band", "flowIn"),
 				rule.NewLTFF("band", "flowOut"),
 				rule.NewLEFF("band", "flowIn"),
 				rule.NewLEFF("band", "flowOut"),
-				rule.NewEQFF("band", "flowIn"),
-				rule.NewEQFF("band", "flowOut"),
 				rule.NewGTFF("band", "flowIn"),
 				rule.NewGTFF("band", "flowOut"),
 				rule.NewGEFF("band", "flowIn"),
@@ -313,10 +309,8 @@ func TestGenerateCompareNumericRules(t *testing.T) {
 		},
 		{field: "flowIn",
 			want: []rule.Rule{
-				rule.NewNEFF("flowIn", "flowOut"),
 				rule.NewLTFF("flowIn", "flowOut"),
 				rule.NewLEFF("flowIn", "flowOut"),
-				rule.NewEQFF("flowIn", "flowOut"),
 				rule.NewGTFF("flowIn", "flowOut"),
 				rule.NewGEFF("flowIn", "flowOut"),
 			},
@@ -339,126 +333,6 @@ func TestGenerateCompareNumericRules(t *testing.T) {
 	complexity := 10
 	for _, c := range cases {
 		got := generateCompareNumericRules(
-			inputDescription,
-			ruleFields,
-			complexity,
-			c.field,
-		)
-		if err := matchRulesUnordered(got, c.want); err != nil {
-			gotRuleStrs := rulesToSortedStrings(got)
-			wantRuleStrs := rulesToSortedStrings(c.want)
-			t.Errorf("matchRulesUnordered() rules don't match: %s\ngot: %s\nwant: %s\n",
-				err, gotRuleStrs, wantRuleStrs)
-		}
-	}
-}
-
-func TestGenerateCompareStringRules(t *testing.T) {
-	inputDescription := &description.Description{
-		map[string]*description.Field{
-			"band": &description.Field{
-				Kind:   fieldtype.Number,
-				Min:    dlit.MustNew(1),
-				Max:    dlit.MustNew(3),
-				Values: map[string]description.Value{},
-			},
-			"groupA": &description.Field{
-				Kind: fieldtype.String,
-				Values: map[string]description.Value{
-					"Nelson":      description.Value{dlit.NewString("Nelson"), 3},
-					"Collingwood": description.Value{dlit.NewString("Collingwood"), 1},
-					"Mountbatten": description.Value{dlit.NewString("Mountbatten"), 1},
-					"Drake":       description.Value{dlit.NewString("Drake"), 2},
-				},
-			},
-			"groupB": &description.Field{
-				Kind: fieldtype.String,
-				Values: map[string]description.Value{
-					"Nelson":      description.Value{dlit.NewString("Nelson"), 3},
-					"Mountbatten": description.Value{dlit.NewString("Mountbatten"), 1},
-					"Drake":       description.Value{dlit.NewString("Drake"), 2},
-				},
-			},
-			"groupC": &description.Field{
-				Kind: fieldtype.String,
-				Values: map[string]description.Value{
-					"Nelson": description.Value{dlit.NewString("Nelson"), 3},
-					"Drake":  description.Value{dlit.NewString("Drake"), 2},
-				},
-			},
-			"groupD": &description.Field{
-				Kind: fieldtype.String,
-				Values: map[string]description.Value{
-					"Drake": description.Value{dlit.NewString("Drake"), 2},
-				},
-			},
-			"groupE": &description.Field{
-				Kind: fieldtype.String,
-				Values: map[string]description.Value{
-					"Drake":       description.Value{dlit.NewString("Drake"), 2},
-					"Chaucer":     description.Value{dlit.NewString("Chaucer"), 2},
-					"Shakespeare": description.Value{dlit.NewString("Shakespeare"), 2},
-					"Marlowe":     description.Value{dlit.NewString("Marlowe"), 2},
-				},
-			},
-			"groupF": &description.Field{
-				Kind: fieldtype.String,
-				Values: map[string]description.Value{
-					"Nelson":      description.Value{dlit.NewString("Nelson"), 3},
-					"Drake":       description.Value{dlit.NewString("Drake"), 2},
-					"Chaucer":     description.Value{dlit.NewString("Chaucer"), 2},
-					"Shakespeare": description.Value{dlit.NewString("Shakespeare"), 2},
-					"Marlowe":     description.Value{dlit.NewString("Marlowe"), 2},
-				},
-			},
-		},
-	}
-	cases := []struct {
-		field string
-		want  []rule.Rule
-	}{
-		{field: "band",
-			want: []rule.Rule{},
-		},
-		{field: "groupA",
-			want: []rule.Rule{
-				rule.NewEQFF("groupA", "groupB"),
-				rule.NewNEFF("groupA", "groupB"),
-				rule.NewEQFF("groupA", "groupC"),
-				rule.NewNEFF("groupA", "groupC"),
-				rule.NewEQFF("groupA", "groupF"),
-				rule.NewNEFF("groupA", "groupF"),
-			},
-		},
-		{field: "groupB",
-			want: []rule.Rule{
-				rule.NewEQFF("groupB", "groupC"),
-				rule.NewNEFF("groupB", "groupC"),
-				rule.NewEQFF("groupB", "groupF"),
-				rule.NewNEFF("groupB", "groupF"),
-			},
-		},
-		{field: "groupC",
-			want: []rule.Rule{
-				rule.NewEQFF("groupC", "groupF"),
-				rule.NewNEFF("groupC", "groupF"),
-			},
-		},
-		{field: "groupD",
-			want: []rule.Rule{},
-		},
-		{field: "groupE",
-			want: []rule.Rule{
-				rule.NewEQFF("groupE", "groupF"),
-				rule.NewNEFF("groupE", "groupF"),
-			},
-		},
-	}
-	ruleFields :=
-		[]string{"band", "groupA", "groupB", "groupC", "groupD", "groupE", "groupF"}
-	complexity := 10
-	for _, c := range cases {
-		got := generateCompareStringRules(
 			inputDescription,
 			ruleFields,
 			complexity,
