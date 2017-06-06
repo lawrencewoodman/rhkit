@@ -20,21 +20,9 @@
 package rhkit
 
 import (
-	"github.com/lawrencewoodman/dexpr"
-	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/description"
-	"github.com/vlifesystems/rhkit/internal"
-	"github.com/vlifesystems/rhkit/internal/dexprfuncs"
-	"github.com/vlifesystems/rhkit/internal/fieldtype"
 	"github.com/vlifesystems/rhkit/rule"
 )
-
-type ruleGeneratorFunc func(
-	*description.Description,
-	[]string,
-	int,
-	string,
-) []rule.Rule
 
 // GenerateRules generates rules for the ruleFields.
 // complexity is used to indicate how complex and in turn how many rules
@@ -48,21 +36,9 @@ func GenerateRules(
 		panic("complexity must be in range 1..10")
 	}
 	rules := make([]rule.Rule, 1)
-	ruleGenerators := []ruleGeneratorFunc{
-		generateCompareNumericRules,
-	}
 	rules[0] = rule.NewTrue()
-	for field := range inputDescription.Fields {
-		if internal.StringInSlice(field, ruleFields) {
-			for _, ruleGenerator := range ruleGenerators {
-				newRules :=
-					ruleGenerator(inputDescription, ruleFields, complexity, field)
-				rules = append(rules, newRules...)
-			}
-		}
-	}
-	extraRules := rule.Generate(inputDescription, ruleFields, complexity)
-	rules = append(rules, extraRules...)
+	newRules := rule.Generate(inputDescription, ruleFields, complexity)
+	rules = append(rules, newRules...)
 
 	if len(ruleFields) == 2 {
 		cRules := CombineRules(rules)
@@ -87,75 +63,4 @@ func CombineRules(rules []rule.Rule) []rule.Rule {
 		}
 	}
 	return rule.Uniq(combinedRules)
-}
-
-func generateCompareNumericRules(
-	inputDescription *description.Description,
-	ruleFields []string,
-	complexity int,
-	field string,
-) []rule.Rule {
-	fd := inputDescription.Fields[field]
-	if fd.Kind != fieldtype.Number {
-		return []rule.Rule{}
-	}
-	fieldNum := description.CalcFieldNum(inputDescription.Fields, field)
-	rulesMap := make(map[string]rule.Rule)
-	ruleNewFuncs := []func(string, string) rule.Rule{
-		rule.NewLTFF,
-		rule.NewLEFF,
-		rule.NewGEFF,
-		rule.NewGTFF,
-	}
-
-	for oField, oFd := range inputDescription.Fields {
-		oFieldNum := description.CalcFieldNum(inputDescription.Fields, oField)
-		isComparable := hasComparableNumberRange(fd, oFd)
-		if fieldNum < oFieldNum && isComparable &&
-			internal.StringInSlice(oField, ruleFields) {
-			for _, ruleNewFunc := range ruleNewFuncs {
-				r := ruleNewFunc(field, oField)
-				rulesMap[r.String()] = r
-			}
-		}
-	}
-	rules := rulesMapToArray(rulesMap)
-	return rules
-}
-
-func isNumberField(fd *description.Field) bool {
-	return fd.Kind == fieldtype.Number
-}
-
-var compareExpr *dexpr.Expr = dexpr.MustNew(
-	"min1 < max2 && max1 > min2",
-	dexprfuncs.CallFuncs,
-)
-
-func hasComparableNumberRange(
-	fd1 *description.Field,
-	fd2 *description.Field,
-) bool {
-	if !isNumberField(fd1) || !isNumberField(fd2) {
-		return false
-	}
-	var isComparable bool
-	vars := map[string]*dlit.Literal{
-		"min1": fd1.Min,
-		"max1": fd1.Max,
-		"min2": fd2.Min,
-		"max2": fd2.Max,
-	}
-	isComparable, err := compareExpr.EvalBool(vars)
-	return err == nil && isComparable
-}
-
-func rulesMapToArray(rulesMap map[string]rule.Rule) []rule.Rule {
-	rules := make([]rule.Rule, len(rulesMap))
-	i := 0
-	for _, expr := range rulesMap {
-		rules[i] = expr
-		i++
-	}
-	return rules
 }

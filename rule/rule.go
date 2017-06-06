@@ -28,6 +28,7 @@ import (
 	"github.com/vlifesystems/rhkit/description"
 	"github.com/vlifesystems/rhkit/internal"
 	"github.com/vlifesystems/rhkit/internal/dexprfuncs"
+	"github.com/vlifesystems/rhkit/internal/fieldtype"
 	"sort"
 	"strings"
 	"sync"
@@ -229,4 +230,27 @@ func calcNumSharedValues(fd1 *description.Field, fd2 *description.Field) int {
 		}
 	}
 	return numShared
+}
+
+var compareExpr *dexpr.Expr = dexpr.MustNew(
+	"min1 < max2 && max1 > min2",
+	dexprfuncs.CallFuncs,
+)
+
+func hasComparableNumberRange(
+	fd1 *description.Field,
+	fd2 *description.Field,
+) bool {
+	if fd1.Kind != fieldtype.Number || fd2.Kind != fieldtype.Number {
+		return false
+	}
+	var isComparable bool
+	vars := map[string]*dlit.Literal{
+		"min1": fd1.Min,
+		"max1": fd1.Max,
+		"min2": fd2.Min,
+		"max2": fd2.Max,
+	}
+	isComparable, err := compareExpr.EvalBool(vars)
+	return err == nil && isComparable
 }
