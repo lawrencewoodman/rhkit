@@ -276,8 +276,7 @@ func TestReduceDP(t *testing.T) {
 	}
 }
 
-func TestGenerate_1(t *testing.T) {
-	testPurpose := "Ensure generates correct rules for each field"
+func TestGenerate(t *testing.T) {
 	inputDescription := &description.Description{
 		map[string]*description.Field{
 			"team": &description.Field{
@@ -348,6 +347,7 @@ func TestGenerate_1(t *testing.T) {
 	ruleFields :=
 		[]string{"team", "teamOut", "level", "flow", "position"}
 	wantRules := []Rule{
+		NewTrue(),
 		NewEQFV("team", dlit.MustNew("a")),
 		NewNEFV("team", dlit.MustNew("a")),
 		NewEQFF("team", "teamOut"),
@@ -375,58 +375,17 @@ func TestGenerate_1(t *testing.T) {
 		NewAddGEF("level", "position", dlit.MustNew(12)),
 		NewMulLEF("flow", "level", dlit.MustNew(26.25)),
 		NewMulGEF("flow", "level", dlit.MustNew(23.63)),
+		MustNewBetweenFV("position", dlit.MustNew(9), dlit.MustNew(12)),
+		MustNewOutsideFV("position", dlit.MustNew(9), dlit.MustNew(12)),
 	}
 	complexity := 10
 	got := Generate(inputDescription, ruleFields, complexity)
 	if err := rulesContain(got, wantRules); err != nil {
-		t.Errorf("Test: %s\n", testPurpose)
 		t.Errorf("Generate: %s", err)
 	}
 }
 
-func TestGenerate_2(t *testing.T) {
-	testPurpose := "Ensure generates a True rule"
-	inputDescription := &description.Description{
-		map[string]*description.Field{
-			"team": &description.Field{
-				Kind: fieldtype.String,
-				Values: map[string]description.Value{
-					"a": description.Value{dlit.MustNew("a"), 3},
-					"b": description.Value{dlit.MustNew("b"), 3},
-					"c": description.Value{dlit.MustNew("c"), 3},
-				},
-			},
-			"teamOut": &description.Field{
-				Kind: fieldtype.String,
-				Values: map[string]description.Value{
-					"a": description.Value{dlit.MustNew("a"), 3},
-					"c": description.Value{dlit.MustNew("c"), 3},
-					"d": description.Value{dlit.MustNew("d"), 3},
-					"e": description.Value{dlit.MustNew("e"), 3},
-					"f": description.Value{dlit.MustNew("f"), 3},
-				},
-			},
-		}}
-	ruleFields := []string{"team", "teamOut"}
-	complexity := 10
-	got := Generate(inputDescription, ruleFields, complexity)
-
-	trueRuleFound := false
-	for _, r := range got {
-		if _, isTrueRule := r.(True); isTrueRule {
-			trueRuleFound = true
-			break
-		}
-	}
-	if !trueRuleFound {
-		t.Errorf("Test: %s\n", testPurpose)
-		t.Errorf("Generate(%v, %v)  - True rule missing",
-			inputDescription, ruleFields)
-	}
-}
-
-func TestGenerate_3(t *testing.T) {
-	testPurpose := "Ensure generates correct combination rules"
+func TestGenerate_combinations(t *testing.T) {
 	inputDescription := &description.Description{
 		map[string]*description.Field{
 			"directionIn": &description.Field{
@@ -498,12 +457,8 @@ func TestGenerate_3(t *testing.T) {
 	Sort(got)
 	Sort(want)
 	if err := matchRulesUnordered(got, want); err != nil {
-		t.Errorf("Test: %s\n", testPurpose)
 		t.Errorf("matchRulesUnordered: %s\n got: %s\nwant: %s\n",
 			err, got, want)
-		for i, r := range got {
-			t.Errorf("rule(%d): %s", i, r)
-		}
 	}
 }
 
