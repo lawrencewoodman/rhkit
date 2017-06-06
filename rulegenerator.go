@@ -20,7 +20,6 @@
 package rhkit
 
 import (
-	"fmt"
 	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/description"
@@ -28,8 +27,6 @@ import (
 	"github.com/vlifesystems/rhkit/internal/dexprfuncs"
 	"github.com/vlifesystems/rhkit/internal/fieldtype"
 	"github.com/vlifesystems/rhkit/rule"
-	"sort"
-	"strings"
 )
 
 type ruleGeneratorFunc func(
@@ -53,7 +50,6 @@ func GenerateRules(
 	rules := make([]rule.Rule, 1)
 	ruleGenerators := []ruleGeneratorFunc{
 		generateCompareNumericRules, generateCompareStringRules,
-		generateInRules,
 	}
 	rules[0] = rule.NewTrue()
 	for field := range inputDescription.Fields {
@@ -210,100 +206,4 @@ func rulesMapToArray(rulesMap map[string]rule.Rule) []rule.Rule {
 		i++
 	}
 	return rules
-}
-
-func generateInRules(
-	inputDescription *description.Description,
-	ruleFields []string,
-	complexity int,
-	field string,
-) []rule.Rule {
-	extra := 0
-	switch complexity {
-	case 1, 2, 3, 4:
-		return []rule.Rule{}
-	case 5, 6:
-	case 7, 8:
-		extra = 2
-	case 9, 10:
-		extra = 4
-	}
-	if len(ruleFields) == 2 {
-		extra += 2
-	}
-	fd := inputDescription.Fields[field]
-	numValues := len(fd.Values)
-	if fd.Kind != fieldtype.String &&
-		fd.Kind != fieldtype.Number ||
-		numValues <= 3 || numValues > (12+extra) {
-		return []rule.Rule{}
-	}
-	rulesMap := make(map[string]rule.Rule)
-	for i := 3; ; i++ {
-		numOnBits := calcNumOnBits(i)
-		if numOnBits >= numValues {
-			break
-		}
-		if numOnBits >= 2 && numOnBits <= (5+extra) && numOnBits < (numValues-1) {
-			compareValues := makeCompareValues(fd.Values, i)
-			if len(compareValues) >= 2 {
-				r := rule.NewInFV(field, compareValues)
-				rulesMap[r.String()] = r
-			}
-		}
-	}
-	rules := rulesMapToArray(rulesMap)
-	return rules
-}
-
-func makeCompareValues(
-	values map[string]description.Value,
-	i int,
-) []*dlit.Literal {
-	bStr := fmt.Sprintf("%b", i)
-	numValues := len(values)
-	lits := valuesToLiterals(values)
-	j := numValues - 1
-	compareValues := []*dlit.Literal{}
-	for _, b := range reverseString(bStr) {
-		if b == '1' {
-			lit := lits[numValues-1-j]
-			if values[lit.String()].Num < 2 {
-				return []*dlit.Literal{}
-			}
-			compareValues = append(compareValues, lit)
-		}
-		j -= 1
-	}
-	return compareValues
-}
-
-func valuesToLiterals(values map[string]description.Value) []*dlit.Literal {
-	lits := make([]*dlit.Literal, len(values))
-	keys := make([]string, len(values))
-	i := 0
-	for k := range values {
-		keys[i] = k
-		i++
-	}
-	// The keys are sorted to make it easier to test because maps aren't ordered
-	sort.Strings(keys)
-	j := 0
-	for _, k := range keys {
-		lits[j] = values[k].Value
-		j++
-	}
-	return lits
-}
-
-func reverseString(s string) (r string) {
-	for _, v := range s {
-		r = string(v) + r
-	}
-	return
-}
-
-func calcNumOnBits(i int) int {
-	bStr := fmt.Sprintf("%b", i)
-	return strings.Count(bStr, "1")
 }

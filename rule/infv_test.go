@@ -3,7 +3,10 @@ package rule
 import (
 	"errors"
 	"github.com/lawrencewoodman/dlit"
+	"github.com/vlifesystems/rhkit/description"
+	"github.com/vlifesystems/rhkit/internal/fieldtype"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -241,6 +244,535 @@ func TestInFVOverlaps(t *testing.T) {
 		if got != c.want {
 			t.Errorf("Overlaps - ruleA: %s, ruleB: %s - got: %t, want: %t",
 				c.ruleA, c.ruleB, got, c.want)
+		}
+	}
+}
+
+func TestGenerateInFV_1(t *testing.T) {
+	inputDescription := &description.Description{
+		map[string]*description.Field{
+			"band": &description.Field{
+				Kind:   fieldtype.Number,
+				Min:    dlit.MustNew(1),
+				Max:    dlit.MustNew(3),
+				Values: map[string]description.Value{},
+			},
+			"flow": &description.Field{
+				Kind:   fieldtype.Number,
+				Min:    dlit.MustNew(1),
+				Max:    dlit.MustNew(3),
+				MaxDP:  2,
+				Values: map[string]description.Value{},
+			},
+			"groupA": &description.Field{
+				Kind: fieldtype.String,
+				Values: map[string]description.Value{
+					"Fred":    description.Value{dlit.NewString("Fred"), 3},
+					"Mary":    description.Value{dlit.NewString("Mary"), 4},
+					"Rebecca": description.Value{dlit.NewString("Rebecca"), 2},
+				},
+			},
+
+			"groupB": &description.Field{
+				Kind: fieldtype.String,
+				Values: map[string]description.Value{
+					"Fred":    description.Value{dlit.NewString("Fred"), 3},
+					"Mary":    description.Value{dlit.NewString("Mary"), 4},
+					"Rebecca": description.Value{dlit.NewString("Rebecca"), 2},
+					"Harry":   description.Value{dlit.NewString("Harry"), 2},
+					"Dinah":   description.Value{dlit.NewString("Dinah"), 2},
+					"Israel":  description.Value{dlit.NewString("Israel"), 2},
+					"Sarah":   description.Value{dlit.NewString("Sarah"), 2},
+					"Ishmael": description.Value{dlit.NewString("Ishmael"), 2},
+					"Caen":    description.Value{dlit.NewString("Caen"), 2},
+					"Abel":    description.Value{dlit.NewString("Abel"), 2},
+					"Noah":    description.Value{dlit.NewString("Noah"), 2},
+					"Isaac":   description.Value{dlit.NewString("Isaac"), 2},
+					"Moses":   description.Value{dlit.NewString("Moses"), 2},
+				},
+			},
+			"groupC": &description.Field{
+				Kind: fieldtype.String,
+				Values: map[string]description.Value{
+					"Fred":    description.Value{dlit.NewString("Fred"), 3},
+					"Mary":    description.Value{dlit.NewString("Mary"), 4},
+					"Rebecca": description.Value{dlit.NewString("Rebecca"), 2},
+					"Harry":   description.Value{dlit.NewString("Harry"), 2},
+				},
+			},
+			"groupD": &description.Field{
+				Kind: fieldtype.String,
+				Values: map[string]description.Value{
+					"Fred":    description.Value{dlit.NewString("Fred"), 3},
+					"Mary":    description.Value{dlit.NewString("Mary"), 4},
+					"Rebecca": description.Value{dlit.NewString("Rebecca"), 1},
+					"Harry":   description.Value{dlit.NewString("Harry"), 2},
+				},
+			},
+			"groupE": &description.Field{
+				Kind: fieldtype.String,
+				Values: map[string]description.Value{
+					"Fred":    description.Value{dlit.NewString("Fred"), 3},
+					"Mary":    description.Value{dlit.NewString("Mary"), 4},
+					"Rebecca": description.Value{dlit.NewString("Rebecca"), 2},
+					"Harry":   description.Value{dlit.NewString("Harry"), 2},
+					"Juliet":  description.Value{dlit.NewString("Juliet"), 2},
+				},
+			},
+		},
+	}
+	cases := []struct {
+		field        string
+		complexities []int
+		want         []Rule
+	}{
+		{field: "band",
+			complexities: []int{10},
+			want:         []Rule{},
+		},
+		{field: "flow",
+			complexities: []int{10},
+			want:         []Rule{},
+		},
+		{field: "groupA",
+			complexities: []int{10},
+			want:         []Rule{},
+		},
+		{field: "groupB",
+			complexities: []int{1, 2, 3, 4, 5, 6},
+			want:         []Rule{},
+		},
+		{field: "groupC",
+			complexities: []int{1, 2, 3, 4},
+			want:         []Rule{},
+		},
+		{field: "groupC",
+			complexities: []int{5, 6},
+			want: []Rule{
+				NewInFV("groupC", []*dlit.Literal{
+					dlit.NewString("Fred"),
+					dlit.NewString("Harry"),
+				}),
+				NewInFV("groupC", []*dlit.Literal{
+					dlit.NewString("Fred"),
+					dlit.NewString("Mary"),
+				}),
+				NewInFV("groupC", []*dlit.Literal{
+					dlit.NewString("Fred"),
+					dlit.NewString("Rebecca"),
+				}),
+				NewInFV("groupC", []*dlit.Literal{
+					dlit.NewString("Harry"),
+					dlit.NewString("Mary"),
+				}),
+				NewInFV("groupC", []*dlit.Literal{
+					dlit.NewString("Harry"),
+					dlit.NewString("Rebecca"),
+				}),
+				NewInFV("groupC", []*dlit.Literal{
+					dlit.NewString("Mary"),
+					dlit.NewString("Rebecca"),
+				}),
+			},
+		},
+		{field: "groupD",
+			complexities: []int{5, 6},
+			want: []Rule{
+				NewInFV("groupD", []*dlit.Literal{
+					dlit.NewString("Fred"),
+					dlit.NewString("Harry"),
+				}),
+				NewInFV("groupD", []*dlit.Literal{
+					dlit.NewString("Fred"),
+					dlit.NewString("Mary"),
+				}),
+				NewInFV("groupD", []*dlit.Literal{
+					dlit.NewString("Harry"),
+					dlit.NewString("Mary"),
+				}),
+			},
+		},
+		{field: "groupE",
+			complexities: []int{5, 6},
+			want: []Rule{
+				NewInFV("groupE", []*dlit.Literal{
+					dlit.NewString("Fred"),
+					dlit.NewString("Harry"),
+				}),
+				NewInFV("groupE", []*dlit.Literal{
+					dlit.NewString("Fred"),
+					dlit.NewString("Harry"),
+					dlit.NewString("Juliet"),
+				}),
+				NewInFV("groupE", []*dlit.Literal{
+					dlit.NewString("Fred"),
+					dlit.NewString("Harry"),
+					dlit.NewString("Mary"),
+				}),
+				NewInFV("groupE", []*dlit.Literal{
+					dlit.NewString("Fred"),
+					dlit.NewString("Harry"),
+					dlit.NewString("Rebecca"),
+				}),
+				NewInFV("groupE", []*dlit.Literal{
+					dlit.NewString("Fred"),
+					dlit.NewString("Juliet"),
+					dlit.NewString("Rebecca"),
+				}),
+				NewInFV("groupE", []*dlit.Literal{
+					dlit.NewString("Fred"),
+					dlit.NewString("Juliet"),
+					dlit.NewString("Mary"),
+				}),
+				NewInFV("groupE", []*dlit.Literal{
+					dlit.NewString("Fred"),
+					dlit.NewString("Mary"),
+				}),
+				NewInFV("groupE", []*dlit.Literal{
+					dlit.NewString("Fred"),
+					dlit.NewString("Mary"),
+					dlit.NewString("Rebecca"),
+				}),
+				NewInFV("groupE", []*dlit.Literal{
+					dlit.NewString("Fred"),
+					dlit.NewString("Rebecca"),
+				}),
+				NewInFV("groupE", []*dlit.Literal{
+					dlit.NewString("Fred"),
+					dlit.NewString("Juliet"),
+				}),
+				NewInFV("groupE", []*dlit.Literal{
+					dlit.NewString("Harry"),
+					dlit.NewString("Mary"),
+				}),
+				NewInFV("groupE", []*dlit.Literal{
+					dlit.NewString("Harry"),
+					dlit.NewString("Rebecca"),
+				}),
+				NewInFV("groupE", []*dlit.Literal{
+					dlit.NewString("Harry"),
+					dlit.NewString("Juliet"),
+				}),
+				NewInFV("groupE", []*dlit.Literal{
+					dlit.NewString("Harry"),
+					dlit.NewString("Juliet"),
+					dlit.NewString("Mary"),
+				}),
+				NewInFV("groupE", []*dlit.Literal{
+					dlit.NewString("Harry"),
+					dlit.NewString("Juliet"),
+					dlit.NewString("Rebecca"),
+				}),
+				NewInFV("groupE", []*dlit.Literal{
+					dlit.NewString("Harry"),
+					dlit.NewString("Mary"),
+					dlit.NewString("Rebecca"),
+				}),
+				NewInFV("groupE", []*dlit.Literal{
+					dlit.NewString("Juliet"),
+					dlit.NewString("Mary"),
+				}),
+				NewInFV("groupE", []*dlit.Literal{
+					dlit.NewString("Juliet"),
+					dlit.NewString("Mary"),
+					dlit.NewString("Rebecca"),
+				}),
+				NewInFV("groupE", []*dlit.Literal{
+					dlit.NewString("Mary"),
+					dlit.NewString("Rebecca"),
+				}),
+				NewInFV("groupE", []*dlit.Literal{
+					dlit.NewString("Juliet"),
+					dlit.NewString("Rebecca"),
+				}),
+			},
+		},
+	}
+	ruleFields :=
+		[]string{"band", "flow", "groupA", "groupB", "groupC", "groupD", "groupE"}
+	for _, c := range cases {
+		for _, complexity := range c.complexities {
+			got := generateInFV(inputDescription, ruleFields, complexity, c.field)
+			if err := matchRulesUnordered(got, c.want); err != nil {
+				t.Errorf("matchRulesUnordered() rules don't match: %s\ngot: %s\nwant: %s\n",
+					err, got, c.want)
+			}
+		}
+	}
+}
+
+// Test that will generate correct number of values in In rule for complexity
+func TestGenerateInFV_2(t *testing.T) {
+	inputDescription := &description.Description{
+		map[string]*description.Field{
+			"group": &description.Field{
+				Kind: fieldtype.String,
+			},
+		},
+	}
+	cases := []struct {
+		groupValues      map[string]description.Value
+		complexities     []int
+		wantMinNumRules  int
+		wantMaxNumRules  int
+		wantMaxNumValues int
+	}{
+		{groupValues: map[string]description.Value{
+			"Fred":    description.Value{dlit.NewString("Fred"), 3},
+			"Mary":    description.Value{dlit.NewString("Mary"), 4},
+			"Rebecca": description.Value{dlit.NewString("Rebecca"), 2},
+			"Harry":   description.Value{dlit.NewString("Harry"), 2},
+			"Dinah":   description.Value{dlit.NewString("Dinah"), 2},
+			"Israel":  description.Value{dlit.NewString("Israel"), 2},
+			"Sarah":   description.Value{dlit.NewString("Sarah"), 2},
+			"Ishmael": description.Value{dlit.NewString("Ishmael"), 2},
+			"Caen":    description.Value{dlit.NewString("Caen"), 2},
+			"Abel":    description.Value{dlit.NewString("Abel"), 2},
+			"Noah":    description.Value{dlit.NewString("Noah"), 2},
+			"Isaac":   description.Value{dlit.NewString("Isaac"), 2},
+		},
+			complexities:     []int{1, 2, 3, 4},
+			wantMinNumRules:  0,
+			wantMaxNumRules:  0,
+			wantMaxNumValues: 5,
+		},
+		{groupValues: map[string]description.Value{
+			"Fred":    description.Value{dlit.NewString("Fred"), 3},
+			"Mary":    description.Value{dlit.NewString("Mary"), 4},
+			"Rebecca": description.Value{dlit.NewString("Rebecca"), 2},
+			"Harry":   description.Value{dlit.NewString("Harry"), 2},
+			"Dinah":   description.Value{dlit.NewString("Dinah"), 2},
+			"Israel":  description.Value{dlit.NewString("Israel"), 2},
+			"Sarah":   description.Value{dlit.NewString("Sarah"), 2},
+			"Ishmael": description.Value{dlit.NewString("Ishmael"), 2},
+			"Caen":    description.Value{dlit.NewString("Caen"), 2},
+			"Abel":    description.Value{dlit.NewString("Abel"), 2},
+			"Noah":    description.Value{dlit.NewString("Noah"), 2},
+			"Isaac":   description.Value{dlit.NewString("Isaac"), 2},
+		},
+			complexities:     []int{5, 6},
+			wantMinNumRules:  1000,
+			wantMaxNumRules:  2000,
+			wantMaxNumValues: 5,
+		},
+	}
+	ruleFields := []string{"group"}
+	for _, c := range cases {
+		for _, complexity := range c.complexities {
+			inputDescription.Fields["group"].Values = c.groupValues
+			got := generateInFV(inputDescription, ruleFields, complexity, "group")
+			if len(got) < c.wantMinNumRules || len(got) > c.wantMaxNumRules {
+				t.Errorf("generateInFV: got wrong number of rules: %d", len(got))
+			}
+			for _, r := range got {
+				numValues := strings.Count(r.String(), ",")
+				if numValues < 2 || numValues > c.wantMaxNumValues {
+					t.Errorf("generateInFV: wrong number of values in rule: %s", r)
+				}
+			}
+		}
+	}
+}
+
+func TestMakeCompareValues(t *testing.T) {
+	values1 := map[string]description.Value{
+		"a": description.Value{dlit.MustNew("a"), 2},
+		"c": description.Value{dlit.MustNew("c"), 2},
+		"d": description.Value{dlit.MustNew("d"), 2},
+		"e": description.Value{dlit.MustNew("e"), 2},
+		"f": description.Value{dlit.MustNew("f"), 2},
+	}
+	values2 := map[string]description.Value{
+		"a": description.Value{dlit.MustNew("a"), 2},
+		"c": description.Value{dlit.MustNew("c"), 1},
+		"d": description.Value{dlit.MustNew("d"), 2},
+		"e": description.Value{dlit.MustNew("e"), 2},
+		"f": description.Value{dlit.MustNew("f"), 2},
+	}
+	cases := []struct {
+		values map[string]description.Value
+		i      int
+		want   []*dlit.Literal
+	}{
+		{
+			values: values1,
+			i:      2,
+			want:   []*dlit.Literal{dlit.NewString("c")},
+		},
+		{
+			values: values2,
+			i:      2,
+			want:   []*dlit.Literal{},
+		},
+		{
+			values: values1,
+			i:      3,
+			want:   []*dlit.Literal{dlit.NewString("a"), dlit.NewString("c")},
+		},
+		{
+			values: values2,
+			i:      3,
+			want:   []*dlit.Literal{},
+		},
+		{
+			values: values1,
+			i:      4,
+			want:   []*dlit.Literal{dlit.NewString("d")},
+		},
+		{
+			values: values2,
+			i:      4,
+			want:   []*dlit.Literal{dlit.NewString("d")},
+		},
+		{
+			values: values1,
+			i:      5,
+			want:   []*dlit.Literal{dlit.NewString("a"), dlit.NewString("d")},
+		},
+		{
+			values: values2,
+			i:      5,
+			want:   []*dlit.Literal{dlit.NewString("a"), dlit.NewString("d")},
+		},
+		{
+			values: values1,
+			i:      6,
+			want:   []*dlit.Literal{dlit.NewString("c"), dlit.NewString("d")},
+		},
+		{
+			values: values2,
+			i:      6,
+			want:   []*dlit.Literal{},
+		},
+		{
+			values: values1,
+			i:      7,
+			want: []*dlit.Literal{
+				dlit.NewString("a"),
+				dlit.NewString("c"),
+				dlit.NewString("d"),
+			},
+		},
+		{
+			values: values2,
+			i:      7,
+			want:   []*dlit.Literal{},
+		},
+		{
+			values: values1,
+			i:      8,
+			want:   []*dlit.Literal{dlit.NewString("e")},
+		},
+		{
+			values: values2,
+			i:      8,
+			want:   []*dlit.Literal{dlit.NewString("e")},
+		},
+		{
+			values: values1,
+			i:      9,
+			want:   []*dlit.Literal{dlit.NewString("a"), dlit.NewString("e")},
+		},
+		{
+			values: values2,
+			i:      9,
+			want:   []*dlit.Literal{dlit.NewString("a"), dlit.NewString("e")},
+		},
+		{
+			values: values1,
+			i:      10,
+			want:   []*dlit.Literal{dlit.NewString("c"), dlit.NewString("e")},
+		},
+		{
+			values: values2,
+			i:      10,
+			want:   []*dlit.Literal{},
+		},
+		{
+			values: values1,
+			i:      11,
+			want: []*dlit.Literal{
+				dlit.NewString("a"),
+				dlit.NewString("c"),
+				dlit.NewString("e"),
+			},
+		},
+		{
+			values: values2,
+			i:      11,
+			want:   []*dlit.Literal{},
+		},
+		{
+			values: values1,
+			i:      12,
+			want:   []*dlit.Literal{dlit.NewString("d"), dlit.NewString("e")},
+		},
+		{
+			values: values2,
+			i:      12,
+			want:   []*dlit.Literal{dlit.NewString("d"), dlit.NewString("e")},
+		},
+		{
+			values: values1,
+			i:      13,
+			want: []*dlit.Literal{
+				dlit.NewString("a"),
+				dlit.NewString("d"),
+				dlit.NewString("e"),
+			},
+		},
+		{
+			values: values1,
+			i:      14,
+			want: []*dlit.Literal{
+				dlit.NewString("c"),
+				dlit.NewString("d"),
+				dlit.NewString("e"),
+			},
+		},
+		{
+			values: values1,
+			i:      15,
+			want: []*dlit.Literal{
+				dlit.NewString("a"),
+				dlit.NewString("c"),
+				dlit.NewString("d"),
+				dlit.NewString("e"),
+			},
+		},
+		{
+			values: values1,
+			i:      16,
+			want:   []*dlit.Literal{dlit.NewString("f")},
+		},
+		{
+			values: values2,
+			i:      16,
+			want:   []*dlit.Literal{dlit.NewString("f")},
+		},
+		{
+			values: values1,
+			i:      17,
+			want:   []*dlit.Literal{dlit.NewString("a"), dlit.NewString("f")},
+		},
+		{
+			values: values2,
+			i:      17,
+			want:   []*dlit.Literal{dlit.NewString("a"), dlit.NewString("f")},
+		},
+	}
+	for _, c := range cases {
+		got := makeCompareValues(c.values, c.i)
+		if len(got) != len(c.want) {
+			t.Errorf("makeCompareValues(%v, %d) got: %v, want: %v",
+				c.values, c.i, got, c.want)
+		}
+		for j, v := range got {
+			o := c.want[j]
+			if o.String() != v.String() {
+				t.Errorf("makeCompareValues(%v, %d) got: %v, want: %v",
+					c.values, c.i, got, c.want)
+			}
 		}
 	}
 }
