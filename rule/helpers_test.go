@@ -10,6 +10,7 @@ import (
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/internal"
 	"github.com/vlifesystems/rhkit/internal/dexprfuncs"
+	"sort"
 )
 
 func checkErrorMatch(got, want error) error {
@@ -234,4 +235,13 @@ func rulesContain(gotRules []Rule, wantRules []Rule) error {
 		}
 	}
 	return nil
+}
+
+func rulesToSortedStrings(rules []Rule) []string {
+	r := make([]string, len(rules))
+	for i, rule := range rules {
+		r[i] = rule.String()
+	}
+	sort.Strings(r)
+	return r
 }

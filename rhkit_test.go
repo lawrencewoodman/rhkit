@@ -72,7 +72,7 @@ func processDataset(experiment *experiment.Experiment) error {
 			err)
 	}
 	complexity := 5
-	rules := rhkit.GenerateRules(
+	rules := rule.Generate(
 		fieldDescriptions,
 		experiment.RuleFieldNames,
 		complexity,
@@ -141,7 +141,7 @@ func processDataset(experiment *experiment.Experiment) error {
 	numRulesToCombine := 50
 	bestNonCombinedRules := assessment.Rules(numRulesToCombine)
 	combinedRules :=
-		rhkit.CombineRules(bestNonCombinedRules)
+		rule.Combine(bestNonCombinedRules)
 	if len(combinedRules) < 2 {
 		return fmt.Errorf("rhkit.CombineRules(bestNonCombinedRules) - not enough rules generated")
 	}

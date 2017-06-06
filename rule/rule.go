@@ -85,6 +85,8 @@ func (e IncompatibleTypesRuleError) Error() string {
 }
 
 // Generate generates rules for rules that have registered a generator.
+// complexity is used to indicate how complex and in turn how many rules
+// to produce it takes a number 1 to 10.
 func Generate(
 	inputDescription *description.Description,
 	ruleFields []string,
@@ -93,7 +95,8 @@ func Generate(
 	if complexity < 1 || complexity > 10 {
 		panic("complexity must be in range 1..10")
 	}
-	rules := make([]Rule, 0)
+	rules := make([]Rule, 1)
+	rules[0] = NewTrue()
 	for field := range inputDescription.Fields {
 		if internal.StringInSlice(field, ruleFields) {
 			for _, generator := range generators {
@@ -102,7 +105,29 @@ func Generate(
 			}
 		}
 	}
-	return rules
+	if len(ruleFields) == 2 {
+		cRules := Combine(rules)
+		rules = append(rules, cRules...)
+	}
+	Sort(rules)
+	return Uniq(rules)
+}
+
+func Combine(rules []Rule) []Rule {
+	Sort(rules)
+	combinedRules := make([]Rule, 0)
+	numRules := len(rules)
+	for i := 0; i < numRules-1; i++ {
+		for j := i + 1; j < numRules; j++ {
+			if andRule, err := NewAnd(rules[i], rules[j]); err == nil {
+				combinedRules = append(combinedRules, andRule)
+			}
+			if orRule, err := NewOr(rules[i], rules[j]); err == nil {
+				combinedRules = append(combinedRules, orRule)
+			}
+		}
+	}
+	return Uniq(combinedRules)
 }
 
 // Sort sorts the rules in place using their .String() method
@@ -163,7 +188,7 @@ func registerGenerator(ruleType string, generator generatorFunc) {
 	generatorsMu.Lock()
 	defer generatorsMu.Unlock()
 	if _, dup := generators[ruleType]; dup {
-		panic("rule.registerGenerator called twice for ruleType: " + ruleType)
+		panic("registerGenerator called twice for ruleType: " + ruleType)
 	}
 	generators[ruleType] = generator
 }
