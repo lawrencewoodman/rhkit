@@ -52,7 +52,6 @@ func GenerateRules(
 	}
 	rules := make([]rule.Rule, 1)
 	ruleGenerators := []ruleGeneratorFunc{
-		generateValueRules,
 		generateCompareNumericRules, generateCompareStringRules,
 		generateInRules,
 	}
@@ -92,32 +91,6 @@ func CombineRules(rules []rule.Rule) []rule.Rule {
 		}
 	}
 	return rule.Uniq(combinedRules)
-}
-
-func generateValueRules(
-	inputDescription *description.Description,
-	ruleFields []string,
-	complexity int,
-	field string,
-) []rule.Rule {
-	fd := inputDescription.Fields[field]
-	rulesMap := make(map[string]rule.Rule)
-	values := fd.Values
-	if len(values) < 2 || fd.Kind == fieldtype.Ignore {
-		return []rule.Rule{}
-	}
-	for _, vd := range values {
-		if vd.Num >= 2 {
-			eqRule := rule.NewEQFV(field, vd.Value)
-			rulesMap[eqRule.String()] = eqRule
-			if len(values) > 2 {
-				neRule := rule.NewNEFV(field, vd.Value)
-				rulesMap[neRule.String()] = neRule
-			}
-		}
-	}
-	rules := rulesMapToArray(rulesMap)
-	return rules
 }
 
 func generateCompareNumericRules(

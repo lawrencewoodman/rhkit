@@ -4,6 +4,7 @@
 package rule
 
 import (
+	"errors"
 	"fmt"
 	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
@@ -208,6 +209,29 @@ func checkRulesComply(
 	}
 	if err := checkMaxDP(rules, maxDP); err != nil {
 		return err
+	}
+	return nil
+}
+
+func matchRulesUnordered(rules1 []Rule, rules2 []Rule) error {
+	if len(rules1) != len(rules2) {
+		return errors.New("rules different lengths")
+	}
+	return rulesContain(rules1, rules2)
+}
+
+func rulesContain(gotRules []Rule, wantRules []Rule) error {
+	for _, wRule := range wantRules {
+		found := false
+		for _, gRule := range gotRules {
+			if gRule.String() == wRule.String() {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return fmt.Errorf("rule doesn't exist: %s", wRule)
+		}
 	}
 	return nil
 }
