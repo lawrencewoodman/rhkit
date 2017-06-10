@@ -374,7 +374,7 @@ func TestGenerateBetweenFV(t *testing.T) {
 			maxDP:       0,
 		},
 	}
-	complexity := 5
+	complexity := Complexity{}
 	ruleFields := []string{"income"}
 	for i, c := range cases {
 		complyFunc := func(r Rule) error {

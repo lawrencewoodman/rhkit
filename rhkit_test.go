@@ -71,11 +71,10 @@ func processDataset(experiment *experiment.Experiment) error {
 		return fmt.Errorf("describer.DescribeDataset(experiment.dataset) - err: %s",
 			err)
 	}
-	complexity := 5
 	rules := rule.Generate(
 		fieldDescriptions,
 		experiment.RuleFieldNames,
-		complexity,
+		experiment.RuleComplexity,
 	)
 	if len(rules) < 2 {
 		return fmt.Errorf(

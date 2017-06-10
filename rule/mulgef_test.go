@@ -316,6 +316,7 @@ func TestGenerateMulGEF(t *testing.T) {
 	fieldA := "balance"
 	cases := []struct {
 		description *description.Description
+		complexity  Complexity
 		minNumRules int
 		maxNumRules int
 		min         *dlit.Literal
@@ -337,6 +338,7 @@ func TestGenerateMulGEF(t *testing.T) {
 				},
 			},
 		},
+			complexity:  Complexity{Arithmetic: true},
 			minNumRules: 18,
 			maxNumRules: 20,
 			min:         dlit.MustNew(62500),
@@ -358,6 +360,7 @@ func TestGenerateMulGEF(t *testing.T) {
 				},
 			},
 		},
+			complexity:  Complexity{Arithmetic: true},
 			minNumRules: 18,
 			maxNumRules: 20,
 			min:         dlit.MustNew(135000),
@@ -379,6 +382,7 @@ func TestGenerateMulGEF(t *testing.T) {
 				},
 			},
 		},
+			complexity:  Complexity{Arithmetic: true},
 			minNumRules: 18,
 			maxNumRules: 20,
 			min:         dlit.MustNew(60000),
@@ -400,6 +404,7 @@ func TestGenerateMulGEF(t *testing.T) {
 				},
 			},
 		},
+			complexity:  Complexity{Arithmetic: true},
 			minNumRules: 18,
 			maxNumRules: 19,
 			min:         dlit.MustNew(118000),
@@ -423,6 +428,7 @@ func TestGenerateMulGEF(t *testing.T) {
 				},
 			},
 		},
+			complexity:  Complexity{Arithmetic: true},
 			minNumRules: 18,
 			maxNumRules: 20,
 			min:         dlit.MustNew(119687.642928),
@@ -444,11 +450,34 @@ func TestGenerateMulGEF(t *testing.T) {
 				},
 			},
 		},
+			complexity:  Complexity{Arithmetic: true},
 			minNumRules: 4,
 			maxNumRules: 4,
 			min:         dlit.MustNew(1),
 			max:         dlit.MustNew(6),
 			mid:         dlit.MustNew(3),
+			maxDP:       0,
+		},
+		{description: &description.Description{
+			map[string]*description.Field{
+				"balance": &description.Field{
+					Kind: fieldtype.Number,
+					Min:  dlit.MustNew(200),
+					Max:  dlit.MustNew(300),
+				},
+				"income": &description.Field{
+					Kind: fieldtype.Number,
+					Min:  dlit.MustNew(590),
+					Max:  dlit.MustNew(510),
+				},
+			},
+		},
+			complexity:  Complexity{Arithmetic: false},
+			minNumRules: 0,
+			maxNumRules: 0,
+			min:         dlit.MustNew(118000),
+			max:         dlit.MustNew(153000),
+			mid:         dlit.MustNew(135500),
 			maxDP:       0,
 		},
 	}
@@ -463,9 +492,8 @@ func TestGenerateMulGEF(t *testing.T) {
 		return nil
 	}
 	ruleFields := []string{"balance", "income"}
-	complexity := 5
 	for i, c := range cases {
-		got := generateMulGEF(c.description, ruleFields, complexity, fieldA)
+		got := generateMulGEF(c.description, ruleFields, c.complexity, fieldA)
 		err := checkRulesComply(
 			got,
 			c.minNumRules,
@@ -508,7 +536,7 @@ func TestGenerateMulGEF_multiple_fields(t *testing.T) {
 	}
 
 	ruleFields := []string{"balance", "income", "reserve"}
-	complexity := 5
+	complexity := Complexity{Arithmetic: true}
 	got := generateMulGEF(description, ruleFields, complexity, fieldA)
 
 	numIncome := 0

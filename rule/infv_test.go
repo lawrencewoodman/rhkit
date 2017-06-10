@@ -248,7 +248,7 @@ func TestInFVOverlaps(t *testing.T) {
 	}
 }
 
-func TestGenerateInFV_1(t *testing.T) {
+func TestGenerateInFV(t *testing.T) {
 	inputDescription := &description.Description{
 		map[string]*description.Field{
 			"band": &description.Field{
@@ -322,32 +322,22 @@ func TestGenerateInFV_1(t *testing.T) {
 		},
 	}
 	cases := []struct {
-		field        string
-		complexities []int
-		want         []Rule
+		field string
+		want  []Rule
 	}{
 		{field: "band",
-			complexities: []int{10},
-			want:         []Rule{},
+			want: []Rule{},
 		},
 		{field: "flow",
-			complexities: []int{10},
-			want:         []Rule{},
+			want: []Rule{},
 		},
 		{field: "groupA",
-			complexities: []int{10},
-			want:         []Rule{},
+			want: []Rule{},
 		},
 		{field: "groupB",
-			complexities: []int{1, 2, 3, 4, 5, 6},
-			want:         []Rule{},
+			want: []Rule{},
 		},
 		{field: "groupC",
-			complexities: []int{1, 2, 3, 4},
-			want:         []Rule{},
-		},
-		{field: "groupC",
-			complexities: []int{5, 6},
 			want: []Rule{
 				NewInFV("groupC", []*dlit.Literal{
 					dlit.NewString("Fred"),
@@ -376,7 +366,6 @@ func TestGenerateInFV_1(t *testing.T) {
 			},
 		},
 		{field: "groupD",
-			complexities: []int{5, 6},
 			want: []Rule{
 				NewInFV("groupD", []*dlit.Literal{
 					dlit.NewString("Fred"),
@@ -393,7 +382,6 @@ func TestGenerateInFV_1(t *testing.T) {
 			},
 		},
 		{field: "groupE",
-			complexities: []int{5, 6},
 			want: []Rule{
 				NewInFV("groupE", []*dlit.Literal{
 					dlit.NewString("Fred"),
@@ -490,85 +478,89 @@ func TestGenerateInFV_1(t *testing.T) {
 	}
 	ruleFields :=
 		[]string{"band", "flow", "groupA", "groupB", "groupC", "groupD", "groupE"}
-	for _, c := range cases {
-		for _, complexity := range c.complexities {
-			got := generateInFV(inputDescription, ruleFields, complexity, c.field)
-			if err := matchRulesUnordered(got, c.want); err != nil {
-				t.Errorf("matchRulesUnordered() rules don't match: %s\ngot: %s\nwant: %s\n",
-					err, got, c.want)
-			}
+	complexity := Complexity{}
+	for i, c := range cases {
+		got := generateInFV(inputDescription, ruleFields, complexity, c.field)
+		if err := matchRulesUnordered(got, c.want); err != nil {
+			t.Errorf("(%d) matchRulesUnordered() rules don't match: %s\ngot: %s\nwant: %s\n",
+				i, err, got, c.want)
 		}
 	}
 }
 
-// Test that will generate correct number of values in In rule for complexity
-func TestGenerateInFV_2(t *testing.T) {
+// Test that will generate correct number of values in In based on number
+// of fields
+func TestGenerateInFV_num_fields(t *testing.T) {
 	inputDescription := &description.Description{
 		map[string]*description.Field{
 			"group": &description.Field{
 				Kind: fieldtype.String,
 			},
+			"flowA": &description.Field{
+				Kind: fieldtype.Number,
+			},
+			"flowB": &description.Field{
+				Kind: fieldtype.Number,
+			},
 		},
 	}
 	cases := []struct {
+		ruleFields       []string
 		groupValues      map[string]description.Value
-		complexities     []int
 		wantMinNumRules  int
 		wantMaxNumRules  int
 		wantMaxNumValues int
 	}{
-		{groupValues: map[string]description.Value{
-			"Fred":    description.Value{dlit.NewString("Fred"), 3},
-			"Mary":    description.Value{dlit.NewString("Mary"), 4},
-			"Rebecca": description.Value{dlit.NewString("Rebecca"), 2},
-			"Harry":   description.Value{dlit.NewString("Harry"), 2},
-			"Dinah":   description.Value{dlit.NewString("Dinah"), 2},
-			"Israel":  description.Value{dlit.NewString("Israel"), 2},
-			"Sarah":   description.Value{dlit.NewString("Sarah"), 2},
-			"Ishmael": description.Value{dlit.NewString("Ishmael"), 2},
-			"Caen":    description.Value{dlit.NewString("Caen"), 2},
-			"Abel":    description.Value{dlit.NewString("Abel"), 2},
-			"Noah":    description.Value{dlit.NewString("Noah"), 2},
-			"Isaac":   description.Value{dlit.NewString("Isaac"), 2},
-		},
-			complexities:     []int{1, 2, 3, 4},
-			wantMinNumRules:  0,
-			wantMaxNumRules:  0,
-			wantMaxNumValues: 5,
-		},
-		{groupValues: map[string]description.Value{
-			"Fred":    description.Value{dlit.NewString("Fred"), 3},
-			"Mary":    description.Value{dlit.NewString("Mary"), 4},
-			"Rebecca": description.Value{dlit.NewString("Rebecca"), 2},
-			"Harry":   description.Value{dlit.NewString("Harry"), 2},
-			"Dinah":   description.Value{dlit.NewString("Dinah"), 2},
-			"Israel":  description.Value{dlit.NewString("Israel"), 2},
-			"Sarah":   description.Value{dlit.NewString("Sarah"), 2},
-			"Ishmael": description.Value{dlit.NewString("Ishmael"), 2},
-			"Caen":    description.Value{dlit.NewString("Caen"), 2},
-			"Abel":    description.Value{dlit.NewString("Abel"), 2},
-			"Noah":    description.Value{dlit.NewString("Noah"), 2},
-			"Isaac":   description.Value{dlit.NewString("Isaac"), 2},
-		},
-			complexities:     []int{5, 6},
+		{ruleFields: []string{"group", "flowA", "flowB"},
+			groupValues: map[string]description.Value{
+				"Fred":    description.Value{dlit.NewString("Fred"), 3},
+				"Mary":    description.Value{dlit.NewString("Mary"), 4},
+				"Rebecca": description.Value{dlit.NewString("Rebecca"), 2},
+				"Harry":   description.Value{dlit.NewString("Harry"), 2},
+				"Dinah":   description.Value{dlit.NewString("Dinah"), 2},
+				"Israel":  description.Value{dlit.NewString("Israel"), 2},
+				"Sarah":   description.Value{dlit.NewString("Sarah"), 2},
+				"Ishmael": description.Value{dlit.NewString("Ishmael"), 2},
+				"Caen":    description.Value{dlit.NewString("Caen"), 2},
+				"Abel":    description.Value{dlit.NewString("Abel"), 2},
+				"Noah":    description.Value{dlit.NewString("Noah"), 2},
+				"Isaac":   description.Value{dlit.NewString("Isaac"), 2},
+			},
 			wantMinNumRules:  1000,
 			wantMaxNumRules:  2000,
 			wantMaxNumValues: 5,
 		},
+		{ruleFields: []string{"group", "flowA"},
+			groupValues: map[string]description.Value{
+				"Fred":    description.Value{dlit.NewString("Fred"), 3},
+				"Mary":    description.Value{dlit.NewString("Mary"), 4},
+				"Rebecca": description.Value{dlit.NewString("Rebecca"), 2},
+				"Harry":   description.Value{dlit.NewString("Harry"), 2},
+				"Dinah":   description.Value{dlit.NewString("Dinah"), 2},
+				"Israel":  description.Value{dlit.NewString("Israel"), 2},
+				"Sarah":   description.Value{dlit.NewString("Sarah"), 2},
+				"Ishmael": description.Value{dlit.NewString("Ishmael"), 2},
+				"Caen":    description.Value{dlit.NewString("Caen"), 2},
+				"Abel":    description.Value{dlit.NewString("Abel"), 2},
+				"Noah":    description.Value{dlit.NewString("Noah"), 2},
+				"Isaac":   description.Value{dlit.NewString("Isaac"), 2},
+			},
+			wantMinNumRules:  2000,
+			wantMaxNumRules:  4000,
+			wantMaxNumValues: 8,
+		},
 	}
-	ruleFields := []string{"group"}
-	for _, c := range cases {
-		for _, complexity := range c.complexities {
-			inputDescription.Fields["group"].Values = c.groupValues
-			got := generateInFV(inputDescription, ruleFields, complexity, "group")
-			if len(got) < c.wantMinNumRules || len(got) > c.wantMaxNumRules {
-				t.Errorf("generateInFV: got wrong number of rules: %d", len(got))
-			}
-			for _, r := range got {
-				numValues := strings.Count(r.String(), ",")
-				if numValues < 2 || numValues > c.wantMaxNumValues {
-					t.Errorf("generateInFV: wrong number of values in rule: %s", r)
-				}
+	complexity := Complexity{}
+	for i, c := range cases {
+		inputDescription.Fields["group"].Values = c.groupValues
+		got := generateInFV(inputDescription, c.ruleFields, complexity, "group")
+		if len(got) < c.wantMinNumRules || len(got) > c.wantMaxNumRules {
+			t.Errorf("(%d) generateInFV: got wrong number of rules: %d", i, len(got))
+		}
+		for _, r := range got {
+			numValues := strings.Count(r.String(), ",")
+			if numValues < 2 || numValues > c.wantMaxNumValues {
+				t.Errorf("(%d) generateInFV: wrong number of values in rule: %s", i, r)
 			}
 		}
 	}

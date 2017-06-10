@@ -336,6 +336,7 @@ func TestGenerateAddLEF(t *testing.T) {
 	fieldA := "balance"
 	cases := []struct {
 		description *description.Description
+		complexity  Complexity
 		minNumRules int
 		maxNumRules int
 		min         *dlit.Literal
@@ -357,6 +358,7 @@ func TestGenerateAddLEF(t *testing.T) {
 				},
 			},
 		},
+			complexity:  Complexity{Arithmetic: true},
 			minNumRules: 18,
 			maxNumRules: 20,
 			min:         dlit.MustNew(500),
@@ -378,6 +380,7 @@ func TestGenerateAddLEF(t *testing.T) {
 				},
 			},
 		},
+			complexity:  Complexity{Arithmetic: true},
 			minNumRules: 18,
 			maxNumRules: 20,
 			min:         dlit.MustNew(790),
@@ -399,6 +402,7 @@ func TestGenerateAddLEF(t *testing.T) {
 				},
 			},
 		},
+			complexity:  Complexity{Arithmetic: true},
 			minNumRules: 18,
 			maxNumRules: 20,
 			min:         dlit.MustNew(500),
@@ -420,6 +424,7 @@ func TestGenerateAddLEF(t *testing.T) {
 				},
 			},
 		},
+			complexity:  Complexity{Arithmetic: true},
 			minNumRules: 18,
 			maxNumRules: 19,
 			min:         dlit.MustNew(790),
@@ -443,6 +448,7 @@ func TestGenerateAddLEF(t *testing.T) {
 				},
 			},
 		},
+			complexity:  Complexity{Arithmetic: true},
 			minNumRules: 18,
 			maxNumRules: 20,
 			min:         dlit.MustNew(797.924),
@@ -464,11 +470,36 @@ func TestGenerateAddLEF(t *testing.T) {
 				},
 			},
 		},
+			complexity:  Complexity{Arithmetic: true},
 			minNumRules: 4,
 			maxNumRules: 4,
 			min:         dlit.MustNew(400),
 			max:         dlit.MustNew(405),
 			mid:         dlit.MustNew(403),
+			maxDP:       0,
+		},
+		{description: &description.Description{
+			map[string]*description.Field{
+				"balance": &description.Field{
+					Kind:  fieldtype.Number,
+					Min:   dlit.MustNew(200),
+					Max:   dlit.MustNew(300),
+					MaxDP: 0,
+				},
+				"income": &description.Field{
+					Kind:  fieldtype.Number,
+					Min:   dlit.MustNew(597.924),
+					Max:   dlit.MustNew(505),
+					MaxDP: 3,
+				},
+			},
+		},
+			complexity:  Complexity{Arithmetic: false},
+			minNumRules: 0,
+			maxNumRules: 0,
+			min:         dlit.MustNew(797.924),
+			max:         dlit.MustNew(805),
+			mid:         dlit.MustNew(800),
 			maxDP:       0,
 		},
 	}
@@ -483,9 +514,8 @@ func TestGenerateAddLEF(t *testing.T) {
 		return nil
 	}
 	ruleFields := []string{"balance", "income"}
-	complexity := 5
 	for i, c := range cases {
-		got := generateAddLEF(c.description, ruleFields, complexity, fieldA)
+		got := generateAddLEF(c.description, ruleFields, c.complexity, fieldA)
 		err := checkRulesComply(
 			got,
 			c.minNumRules,
@@ -528,7 +558,7 @@ func TestGenerateAddLEF_multiple_fields(t *testing.T) {
 	}
 
 	ruleFields := []string{"balance", "income", "reserve"}
-	complexity := 5
+	complexity := Complexity{Arithmetic: true}
 	got := generateAddLEF(description, ruleFields, complexity, fieldA)
 
 	numIncome := 0

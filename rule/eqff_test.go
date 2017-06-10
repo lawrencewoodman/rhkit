@@ -243,7 +243,7 @@ func TestGenerateEQFF(t *testing.T) {
 			"bandA", "groupA", "groupB", "groupC", "groupD",
 			"groupE", "groupF", "bandB", "bandC", "bandD",
 		}
-	complexity := 10
+	complexity := Complexity{}
 	for _, c := range cases {
 		got := generateEQFF(
 			inputDescription,

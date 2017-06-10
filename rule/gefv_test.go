@@ -360,7 +360,7 @@ func TestGenerateGEFV(t *testing.T) {
 		}
 		return nil
 	}
-	complexity := 5
+	complexity := Complexity{}
 	ruleFields := []string{"income"}
 	for i, c := range cases {
 		got := generateGEFV(c.description, ruleFields, complexity, c.field)

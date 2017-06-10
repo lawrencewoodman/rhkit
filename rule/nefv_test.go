@@ -192,7 +192,7 @@ func TestGenerateNEFV(t *testing.T) {
 		},
 	}
 	ruleFields := []string{"band", "flow", "group", "month"}
-	complexity := 5
+	complexity := Complexity{}
 	for _, c := range cases {
 		got := generateNEFV(inputDescription, ruleFields, complexity, c.field)
 		if err := matchRulesUnordered(got, c.want); err != nil {

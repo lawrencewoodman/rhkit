@@ -6,6 +6,7 @@ import (
 	"github.com/lawrencewoodman/ddataset/dcsv"
 	"github.com/vlifesystems/rhkit/aggregators"
 	"github.com/vlifesystems/rhkit/goal"
+	"github.com/vlifesystems/rhkit/rule"
 	"path/filepath"
 	"reflect"
 	"testing"
@@ -17,7 +18,6 @@ func TestNew(t *testing.T) {
 		"balance", "housing", "loan", "contact", "day", "month", "duration",
 		"campaign", "pdays", "previous", "p_1234567890outcome", "y"}
 	expectedExperiments := []*Experiment{
-		&Experiment{},
 		&Experiment{
 			Title: "This is a jolly nice title",
 			Dataset: dcsv.New(
@@ -30,6 +30,42 @@ func TestNew(t *testing.T) {
 				"balance", "housing", "loan", "contact", "day", "month", "duration",
 				"campaign", "pdays", "previous", "p_1234567890outcome", "y",
 			},
+			RuleComplexity: rule.Complexity{Arithmetic: true},
+			Aggregators: []aggregators.AggregatorSpec{
+				aggregators.MustNew("numMatches", "count", "true()"),
+				aggregators.MustNew("percentMatches", "calc",
+					"roundto(100.0 * numMatches / numRecords, 2)"),
+				// num_married to check for allowed characters
+				aggregators.MustNew("num_married", "count", "marital == \"married\""),
+				aggregators.MustNew("numSignedUp", "count", "y == \"yes\""),
+				aggregators.MustNew("cost", "calc", "numMatches * 4.5"),
+				aggregators.MustNew("income", "calc", "numSignedUp * 24"),
+				aggregators.MustNew("profit", "calc", "income - cost"),
+				aggregators.MustNew("goalsScore", "goalsscore"),
+			},
+			Goals: []*goal.Goal{goal.MustNew("profit > 0")},
+			SortOrder: []SortField{
+				SortField{"profit", DESCENDING},
+				SortField{"numSignedUp", DESCENDING},
+				SortField{"cost", ASCENDING},
+				SortField{"numMatches", DESCENDING},
+				SortField{"percentMatches", DESCENDING},
+				SortField{"goalsScore", DESCENDING},
+			},
+		},
+		&Experiment{
+			Title: "This is a jolly nice title",
+			Dataset: dcsv.New(
+				filepath.Join("..", "fixtures", "bank.csv"),
+				true,
+				rune(';'),
+				fieldNames,
+			),
+			RuleFieldNames: []string{"age", "job", "marital", "default",
+				"balance", "housing", "loan", "contact", "day", "month", "duration",
+				"campaign", "pdays", "previous", "p_1234567890outcome", "y",
+			},
+			RuleComplexity: rule.Complexity{Arithmetic: false},
 			Aggregators: []aggregators.AggregatorSpec{
 				aggregators.MustNew("numMatches", "count", "true()"),
 				aggregators.MustNew("percentMatches", "calc",
@@ -69,6 +105,38 @@ func TestNew(t *testing.T) {
 				"balance", "housing", "loan", "contact", "day", "month", "duration",
 				"campaign", "pdays", "previous", "p_1234567890outcome", "y",
 			},
+			RuleComplexity: rule.Complexity{Arithmetic: true},
+			Aggregators: []*AggregatorDesc{
+				&AggregatorDesc{"num_married", "count", "marital == \"married\""},
+				&AggregatorDesc{"numSignedUp", "count", "y == \"yes\""},
+				&AggregatorDesc{"cost", "calc", "numMatches * 4.5"},
+				&AggregatorDesc{"income", "calc", "numSignedUp * 24"},
+				&AggregatorDesc{"profit", "calc", "income - cost"},
+			},
+			Goals: []string{"profit > 0"},
+			SortOrder: []*SortDesc{
+				&SortDesc{"profit", "descending"},
+				&SortDesc{"numSignedUp", "descending"},
+				&SortDesc{"cost", "ascending"},
+				&SortDesc{"numMatches", "descending"},
+				&SortDesc{"percentMatches", "descending"},
+				&SortDesc{"goalsScore", "descending"},
+			}},
+			expectedExperiments[0],
+		},
+		{&ExperimentDesc{
+			Title: "This is a jolly nice title",
+			Dataset: dcsv.New(
+				filepath.Join("..", "fixtures", "bank.csv"),
+				true,
+				rune(';'),
+				fieldNames,
+			),
+			RuleFields: []string{"age", "job", "marital", "default",
+				"balance", "housing", "loan", "contact", "day", "month", "duration",
+				"campaign", "pdays", "previous", "p_1234567890outcome", "y",
+			},
+			RuleComplexity: rule.Complexity{Arithmetic: false},
 			Aggregators: []*AggregatorDesc{
 				&AggregatorDesc{"num_married", "count", "marital == \"married\""},
 				&AggregatorDesc{"numSignedUp", "count", "y == \"yes\""},
@@ -334,6 +402,9 @@ func checkExperimentsMatch(e1 *Experiment, e2 *Experiment) error {
 	if !areStringArraysEqual(e1.RuleFieldNames, e2.RuleFieldNames) {
 		return errors.New("RuleFieldNames don't match")
 	}
+	if !areRuleComplexitiesEqual(e1.RuleComplexity, e2.RuleComplexity) {
+		return errors.New("RuleComplexities don't match")
+	}
 	if !areGoalExpressionsEqual(e1.Goals, e2.Goals) {
 		return errors.New("Goals don't match")
 	}
@@ -387,6 +458,10 @@ func areStringArraysEqual(a1 []string, a2 []string) bool {
 		}
 	}
 	return true
+}
+
+func areRuleComplexitiesEqual(c1, c2 rule.Complexity) bool {
+	return c1.Arithmetic == c2.Arithmetic
 }
 
 func areGoalExpressionsEqual(g1 []*goal.Goal, g2 []*goal.Goal) bool {

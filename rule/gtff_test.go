@@ -184,7 +184,7 @@ func TestGenerateGTFF(t *testing.T) {
 	}
 	ruleFields :=
 		[]string{"band", "flowIn", "flowOut", "rateIn", "rateOut", "group"}
-	complexity := 10
+	complexity := Complexity{}
 	for _, c := range cases {
 		got := generateGTFF(
 			inputDescription,

@@ -378,7 +378,7 @@ func TestGenerate(t *testing.T) {
 		MustNewBetweenFV("position", dlit.MustNew(9), dlit.MustNew(12)),
 		MustNewOutsideFV("position", dlit.MustNew(9), dlit.MustNew(12)),
 	}
-	complexity := 10
+	complexity := Complexity{Arithmetic: true}
 	got := Generate(inputDescription, ruleFields, complexity)
 	if err := rulesContain(got, wantRules); err != nil {
 		t.Errorf("Generate: %s", err)
@@ -452,7 +452,7 @@ func TestGenerate_combinations(t *testing.T) {
 		NewTrue(),
 	}
 
-	complexity := 10
+	complexity := Complexity{Arithmetic: true}
 	got := Generate(inputDescription, ruleFields, complexity)
 	Sort(got)
 	Sort(want)

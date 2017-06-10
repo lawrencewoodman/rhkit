@@ -333,7 +333,7 @@ func TestGenerateLEFV(t *testing.T) {
 		}
 		return nil
 	}
-	complexity := 5
+	complexity := Complexity{}
 	ruleFields := []string{"income"}
 	for i, c := range cases {
 		got := generateLEFV(c.description, ruleFields, complexity, c.field)

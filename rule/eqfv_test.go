@@ -181,7 +181,7 @@ func TestGenerateEQFV(t *testing.T) {
 		},
 	}
 	ruleFields := []string{"band", "flow", "group"}
-	complexity := 5
+	complexity := Complexity{}
 	for _, c := range cases {
 		got := generateEQFV(inputDescription, ruleFields, complexity, c.field)
 		if err := matchRulesUnordered(got, c.want); err != nil {
