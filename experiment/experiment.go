@@ -52,7 +52,7 @@ type SortDesc struct {
 type Experiment struct {
 	Title          string
 	Dataset        ddataset.Dataset
-	RuleFieldNames []string
+	RuleFields     []string
 	RuleComplexity rule.Complexity
 	Aggregators    []aggregators.AggregatorSpec
 	Goals          []*goal.Goal
@@ -100,7 +100,7 @@ func New(e *ExperimentDesc) (*Experiment, error) {
 	return &Experiment{
 		Title:          e.Title,
 		Dataset:        e.Dataset,
-		RuleFieldNames: e.RuleFields,
+		RuleFields:     e.RuleFields,
 		RuleComplexity: e.RuleComplexity,
 		Aggregators:    aggregators,
 		Goals:          goals,

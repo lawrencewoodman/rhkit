@@ -73,14 +73,14 @@ func processDataset(experiment *experiment.Experiment) error {
 	}
 	rules := rule.Generate(
 		fieldDescriptions,
-		experiment.RuleFieldNames,
+		experiment.RuleFields,
 		experiment.RuleComplexity,
 	)
 	if len(rules) < 2 {
 		return fmt.Errorf(
 			"rhkit.GenerateRules(%v, %v) - not enough rules generated",
 			fieldDescriptions,
-			experiment.RuleFieldNames,
+			experiment.RuleFields,
 		)
 	}
 

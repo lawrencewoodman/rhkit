@@ -26,7 +26,7 @@ func TestNew(t *testing.T) {
 				rune(';'),
 				fieldNames,
 			),
-			RuleFieldNames: []string{"age", "job", "marital", "default",
+			RuleFields: []string{"age", "job", "marital", "default",
 				"balance", "housing", "loan", "contact", "day", "month", "duration",
 				"campaign", "pdays", "previous", "p_1234567890outcome", "y",
 			},
@@ -61,7 +61,7 @@ func TestNew(t *testing.T) {
 				rune(';'),
 				fieldNames,
 			),
-			RuleFieldNames: []string{"age", "job", "marital", "default",
+			RuleFields: []string{"age", "job", "marital", "default",
 				"balance", "housing", "loan", "contact", "day", "month", "duration",
 				"campaign", "pdays", "previous", "p_1234567890outcome", "y",
 			},
@@ -399,7 +399,7 @@ func checkExperimentsMatch(e1 *Experiment, e2 *Experiment) error {
 	if e1.Title != e2.Title {
 		return errors.New("Titles don't match")
 	}
-	if !areStringArraysEqual(e1.RuleFieldNames, e2.RuleFieldNames) {
+	if !areStringArraysEqual(e1.RuleFields, e2.RuleFields) {
 		return errors.New("RuleFieldNames don't match")
 	}
 	if !areRuleComplexitiesEqual(e1.RuleComplexity, e2.RuleComplexity) {
