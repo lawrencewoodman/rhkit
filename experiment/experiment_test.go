@@ -400,7 +400,7 @@ func checkExperimentsMatch(e1 *Experiment, e2 *Experiment) error {
 		return errors.New("Titles don't match")
 	}
 	if !areStringArraysEqual(e1.RuleFields, e2.RuleFields) {
-		return errors.New("RuleFieldNames don't match")
+		return errors.New("RuleFields don't match")
 	}
 	if !areRuleComplexitiesEqual(e1.RuleComplexity, e2.RuleComplexity) {
 		return errors.New("RuleComplexities don't match")
