@@ -458,6 +458,13 @@ func TestRoundTo_errors(t *testing.T) {
 			want: dlit.MustNew(errThisIsAnError),
 			err:  errThisIsAnError,
 		},
+		{in: []*dlit.Literal{
+			dlit.MustNew(6.7),
+			dlit.MustNew(errThisIsAnError),
+		},
+			want: dlit.MustNew(errThisIsAnError),
+			err:  errThisIsAnError,
+		},
 		{in: []*dlit.Literal{dlit.NewString("hello"), dlit.MustNew(4)},
 			want: dlit.MustNew(
 				CantConvertToTypeError{Kind: "float", Value: dlit.NewString("hello")},
