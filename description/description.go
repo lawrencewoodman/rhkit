@@ -264,8 +264,10 @@ func (f *Field) updateNumBoundaries(value *dlit.Literal) {
 		vars := map[string]*dlit.Literal{"min": f.Min, "max": f.Max, "v": value}
 		f.Min = dexpr.Eval("min(min, v)", dexprfuncs.CallFuncs, vars)
 		f.Max = dexpr.Eval("max(max, v)", dexprfuncs.CallFuncs, vars)
-		f.MaxDP =
-			int(maxI(int64(f.MaxDP), int64(internal.NumDecPlaces(value.String()))))
+		numDP := internal.NumDecPlaces(value.String())
+		if numDP > f.MaxDP {
+			f.MaxDP = numDP
+		}
 	}
 }
 
@@ -309,11 +311,4 @@ func fieldValuesEqual(
 		}
 	}
 	return nil
-}
-
-func maxI(x, y int64) int64 {
-	if x > y {
-		return x
-	}
-	return y
 }
