@@ -1,6 +1,8 @@
 package description
 
 import (
+	"errors"
+	"fmt"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/internal/fieldtype"
 	"io/ioutil"
@@ -100,5 +102,347 @@ func TestDescriptionWriteLoadJSON(t *testing.T) {
 	}
 	if err := got.CheckEqual(description); err != nil {
 		t.Errorf("LoadDescriptionJSON got not expected: %s", err)
+	}
+}
+
+func TestDescriptionCheckEqual(t *testing.T) {
+	descriptions := []*Description{
+		&Description{
+			map[string]*Field{
+				"band": &Field{fieldtype.String, nil, nil, 0,
+					map[string]Value{
+						"a": Value{dlit.MustNew("a"), 2},
+						"b": Value{dlit.MustNew("b"), 3},
+						"c": Value{dlit.MustNew("c"), 70},
+						"f": Value{dlit.MustNew("f"), 22},
+						"9": Value{dlit.MustNew("9"), 1},
+					},
+					31,
+				},
+				"inputA": &Field{
+					fieldtype.Number,
+					dlit.MustNew(7),
+					dlit.MustNew(15.1),
+					1,
+					map[string]Value{
+						"7":    Value{dlit.MustNew(7), 7},
+						"7.3":  Value{dlit.MustNew(7.3), 7},
+						"9":    Value{dlit.MustNew(9), 7},
+						"14":   Value{dlit.MustNew(14), 7},
+						"15.1": Value{dlit.MustNew(15.1), 7},
+					},
+					5,
+				},
+				"inputB": &Field{
+					fieldtype.Number,
+					dlit.MustNew(2),
+					dlit.MustNew(5),
+					4,
+					map[string]Value{
+						"2.6":    Value{dlit.MustNew(2.6), 7},
+						"2.8789": Value{dlit.MustNew(2.8789), 1},
+						"3":      Value{dlit.MustNew(3), 7},
+						"5":      Value{dlit.MustNew(5), 7},
+						"2":      Value{dlit.MustNew(2), 7},
+						"2.8":    Value{dlit.MustNew(2.8), 6},
+					},
+					6,
+				},
+			},
+		},
+		&Description{
+			map[string]*Field{
+				"band": &Field{fieldtype.String, nil, nil, 0,
+					map[string]Value{
+						"a": Value{dlit.MustNew("a"), 2},
+						"b": Value{dlit.MustNew("b"), 3},
+						"c": Value{dlit.MustNew("c"), 70},
+						"f": Value{dlit.MustNew("f"), 22},
+						"9": Value{dlit.MustNew("9"), 1},
+					},
+					31,
+				},
+				"inputB": &Field{
+					fieldtype.Number,
+					dlit.MustNew(2),
+					dlit.MustNew(5),
+					4,
+					map[string]Value{
+						"2.6":    Value{dlit.MustNew(2.6), 7},
+						"2.8789": Value{dlit.MustNew(2.8789), 1},
+						"3":      Value{dlit.MustNew(3), 7},
+						"5":      Value{dlit.MustNew(5), 7},
+						"2":      Value{dlit.MustNew(2), 7},
+						"2.8":    Value{dlit.MustNew(2.8), 6},
+					},
+					6,
+				},
+			},
+		},
+		&Description{
+			map[string]*Field{
+				"strata": &Field{fieldtype.String, nil, nil, 0,
+					map[string]Value{
+						"a": Value{dlit.MustNew("a"), 2},
+						"b": Value{dlit.MustNew("b"), 3},
+						"c": Value{dlit.MustNew("c"), 70},
+						"f": Value{dlit.MustNew("f"), 22},
+						"9": Value{dlit.MustNew("9"), 1},
+					},
+					31,
+				},
+				"inputA": &Field{
+					fieldtype.Number,
+					dlit.MustNew(7),
+					dlit.MustNew(15.1),
+					1,
+					map[string]Value{
+						"7":    Value{dlit.MustNew(7), 7},
+						"7.3":  Value{dlit.MustNew(7.3), 7},
+						"9":    Value{dlit.MustNew(9), 7},
+						"14":   Value{dlit.MustNew(14), 7},
+						"15.1": Value{dlit.MustNew(15.1), 7},
+					},
+					5,
+				},
+				"inputB": &Field{
+					fieldtype.Number,
+					dlit.MustNew(2),
+					dlit.MustNew(5),
+					4,
+					map[string]Value{
+						"2.6":    Value{dlit.MustNew(2.6), 7},
+						"2.8789": Value{dlit.MustNew(2.8789), 1},
+						"3":      Value{dlit.MustNew(3), 7},
+						"5":      Value{dlit.MustNew(5), 7},
+						"2":      Value{dlit.MustNew(2), 7},
+						"2.8":    Value{dlit.MustNew(2.8), 6},
+					},
+					6,
+				},
+			},
+		},
+		&Description{
+			map[string]*Field{
+				"band": &Field{fieldtype.String, nil, nil, 0,
+					map[string]Value{
+						"a": Value{dlit.MustNew("a"), 2},
+						"b": Value{dlit.MustNew("b"), 3},
+						"c": Value{dlit.MustNew("c"), 70},
+						"f": Value{dlit.MustNew("f"), 22},
+						"9": Value{dlit.MustNew("9"), 1},
+					},
+					31,
+				},
+				"inputA": &Field{
+					fieldtype.Number,
+					dlit.MustNew(6),
+					dlit.MustNew(15.1),
+					1,
+					map[string]Value{
+						"7":    Value{dlit.MustNew(7), 7},
+						"7.3":  Value{dlit.MustNew(7.3), 7},
+						"9":    Value{dlit.MustNew(9), 7},
+						"14":   Value{dlit.MustNew(14), 7},
+						"15.1": Value{dlit.MustNew(15.1), 7},
+					},
+					5,
+				},
+				"inputB": &Field{
+					fieldtype.Number,
+					dlit.MustNew(2),
+					dlit.MustNew(5),
+					4,
+					map[string]Value{
+						"2.6":    Value{dlit.MustNew(2.6), 7},
+						"2.8789": Value{dlit.MustNew(2.8789), 1},
+						"3":      Value{dlit.MustNew(3), 7},
+						"5":      Value{dlit.MustNew(5), 7},
+						"2":      Value{dlit.MustNew(2), 7},
+						"2.8":    Value{dlit.MustNew(2.8), 6},
+					},
+					6,
+				},
+			},
+		},
+	}
+	cases := []struct {
+		ndxA int
+		ndxB int
+		want error
+	}{
+		{0, 0, nil},
+		{0, 1, errors.New("number of Fields doesn't match: 3 != 2")},
+		{0, 2, errors.New("missing field: band")},
+		{0, 3, errors.New("description for field: inputA, Min not equal: 7 != 6")},
+	}
+	for i, c := range cases {
+		got := descriptions[c.ndxA].CheckEqual(descriptions[c.ndxB])
+		checkErrorMatch(t, fmt.Sprintf("(%d) CheckEqual: ", i), got, c.want)
+	}
+}
+
+func TestFieldCheckEqual(t *testing.T) {
+	fields := []*Field{
+		&Field{fieldtype.String, nil, nil, 0,
+			map[string]Value{
+				"a": Value{dlit.MustNew("a"), 2},
+				"b": Value{dlit.MustNew("b"), 3},
+				"c": Value{dlit.MustNew("c"), 70},
+				"f": Value{dlit.MustNew("f"), 22},
+				"9": Value{dlit.MustNew("9"), 1},
+			},
+			31,
+		},
+		&Field{fieldtype.String, nil, nil, 0,
+			map[string]Value{
+				"a": Value{dlit.MustNew("a"), 2},
+				"b": Value{dlit.MustNew("b"), 3},
+				"c": Value{dlit.MustNew("c"), 70},
+				"f": Value{dlit.MustNew("f"), 22},
+				"9": Value{dlit.MustNew("9"), 1},
+			},
+			18,
+		},
+		&Field{
+			fieldtype.Number,
+			dlit.MustNew(2),
+			dlit.MustNew(5),
+			4,
+			map[string]Value{
+				"2.6":    Value{dlit.MustNew(2.6), 7},
+				"2.8789": Value{dlit.MustNew(2.8789), 1},
+				"3":      Value{dlit.MustNew(3), 7},
+				"5":      Value{dlit.MustNew(5), 7},
+				"2":      Value{dlit.MustNew(2), 7},
+				"2.8":    Value{dlit.MustNew(2.8), 6},
+			},
+			6,
+		},
+		&Field{
+			fieldtype.Number,
+			dlit.MustNew(7),
+			dlit.MustNew(5),
+			4,
+			map[string]Value{
+				"2.6":    Value{dlit.MustNew(2.6), 7},
+				"2.8789": Value{dlit.MustNew(2.8789), 1},
+				"3":      Value{dlit.MustNew(3), 7},
+				"5":      Value{dlit.MustNew(5), 7},
+				"2":      Value{dlit.MustNew(2), 7},
+				"2.8":    Value{dlit.MustNew(2.8), 6},
+			},
+			6,
+		},
+		&Field{
+			fieldtype.Number,
+			dlit.MustNew(2),
+			dlit.MustNew(4),
+			4,
+			map[string]Value{
+				"2.6":    Value{dlit.MustNew(2.6), 7},
+				"2.8789": Value{dlit.MustNew(2.8789), 1},
+				"3":      Value{dlit.MustNew(3), 7},
+				"5":      Value{dlit.MustNew(5), 7},
+				"2":      Value{dlit.MustNew(2), 7},
+				"2.8":    Value{dlit.MustNew(2.8), 6},
+			},
+			6,
+		},
+		&Field{
+			fieldtype.Number,
+			dlit.MustNew(2),
+			dlit.MustNew(5),
+			2,
+			map[string]Value{
+				"2.6":    Value{dlit.MustNew(2.6), 7},
+				"2.8789": Value{dlit.MustNew(2.8789), 1},
+				"3":      Value{dlit.MustNew(3), 7},
+				"5":      Value{dlit.MustNew(5), 7},
+				"2":      Value{dlit.MustNew(2), 7},
+				"2.8":    Value{dlit.MustNew(2.8), 6},
+			},
+			6,
+		},
+		&Field{
+			fieldtype.Number,
+			dlit.MustNew(7),
+			dlit.MustNew(5),
+			4,
+			map[string]Value{
+				"2.6":    Value{dlit.MustNew(2.6), 7},
+				"2.8789": Value{dlit.MustNew(2.8789), 1},
+				"3.3":    Value{dlit.MustNew(3.3), 6},
+				"5":      Value{dlit.MustNew(5), 7},
+				"2":      Value{dlit.MustNew(2), 7},
+				"2.8":    Value{dlit.MustNew(2.8), 6},
+			},
+			6,
+		},
+		&Field{
+			fieldtype.Number,
+			dlit.MustNew(7),
+			dlit.MustNew(5),
+			4,
+			map[string]Value{
+				"2.6":    Value{dlit.MustNew(2.6), 7},
+				"2.8789": Value{dlit.MustNew(2.8789), 1},
+				"3.3":    Value{dlit.MustNew(3.3), 6},
+				"5":      Value{dlit.MustNew(5), 7},
+				"2":      Value{dlit.MustNew(2), 7},
+				"2.8":    Value{dlit.MustNew(2.8), 6},
+				"8.8":    Value{dlit.MustNew(8.8), 6},
+			},
+			6,
+		},
+		&Field{
+			fieldtype.Number,
+			dlit.MustNew(7),
+			dlit.MustNew(5),
+			4,
+			map[string]Value{
+				"2.6":    Value{dlit.MustNew(2.6), 7},
+				"2.8789": Value{dlit.MustNew(2.8789), 1},
+				"3.3":    Value{dlit.MustNew(3.3), 3},
+				"5":      Value{dlit.MustNew(5), 7},
+				"2":      Value{dlit.MustNew(2), 7},
+				"2.8":    Value{dlit.MustNew(2.8), 6},
+			},
+			6,
+		},
+	}
+	cases := []struct {
+		ndxA int
+		ndxB int
+		want error
+	}{
+		{0, 0, nil},
+		{0, 1, errors.New("NumValues not equal: 31 != 18")},
+		{0, 2, errors.New("Kind not equal: String != Number")},
+		{2, 3, errors.New("Min not equal: 2 != 7")},
+		{2, 4, errors.New("Max not equal: 5 != 4")},
+		{2, 5, errors.New("MaxDP not equal: 4 != 2")},
+		{6, 7, errors.New("number of Values not equal: 6 != 7")},
+		{3, 6, errors.New("Value missing: 3")},
+		{6, 8, errors.New("Value not equal for: 3.3, {3.3 6} != {3.3 3}")},
+	}
+	for i, c := range cases {
+		got := fields[c.ndxA].checkEqual(fields[c.ndxB])
+		checkErrorMatch(t, fmt.Sprintf("(%d) CheckEqual: ", i), got, c.want)
+	}
+}
+
+/*************************************
+ *  Helper functions
+ *************************************/
+func checkErrorMatch(t *testing.T, context string, got, want error) {
+	if got == nil && want == nil {
+		return
+	}
+	if got == nil || want == nil {
+		t.Errorf("%s got err: %s, want : %s", context, got, want)
+	}
+	if got.Error() != want.Error() {
+		t.Errorf("%s got err: %s, want : %s", context, got, want)
 	}
 }
