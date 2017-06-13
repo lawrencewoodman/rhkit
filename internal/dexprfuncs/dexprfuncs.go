@@ -185,6 +185,8 @@ func ni(args []*dlit.Literal) (*dlit.Literal, error) {
 	return trueLiteral, nil
 }
 
+var isSmallerExpr = dexpr.MustNew("v < min", CallFuncs)
+
 // min returns the smallest number of those supplied
 func min(args []*dlit.Literal) (*dlit.Literal, error) {
 	if len(args) < 2 {
@@ -195,7 +197,7 @@ func min(args []*dlit.Literal) (*dlit.Literal, error) {
 	min := args[0]
 	for _, v := range args[1:] {
 		vars := map[string]*dlit.Literal{"min": min, "v": v}
-		isSmaller, err := dexpr.EvalBool("v < min", CallFuncs, vars)
+		isSmaller, err := isSmallerExpr.EvalBool(vars)
 		if err != nil {
 			if x, ok := err.(dexpr.InvalidExprError); ok {
 				if x.Err == dexpr.ErrIncompatibleTypes {
@@ -212,6 +214,8 @@ func min(args []*dlit.Literal) (*dlit.Literal, error) {
 	return min, nil
 }
 
+var isBiggerExpr = dexpr.MustNew("v > max", CallFuncs)
+
 // max returns the smallest number of those supplied
 func max(args []*dlit.Literal) (*dlit.Literal, error) {
 	if len(args) < 2 {
@@ -222,7 +226,7 @@ func max(args []*dlit.Literal) (*dlit.Literal, error) {
 	max := args[0]
 	for _, v := range args[1:] {
 		vars := map[string]*dlit.Literal{"max": max, "v": v}
-		isBigger, err := dexpr.EvalBool("v > max", CallFuncs, vars)
+		isBigger, err := isBiggerExpr.EvalBool(vars)
 		if err != nil {
 			if x, ok := err.(dexpr.InvalidExprError); ok {
 				if x.Err == dexpr.ErrIncompatibleTypes {
