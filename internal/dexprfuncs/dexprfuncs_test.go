@@ -124,6 +124,13 @@ func TestPow_errors(t *testing.T) {
 		},
 		{in: []*dlit.Literal{
 			dlit.MustNew(errThisIsAnError),
+			dlit.MustNew(6),
+		},
+			want: dlit.MustNew(errThisIsAnError),
+			err:  errThisIsAnError,
+		},
+		{in: []*dlit.Literal{
+			dlit.MustNew(5),
 			dlit.MustNew(errThisIsAnError),
 		},
 			want: dlit.MustNew(errThisIsAnError),
