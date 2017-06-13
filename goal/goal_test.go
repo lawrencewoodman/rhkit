@@ -15,6 +15,24 @@ func TestNew_errors(t *testing.T) {
 	}
 }
 
+func TestMustNew_panic(t *testing.T) {
+	paniced := false
+	wantPanic := "can't create goal: invalid goal: 7+8{"
+	defer func() {
+		if r := recover(); r != nil {
+			if r.(string) == wantPanic {
+				paniced = true
+			} else {
+				t.Errorf("MustNew: got panic: %s, wanted: %s", r, wantPanic)
+			}
+		}
+	}()
+	MustNew("7+8{")
+	if !paniced {
+		t.Errorf("MustNew: failed to panic with: %s", wantPanic)
+	}
+}
+
 func TestString(t *testing.T) {
 	exprStr := "profit > 55"
 	goal, err := New(exprStr)

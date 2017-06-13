@@ -33,13 +33,13 @@ func TestRegister_panic2(t *testing.T) {
 			if r.(string) == wantPanic {
 				paniced = true
 			} else {
-				t.Errorf("MustNew: got panic: %s, wanted: %s", r, wantPanic)
+				t.Errorf("Register: got panic: %s, wanted: %s", r, wantPanic)
 			}
 		}
 	}()
 	Register("goalsscore", &goalsScoreAggregator{})
 	if !paniced {
-		t.Errorf("MustNew: failed to panic with: %s", wantPanic)
+		t.Errorf("Register: failed to panic with: %s", wantPanic)
 	}
 }
 
