@@ -1,10 +1,92 @@
 package aggregators
 
 import (
+	"errors"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/goal"
 	"testing"
 )
+
+func TestRegister_panic1(t *testing.T) {
+	paniced := false
+	wantPanic := "aggregator.Register aggregator is nil"
+	defer func() {
+		if r := recover(); r != nil {
+			if r.(string) == wantPanic {
+				paniced = true
+			} else {
+				t.Errorf("Register: got panic: %s, wanted: %s", r, wantPanic)
+			}
+		}
+	}()
+	Register("dummy", nil)
+	if !paniced {
+		t.Errorf("Register: failed to panic with: %s", wantPanic)
+	}
+}
+
+func TestRegister_panic2(t *testing.T) {
+	paniced := false
+	wantPanic := "aggregator.Register called twice for aggregator: goalsscore"
+	defer func() {
+		if r := recover(); r != nil {
+			if r.(string) == wantPanic {
+				paniced = true
+			} else {
+				t.Errorf("MustNew: got panic: %s, wanted: %s", r, wantPanic)
+			}
+		}
+	}()
+	Register("goalsscore", &goalsScoreAggregator{})
+	if !paniced {
+		t.Errorf("MustNew: failed to panic with: %s", wantPanic)
+	}
+}
+
+func TestNew_error(t *testing.T) {
+	cases := []struct {
+		aggType string
+		args    []string
+		wantErr error
+	}{
+		{aggType: "goalsscore",
+			args:    []string{"5+6"},
+			wantErr: errors.New("invalid number of arguments for aggregator: goalsscore"),
+		},
+		{aggType: "calc",
+			args:    []string{},
+			wantErr: errors.New("invalid number of arguments for aggregator: calc"),
+		},
+		{aggType: "calc",
+			args:    []string{"3+4", "5+6"},
+			wantErr: errors.New("invalid number of arguments for aggregator: calc"),
+		},
+	}
+	for i, c := range cases {
+		_, err := New("a", c.aggType, c.args...)
+		if err == nil || err.Error() != c.wantErr.Error() {
+			t.Errorf("(%d) New: gotErr: %s, wantErr: %s", i, err, c.wantErr)
+		}
+	}
+}
+
+func TestMustNew_panic(t *testing.T) {
+	paniced := false
+	wantPanic := "invalid number of arguments for aggregator: goalsscore"
+	defer func() {
+		if r := recover(); r != nil {
+			if r.(error).Error() == wantPanic {
+				paniced = true
+			} else {
+				t.Errorf("MustNew: got panic: %s, wanted: %s", r, wantPanic)
+			}
+		}
+	}()
+	got := MustNew("a", "goalsscore", "5")
+	if !paniced {
+		t.Errorf("MustNew: got: %s, failed to panic with: %s", got, wantPanic)
+	}
+}
 
 func TestInstancesToMap(t *testing.T) {
 	instances := []AggregatorInstance{
