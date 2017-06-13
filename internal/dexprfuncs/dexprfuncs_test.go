@@ -490,6 +490,17 @@ func TestRoundTo_errors(t *testing.T) {
 	}
 }
 
+func TestAlwaysTrue(t *testing.T) {
+	want := trueLiteral
+	got, err := alwaysTrue([]*dlit.Literal{})
+	if err != nil {
+		t.Errorf("alwaysTrue err: %s", err)
+	}
+	if got.String() != want.String() {
+		t.Errorf("alwaysTrue: got: %s, want: %s", got, want)
+	}
+}
+
 /*************************
  *       Benchmarks
  *************************/
