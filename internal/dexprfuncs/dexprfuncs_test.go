@@ -467,6 +467,18 @@ func TestRoundTo_errors(t *testing.T) {
 				Value: dlit.NewString("hello"),
 			},
 		},
+		{in: []*dlit.Literal{
+			dlit.MustNew(4.3),
+			dlit.MustNew(6.7),
+		},
+			want: dlit.MustNew(
+				CantConvertToTypeError{Kind: "int", Value: dlit.MustNew(6.7)},
+			),
+			err: CantConvertToTypeError{
+				Kind:  "int",
+				Value: dlit.MustNew(6.7),
+			},
+		},
 	}
 
 	for i, c := range cases {

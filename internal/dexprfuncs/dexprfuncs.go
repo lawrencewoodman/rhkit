@@ -139,7 +139,7 @@ func roundTo(args []*dlit.Literal) (*dlit.Literal, error) {
 		if err := args[1].Err(); err != nil {
 			return args[1], err
 		}
-		err := CantConvertToTypeError{Kind: "int", Value: args[0]}
+		err := CantConvertToTypeError{Kind: "int", Value: args[1]}
 		r := dlit.MustNew(err)
 		return r, err
 	}
