@@ -7,6 +7,25 @@ import (
 	"testing"
 )
 
+func TestNewCalc_error(t *testing.T) {
+	_, err := New("a", "calc", "3+4+{")
+	wantErr :=
+		"can't make aggregator: a, error: invalid expression: 3+4+{ (syntax error)"
+	if err.Error() != wantErr {
+		t.Errorf("New: gotErr: %s, wantErr: %s", err, wantErr)
+	}
+}
+
+func TestCalcNextRecord(t *testing.T) {
+	as := MustNew("a", "calc", "3+4")
+	ai := as.New()
+	record := map[string]*dlit.Literal{}
+	got := ai.NextRecord(record, true)
+	if got != nil {
+		t.Errorf("NextRecord: got: %s, want: %s", got, nil)
+	}
+}
+
 func TestCalcResult(t *testing.T) {
 	aggregatorSpecs := []AggregatorSpec{
 		MustNew("a", "calc", "3 + 4"),
@@ -14,6 +33,7 @@ func TestCalcResult(t *testing.T) {
 		MustNew("c", "calc", "a + b"),
 		MustNew("2NumRecords", "calc", "numRecords * 2"),
 		MustNew("d", "calc", "a + e"),
+		MustNew("f", "calc", "a + d"),
 	}
 	goals := []*goal.Goal{}
 	want := []*dlit.Literal{
@@ -21,6 +41,10 @@ func TestCalcResult(t *testing.T) {
 		dlit.MustNew(11),
 		dlit.MustNew(18),
 		dlit.MustNew(24),
+		dlit.MustNew(dexpr.InvalidExprError{
+			Expr: "a + e",
+			Err:  dexpr.VarNotExistError("e"),
+		}),
 		dlit.MustNew(dexpr.InvalidExprError{
 			Expr: "a + e",
 			Err:  dexpr.VarNotExistError("e"),
@@ -34,7 +58,7 @@ func TestCalcResult(t *testing.T) {
 	for i, instance := range instances {
 		got := instance.Result(instances, goals, numRecords)
 		if got.String() != want[i].String() {
-			t.Errorf("Result() i: %d got: %s, want: %s", i, got, want[i])
+			t.Errorf("(%d) Result: got: %s, want: %s", i, got, want[i])
 		}
 	}
 }
