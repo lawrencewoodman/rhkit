@@ -433,6 +433,51 @@ func TestRoundTo_float(t *testing.T) {
 	}
 }
 
+func TestRoundTo_errors(t *testing.T) {
+	cases := []struct {
+		in   []*dlit.Literal
+		want *dlit.Literal
+		err  error
+	}{
+		{in: []*dlit.Literal{},
+			want: dlit.MustNew(WrongNumOfArgsError{Got: 0, Want: 2}),
+			err:  WrongNumOfArgsError{Got: 0, Want: 2},
+		},
+		{in: []*dlit.Literal{dlit.MustNew(23)},
+			want: dlit.MustNew(WrongNumOfArgsError{Got: 1, Want: 2}),
+			err:  WrongNumOfArgsError{Got: 1, Want: 2},
+		},
+		{in: []*dlit.Literal{dlit.MustNew(23), dlit.MustNew(4), dlit.MustNew(5)},
+			want: dlit.MustNew(WrongNumOfArgsError{Got: 3, Want: 2}),
+			err:  WrongNumOfArgsError{Got: 3, Want: 2},
+		},
+		{in: []*dlit.Literal{
+			dlit.MustNew(errThisIsAnError),
+			dlit.MustNew(6),
+		},
+			want: dlit.MustNew(errThisIsAnError),
+			err:  errThisIsAnError,
+		},
+		{in: []*dlit.Literal{dlit.NewString("hello"), dlit.MustNew(4)},
+			want: dlit.MustNew(
+				CantConvertToTypeError{Kind: "float", Value: dlit.NewString("hello")},
+			),
+			err: CantConvertToTypeError{
+				Kind:  "float",
+				Value: dlit.NewString("hello"),
+			},
+		},
+	}
+
+	for i, c := range cases {
+		got, err := roundTo(c.in)
+		checkErrorMatch(t, fmt.Sprintf("(%d) roundTo(%v)", i, c.in), err, c.err)
+		if got.String() != c.want.String() {
+			t.Errorf("(%d) roundTo(%v) got: %s, want: %s", i, c.in, got, c.want)
+		}
+	}
+}
+
 /*************************
  *       Benchmarks
  *************************/
@@ -519,6 +564,7 @@ func checkErrorMatch(t *testing.T, context string, got, want error) {
 	}
 	if got == nil || want == nil {
 		t.Errorf("%s got err: %s, want : %s", context, got, want)
+		return
 	}
 	switch x := want.(type) {
 	case CantConvertToTypeError:
