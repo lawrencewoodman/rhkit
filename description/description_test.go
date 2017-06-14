@@ -12,6 +12,13 @@ import (
 	"testing"
 )
 
+func TestDescriptionNew(t *testing.T) {
+	got := New()
+	if len(got.Fields) != 0 {
+		t.Errorf("New got len(got.Fields): %d, want: 0", len(got.Fields))
+	}
+}
+
 func TestDescriptionWriteLoadJSON(t *testing.T) {
 	description := &Description{
 		map[string]*Field{
