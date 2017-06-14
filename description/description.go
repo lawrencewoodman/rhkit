@@ -104,7 +104,7 @@ func CalcFieldNum(fieldDescriptions map[string]*Field, fieldN string) int {
 		}
 		j++
 	}
-	panic("can't find field in fieldDescriptions")
+	panic("can't find field in Field descriptions: " + fieldN)
 }
 
 func (d *Description) WriteJSON(filename string) error {

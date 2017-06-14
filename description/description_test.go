@@ -432,6 +432,103 @@ func TestFieldCheckEqual(t *testing.T) {
 	}
 }
 
+func TestDescriptionCalcFieldNum(t *testing.T) {
+	description := &Description{
+		map[string]*Field{
+			"inputA": &Field{
+				fieldtype.Number,
+				dlit.MustNew(7),
+				dlit.MustNew(15.1),
+				1,
+				map[string]Value{
+					"7":    Value{dlit.MustNew(7), 7},
+					"7.3":  Value{dlit.MustNew(7.3), 7},
+					"9":    Value{dlit.MustNew(9), 7},
+					"14":   Value{dlit.MustNew(14), 7},
+					"15.1": Value{dlit.MustNew(15.1), 7},
+				},
+				5,
+			},
+			"band": &Field{fieldtype.String, nil, nil, 0,
+				map[string]Value{
+					"a": Value{dlit.MustNew("a"), 2},
+					"b": Value{dlit.MustNew("b"), 3},
+					"c": Value{dlit.MustNew("c"), 70},
+					"f": Value{dlit.MustNew("f"), 22},
+					"9": Value{dlit.MustNew("9"), 1},
+				},
+				31,
+			},
+			"inputB": &Field{
+				fieldtype.Number,
+				dlit.MustNew(2),
+				dlit.MustNew(5),
+				4,
+				map[string]Value{
+					"2.6":    Value{dlit.MustNew(2.6), 7},
+					"2.8789": Value{dlit.MustNew(2.8789), 1},
+					"3":      Value{dlit.MustNew(3), 7},
+					"5":      Value{dlit.MustNew(5), 7},
+					"2":      Value{dlit.MustNew(2), 7},
+					"2.8":    Value{dlit.MustNew(2.8), 6},
+				},
+				6,
+			},
+		},
+	}
+	cases := []struct {
+		field string
+		want  int
+	}{
+		{"band", 0},
+		{"inputA", 1},
+		{"inputB", 2},
+	}
+	for i, c := range cases {
+		got := CalcFieldNum(description.Fields, c.field)
+		if got != c.want {
+			t.Errorf("(%d) CalcFieldNum: got: %d, want: %d", i, got, c.want)
+		}
+	}
+}
+
+func TestDescriptionCalcFieldNum_panic(t *testing.T) {
+	description := &Description{
+		map[string]*Field{
+			"inputA": &Field{
+				fieldtype.Number,
+				dlit.MustNew(7),
+				dlit.MustNew(15.1),
+				1,
+				map[string]Value{
+					"7":    Value{dlit.MustNew(7), 7},
+					"7.3":  Value{dlit.MustNew(7.3), 7},
+					"9":    Value{dlit.MustNew(9), 7},
+					"14":   Value{dlit.MustNew(14), 7},
+					"15.1": Value{dlit.MustNew(15.1), 7},
+				},
+				5,
+			},
+		},
+	}
+	paniced := false
+	field := "borris"
+	wantPanic := "can't find field in Field descriptions: " + field
+	defer func() {
+		if r := recover(); r != nil {
+			if r.(string) == wantPanic {
+				paniced = true
+			} else {
+				t.Errorf("CalcFieldNum: got panic: %s, want: %s", r, wantPanic)
+			}
+		}
+	}()
+	got := CalcFieldNum(description.Fields, field)
+	if !paniced {
+		t.Errorf("CalcFieldNum: got: %s, failed to panic with: %s", got, wantPanic)
+	}
+}
+
 /*************************************
  *  Helper functions
  *************************************/
