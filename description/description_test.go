@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"syscall"
 	"testing"
 )
 
@@ -102,6 +103,33 @@ func TestDescriptionWriteLoadJSON(t *testing.T) {
 	}
 	if err := got.CheckEqual(description); err != nil {
 		t.Errorf("LoadDescriptionJSON got not expected: %s", err)
+	}
+}
+
+func TestDescriptionLoadJSON_errors(t *testing.T) {
+	cases := []struct {
+		filename string
+		wantErr  error
+	}{
+		{filename: filepath.Join("fixtures", "nonexistant.json"),
+			wantErr: &os.PathError{
+				"open",
+				filepath.Join("fixtures", "nonexistant.json"),
+				syscall.ENOENT,
+			},
+		},
+		{filename: filepath.Join("fixtures", "broken.json"),
+			wantErr: errors.New("unexpected EOF"),
+		},
+	}
+	for i, c := range cases {
+		_, err := LoadDescriptionJSON(c.filename)
+		checkErrorMatch(
+			t,
+			fmt.Sprintf("(%d) LoadDescriptionJSON:", i),
+			err,
+			c.wantErr,
+		)
 	}
 }
 
@@ -539,7 +567,30 @@ func checkErrorMatch(t *testing.T, context string, got, want error) {
 	if got == nil || want == nil {
 		t.Errorf("%s got err: %s, want : %s", context, got, want)
 	}
+	if perr, ok := want.(*os.PathError); ok {
+		if err := checkPathErrorMatch(got, perr); err != nil {
+			t.Errorf("%s %s", context, err)
+		}
+	}
 	if got.Error() != want.Error() {
 		t.Errorf("%s got err: %s, want : %s", context, got, want)
 	}
+}
+
+func checkPathErrorMatch(checkErr error, wantErr *os.PathError) error {
+	perr, ok := checkErr.(*os.PathError)
+	if !ok {
+		return fmt.Errorf("got err type: %T, want error type: os.PathError",
+			checkErr)
+	}
+	if perr.Op != wantErr.Op {
+		return fmt.Errorf("got perr.Op: %s, want: %s", perr.Op, wantErr.Op)
+	}
+	if filepath.Clean(perr.Path) != filepath.Clean(wantErr.Path) {
+		return fmt.Errorf("got perr.Path: %s, want: %s", perr.Path, wantErr.Path)
+	}
+	if perr.Err != wantErr.Err {
+		return fmt.Errorf("got perr.Err: %s, want: %s", perr.Err, wantErr.Err)
+	}
+	return nil
 }
