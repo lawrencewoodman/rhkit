@@ -51,7 +51,7 @@ type Value struct {
 	Num   int
 }
 
-func LoadDescriptionJSON(filename string) (*Description, error) {
+func LoadJSON(filename string) (*Description, error) {
 	var dj descriptionJ
 
 	f, err := os.Open(filename)

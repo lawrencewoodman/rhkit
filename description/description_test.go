@@ -97,12 +97,12 @@ func TestDescriptionWriteLoadJSON(t *testing.T) {
 	if err := description.WriteJSON(filename); err != nil {
 		t.Fatalf("WriteJSON: %s", err)
 	}
-	got, err := LoadDescriptionJSON(filename)
+	got, err := LoadJSON(filename)
 	if err != nil {
-		t.Fatalf("LoadDescriptionJSON: %s", err)
+		t.Fatalf("LoadJSON: %s", err)
 	}
 	if err := got.CheckEqual(description); err != nil {
-		t.Errorf("LoadDescriptionJSON got not expected: %s", err)
+		t.Errorf("LoadJSON got not expected: %s", err)
 	}
 }
 
@@ -123,10 +123,10 @@ func TestDescriptionLoadJSON_errors(t *testing.T) {
 		},
 	}
 	for i, c := range cases {
-		_, err := LoadDescriptionJSON(c.filename)
+		_, err := LoadJSON(c.filename)
 		checkErrorMatch(
 			t,
-			fmt.Sprintf("(%d) LoadDescriptionJSON:", i),
+			fmt.Sprintf("(%d) LoadJSON:", i),
 			err,
 			c.wantErr,
 		)
