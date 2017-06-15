@@ -3,6 +3,7 @@ package description
 import (
 	"errors"
 	"fmt"
+	"github.com/lawrencewoodman/ddataset/dcsv"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/internal/fieldtype"
 	"io/ioutil"
@@ -16,6 +17,88 @@ func TestDescriptionNew(t *testing.T) {
 	got := New()
 	if len(got.Fields) != 0 {
 		t.Errorf("New got len(got.Fields): %d, want: 0", len(got.Fields))
+	}
+}
+
+func TestDescriptionNextRecord(t *testing.T) {
+	wantDescription := &Description{
+		map[string]*Field{
+			"platform": &Field{fieldtype.Ignore, nil, nil, 0,
+				map[string]Value{},
+				-1,
+			},
+			"month": &Field{fieldtype.String, nil, nil, 0,
+				map[string]Value{
+					"jan":   Value{dlit.MustNew("jan"), 3},
+					"feb":   Value{dlit.MustNew("feb"), 3},
+					"march": Value{dlit.MustNew("march"), 3},
+					"april": Value{dlit.MustNew("april"), 3},
+					"may":   Value{dlit.MustNew("may"), 12},
+					"june":  Value{dlit.MustNew("june"), 3},
+					"july":  Value{dlit.MustNew("july"), 9},
+					"aug":   Value{dlit.MustNew("aug"), 3},
+					"sept":  Value{dlit.MustNew("sept"), 3},
+				},
+				9,
+			},
+			"grade": &Field{fieldtype.String, nil, nil, 0,
+				map[string]Value{
+					"0":     Value{dlit.MustNew("0"), 3},
+					"5":     Value{dlit.MustNew("5"), 3},
+					"707":   Value{dlit.MustNew("707"), 3},
+					"22":    Value{dlit.MustNew("22"), 5},
+					"alpha": Value{dlit.MustNew("alpha"), 3},
+					"15":    Value{dlit.MustNew("15"), 6},
+					"beta":  Value{dlit.MustNew("beta"), 3},
+					"gamma": Value{dlit.MustNew("gamma"), 3},
+					"23":    Value{dlit.MustNew("23"), 3},
+					"-22":   Value{dlit.MustNew("-22"), 1},
+					"delta": Value{dlit.MustNew("delta"), 3},
+					"6":     Value{dlit.MustNew("6"), 3},
+					"98":    Value{dlit.MustNew("98"), 3},
+				},
+				13,
+			},
+			"rate": &Field{
+				fieldtype.Number,
+				dlit.MustNew(-9.3456),
+				dlit.MustNew(282),
+				4,
+				map[string]Value{},
+				-1,
+			},
+			"success": &Field{fieldtype.String, nil, nil, 0,
+				map[string]Value{
+					"true":  Value{dlit.MustNew("true"), 24},
+					"false": Value{dlit.MustNew("false"), 18},
+				},
+				2,
+			},
+		},
+	}
+	fields := []string{"platform", "month", "grade", "rate", "success"}
+	dataset := dcsv.New(
+		filepath.Join("fixtures", "launch.csv"),
+		true,
+		rune(','),
+		fields,
+	)
+	description := New()
+	conn, err := dataset.Open()
+	if err != nil {
+		t.Fatalf("dataset.Open: %s", err)
+	}
+	defer conn.Close()
+
+	for conn.Next() {
+		record := conn.Read()
+		description.NextRecord(record)
+	}
+	if err := conn.Err(); err != nil {
+		t.Fatalf("NextRecord Err: %s", err)
+	}
+	if err := description.CheckEqual(wantDescription); err != nil {
+		t.Errorf("NextRecord description not expected: %s", err)
 	}
 }
 
