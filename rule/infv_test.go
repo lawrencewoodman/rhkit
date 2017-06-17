@@ -224,6 +224,14 @@ func TestInFVOverlaps(t *testing.T) {
 			),
 			want: true,
 		},
+		{ruleA: NewInFV("band", []*dlit.Literal{
+			dlit.NewString("4"), dlit.NewString("3"), dlit.NewString("2")},
+		),
+			ruleB: NewInFV("band", []*dlit.Literal{
+				dlit.NewString("9"), dlit.NewString("7")},
+			),
+			want: false,
+		},
 		{ruleA: NewInFV("rate", []*dlit.Literal{
 			dlit.NewString("4"), dlit.NewString("3"), dlit.NewString("2")},
 		),
