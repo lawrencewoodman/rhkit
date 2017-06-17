@@ -282,30 +282,6 @@ func (sortedAssessment *Assessment) excludePoorRules() {
 	sortedAssessment.RuleAssessments = goodRuleAssessments
 }
 
-func (sortedAssessment *Assessment) excludePoorerInRules(
-	numSimilarRules int,
-) {
-	goodRuleAssessments := make([]*RuleAssessment, 0)
-	inFields := make(map[string]int)
-	for _, a := range sortedAssessment.RuleAssessments {
-		switch x := a.Rule.(type) {
-		case *rule.InFV:
-			field := x.Fields()[0]
-			n, ok := inFields[field]
-			if !ok {
-				goodRuleAssessments = append(goodRuleAssessments, a)
-				inFields[field] = 1
-			} else if n < numSimilarRules {
-				goodRuleAssessments = append(goodRuleAssessments, a)
-				inFields[field]++
-			}
-		default:
-			goodRuleAssessments = append(goodRuleAssessments, a)
-		}
-	}
-	sortedAssessment.RuleAssessments = goodRuleAssessments
-}
-
 func (sortedAssessment *Assessment) excludePoorerOverlappingRules() {
 	goodRuleAssessments := make([]*RuleAssessment, 0)
 	for i, aI := range sortedAssessment.RuleAssessments {
