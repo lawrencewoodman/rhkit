@@ -343,6 +343,8 @@ func TestRoundTo(t *testing.T) {
 		in   []*dlit.Literal
 		want *dlit.Literal
 	}{
+		{in: []*dlit.Literal{dlit.MustNew(0), dlit.MustNew(5)},
+			want: dlit.MustNew(0)},
 		{in: []*dlit.Literal{dlit.MustNew(3), dlit.MustNew(5)},
 			want: dlit.MustNew(3)},
 		{in: []*dlit.Literal{dlit.MustNew(3), dlit.MustNew(1)},
