@@ -417,7 +417,7 @@ func TestRoundTo_int(t *testing.T) {
 	}
 }
 
-// Tests that an float is always returned with a dp less then or equal
+// Tests that a float is always returned with a dp less then or equal
 // the original number.
 // This is important because rounding errors can be created because
 // of the use of a float
@@ -495,6 +495,156 @@ func TestRoundTo_errors(t *testing.T) {
 		checkErrorMatch(t, fmt.Sprintf("(%d) roundTo(%v)", i, c.in), err, c.err)
 		if got.String() != c.want.String() {
 			t.Errorf("(%d) roundTo(%v) got: %s, want: %s", i, c.in, got, c.want)
+		}
+	}
+}
+
+func TestIn(t *testing.T) {
+	cases := []struct {
+		in   []*dlit.Literal
+		want *dlit.Literal
+	}{
+		{in: []*dlit.Literal{
+			dlit.MustNew(3),
+			dlit.MustNew(5),
+			dlit.MustNew(7),
+			dlit.MustNew("fred"),
+			dlit.MustNew(9),
+			dlit.MustNew(7),
+		},
+			want: falseLiteral},
+		{in: []*dlit.Literal{
+			dlit.MustNew(3),
+			dlit.MustNew(5),
+			dlit.MustNew(7),
+			dlit.MustNew("fred"),
+			dlit.MustNew(3),
+			dlit.MustNew(7),
+		},
+			want: trueLiteral},
+	}
+
+	for _, c := range cases {
+		got, err := in(c.in)
+		if err != nil {
+			t.Errorf("in(%v) err: %v", c.in, err)
+		}
+		if got.String() != c.want.String() {
+			t.Errorf("in(%v) got: %s, want: %s", c.in, got, c.want)
+		}
+	}
+}
+
+func TestIn_errors(t *testing.T) {
+	cases := []struct {
+		in   []*dlit.Literal
+		want *dlit.Literal
+		err  error
+	}{
+		{in: []*dlit.Literal{},
+			want: dlit.MustNew(ErrTooFewArguments),
+			err:  ErrTooFewArguments,
+		},
+		{in: []*dlit.Literal{dlit.MustNew(23)},
+			want: dlit.MustNew(ErrTooFewArguments),
+			err:  ErrTooFewArguments,
+		},
+		{in: []*dlit.Literal{
+			dlit.MustNew(errThisIsAnError),
+			dlit.MustNew(6),
+		},
+			want: dlit.MustNew(errThisIsAnError),
+			err:  errThisIsAnError,
+		},
+		{in: []*dlit.Literal{
+			dlit.MustNew(6.7),
+			dlit.MustNew(errThisIsAnError),
+		},
+			want: dlit.MustNew(errThisIsAnError),
+			err:  errThisIsAnError,
+		},
+	}
+
+	for i, c := range cases {
+		got, err := in(c.in)
+		checkErrorMatch(t, fmt.Sprintf("(%d) in(%v)", i, c.in), err, c.err)
+		if got.String() != c.want.String() {
+			t.Errorf("(%d) in(%v) got: %s, want: %s", i, c.in, got, c.want)
+		}
+	}
+}
+
+func TestNi(t *testing.T) {
+	cases := []struct {
+		in   []*dlit.Literal
+		want *dlit.Literal
+	}{
+		{in: []*dlit.Literal{
+			dlit.MustNew(3),
+			dlit.MustNew(5),
+			dlit.MustNew(7),
+			dlit.MustNew("fred"),
+			dlit.MustNew(9),
+			dlit.MustNew(7),
+		},
+			want: trueLiteral},
+		{in: []*dlit.Literal{
+			dlit.MustNew(3),
+			dlit.MustNew(5),
+			dlit.MustNew(7),
+			dlit.MustNew("fred"),
+			dlit.MustNew(3),
+			dlit.MustNew(7),
+		},
+			want: falseLiteral},
+	}
+
+	for _, c := range cases {
+		got, err := ni(c.in)
+		if err != nil {
+			t.Errorf("ni(%v) err: %v", c.in, err)
+		}
+		if got.String() != c.want.String() {
+			t.Errorf("ni(%v) got: %s, want: %s", c.in, got, c.want)
+		}
+	}
+}
+
+func TestNi_errors(t *testing.T) {
+	cases := []struct {
+		in   []*dlit.Literal
+		want *dlit.Literal
+		err  error
+	}{
+		{in: []*dlit.Literal{},
+			want: dlit.MustNew(ErrTooFewArguments),
+			err:  ErrTooFewArguments,
+		},
+		{in: []*dlit.Literal{dlit.MustNew(23)},
+			want: dlit.MustNew(ErrTooFewArguments),
+			err:  ErrTooFewArguments,
+		},
+		{in: []*dlit.Literal{
+			dlit.MustNew(errThisIsAnError),
+			dlit.MustNew(6),
+		},
+			want: dlit.MustNew(errThisIsAnError),
+			err:  errThisIsAnError,
+		},
+		{in: []*dlit.Literal{
+			dlit.MustNew(6.7),
+			dlit.MustNew(errThisIsAnError),
+		},
+			want: dlit.MustNew(errThisIsAnError),
+			err:  errThisIsAnError,
+		},
+	}
+
+	for i, c := range cases {
+		got, err := ni(c.in)
+		checkErrorMatch(t, fmt.Sprintf("(%d) ni(%v)", i, c.in), err, c.err)
+		if got.String() != c.want.String() {
+			t.Errorf("(%d) ni(%v) got: %s, want: %s", i, c.in, got, c.want)
 		}
 	}
 }

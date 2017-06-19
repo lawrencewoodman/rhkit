@@ -153,7 +153,7 @@ func roundTo(args []*dlit.Literal) (*dlit.Literal, error) {
 	return dlit.New(math.Floor(.5+x*shift) / shift)
 }
 
-// in returns whether a string is in a slice strings
+// in returns whether a string is in a slice of strings
 func in(args []*dlit.Literal) (*dlit.Literal, error) {
 	if len(args) < 2 {
 		r := dlit.MustNew(ErrTooFewArguments)
@@ -161,7 +161,13 @@ func in(args []*dlit.Literal) (*dlit.Literal, error) {
 	}
 	needle := args[0]
 	haystack := args[1:]
+	if err := needle.Err(); err != nil {
+		return needle, err
+	}
 	for _, v := range haystack {
+		if err := v.Err(); err != nil {
+			return v, err
+		}
 		if needle.String() == v.String() {
 			return trueLiteral, nil
 		}
@@ -169,7 +175,7 @@ func in(args []*dlit.Literal) (*dlit.Literal, error) {
 	return falseLiteral, nil
 }
 
-// ni returns whether a string is not in a slice strings
+// ni returns whether a string is not in a slice of strings
 func ni(args []*dlit.Literal) (*dlit.Literal, error) {
 	if len(args) < 2 {
 		r := dlit.MustNew(ErrTooFewArguments)
@@ -177,7 +183,13 @@ func ni(args []*dlit.Literal) (*dlit.Literal, error) {
 	}
 	needle := args[0]
 	haystack := args[1:]
+	if err := needle.Err(); err != nil {
+		return needle, err
+	}
 	for _, v := range haystack {
+		if err := v.Err(); err != nil {
+			return v, err
+		}
 		if needle.String() == v.String() {
 			return falseLiteral, nil
 		}
