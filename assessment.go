@@ -132,11 +132,6 @@ func (a *Assessment) IsEqual(o *Assessment) bool {
 	return true
 }
 
-func (r *RuleAssessment) String() string {
-	return fmt.Sprintf("Rule: %s, Aggregators: %s, Goals: %s",
-		r.Rule, r.Aggregators, r.Goals)
-}
-
 // Tidy up rule assessments by removing poor and poorer similar rules
 // For example this removes all rules poorer than the True rule
 func (sortedAssessment *Assessment) Refine() {
@@ -407,8 +402,4 @@ func (r *RuleAssessment) clone() *RuleAssessment {
 
 func (g *GoalAssessment) IsEqual(o *GoalAssessment) bool {
 	return g.Expr == o.Expr && g.Passed == o.Passed
-}
-
-func (g *GoalAssessment) String() string {
-	return fmt.Sprintf("Expr: %s, Passed: %t", g.Expr, g.Passed)
 }
