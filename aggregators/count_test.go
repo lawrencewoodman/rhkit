@@ -1,10 +1,23 @@
 package aggregators
 
 import (
+	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/goal"
 	"testing"
 )
+
+func TestNewCount_error(t *testing.T) {
+	_, err := New("a", "count", "3+4+{")
+	wantErr := "can't make aggregator: a, error: " +
+		dexpr.InvalidExprError{
+			Expr: "3+4+{",
+			Err:  dexpr.ErrSyntax,
+		}.Error()
+	if err.Error() != wantErr {
+		t.Errorf("New: gotErr: %s, wantErr: %s", err, wantErr)
+	}
+}
 
 func TestCountResult(t *testing.T) {
 	records := []map[string]*dlit.Literal{
@@ -32,6 +45,20 @@ func TestCountResult(t *testing.T) {
 	}
 }
 
+func TestCountNextRecord_error(t *testing.T) {
+	as := MustNew("a", "count", "cost > 2")
+	ai := as.New()
+	record := map[string]*dlit.Literal{}
+	got := ai.NextRecord(record, true)
+	want := dexpr.InvalidExprError{
+		Expr: "cost > 2",
+		Err:  dexpr.VarNotExistError("cost"),
+	}
+	if got == nil || got.Error() != want.Error() {
+		t.Errorf("NextRecord: got: %s, want: %s", got, want)
+	}
+}
+
 func TestCountSpecName(t *testing.T) {
 	name := "a"
 	as := MustNew(name, "count", "band > 4")
@@ -56,5 +83,15 @@ func TestCountSpecArg(t *testing.T) {
 	got := as.Arg()
 	if got != arg {
 		t.Errorf("Arg - got: %s, want: %s", got, arg)
+	}
+}
+
+func TestCountInstanceName(t *testing.T) {
+	as := MustNew("abc", "count", "cost > 2")
+	ai := as.New()
+	got := ai.Name()
+	want := "abc"
+	if got != want {
+		t.Errorf("Name: got: %s, want: %s", got, want)
 	}
 }

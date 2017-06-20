@@ -9,8 +9,11 @@ import (
 
 func TestNewCalc_error(t *testing.T) {
 	_, err := New("a", "calc", "3+4+{")
-	wantErr :=
-		"can't make aggregator: a, error: invalid expression: 3+4+{ (syntax error)"
+	wantErr := "can't make aggregator: a, error: " +
+		dexpr.InvalidExprError{
+			Expr: "3+4+{",
+			Err:  dexpr.ErrSyntax,
+		}.Error()
 	if err.Error() != wantErr {
 		t.Errorf("New: gotErr: %s, wantErr: %s", err, wantErr)
 	}
