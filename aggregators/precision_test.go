@@ -1,10 +1,23 @@
 package aggregators
 
 import (
+	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/goal"
 	"testing"
 )
+
+func TestNewPrecision_error(t *testing.T) {
+	_, err := New("a", "precision", "3>4{")
+	wantErr := "can't make aggregator: a, error: " +
+		dexpr.InvalidExprError{
+			Expr: "3>4{",
+			Err:  dexpr.ErrSyntax,
+		}.Error()
+	if err.Error() != wantErr {
+		t.Errorf("New: gotErr: %s, wantErr: %s", err, wantErr)
+	}
+}
 
 func TestPrecisionResult(t *testing.T) {
 	records := []map[string]*dlit.Literal{
@@ -83,6 +96,20 @@ func TestPrecisionResult(t *testing.T) {
 	}
 }
 
+func TestPrecisionNextRecord_error(t *testing.T) {
+	as := MustNew("a", "precision", "cost > 2")
+	ai := as.New()
+	record := map[string]*dlit.Literal{}
+	got := ai.NextRecord(record, true)
+	want := dexpr.InvalidExprError{
+		Expr: "cost > 2",
+		Err:  dexpr.VarNotExistError("cost"),
+	}
+	if got == nil || got.Error() != want.Error() {
+		t.Errorf("NextRecord: got: %s, want: %s", got, want)
+	}
+}
+
 func TestPrecisionSpecName(t *testing.T) {
 	name := "a"
 	as := MustNew(name, "precision", "cost > 2")
@@ -107,5 +134,15 @@ func TestPrecisionSpecArg(t *testing.T) {
 	got := as.Arg()
 	if got != arg {
 		t.Errorf("Arg - got: %s, want: %s", got, arg)
+	}
+}
+
+func TestPrecisionInstanceName(t *testing.T) {
+	as := MustNew("abc", "precision", "cost + 2")
+	ai := as.New()
+	got := ai.Name()
+	want := "abc"
+	if got != want {
+		t.Errorf("Name: got: %s, want: %s", got, want)
 	}
 }

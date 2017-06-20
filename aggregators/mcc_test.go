@@ -8,6 +8,18 @@ import (
 	"testing"
 )
 
+func TestNewMCC_error(t *testing.T) {
+	_, err := New("a", "mcc", "3>4{")
+	wantErr := "can't make aggregator: a, error: " +
+		dexpr.InvalidExprError{
+			Expr: "3>4{",
+			Err:  dexpr.ErrSyntax,
+		}.Error()
+	if err.Error() != wantErr {
+		t.Errorf("New: gotErr: %s, wantErr: %s", err, wantErr)
+	}
+}
+
 func TestMCCResult(t *testing.T) {
 	records := []map[string]*dlit.Literal{
 		map[string]*dlit.Literal{
@@ -118,6 +130,20 @@ func TestMCCResult(t *testing.T) {
 	}
 }
 
+func TestMCCNextRecord_error(t *testing.T) {
+	as := MustNew("a", "mcc", "cost > 2")
+	ai := as.New()
+	record := map[string]*dlit.Literal{}
+	got := ai.NextRecord(record, true)
+	want := dexpr.InvalidExprError{
+		Expr: "cost > 2",
+		Err:  dexpr.VarNotExistError("cost"),
+	}
+	if got == nil || got.Error() != want.Error() {
+		t.Errorf("NextRecord: got: %s, want: %s", got, want)
+	}
+}
+
 func TestMCCSpecName(t *testing.T) {
 	name := "a"
 	as := MustNew(name, "mcc", "band > 4")
@@ -142,5 +168,15 @@ func TestMCCSpecArg(t *testing.T) {
 	got := as.Arg()
 	if got != arg {
 		t.Errorf("Arg - got: %s, want: %s", got, arg)
+	}
+}
+
+func TestMCCInstanceName(t *testing.T) {
+	as := MustNew("abc", "mcc", "cost + 2")
+	ai := as.New()
+	got := ai.Name()
+	want := "abc"
+	if got != want {
+		t.Errorf("Name: got: %s, want: %s", got, want)
 	}
 }
