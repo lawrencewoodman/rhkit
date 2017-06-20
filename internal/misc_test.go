@@ -11,6 +11,7 @@ func TestNumDecPlaces(t *testing.T) {
 		in   string
 		want int
 	}{
+		{"", 0},
 		{"5", 0},
 		{"25", 0},
 		{"235", 0},
@@ -103,6 +104,36 @@ func TestGeneratePoints(t *testing.T) {
 	}
 }
 
+func TestStringInSlice(t *testing.T) {
+	cases := []struct {
+		needle   string
+		haystack []string
+		want     bool
+	}{
+		{needle: "velma",
+			haystack: []string{"fred", "scooby", "velma"},
+			want:     true,
+		},
+		{needle: "Velma",
+			haystack: []string{"fred", "scooby", "velma"},
+			want:     false,
+		},
+		{needle: "velma",
+			haystack: []string{},
+			want:     false},
+	}
+
+	for i, c := range cases {
+		got := StringInSlice(c.needle, c.haystack)
+		if got != c.want {
+			t.Errorf("(%d) StringInSlice got: %d, want: %d", i, got, c.want)
+		}
+	}
+}
+
+/**********************
+ *  Helper functions
+ **********************/
 func checkPoints(got, want []*dlit.Literal) error {
 	if len(got) != len(want) {
 		return fmt.Errorf("len(got): %d != len(want): %d, got: %v",
