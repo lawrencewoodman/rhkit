@@ -5,6 +5,7 @@ import (
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/description"
 	"github.com/vlifesystems/rhkit/internal/fieldtype"
+	"math"
 	"reflect"
 	"testing"
 )
@@ -47,6 +48,7 @@ func TestEQFVIsTrue(t *testing.T) {
 		want  bool
 	}{
 		{"income", dlit.MustNew(19.0), true},
+		{"income", dlit.MustNew(math.MaxInt64), false},
 		{"income", dlit.MustNew(-19.0), false},
 		{"income", dlit.MustNew(20.0), false},
 		{"flow", dlit.MustNew(124.564), true},
@@ -61,12 +63,15 @@ func TestEQFVIsTrue(t *testing.T) {
 		{"success", dlit.MustNew("TRUE"), true},
 		{"success", dlit.MustNew("true"), false},
 		{"success", dlit.MustNew("1"), false},
+		{"bigNums", dlit.MustNew(math.MaxInt64), true},
+		{"bigNums", dlit.MustNew("1"), false},
 	}
 	record := map[string]*dlit.Literal{
 		"income":  dlit.MustNew(19),
 		"flow":    dlit.MustNew(124.564),
 		"band":    dlit.MustNew("alpha"),
 		"success": dlit.MustNew("TRUE"),
+		"bigNums": dlit.MustNew(math.MaxInt64),
 	}
 	for _, c := range cases {
 		r := NewEQFV(c.field, c.value)
@@ -152,6 +157,12 @@ func TestGenerateEQFV(t *testing.T) {
 					"Drake":       description.Value{dlit.NewString("Drake"), 2},
 				},
 			},
+			"month": &description.Field{
+				Kind: fieldtype.String,
+				Values: map[string]description.Value{
+					"May": description.Value{dlit.NewString("May"), 3},
+				},
+			},
 		},
 	}
 	cases := []struct {
@@ -179,8 +190,11 @@ func TestGenerateEQFV(t *testing.T) {
 				NewEQFV("group", dlit.MustNew("Drake")),
 			},
 		},
+		{field: "month",
+			want: []Rule{},
+		},
 	}
-	ruleFields := []string{"band", "flow", "group"}
+	ruleFields := []string{"band", "flow", "group", "month"}
 	complexity := Complexity{}
 	for _, c := range cases {
 		got := generateEQFV(inputDescription, ruleFields, complexity, c.field)
