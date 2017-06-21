@@ -16,19 +16,18 @@ func TestNewAssessment_error(t *testing.T) {
 	numRecords := int64(100)
 	as := aggregators.MustNew("a", "calc", "3+4")
 	ai := as.New()
-	goals := []*goal.Goal{goal.MustNew("cost > 3")}
 	goodRuleAssessors := []*ruleAssessor{
 		&ruleAssessor{
 			Rule:        rule.NewEQFV("month", dlit.NewString("May")),
 			Aggregators: []aggregators.AggregatorInstance{ai},
-			Goals:       goals,
+			Goals:       []*goal.Goal{goal.MustNew("cost > 3")},
 		},
 	}
 	wantErr := dexpr.InvalidExprError{
 		Expr: "cost > 3",
 		Err:  dexpr.VarNotExistError("cost"),
 	}
-	_, err := newAssessment(numRecords, goodRuleAssessors, goals)
+	_, err := newAssessment(numRecords, goodRuleAssessors)
 	if err == nil || err.Error() != wantErr.Error() {
 		t.Errorf("newAssessment: err: %s, wantErr: %s", err, wantErr)
 	}

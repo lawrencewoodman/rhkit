@@ -25,7 +25,6 @@ import (
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/aggregators"
 	"github.com/vlifesystems/rhkit/experiment"
-	"github.com/vlifesystems/rhkit/goal"
 	"github.com/vlifesystems/rhkit/rule"
 	"sort"
 	"strings"
@@ -51,7 +50,6 @@ type GoalAssessment struct {
 func newAssessment(
 	numRecords int64,
 	goodRuleAssessors []*ruleAssessor,
-	goals []*goal.Goal,
 ) (*Assessment, error) {
 	ruleAssessments := make([]*RuleAssessment, len(goodRuleAssessors))
 	for i, ruleAssessment := range goodRuleAssessors {
