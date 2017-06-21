@@ -2,12 +2,37 @@ package rhkit
 
 import (
 	"errors"
+	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
+	"github.com/vlifesystems/rhkit/aggregators"
 	"github.com/vlifesystems/rhkit/experiment"
+	"github.com/vlifesystems/rhkit/goal"
 	"github.com/vlifesystems/rhkit/rule"
 	"reflect"
 	"testing"
 )
+
+func TestNewAssessment_error(t *testing.T) {
+	numRecords := int64(100)
+	as := aggregators.MustNew("a", "calc", "3+4")
+	ai := as.New()
+	goals := []*goal.Goal{goal.MustNew("cost > 3")}
+	goodRuleAssessors := []*ruleAssessor{
+		&ruleAssessor{
+			Rule:        rule.NewEQFV("month", dlit.NewString("May")),
+			Aggregators: []aggregators.AggregatorInstance{ai},
+			Goals:       goals,
+		},
+	}
+	wantErr := dexpr.InvalidExprError{
+		Expr: "cost > 3",
+		Err:  dexpr.VarNotExistError("cost"),
+	}
+	_, err := newAssessment(numRecords, goodRuleAssessors, goals)
+	if err == nil || err.Error() != wantErr.Error() {
+		t.Errorf("newAssessment: err: %s, wantErr: %s", err, wantErr)
+	}
+}
 
 func TestRules(t *testing.T) {
 	var gotRules []rule.Rule
