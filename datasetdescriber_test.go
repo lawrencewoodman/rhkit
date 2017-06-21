@@ -1,6 +1,8 @@
 package rhkit
 
 import (
+	"errors"
+	"github.com/lawrencewoodman/ddataset"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/description"
 	"github.com/vlifesystems/rhkit/internal/fieldtype"
@@ -162,4 +164,99 @@ func TestDescribeDataset(t *testing.T) {
 	if err := d.CheckEqual(expected); err != nil {
 		t.Errorf("DescibeDataset(dataset) got not expected: %s", err)
 	}
+}
+
+func TestDescribeDataset_errors(t *testing.T) {
+	fieldNames :=
+		[]string{"band", "inputA", "inputB", "version", "flow", "score", "method"}
+	dataset := NewLiteralDataset(fieldNames, flowRecords)
+	cases := []struct {
+		stage int
+		err   error
+	}{
+		{stage: 0, err: errors.New("can't open database")},
+		{stage: 1, err: errors.New("read error")},
+	}
+	for _, c := range cases {
+		fdataset := NewFailingDataset(dataset, c.stage, c.err)
+		_, err := DescribeDataset(fdataset)
+		if err == nil || err.Error() != c.err.Error() {
+			t.Errorf("DescribeDataset(dataset) err: %s, want: %s", err, c.err)
+		}
+	}
+}
+
+/******************************
+ *  Helper functions
+ ******************************/
+
+type FailingDataset struct {
+	dataset  ddataset.Dataset
+	stage    int
+	errStage int
+	err      error
+}
+
+type FailingDatasetConn struct {
+	dataset *FailingDataset
+	conn    ddataset.Conn
+}
+
+func NewFailingDataset(
+	dataset ddataset.Dataset,
+	stage int,
+	err error,
+) ddataset.Dataset {
+	return &FailingDataset{
+		dataset:  dataset,
+		stage:    0,
+		errStage: stage,
+		err:      err,
+	}
+}
+
+func (l *FailingDataset) Open() (ddataset.Conn, error) {
+	if l.errStage == 0 {
+		return nil, l.err
+	}
+	l.stage++
+	conn, err := l.dataset.Open()
+	if err != nil {
+		return nil, err
+	}
+	return &FailingDatasetConn{
+		dataset: l,
+		conn:    conn,
+	}, nil
+}
+
+func (l *FailingDataset) Fields() []string {
+	return l.dataset.Fields()
+}
+
+func (lc *FailingDatasetConn) Close() error {
+	if lc.dataset.stage == lc.dataset.errStage {
+		return lc.dataset.err
+	}
+	lc.dataset.stage++
+	return lc.conn.Close()
+}
+
+func (lc *FailingDatasetConn) Next() bool {
+	if lc.dataset.stage == lc.dataset.errStage {
+		return false
+	}
+	return lc.conn.Next()
+}
+
+func (lc *FailingDatasetConn) Read() ddataset.Record {
+	return lc.conn.Read()
+}
+
+func (lc *FailingDatasetConn) Err() error {
+	if lc.dataset.stage == lc.dataset.errStage {
+		return lc.dataset.err
+	}
+	lc.dataset.stage++
+	return lc.conn.Err()
 }
