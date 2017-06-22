@@ -570,6 +570,84 @@ func TestRefine(t *testing.T) {
 	}
 }
 
+func TestRefine_few_ruleassessments(t *testing.T) {
+	cases := []struct {
+		in        *Assessment
+		wantRules []rule.Rule
+	}{
+		{in: &Assessment{
+			NumRecords: 20,
+			flags: map[string]bool{
+				"sorted": true,
+			},
+			RuleAssessments: []*RuleAssessment{
+				&RuleAssessment{
+					Rule: rule.NewTrue(),
+					Aggregators: map[string]*dlit.Literal{
+						"numMatches":     dlit.MustNew("142"),
+						"percentMatches": dlit.MustNew("42"),
+						"numIncomeGt2":   dlit.MustNew("2"),
+						"goalsScore":     dlit.MustNew(0.1),
+					},
+					Goals: []*GoalAssessment{
+						&GoalAssessment{"numIncomeGt2 == 1", false},
+						&GoalAssessment{"numIncomeGt2 == 2", true},
+					},
+				},
+			},
+		},
+			wantRules: []rule.Rule{rule.NewTrue()},
+		},
+		{in: &Assessment{
+			NumRecords: 20,
+			flags: map[string]bool{
+				"sorted": true,
+			},
+			RuleAssessments: []*RuleAssessment{
+				&RuleAssessment{
+					Rule: rule.NewEQFV("month", dlit.NewString("april")),
+					Aggregators: map[string]*dlit.Literal{
+						"numMatches":     dlit.MustNew("142"),
+						"percentMatches": dlit.MustNew("42"),
+						"goalsScore":     dlit.MustNew(0.1),
+					},
+					Goals: []*GoalAssessment{
+						&GoalAssessment{"numIncomeGt2 == 1", false},
+						&GoalAssessment{"numIncomeGt2 == 2", true},
+					},
+				},
+				&RuleAssessment{
+					Rule: rule.NewTrue(),
+					Aggregators: map[string]*dlit.Literal{
+						"numMatches":     dlit.MustNew("142"),
+						"percentMatches": dlit.MustNew("42"),
+						"numIncomeGt2":   dlit.MustNew("2"),
+						"goalsScore":     dlit.MustNew(0.1),
+					},
+					Goals: []*GoalAssessment{
+						&GoalAssessment{"numIncomeGt2 == 1", false},
+						&GoalAssessment{"numIncomeGt2 == 2", true},
+					},
+				},
+			},
+		},
+			wantRules: []rule.Rule{
+				rule.NewEQFV("month", dlit.NewString("april")),
+				rule.NewTrue(),
+			},
+		},
+	}
+	for _, c := range cases {
+		c.in.Refine()
+		gotRules := c.in.Rules()
+
+		if !matchRules(gotRules, c.wantRules) {
+			t.Errorf("matchRules() rules don't match:\ngot: %s\nwant: %s\n",
+				gotRules, c.wantRules)
+		}
+	}
+}
+
 func TestRefine_between(t *testing.T) {
 	sortedAssessment := &Assessment{
 		NumRecords: 20,
