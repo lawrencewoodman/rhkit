@@ -228,7 +228,7 @@ func min(args []*dlit.Literal) (*dlit.Literal, error) {
 
 var isBiggerExpr = dexpr.MustNew("v > max", CallFuncs)
 
-// max returns the smallest number of those supplied
+// max returns the biggest number of those supplied
 func max(args []*dlit.Literal) (*dlit.Literal, error) {
 	if len(args) < 2 {
 		r := dlit.MustNew(ErrTooFewArguments)
