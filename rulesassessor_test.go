@@ -6,6 +6,7 @@ import (
 	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/experiment"
+	"github.com/vlifesystems/rhkit/internal/testhelpers"
 	"github.com/vlifesystems/rhkit/rule"
 	"path/filepath"
 	"testing"
@@ -38,7 +39,7 @@ func TestAssessRules(t *testing.T) {
 		[]string{"2", "1.2", "4"},
 		[]string{"0", "0", "9"},
 	}
-	dataset := NewLiteralDataset(fieldNames, records)
+	dataset := testhelpers.NewLiteralDataset(fieldNames, records)
 	experimentDesc := &experiment.ExperimentDesc{
 		Title:       "",
 		Dataset:     dataset,
@@ -171,7 +172,7 @@ func TestAssessRules_errors(t *testing.T) {
 	records := [][]string{
 		[]string{"3", "4.5", "4"},
 	}
-	dataset := NewLiteralDataset(fieldNames, records)
+	dataset := testhelpers.NewLiteralDataset(fieldNames, records)
 	for _, c := range cases {
 		experimentDesc := &experiment.ExperimentDesc{
 			Title:       "",

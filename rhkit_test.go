@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/lawrencewoodman/ddataset/dcsv"
 	"github.com/vlifesystems/rhkit"
+	"github.com/vlifesystems/rhkit/description"
 	"github.com/vlifesystems/rhkit/experiment"
 	"github.com/vlifesystems/rhkit/rule"
 	"path/filepath"
@@ -66,7 +67,7 @@ func processDataset(experiment *experiment.Experiment) error {
 	var assessment *rhkit.Assessment
 	var newAssessment *rhkit.Assessment
 	var err error
-	fieldDescriptions, err := rhkit.DescribeDataset(experiment.Dataset)
+	fieldDescriptions, err := description.DescribeDataset(experiment.Dataset)
 	if err != nil {
 		return fmt.Errorf("describer.DescribeDataset(experiment.dataset) - err: %s",
 			err)

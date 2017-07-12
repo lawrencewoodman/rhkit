@@ -17,6 +17,7 @@
 	<http://www.gnu.org/licenses/>.
 */
 
+// Package description handles describing a Dataset
 package description
 
 import (
@@ -33,10 +34,12 @@ import (
 	"sort"
 )
 
+// Description describes a Dataset
 type Description struct {
 	Fields map[string]*Field
 }
 
+// Field describes a field
 type Field struct {
 	Kind      fieldtype.FieldType
 	Min       *dlit.Literal
@@ -46,11 +49,30 @@ type Field struct {
 	NumValues int
 }
 
+// Value describes a value in a field
 type Value struct {
 	Value *dlit.Literal
 	Num   int
 }
 
+// DescribeDataset analyses a Dataset and returns a Description of it
+func DescribeDataset(dataset ddataset.Dataset) (*Description, error) {
+	desc := New()
+	conn, err := dataset.Open()
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+
+	for conn.Next() {
+		record := conn.Read()
+		desc.NextRecord(record)
+	}
+
+	return desc, conn.Err()
+}
+
+// LoadJSON loads a Dataset Description that has been saved as a JSON file
 func LoadJSON(filename string) (*Description, error) {
 	var dj descriptionJ
 
@@ -107,6 +129,7 @@ func CalcFieldNum(fieldDescriptions map[string]*Field, fieldN string) int {
 	panic("can't find field in Field descriptions: " + fieldN)
 }
 
+// WriteJSON writes the Description to a JSON file
 func (d *Description) WriteJSON(filename string) error {
 	fields := make(map[string]*fieldJ, len(d.Fields))
 	for field, fd := range d.Fields {
@@ -120,6 +143,7 @@ func (d *Description) WriteJSON(filename string) error {
 	return ioutil.WriteFile(filename, json, 0640)
 }
 
+// CheckEqual checks if two Descriptions are equal
 func (d *Description) CheckEqual(o *Description) error {
 	if len(d.Fields) != len(o.Fields) {
 		return fmt.Errorf(
@@ -139,7 +163,7 @@ func (d *Description) CheckEqual(o *Description) error {
 	return nil
 }
 
-// Create a New Description.
+// New creates a new Description
 func New() *Description {
 	fd := map[string]*Field{}
 	return &Description{fd}
@@ -189,12 +213,13 @@ func newFieldDescriptionJ(fd *Field) *fieldJ {
 	}
 }
 
+// String outputs a string representation of the field
 func (fd *Field) String() string {
 	return fmt.Sprintf("Kind: %s, Min: %s, Max: %s, MaxDP: %d, Values: %v",
 		fd.Kind, fd.Min, fd.Max, fd.MaxDP, fd.Values)
 }
 
-// Analyse this record
+// NextRecord updates the description after analysing the supplied record
 func (d *Description) NextRecord(record ddataset.Record) {
 	if len(d.Fields) == 0 {
 		for field, value := range record {
