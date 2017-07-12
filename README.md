@@ -4,6 +4,7 @@ A Go package to find simple rules in data to meet user specified goals
 
 Requirements
 ------------
+* [ddataset](https://github.com/lawrencewoodman/ddataset) package
 * [dexpr](https://github.com/lawrencewoodman/dexpr) package
 * [dlit](https://github.com/lawrencewoodman/dlit) package
 
