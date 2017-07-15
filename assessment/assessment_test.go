@@ -1,4 +1,4 @@
-package rhkit
+package assessment
 
 import (
 	"errors"
@@ -7,6 +7,7 @@ import (
 	"github.com/vlifesystems/rhkit/aggregators"
 	"github.com/vlifesystems/rhkit/experiment"
 	"github.com/vlifesystems/rhkit/goal"
+	"github.com/vlifesystems/rhkit/internal/testhelpers"
 	"github.com/vlifesystems/rhkit/rule"
 	"reflect"
 	"testing"
@@ -424,7 +425,10 @@ func TestRefine(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: rule.NewInFV("band", makeStringsDlitSlice("4", "3", "2")),
+				Rule: rule.NewInFV(
+					"band",
+					testhelpers.MakeStringsDlitSlice("4", "3", "2"),
+				),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("149"),
 					"percentMatches": dlit.MustNew("49"),
@@ -437,7 +441,7 @@ func TestRefine(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: rule.NewInFV("team", makeStringsDlitSlice("a", "b")),
+				Rule: rule.NewInFV("team", testhelpers.MakeStringsDlitSlice("a", "b")),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("148"),
 					"percentMatches": dlit.MustNew("48"),
@@ -450,7 +454,10 @@ func TestRefine(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: rule.NewInFV("band", makeStringsDlitSlice("99", "23")),
+				Rule: rule.NewInFV(
+					"band",
+					testhelpers.MakeStringsDlitSlice("99", "23"),
+				),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("147"),
 					"percentMatches": dlit.MustNew("47"),
@@ -489,7 +496,7 @@ func TestRefine(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: rule.NewInFV("band", makeStringsDlitSlice("9", "2")),
+				Rule: rule.NewInFV("band", testhelpers.MakeStringsDlitSlice("9", "2")),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("144"),
 					"percentMatches": dlit.MustNew("44"),
@@ -557,9 +564,9 @@ func TestRefine(t *testing.T) {
 	}
 	wantRules := []rule.Rule{
 		rule.NewGEFV("band", dlit.MustNew(4)),
-		rule.NewInFV("band", makeStringsDlitSlice("4", "3", "2")),
-		rule.NewInFV("team", makeStringsDlitSlice("a", "b")),
-		rule.NewInFV("band", makeStringsDlitSlice("99", "23")),
+		rule.NewInFV("band", testhelpers.MakeStringsDlitSlice("4", "3", "2")),
+		rule.NewInFV("team", testhelpers.MakeStringsDlitSlice("a", "b")),
+		rule.NewInFV("band", testhelpers.MakeStringsDlitSlice("99", "23")),
 		rule.NewTrue(),
 	}
 	sortedAssessment.Refine()
@@ -1171,7 +1178,10 @@ func TestTruncateRuleAssessments(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: rule.NewInFV("band", makeStringsDlitSlice("4", "3", "2")),
+				Rule: rule.NewInFV(
+					"band",
+					testhelpers.MakeStringsDlitSlice("4", "3", "2"),
+				),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches": dlit.MustNew("4"),
 				},
@@ -1180,7 +1190,7 @@ func TestTruncateRuleAssessments(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: rule.NewInFV("team", makeStringsDlitSlice("a", "b")),
+				Rule: rule.NewInFV("team", testhelpers.MakeStringsDlitSlice("a", "b")),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches": dlit.MustNew("4"),
 				},
@@ -1189,7 +1199,10 @@ func TestTruncateRuleAssessments(t *testing.T) {
 				},
 			},
 			&RuleAssessment{
-				Rule: rule.NewInFV("band", makeStringsDlitSlice("99", "23")),
+				Rule: rule.NewInFV(
+					"band",
+					testhelpers.MakeStringsDlitSlice("99", "23"),
+				),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches": dlit.MustNew("4"),
 				},
@@ -1231,33 +1244,33 @@ func TestTruncateRuleAssessments(t *testing.T) {
 		{3,
 			[]rule.Rule{
 				rule.NewGEFV("band", dlit.MustNew(4)),
-				rule.NewInFV("band", makeStringsDlitSlice("4", "3", "2")),
+				rule.NewInFV("band", testhelpers.MakeStringsDlitSlice("4", "3", "2")),
 				rule.NewTrue(),
 			},
 		},
 		{4,
 			[]rule.Rule{
 				rule.NewGEFV("band", dlit.MustNew(4)),
-				rule.NewInFV("band", makeStringsDlitSlice("4", "3", "2")),
-				rule.NewInFV("team", makeStringsDlitSlice("a", "b")),
+				rule.NewInFV("band", testhelpers.MakeStringsDlitSlice("4", "3", "2")),
+				rule.NewInFV("team", testhelpers.MakeStringsDlitSlice("a", "b")),
 				rule.NewTrue(),
 			},
 		},
 		{5,
 			[]rule.Rule{
 				rule.NewGEFV("band", dlit.MustNew(4)),
-				rule.NewInFV("band", makeStringsDlitSlice("4", "3", "2")),
-				rule.NewInFV("team", makeStringsDlitSlice("a", "b")),
-				rule.NewInFV("band", makeStringsDlitSlice("99", "23")),
+				rule.NewInFV("band", testhelpers.MakeStringsDlitSlice("4", "3", "2")),
+				rule.NewInFV("team", testhelpers.MakeStringsDlitSlice("a", "b")),
+				rule.NewInFV("band", testhelpers.MakeStringsDlitSlice("99", "23")),
 				rule.NewTrue(),
 			},
 		},
 		{6,
 			[]rule.Rule{
 				rule.NewGEFV("band", dlit.MustNew(4)),
-				rule.NewInFV("band", makeStringsDlitSlice("4", "3", "2")),
-				rule.NewInFV("team", makeStringsDlitSlice("a", "b")),
-				rule.NewInFV("band", makeStringsDlitSlice("99", "23")),
+				rule.NewInFV("band", testhelpers.MakeStringsDlitSlice("4", "3", "2")),
+				rule.NewInFV("team", testhelpers.MakeStringsDlitSlice("a", "b")),
+				rule.NewInFV("band", testhelpers.MakeStringsDlitSlice("99", "23")),
 				rule.NewTrue(),
 			},
 		},

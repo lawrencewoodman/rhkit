@@ -1,4 +1,4 @@
-package rhkit
+package assessment
 
 import (
 	"fmt"

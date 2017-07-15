@@ -392,7 +392,7 @@ func TestDescriptionLoadJSON_errors(t *testing.T) {
 	}
 	for i, c := range cases {
 		_, err := LoadJSON(c.filename)
-		checkErrorMatch(
+		testhelpers.CheckErrorMatch(
 			t,
 			fmt.Sprintf("(%d) LoadJSON:", i),
 			err,
@@ -574,7 +574,12 @@ func TestDescriptionCheckEqual(t *testing.T) {
 	}
 	for i, c := range cases {
 		got := descriptions[c.ndxA].CheckEqual(descriptions[c.ndxB])
-		checkErrorMatch(t, fmt.Sprintf("(%d) CheckEqual: ", i), got, c.want)
+		testhelpers.CheckErrorMatch(
+			t,
+			fmt.Sprintf("(%d) CheckEqual: ", i),
+			got,
+			c.want,
+		)
 	}
 }
 
@@ -724,7 +729,12 @@ func TestFieldCheckEqual(t *testing.T) {
 	}
 	for i, c := range cases {
 		got := fields[c.ndxA].checkEqual(fields[c.ndxB])
-		checkErrorMatch(t, fmt.Sprintf("(%d) CheckEqual: ", i), got, c.want)
+		testhelpers.CheckErrorMatch(
+			t,
+			fmt.Sprintf("(%d) CheckEqual: ", i),
+			got,
+			c.want,
+		)
 	}
 }
 
@@ -828,40 +838,6 @@ func TestDescriptionCalcFieldNum_panic(t *testing.T) {
 /*************************************
  *  Helper functions
  *************************************/
-func checkErrorMatch(t *testing.T, context string, got, want error) {
-	if got == nil && want == nil {
-		return
-	}
-	if got == nil || want == nil {
-		t.Errorf("%s got err: %s, want : %s", context, got, want)
-	}
-	if perr, ok := want.(*os.PathError); ok {
-		if err := checkPathErrorMatch(got, perr); err != nil {
-			t.Errorf("%s %s", context, err)
-		}
-	}
-	if got.Error() != want.Error() {
-		t.Errorf("%s got err: %s, want : %s", context, got, want)
-	}
-}
-
-func checkPathErrorMatch(checkErr error, wantErr *os.PathError) error {
-	perr, ok := checkErr.(*os.PathError)
-	if !ok {
-		return fmt.Errorf("got err type: %T, want error type: os.PathError",
-			checkErr)
-	}
-	if perr.Op != wantErr.Op {
-		return fmt.Errorf("got perr.Op: %s, want: %s", perr.Op, wantErr.Op)
-	}
-	if filepath.Clean(perr.Path) != filepath.Clean(wantErr.Path) {
-		return fmt.Errorf("got perr.Path: %s, want: %s", perr.Path, wantErr.Path)
-	}
-	if perr.Err != wantErr.Err {
-		return fmt.Errorf("got perr.Err: %s, want: %s", perr.Err, wantErr.Err)
-	}
-	return nil
-}
 
 type FailingDataset struct {
 	dataset  ddataset.Dataset

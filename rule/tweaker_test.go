@@ -5,6 +5,7 @@ import (
 	"github.com/vlifesystems/rhkit/description"
 	"github.com/vlifesystems/rhkit/internal"
 	"github.com/vlifesystems/rhkit/internal/fieldtype"
+	"github.com/vlifesystems/rhkit/internal/testhelpers"
 	"testing"
 )
 
@@ -33,7 +34,10 @@ func TestTweak_1(t *testing.T) {
 		NewGEFV("flow", dlit.MustNew(70.20)),
 		NewGEFV("flow", dlit.MustNew(100.5)),
 		NewGTFF("age", "band"),
-		NewInFV("stage", makeStringsDlitSlice("20", "21", "22")),
+		NewInFV(
+			"stage",
+			testhelpers.MakeStringsDlitSlice("20", "21", "22"),
+		),
 	}
 	gotRules := Tweak(1, rulesIn, inputDescription)
 
@@ -344,7 +348,10 @@ func TestTweak_5(t *testing.T) {
 		NewGEFV("flow", dlit.MustNew(70.20)),
 		NewGEFV("flow", dlit.MustNew(100.5)),
 		NewGTFF("age", "band"),
-		NewInFV("stage", makeStringsDlitSlice("20", "21", "22")),
+		NewInFV(
+			"stage",
+			testhelpers.MakeStringsDlitSlice("20", "21", "22"),
+		),
 	}
 	gotRules := Tweak(1, rulesIn, inputDescription)
 
@@ -370,12 +377,4 @@ func printTestPurposes(t *testing.T, testPurposes []string) {
 	for _, p := range testPurposes[1:] {
 		t.Errorf("      %s\n", p)
 	}
-}
-
-func makeStringsDlitSlice(strings ...string) []*dlit.Literal {
-	r := make([]*dlit.Literal, len(strings))
-	for i, s := range strings {
-		r[i] = dlit.NewString(s)
-	}
-	return r
 }

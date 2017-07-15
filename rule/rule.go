@@ -89,8 +89,8 @@ func (e IncompatibleTypesRuleError) Error() string {
 }
 
 // Generate generates rules for rules that have registered a generator.
-// complexity is used to indicate how complex and in turn how many rules
-// to produce it takes a number 1 to 10.
+// complexity is used to indicate how complex rules should be and therefore
+// has an impact on how many rules are generated.
 func Generate(
 	inputDescription *description.Description,
 	ruleFields []string,

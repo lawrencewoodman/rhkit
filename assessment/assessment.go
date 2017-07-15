@@ -17,7 +17,8 @@
 	<http://www.gnu.org/licenses/>.
 */
 
-package rhkit
+// Package assessment assesses rules to meet user defined goals
+package assessment
 
 import (
 	"errors"

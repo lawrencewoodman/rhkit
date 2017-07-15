@@ -17,7 +17,7 @@
 	<http://www.gnu.org/licenses/>.
 */
 
-package rhkit
+package assessment
 
 import (
 	"errors"

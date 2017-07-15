@@ -7,6 +7,7 @@ import (
 	"github.com/vlifesystems/rhkit/internal"
 	"github.com/vlifesystems/rhkit/internal/dexprfuncs"
 	"github.com/vlifesystems/rhkit/internal/fieldtype"
+	"github.com/vlifesystems/rhkit/internal/testhelpers"
 	"testing"
 )
 
@@ -352,7 +353,7 @@ func TestGenerate(t *testing.T) {
 		NewNEFV("team", dlit.MustNew("a")),
 		NewEQFF("team", "teamOut"),
 		NewNEFF("team", "teamOut"),
-		NewInFV("teamOut", makeStringsDlitSlice("a", "d")),
+		NewInFV("teamOut", testhelpers.MakeStringsDlitSlice("a", "d")),
 		NewEQFV("level", dlit.MustNew(0)),
 		NewEQFV("level", dlit.MustNew(1)),
 		NewNEFV("level", dlit.MustNew(0)),
@@ -365,8 +366,8 @@ func TestGenerate(t *testing.T) {
 		NewEQFF("level", "position"),
 		NewGEFV("level", dlit.MustNew(1)),
 		NewLEFV("level", dlit.MustNew(4)),
-		NewInFV("level", makeStringsDlitSlice("0", "1")),
-		NewInFV("level", makeStringsDlitSlice("0", "3")),
+		NewInFV("level", testhelpers.MakeStringsDlitSlice("0", "1")),
+		NewInFV("level", testhelpers.MakeStringsDlitSlice("0", "3")),
 		NewGEFV("flow", dlit.MustNew(2.1)),
 		NewGEFV("flow", dlit.MustNew(3.68)),
 		NewLEFV("flow", dlit.MustNew(4.2)),
@@ -470,12 +471,18 @@ func TestCombine(t *testing.T) {
 		{in: []Rule{
 			NewEQFV("group", dlit.MustNew("a")),
 			NewGEFV("band", dlit.MustNew(4)),
-			NewInFV("team", makeStringsDlitSlice("red", "green", "blue")),
+			NewInFV(
+				"team",
+				testhelpers.MakeStringsDlitSlice("red", "green", "blue"),
+			),
 		},
 			want: []Rule{
 				MustNewAnd(
 					NewGEFV("band", dlit.MustNew(4)),
-					NewInFV("team", makeStringsDlitSlice("red", "green", "blue")),
+					NewInFV(
+						"team",
+						testhelpers.MakeStringsDlitSlice("red", "green", "blue"),
+					),
 				),
 				MustNewAnd(
 					NewGEFV("band", dlit.MustNew(4)),
@@ -483,7 +490,10 @@ func TestCombine(t *testing.T) {
 				),
 				MustNewOr(
 					NewGEFV("band", dlit.MustNew(4)),
-					NewInFV("team", makeStringsDlitSlice("red", "green", "blue")),
+					NewInFV(
+						"team",
+						testhelpers.MakeStringsDlitSlice("red", "green", "blue"),
+					),
 				),
 				MustNewOr(
 					NewGEFV("band", dlit.MustNew(4)),
@@ -491,11 +501,17 @@ func TestCombine(t *testing.T) {
 				),
 				MustNewAnd(
 					NewEQFV("group", dlit.MustNew("a")),
-					NewInFV("team", makeStringsDlitSlice("red", "green", "blue")),
+					NewInFV(
+						"team",
+						testhelpers.MakeStringsDlitSlice("red", "green", "blue"),
+					),
 				),
 				MustNewOr(
 					NewEQFV("group", dlit.MustNew("a")),
-					NewInFV("team", makeStringsDlitSlice("red", "green", "blue")),
+					NewInFV(
+						"team",
+						testhelpers.MakeStringsDlitSlice("red", "green", "blue"),
+					),
 				),
 			},
 		},
@@ -529,26 +545,55 @@ func TestCombine(t *testing.T) {
 			},
 		},
 		{in: []Rule{
-			NewInFV("team", makeStringsDlitSlice("pink", "yellow", "blue")),
-			NewInFV("team", makeStringsDlitSlice("red", "green", "blue")),
+			NewInFV(
+				"team",
+				testhelpers.MakeStringsDlitSlice("pink", "yellow", "blue"),
+			),
+			NewInFV(
+				"team",
+				testhelpers.MakeStringsDlitSlice("red", "green", "blue"),
+			),
 		},
 			want: []Rule{
-				NewInFV("team",
-					makeStringsDlitSlice("pink", "yellow", "blue", "red", "green")),
+				NewInFV(
+					"team",
+					testhelpers.MakeStringsDlitSlice(
+						"pink", "yellow", "blue",
+						"red", "green",
+					),
+				),
 			},
 		},
 		{in: []Rule{
-			NewInFV("team", makeStringsDlitSlice("pink", "yellow", "blue")),
-			NewInFV("group", makeStringsDlitSlice("red", "green", "blue")),
+			NewInFV(
+				"team",
+				testhelpers.MakeStringsDlitSlice("pink", "yellow", "blue"),
+			),
+			NewInFV(
+				"group",
+				testhelpers.MakeStringsDlitSlice("red", "green", "blue"),
+			),
 		},
 			want: []Rule{
 				MustNewAnd(
-					NewInFV("group", makeStringsDlitSlice("red", "green", "blue")),
-					NewInFV("team", makeStringsDlitSlice("pink", "yellow", "blue")),
+					NewInFV(
+						"group",
+						testhelpers.MakeStringsDlitSlice("red", "green", "blue"),
+					),
+					NewInFV(
+						"team",
+						testhelpers.MakeStringsDlitSlice("pink", "yellow", "blue"),
+					),
 				),
 				MustNewOr(
-					NewInFV("group", makeStringsDlitSlice("red", "green", "blue")),
-					NewInFV("team", makeStringsDlitSlice("pink", "yellow", "blue")),
+					NewInFV(
+						"group",
+						testhelpers.MakeStringsDlitSlice("red", "green", "blue"),
+					),
+					NewInFV(
+						"team",
+						testhelpers.MakeStringsDlitSlice("pink", "yellow", "blue"),
+					),
 				),
 			},
 		},

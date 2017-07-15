@@ -1,10 +1,12 @@
-package rhkit
+package assessment
 
 import (
+	"fmt"
 	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/aggregators"
 	"github.com/vlifesystems/rhkit/goal"
+	"github.com/vlifesystems/rhkit/internal/testhelpers"
 	"github.com/vlifesystems/rhkit/rule"
 	"testing"
 )
@@ -139,11 +141,11 @@ func TestNextRecord_Errors(t *testing.T) {
 		ra := newRuleAssessor(c.rule, c.aggregators, goals)
 		for _, record := range records {
 			err := ra.NextRecord(record)
-			if !errorMatch(c.wantErr, err) {
-				t.Errorf("NextRecord(%v) rule: %v, aggregators: %v, goals: %v err: %v, wantErr: %v",
-					record, c.rule, c.aggregators, goals, err, c.wantErr)
-				return
-			}
+			context := fmt.Sprintf(
+				"NextRecord(%v) rule: %v, aggregators: %v, goals: %v err: %v, wantErr: %v",
+				record, c.rule, c.aggregators, goals, err, c.wantErr,
+			)
+			testhelpers.CheckErrorMatch(t, context, err, c.wantErr)
 		}
 	}
 }
