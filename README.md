@@ -13,6 +13,7 @@ Contributing
 [![Build Status](https://travis-ci.org/vlifesystems/rhkit.svg?branch=master)](https://travis-ci.org/vlifesystems/rhkit)
 [![Build status](https://ci.appveyor.com/api/projects/status/s8wuof8su9v6ty7k?svg=true)](https://ci.appveyor.com/project/lawrencewoodman/rhkit)
 [![Coverage Status](https://coveralls.io/repos/vlifesystems/rhkit/badge.svg?branch=master)](https://coveralls.io/r/vlifesystems/rhkit?branch=master)
+[![GoDoc](https://godoc.org/github.com/vlifesystems/rhkit?status.svg)](https://godoc.org/github.com/vlifesystems/rhkit)
 [![Go Report Card](https://goreportcard.com/badge/github.com/vlifesystems/rhkit)](https://goreportcard.com/report/github.com/vlifesystems/rhkit)
 
 If you want to improve this program make a pull request to the [repo](https://github.com/vlifesystems/rhkit) on github.  Please put any pull requests in a separate branch to ease integration and add a test to prove that it works.  If you find a bug, please report it at the project's [issues tracker](https://github.com/vlifesystems/rhkit/issues) also on github.
