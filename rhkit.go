@@ -54,7 +54,7 @@ func (e MergeError) Error() string {
 	return "problem merging rules: " + e.Err.Error()
 }
 
-// Process processes an Experiment and returns and assessment
+// Process processes an Experiment and returns an assessment
 func Process(
 	experiment *experiment.Experiment,
 	maxNumRules int,
