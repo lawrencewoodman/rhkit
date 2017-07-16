@@ -69,7 +69,7 @@ If you find a bug, please report it at the project's [issues tracker](https://gi
 
 Licence
 -------
-Copyright (C) 2016 [vLife Systems Ltd](http://vlifesystems.com)
+Copyright (C) 2016-2017 [vLife Systems Ltd](http://vlifesystems.com)
 
 rhkit is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
