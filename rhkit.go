@@ -31,11 +31,12 @@ import (
 
 var ErrNoRulesGenerated = errors.New("no rules generated")
 
-type DescribingError struct {
+// DescribeError indicates an error describing a Dataset
+type DescribeError struct {
 	Err error
 }
 
-func (e DescribingError) Error() string {
+func (e DescribeError) Error() string {
 	return "problem describing dataset: " + e.Err.Error()
 }
 
@@ -65,7 +66,7 @@ func Process(
 	var err error
 	fieldDescriptions, err := description.DescribeDataset(experiment.Dataset)
 	if err != nil {
-		return nil, DescribingError{Err: err}
+		return nil, DescribeError{Err: err}
 	}
 	rules := rule.Generate(
 		fieldDescriptions,
