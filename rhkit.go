@@ -17,7 +17,8 @@
 	<http://www.gnu.org/licenses/>.
 */
 
-// rhkit is a package to find rules in a Dataset to satisfy user defined goals
+// package rhkit is used to find rules in a Dataset to satisfy user defined
+// goals
 package rhkit
 
 import (
