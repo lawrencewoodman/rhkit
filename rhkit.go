@@ -48,12 +48,13 @@ func (e AssessError) Error() string {
 	return "problem assessing rules: " + e.Err.Error()
 }
 
+// MergeError indicates an error Merging assessments
 type MergeError struct {
 	Err error
 }
 
 func (e MergeError) Error() string {
-	return "problem merging rules: " + e.Err.Error()
+	return "problem merging assessments: " + e.Err.Error()
 }
 
 // Process processes an Experiment and returns an assessment
