@@ -29,6 +29,7 @@ import (
 	"github.com/vlifesystems/rhkit/rule"
 )
 
+// ErrNoRulesGenerated indicates that no rules were generated
 var ErrNoRulesGenerated = errors.New("no rules generated")
 
 // DescribeError indicates an error describing a Dataset
@@ -40,6 +41,7 @@ func (e DescribeError) Error() string {
 	return "problem describing dataset: " + e.Err.Error()
 }
 
+// AssessError indicates an error assessing rules
 type AssessError struct {
 	Err error
 }
