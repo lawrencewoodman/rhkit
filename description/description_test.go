@@ -831,7 +831,7 @@ func TestDescriptionCalcFieldNum_panic(t *testing.T) {
 	}()
 	got := CalcFieldNum(description.Fields, field)
 	if !paniced {
-		t.Errorf("CalcFieldNum: got: %s, failed to panic with: %s", got, wantPanic)
+		t.Errorf("CalcFieldNum: got: %d, failed to panic with: %s", got, wantPanic)
 	}
 }
 
