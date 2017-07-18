@@ -1,4 +1,4 @@
-The MIT Licence
+The MIT License
 ===============
 
 Copyright (C) 2016-2017 [vLife Systems Ltd](http://vlifesystems.com)
