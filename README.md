@@ -72,4 +72,4 @@ Licence
 -------
 Copyright (C) 2016-2017 [vLife Systems Ltd](http://vlifesystems.com)
 
-Licensed under an MIT licence.  Please see LICENCE.md for details.
+Licensed under an MIT licence.  Please see [LICENCE.md](https://github.com/vlifesystems/rhkit/blob/master/LICENCE.md) for details.
