@@ -381,9 +381,9 @@ func TestDescriptionLoadJSON_errors(t *testing.T) {
 	}{
 		{filename: filepath.Join("fixtures", "nonexistant.json"),
 			wantErr: &os.PathError{
-				"open",
-				filepath.Join("fixtures", "nonexistant.json"),
-				syscall.ENOENT,
+				Op:   "open",
+				Path: filepath.Join("fixtures", "nonexistant.json"),
+				Err:  syscall.ENOENT,
 			},
 		},
 		{filename: filepath.Join("fixtures", "broken.json"),
