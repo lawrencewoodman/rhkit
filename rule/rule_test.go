@@ -280,68 +280,68 @@ func TestReduceDP(t *testing.T) {
 func TestGenerate(t *testing.T) {
 	inputDescription := &description.Description{
 		map[string]*description.Field{
-			"team": &description.Field{
+			"team": {
 				Kind: fieldtype.String,
 				Values: map[string]description.Value{
-					"a": description.Value{dlit.NewString("a"), 3},
-					"b": description.Value{dlit.NewString("b"), 3},
-					"c": description.Value{dlit.NewString("c"), 3},
+					"a": {dlit.NewString("a"), 3},
+					"b": {dlit.NewString("b"), 3},
+					"c": {dlit.NewString("c"), 3},
 				},
 			},
-			"teamOut": &description.Field{
+			"teamOut": {
 				Kind: fieldtype.String,
 				Values: map[string]description.Value{
-					"a": description.Value{dlit.NewString("a"), 3},
-					"c": description.Value{dlit.NewString("c"), 1},
-					"d": description.Value{dlit.NewString("d"), 3},
-					"e": description.Value{dlit.NewString("e"), 3},
-					"f": description.Value{dlit.NewString("f"), 3},
+					"a": {dlit.NewString("a"), 3},
+					"c": {dlit.NewString("c"), 1},
+					"d": {dlit.NewString("d"), 3},
+					"e": {dlit.NewString("e"), 3},
+					"f": {dlit.NewString("f"), 3},
 				},
 			},
-			"level": &description.Field{
+			"level": {
 				Kind:  fieldtype.Number,
 				Min:   dlit.MustNew(0),
 				Max:   dlit.MustNew(5),
 				MaxDP: 0,
 				Values: map[string]description.Value{
-					"0": description.Value{dlit.NewString("0"), 3},
-					"1": description.Value{dlit.NewString("1"), 3},
-					"2": description.Value{dlit.NewString("2"), 1},
-					"3": description.Value{dlit.NewString("3"), 3},
-					"4": description.Value{dlit.NewString("4"), 3},
-					"5": description.Value{dlit.NewString("5"), 3},
+					"0": {dlit.NewString("0"), 3},
+					"1": {dlit.NewString("1"), 3},
+					"2": {dlit.NewString("2"), 1},
+					"3": {dlit.NewString("3"), 3},
+					"4": {dlit.NewString("4"), 3},
+					"5": {dlit.NewString("5"), 3},
 				},
 			},
-			"flow": &description.Field{
+			"flow": {
 				Kind:  fieldtype.Number,
 				Min:   dlit.MustNew(0),
 				Max:   dlit.MustNew(10.5),
 				MaxDP: 2,
 				Values: map[string]description.Value{
-					"0.0":  description.Value{dlit.NewString("0.0"), 3},
-					"2.34": description.Value{dlit.NewString("2.34"), 3},
-					"10.5": description.Value{dlit.NewString("10.5"), 3},
+					"0.0":  {dlit.NewString("0.0"), 3},
+					"2.34": {dlit.NewString("2.34"), 3},
+					"10.5": {dlit.NewString("10.5"), 3},
 				},
 			},
-			"position": &description.Field{
+			"position": {
 				Kind:  fieldtype.Number,
 				Min:   dlit.MustNew(1),
 				Max:   dlit.MustNew(13),
 				MaxDP: 0,
 				Values: map[string]description.Value{
-					"1":  description.Value{dlit.NewString("1"), 3},
-					"2":  description.Value{dlit.NewString("2"), 3},
-					"3":  description.Value{dlit.NewString("3"), 3},
-					"4":  description.Value{dlit.NewString("4"), 3},
-					"5":  description.Value{dlit.NewString("5"), 3},
-					"6":  description.Value{dlit.NewString("6"), 3},
-					"7":  description.Value{dlit.NewString("7"), 3},
-					"8":  description.Value{dlit.NewString("8"), 3},
-					"9":  description.Value{dlit.NewString("9"), 3},
-					"10": description.Value{dlit.NewString("10"), 3},
-					"11": description.Value{dlit.NewString("11"), 3},
-					"12": description.Value{dlit.NewString("12"), 3},
-					"13": description.Value{dlit.NewString("13"), 3},
+					"1":  {dlit.NewString("1"), 3},
+					"2":  {dlit.NewString("2"), 3},
+					"3":  {dlit.NewString("3"), 3},
+					"4":  {dlit.NewString("4"), 3},
+					"5":  {dlit.NewString("5"), 3},
+					"6":  {dlit.NewString("6"), 3},
+					"7":  {dlit.NewString("7"), 3},
+					"8":  {dlit.NewString("8"), 3},
+					"9":  {dlit.NewString("9"), 3},
+					"10": {dlit.NewString("10"), 3},
+					"11": {dlit.NewString("11"), 3},
+					"12": {dlit.NewString("12"), 3},
+					"13": {dlit.NewString("13"), 3},
 				},
 			},
 		}}
@@ -389,18 +389,18 @@ func TestGenerate(t *testing.T) {
 func TestGenerate_combinations(t *testing.T) {
 	inputDescription := &description.Description{
 		map[string]*description.Field{
-			"directionIn": &description.Field{
+			"directionIn": {
 				Kind: fieldtype.String,
 				Values: map[string]description.Value{
-					"gogledd": description.Value{dlit.MustNew("gogledd"), 3},
-					"de":      description.Value{dlit.MustNew("de"), 3},
+					"gogledd": {dlit.MustNew("gogledd"), 3},
+					"de":      {dlit.MustNew("de"), 3},
 				},
 			},
-			"directionOut": &description.Field{
+			"directionOut": {
 				Kind: fieldtype.String,
 				Values: map[string]description.Value{
-					"dwyrain":   description.Value{dlit.MustNew("dwyrain"), 3},
-					"gorllewin": description.Value{dlit.MustNew("gorllewin"), 3},
+					"dwyrain":   {dlit.MustNew("dwyrain"), 3},
+					"gorllewin": {dlit.MustNew("gorllewin"), 3},
 				},
 			},
 		}}

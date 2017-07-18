@@ -173,12 +173,12 @@ func TestMulGEFTweak(t *testing.T) {
 	}{
 		{description: &description.Description{
 			map[string]*description.Field{
-				"balance": &description.Field{
+				"balance": {
 					Kind: fieldtype.Number,
 					Min:  dlit.MustNew(250),
 					Max:  dlit.MustNew(500),
 				},
-				"income": &description.Field{
+				"income": {
 					Kind: fieldtype.Number,
 					Min:  dlit.MustNew(250),
 					Max:  dlit.MustNew(500),
@@ -195,12 +195,12 @@ func TestMulGEFTweak(t *testing.T) {
 		},
 		{description: &description.Description{
 			map[string]*description.Field{
-				"balance": &description.Field{
+				"balance": {
 					Kind: fieldtype.Number,
 					Min:  dlit.MustNew(250),
 					Max:  dlit.MustNew(300),
 				},
-				"income": &description.Field{
+				"income": {
 					Kind: fieldtype.Number,
 					Min:  dlit.MustNew(540),
 					Max:  dlit.MustNew(700),
@@ -217,12 +217,12 @@ func TestMulGEFTweak(t *testing.T) {
 		},
 		{description: &description.Description{
 			map[string]*description.Field{
-				"balance": &description.Field{
+				"balance": {
 					Kind: fieldtype.Number,
 					Min:  dlit.MustNew(200),
 					Max:  dlit.MustNew(300),
 				},
-				"income": &description.Field{
+				"income": {
 					Kind: fieldtype.Number,
 					Min:  dlit.MustNew(300),
 					Max:  dlit.MustNew(510),
@@ -239,13 +239,13 @@ func TestMulGEFTweak(t *testing.T) {
 		},
 		{description: &description.Description{
 			map[string]*description.Field{
-				"balance": &description.Field{
+				"balance": {
 					Kind:  fieldtype.Number,
 					Min:   dlit.MustNew(200),
 					Max:   dlit.MustNew(300),
 					MaxDP: 0,
 				},
-				"income": &description.Field{
+				"income": {
 					Kind:  fieldtype.Number,
 					Min:   dlit.MustNew(300.924),
 					Max:   dlit.MustNew(505),
@@ -263,12 +263,12 @@ func TestMulGEFTweak(t *testing.T) {
 		},
 		{description: &description.Description{
 			map[string]*description.Field{
-				"balance": &description.Field{
+				"balance": {
 					Kind: fieldtype.Number,
 					Min:  dlit.MustNew(200),
 					Max:  dlit.MustNew(300),
 				},
-				"income": &description.Field{
+				"income": {
 					Kind: fieldtype.Number,
 					Min:  dlit.MustNew(300),
 					Max:  dlit.MustNew(700),
@@ -326,12 +326,12 @@ func TestGenerateMulGEF(t *testing.T) {
 	}{
 		{description: &description.Description{
 			map[string]*description.Field{
-				"balance": &description.Field{
+				"balance": {
 					Kind: fieldtype.Number,
 					Min:  dlit.MustNew(250),
 					Max:  dlit.MustNew(500),
 				},
-				"income": &description.Field{
+				"income": {
 					Kind: fieldtype.Number,
 					Min:  dlit.MustNew(250),
 					Max:  dlit.MustNew(500),
@@ -348,12 +348,12 @@ func TestGenerateMulGEF(t *testing.T) {
 		},
 		{description: &description.Description{
 			map[string]*description.Field{
-				"balance": &description.Field{
+				"balance": {
 					Kind: fieldtype.Number,
 					Min:  dlit.MustNew(250),
 					Max:  dlit.MustNew(300),
 				},
-				"income": &description.Field{
+				"income": {
 					Kind: fieldtype.Number,
 					Min:  dlit.MustNew(540),
 					Max:  dlit.MustNew(700),
@@ -370,12 +370,12 @@ func TestGenerateMulGEF(t *testing.T) {
 		},
 		{description: &description.Description{
 			map[string]*description.Field{
-				"balance": &description.Field{
+				"balance": {
 					Kind: fieldtype.Number,
 					Min:  dlit.MustNew(200),
 					Max:  dlit.MustNew(300),
 				},
-				"income": &description.Field{
+				"income": {
 					Kind: fieldtype.Number,
 					Min:  dlit.MustNew(300),
 					Max:  dlit.MustNew(510),
@@ -392,12 +392,12 @@ func TestGenerateMulGEF(t *testing.T) {
 		},
 		{description: &description.Description{
 			map[string]*description.Field{
-				"balance": &description.Field{
+				"balance": {
 					Kind: fieldtype.Number,
 					Min:  dlit.MustNew(200),
 					Max:  dlit.MustNew(300),
 				},
-				"income": &description.Field{
+				"income": {
 					Kind: fieldtype.Number,
 					Min:  dlit.MustNew(590),
 					Max:  dlit.MustNew(510),
@@ -414,13 +414,13 @@ func TestGenerateMulGEF(t *testing.T) {
 		},
 		{description: &description.Description{
 			map[string]*description.Field{
-				"balance": &description.Field{
+				"balance": {
 					Kind:  fieldtype.Number,
 					Min:   dlit.MustNew(200.172),
 					Max:   dlit.MustNew(300),
 					MaxDP: 0,
 				},
-				"income": &description.Field{
+				"income": {
 					Kind:  fieldtype.Number,
 					Min:   dlit.MustNew(597.924),
 					Max:   dlit.MustNew(505),
@@ -438,12 +438,12 @@ func TestGenerateMulGEF(t *testing.T) {
 		},
 		{description: &description.Description{
 			map[string]*description.Field{
-				"balance": &description.Field{
+				"balance": {
 					Kind: fieldtype.Number,
 					Min:  dlit.MustNew(1),
 					Max:  dlit.MustNew(2),
 				},
-				"income": &description.Field{
+				"income": {
 					Kind: fieldtype.Number,
 					Min:  dlit.MustNew(1),
 					Max:  dlit.MustNew(3),
@@ -460,12 +460,12 @@ func TestGenerateMulGEF(t *testing.T) {
 		},
 		{description: &description.Description{
 			map[string]*description.Field{
-				"balance": &description.Field{
+				"balance": {
 					Kind: fieldtype.Number,
 					Min:  dlit.MustNew(200),
 					Max:  dlit.MustNew(300),
 				},
-				"income": &description.Field{
+				"income": {
 					Kind: fieldtype.Number,
 					Min:  dlit.MustNew(590),
 					Max:  dlit.MustNew(510),
@@ -514,20 +514,20 @@ func TestGenerateMulGEF_multiple_fields(t *testing.T) {
 	fieldA := "balance"
 	description := &description.Description{
 		map[string]*description.Field{
-			"balance": &description.Field{
+			"balance": {
 				Kind: fieldtype.Number,
 				Min:  dlit.MustNew(250),
 				Max:  dlit.MustNew(500),
 			},
-			"income": &description.Field{
+			"income": {
 				Kind: fieldtype.Number,
 				Min:  dlit.MustNew(250),
 				Max:  dlit.MustNew(500),
 			},
-			"day": &description.Field{
+			"day": {
 				Kind: fieldtype.String,
 			},
-			"reserve": &description.Field{
+			"reserve": {
 				Kind: fieldtype.Number,
 				Min:  dlit.MustNew(660),
 				Max:  dlit.MustNew(990),

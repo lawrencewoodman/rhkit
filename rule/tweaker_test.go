@@ -13,13 +13,13 @@ func TestTweak_1(t *testing.T) {
 	testPurposes := []string{"Ensure that results are only from tweakable rules"}
 	inputDescription := &description.Description{
 		map[string]*description.Field{
-			"band": &description.Field{
+			"band": {
 				fieldtype.Number, dlit.MustNew(3), dlit.MustNew(40), 0,
 				map[string]description.Value{}, 0},
-			"age": &description.Field{
+			"age": {
 				fieldtype.Number, dlit.MustNew(4), dlit.MustNew(90), 0,
 				map[string]description.Value{}, 0},
-			"flow": &description.Field{
+			"flow": {
 				fieldtype.Number, dlit.MustNew(50), dlit.MustNew(400), 2,
 				map[string]description.Value{}, 0},
 		}}
@@ -105,7 +105,7 @@ func TestTweak_2(t *testing.T) {
 	}
 	inputDescription := &description.Description{
 		map[string]*description.Field{
-			"age": &description.Field{
+			"age": {
 				fieldtype.Number, dlit.MustNew(10), dlit.MustNew(80), 0,
 				map[string]description.Value{}, 0,
 			},
@@ -187,7 +187,7 @@ func TestTweak_3(t *testing.T) {
 	}
 	inputDescription := &description.Description{
 		map[string]*description.Field{
-			"flow": &description.Field{
+			"flow": {
 				Kind:      fieldtype.Number,
 				Min:       dlit.MustNew(10),
 				Max:       dlit.MustNew(80),
@@ -296,7 +296,7 @@ func TestTweak_4(t *testing.T) {
 	}
 	inputDescription := &description.Description{
 		map[string]*description.Field{
-			"flow": &description.Field{
+			"flow": {
 				fieldtype.Number, dlit.MustNew(4), dlit.MustNew(30), 6,
 				map[string]description.Value{}, 0,
 			},
@@ -326,13 +326,13 @@ func TestTweak_5(t *testing.T) {
 	testPurposes := []string{"Ensure that are rules are unique"}
 	inputDescription := &description.Description{
 		map[string]*description.Field{
-			"band": &description.Field{
+			"band": {
 				fieldtype.Number, dlit.MustNew(3), dlit.MustNew(40), 0,
 				map[string]description.Value{}, 0},
-			"age": &description.Field{
+			"age": {
 				fieldtype.Number, dlit.MustNew(4), dlit.MustNew(30), 0,
 				map[string]description.Value{}, 0},
-			"flow": &description.Field{
+			"flow": {
 				fieldtype.Number, dlit.MustNew(50), dlit.MustNew(400), 2,
 				map[string]description.Value{}, 0},
 		}}

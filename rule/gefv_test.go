@@ -118,7 +118,7 @@ func TestGEFVTweak(t *testing.T) {
 	}{
 		{description: &description.Description{
 			map[string]*description.Field{
-				"income": &description.Field{
+				"income": {
 					Kind:  fieldtype.Number,
 					Min:   dlit.MustNew(500),
 					Max:   dlit.MustNew(1000),
@@ -136,7 +136,7 @@ func TestGEFVTweak(t *testing.T) {
 		},
 		{description: &description.Description{
 			map[string]*description.Field{
-				"income": &description.Field{
+				"income": {
 					Kind:  fieldtype.Number,
 					Min:   dlit.MustNew(790),
 					Max:   dlit.MustNew(1000),
@@ -154,7 +154,7 @@ func TestGEFVTweak(t *testing.T) {
 		},
 		{description: &description.Description{
 			map[string]*description.Field{
-				"income": &description.Field{
+				"income": {
 					Kind:  fieldtype.Number,
 					Min:   dlit.MustNew(500),
 					Max:   dlit.MustNew(810),
@@ -172,7 +172,7 @@ func TestGEFVTweak(t *testing.T) {
 		},
 		{description: &description.Description{
 			map[string]*description.Field{
-				"income": &description.Field{
+				"income": {
 					Kind:  fieldtype.Number,
 					Min:   dlit.MustNew(799),
 					Max:   dlit.MustNew(801),
@@ -190,7 +190,7 @@ func TestGEFVTweak(t *testing.T) {
 		},
 		{description: &description.Description{
 			map[string]*description.Field{
-				"income": &description.Field{
+				"income": {
 					Kind:  fieldtype.Number,
 					Min:   dlit.MustNew(500),
 					Max:   dlit.MustNew(1000),
@@ -276,7 +276,7 @@ func TestGenerateGEFV(t *testing.T) {
 	}{
 		{description: &description.Description{
 			map[string]*description.Field{
-				"income": &description.Field{
+				"income": {
 					Kind:  fieldtype.Number,
 					Min:   dlit.MustNew(500),
 					Max:   dlit.MustNew(1000),
@@ -294,7 +294,7 @@ func TestGenerateGEFV(t *testing.T) {
 		},
 		{description: &description.Description{
 			map[string]*description.Field{
-				"income": &description.Field{
+				"income": {
 					Kind:  fieldtype.Number,
 					Min:   dlit.MustNew(790.73),
 					Max:   dlit.MustNew(1000),
@@ -312,7 +312,7 @@ func TestGenerateGEFV(t *testing.T) {
 		},
 		{description: &description.Description{
 			map[string]*description.Field{
-				"income": &description.Field{
+				"income": {
 					Kind:  fieldtype.Number,
 					Min:   dlit.MustNew(799),
 					Max:   dlit.MustNew(801),
@@ -330,13 +330,13 @@ func TestGenerateGEFV(t *testing.T) {
 		},
 		{description: &description.Description{
 			map[string]*description.Field{
-				"income": &description.Field{
+				"income": {
 					Kind:  fieldtype.Number,
 					Min:   dlit.MustNew(799),
 					Max:   dlit.MustNew(801),
 					MaxDP: 0,
 				},
-				"month": &description.Field{
+				"month": {
 					Kind: fieldtype.String,
 				},
 			},

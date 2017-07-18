@@ -21,22 +21,22 @@ func TestNewSum_error(t *testing.T) {
 
 func TestSumResult(t *testing.T) {
 	records := []map[string]*dlit.Literal{
-		map[string]*dlit.Literal{
+		{
 			"income": dlit.MustNew(3),
 			"cost":   dlit.MustNew(4.5),
 			"band":   dlit.MustNew(4),
 		},
-		map[string]*dlit.Literal{
+		{
 			"income": dlit.MustNew(3),
 			"cost":   dlit.MustNew(3.2),
 			"band":   dlit.MustNew(7),
 		},
-		map[string]*dlit.Literal{
+		{
 			"income": dlit.MustNew(2),
 			"cost":   dlit.MustNew(1.2),
 			"band":   dlit.MustNew(4),
 		},
-		map[string]*dlit.Literal{
+		{
 			"income": dlit.MustNew(9),
 			"cost":   dlit.MustNew(2),
 			"band":   dlit.MustNew(9),

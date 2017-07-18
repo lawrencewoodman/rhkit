@@ -22,52 +22,52 @@ func TestNewMCC_error(t *testing.T) {
 
 func TestMCCResult(t *testing.T) {
 	records := []map[string]*dlit.Literal{
-		map[string]*dlit.Literal{
+		{
 			"income": dlit.MustNew(3),
 			"cost":   dlit.MustNew(4.5),
 			"band":   dlit.MustNew(4),
 		},
-		map[string]*dlit.Literal{
+		{
 			"income": dlit.MustNew(3),
 			"cost":   dlit.MustNew(3.2),
 			"band":   dlit.MustNew(7),
 		},
-		map[string]*dlit.Literal{
+		{
 			"income": dlit.MustNew(3),
 			"cost":   dlit.MustNew(1.2),
 			"band":   dlit.MustNew(7),
 		},
-		map[string]*dlit.Literal{
+		{
 			"income": dlit.MustNew(2),
 			"cost":   dlit.MustNew(1.2),
 			"band":   dlit.MustNew(4),
 		},
-		map[string]*dlit.Literal{
+		{
 			"income": dlit.MustNew(2),
 			"cost":   dlit.MustNew(5.6),
 			"band":   dlit.MustNew(4),
 		},
-		map[string]*dlit.Literal{
+		{
 			"income": dlit.MustNew(2),
 			"cost":   dlit.MustNew(0.6),
 			"band":   dlit.MustNew(4),
 		},
-		map[string]*dlit.Literal{
+		{
 			"income": dlit.MustNew(2),
 			"cost":   dlit.MustNew(0.8),
 			"band":   dlit.MustNew(4),
 		},
-		map[string]*dlit.Literal{
+		{
 			"income": dlit.MustNew(9),
 			"cost":   dlit.MustNew(2),
 			"band":   dlit.MustNew(9),
 		},
-		map[string]*dlit.Literal{
+		{
 			"income": dlit.MustNew(9),
 			"cost":   dlit.MustNew(3),
 			"band":   dlit.MustNew(9),
 		},
-		map[string]*dlit.Literal{
+		{
 			"income": dlit.MustNew(9),
 			"cost":   dlit.MustNew(2),
 			"band":   dlit.MustNew(7),

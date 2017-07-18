@@ -109,47 +109,47 @@ func TestGEFFFields(t *testing.T) {
 func TestGenerateGEFF(t *testing.T) {
 	inputDescription := &description.Description{
 		map[string]*description.Field{
-			"band": &description.Field{
+			"band": {
 				Kind:   fieldtype.Number,
 				Min:    dlit.MustNew(1),
 				Max:    dlit.MustNew(3),
 				Values: map[string]description.Value{},
 			},
-			"flowIn": &description.Field{
+			"flowIn": {
 				Kind:   fieldtype.Number,
 				Min:    dlit.MustNew(1),
 				Max:    dlit.MustNew(4),
 				MaxDP:  2,
 				Values: map[string]description.Value{},
 			},
-			"flowOut": &description.Field{
+			"flowOut": {
 				Kind:   fieldtype.Number,
 				Min:    dlit.MustNew(0.95),
 				Max:    dlit.MustNew(4.1),
 				MaxDP:  2,
 				Values: map[string]description.Value{},
 			},
-			"rateIn": &description.Field{
+			"rateIn": {
 				Kind:   fieldtype.Number,
 				Min:    dlit.MustNew(4.2),
 				Max:    dlit.MustNew(8.9),
 				MaxDP:  2,
 				Values: map[string]description.Value{},
 			},
-			"rateOut": &description.Field{
+			"rateOut": {
 				Kind:   fieldtype.Number,
 				Min:    dlit.MustNew(0.1),
 				Max:    dlit.MustNew(0.9),
 				MaxDP:  2,
 				Values: map[string]description.Value{},
 			},
-			"group": &description.Field{
+			"group": {
 				Kind: fieldtype.String,
 				Values: map[string]description.Value{
-					"Nelson":      description.Value{dlit.NewString("Nelson"), 3},
-					"Collingwood": description.Value{dlit.NewString("Collingwood"), 1},
-					"Mountbatten": description.Value{dlit.NewString("Mountbatten"), 1},
-					"Drake":       description.Value{dlit.NewString("Drake"), 2},
+					"Nelson":      {dlit.NewString("Nelson"), 3},
+					"Collingwood": {dlit.NewString("Collingwood"), 1},
+					"Mountbatten": {dlit.NewString("Mountbatten"), 1},
+					"Drake":       {dlit.NewString("Drake"), 2},
 				},
 			},
 		},

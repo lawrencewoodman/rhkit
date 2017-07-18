@@ -123,44 +123,44 @@ func TestEQFVFields(t *testing.T) {
 func TestGenerateEQFV(t *testing.T) {
 	inputDescription := &description.Description{
 		map[string]*description.Field{
-			"band": &description.Field{
+			"band": {
 				Kind: fieldtype.Number,
 				Min:  dlit.MustNew(1),
 				Max:  dlit.MustNew(4),
 				Values: map[string]description.Value{
-					"1": description.Value{dlit.NewString("1"), 3},
-					"2": description.Value{dlit.NewString("2"), 1},
-					"3": description.Value{dlit.NewString("3"), 2},
-					"4": description.Value{dlit.NewString("4"), 5},
+					"1": {dlit.NewString("1"), 3},
+					"2": {dlit.NewString("2"), 1},
+					"3": {dlit.NewString("3"), 2},
+					"4": {dlit.NewString("4"), 5},
 				},
 			},
-			"flow": &description.Field{
+			"flow": {
 				Kind:  fieldtype.Number,
 				Min:   dlit.MustNew(1),
 				Max:   dlit.MustNew(4),
 				MaxDP: 2,
 				Values: map[string]description.Value{
-					"1":    description.Value{dlit.NewString("1"), 3},
-					"2":    description.Value{dlit.NewString("2"), 1},
-					"2.90": description.Value{dlit.NewString("2.90"), 1},
-					"3.37": description.Value{dlit.NewString("3.37"), 2},
-					"3.3":  description.Value{dlit.NewString("3.3"), 2},
-					"4":    description.Value{dlit.NewString("4"), 5},
+					"1":    {dlit.NewString("1"), 3},
+					"2":    {dlit.NewString("2"), 1},
+					"2.90": {dlit.NewString("2.90"), 1},
+					"3.37": {dlit.NewString("3.37"), 2},
+					"3.3":  {dlit.NewString("3.3"), 2},
+					"4":    {dlit.NewString("4"), 5},
 				},
 			},
-			"group": &description.Field{
+			"group": {
 				Kind: fieldtype.String,
 				Values: map[string]description.Value{
-					"Nelson":      description.Value{dlit.NewString("Nelson"), 3},
-					"Collingwood": description.Value{dlit.NewString("Collingwood"), 1},
-					"Mountbatten": description.Value{dlit.NewString("Mountbatten"), 1},
-					"Drake":       description.Value{dlit.NewString("Drake"), 2},
+					"Nelson":      {dlit.NewString("Nelson"), 3},
+					"Collingwood": {dlit.NewString("Collingwood"), 1},
+					"Mountbatten": {dlit.NewString("Mountbatten"), 1},
+					"Drake":       {dlit.NewString("Drake"), 2},
 				},
 			},
-			"month": &description.Field{
+			"month": {
 				Kind: fieldtype.String,
 				Values: map[string]description.Value{
-					"May": description.Value{dlit.NewString("May"), 3},
+					"May": {dlit.NewString("May"), 3},
 				},
 			},
 		},

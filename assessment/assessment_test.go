@@ -18,7 +18,7 @@ func TestAddRuleAssessors_error(t *testing.T) {
 	as := aggregators.MustNew("a", "calc", "3+4")
 	ai := as.New()
 	ruleAssessors := []*ruleAssessor{
-		&ruleAssessor{
+		{
 			Rule:        rule.NewEQFV("month", dlit.NewString("May")),
 			Aggregators: []aggregators.AggregatorInstance{ai},
 			Goals:       []*goal.Goal{goal.MustNew("cost > 3")},
@@ -39,44 +39,44 @@ func TestRules(t *testing.T) {
 	var gotRules []rule.Rule
 	assessment := Assessment{NumRecords: 8,
 		RuleAssessments: []*RuleAssessment{
-			&RuleAssessment{
+			{
 				Rule: rule.NewGEFV("band", dlit.MustNew(9)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("5"),
 					"percentMatches": dlit.MustNew("65.3"),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numMatches > 3 ", true},
+					{"numMatches > 3 ", true},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewGEFV("band", dlit.MustNew(456)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("50"),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numMatches > 3 ", false},
+					{"numMatches > 3 ", false},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewGEFV("band", dlit.MustNew(3)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("4"),
 					"percentMatches": dlit.MustNew("76.3"),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numMatches > 3 ", true},
+					{"numMatches > 3 ", true},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewGEFV("cost", dlit.MustNew(1.2)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("50"),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numMatches > 3 ", false},
+					{"numMatches > 3 ", false},
 				},
 			},
 		},
@@ -134,44 +134,44 @@ func TestMerge(t *testing.T) {
 			"sorted": true,
 		},
 		RuleAssessments: []*RuleAssessment{
-			&RuleAssessment{
+			{
 				Rule: rule.NewGEFV("band", dlit.MustNew(9)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("5"),
 					"percentMatches": dlit.MustNew("65.3"),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numMatches > 3 ", true},
+					{"numMatches > 3 ", true},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewGEFV("band", dlit.MustNew(456)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("50"),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numMatches > 3 ", false},
+					{"numMatches > 3 ", false},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewGEFV("band", dlit.MustNew(3)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("4"),
 					"percentMatches": dlit.MustNew("76.3"),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numMatches > 3 ", true},
+					{"numMatches > 3 ", true},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewGEFV("cost", dlit.MustNew(1.2)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("50"),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numMatches > 3 ", false},
+					{"numMatches > 3 ", false},
 				},
 			},
 		},
@@ -182,44 +182,44 @@ func TestMerge(t *testing.T) {
 			"sorted": true,
 		},
 		RuleAssessments: []*RuleAssessment{
-			&RuleAssessment{
+			{
 				Rule: rule.NewGEFV("band", dlit.MustNew(16)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("8"),
 					"percentMatches": dlit.MustNew("5.3"),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numMatches > 3 ", true},
+					{"numMatches > 3 ", true},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewEQFV("team", dlit.MustNew("Pi")),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("3"),
 					"percentMatches": dlit.MustNew("19"),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numMatches > 3 ", false},
+					{"numMatches > 3 ", false},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewGEFV("band", dlit.MustNew(36)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("6.3"),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numMatches > 3 ", false},
+					{"numMatches > 3 ", false},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewGEFV("cost", dlit.MustNew(1.27)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("3"),
 					"percentMatches": dlit.MustNew("3.5"),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numMatches > 3 ", false},
+					{"numMatches > 3 ", false},
 				},
 			},
 		},
@@ -232,84 +232,84 @@ func TestMerge(t *testing.T) {
 			"refined": false,
 		},
 		RuleAssessments: []*RuleAssessment{
-			&RuleAssessment{
+			{
 				Rule: rule.NewGEFV("band", dlit.MustNew(9)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("5"),
 					"percentMatches": dlit.MustNew("65.3"),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numMatches > 3 ", true},
+					{"numMatches > 3 ", true},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewGEFV("band", dlit.MustNew(456)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("50"),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numMatches > 3 ", false},
+					{"numMatches > 3 ", false},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewGEFV("band", dlit.MustNew(3)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("4"),
 					"percentMatches": dlit.MustNew("76.3"),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numMatches > 3 ", true},
+					{"numMatches > 3 ", true},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewGEFV("cost", dlit.MustNew(1.2)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("50"),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numMatches > 3 ", false},
+					{"numMatches > 3 ", false},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewGEFV("band", dlit.MustNew(16)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("8"),
 					"percentMatches": dlit.MustNew("5.3"),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numMatches > 3 ", true},
+					{"numMatches > 3 ", true},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewEQFV("team", dlit.MustNew("Pi")),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("3"),
 					"percentMatches": dlit.MustNew("19"),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numMatches > 3 ", false},
+					{"numMatches > 3 ", false},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewGEFV("band", dlit.MustNew(36)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("6.3"),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numMatches > 3 ", false},
+					{"numMatches > 3 ", false},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewGEFV("cost", dlit.MustNew(1.27)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("3"),
 					"percentMatches": dlit.MustNew("3.5"),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numMatches > 3 ", false},
+					{"numMatches > 3 ", false},
 				},
 			},
 		},
@@ -333,48 +333,48 @@ func TestMerge_errors(t *testing.T) {
 			"sorted": true,
 		},
 		RuleAssessments: []*RuleAssessment{
-			&RuleAssessment{
+			{
 				Rule: rule.NewGEFV("band", dlit.MustNew(9)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("5"),
 					"percentMatches": dlit.MustNew("65.3"),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numMatches > 3 ", true},
+					{"numMatches > 3 ", true},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewGEFV("band", dlit.MustNew(456)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
 					"percentMatches": dlit.MustNew("50"),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numMatches > 3 ", false},
+					{"numMatches > 3 ", false},
 				},
 			},
 		},
 	}
 	assessment2 := &Assessment{NumRecords: 2,
 		RuleAssessments: []*RuleAssessment{
-			&RuleAssessment{
+			{
 				Rule: rule.NewGEFV("band", dlit.MustNew(16)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("8"),
 					"percentMatches": dlit.MustNew("5.3"),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numMatches > 3 ", true},
+					{"numMatches > 3 ", true},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewEQFV("team", dlit.MustNew("Pi")),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("3"),
 					"percentMatches": dlit.MustNew("19"),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numMatches > 3 ", false},
+					{"numMatches > 3 ", false},
 				},
 			},
 		},
@@ -398,7 +398,7 @@ func TestRefine(t *testing.T) {
 			"sorted": true,
 		},
 		RuleAssessments: []*RuleAssessment{
-			&RuleAssessment{
+			{
 				Rule: rule.NewGEFV("band", dlit.MustNew(4)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("150"),
@@ -407,11 +407,11 @@ func TestRefine(t *testing.T) {
 					"goalsScore":     dlit.MustNew(1),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", true},
-					&GoalAssessment{"numIncomeGt2 == 2", false},
+					{"numIncomeGt2 == 1", true},
+					{"numIncomeGt2 == 2", false},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewGEFV("band", dlit.MustNew(5)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("150"),
@@ -420,11 +420,11 @@ func TestRefine(t *testing.T) {
 					"goalsScore":     dlit.MustNew(1),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", true},
-					&GoalAssessment{"numIncomeGt2 == 2", false},
+					{"numIncomeGt2 == 1", true},
+					{"numIncomeGt2 == 2", false},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewInFV(
 					"band",
 					testhelpers.MakeStringsDlitSlice("4", "3", "2"),
@@ -436,11 +436,11 @@ func TestRefine(t *testing.T) {
 					"goalsScore":     dlit.MustNew(0.1),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", false},
-					&GoalAssessment{"numIncomeGt2 == 2", true},
+					{"numIncomeGt2 == 1", false},
+					{"numIncomeGt2 == 2", true},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewInFV("team", testhelpers.MakeStringsDlitSlice("a", "b")),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("148"),
@@ -449,11 +449,11 @@ func TestRefine(t *testing.T) {
 					"goalsScore":     dlit.MustNew(0.1),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", false},
-					&GoalAssessment{"numIncomeGt2 == 2", true},
+					{"numIncomeGt2 == 1", false},
+					{"numIncomeGt2 == 2", true},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewInFV(
 					"band",
 					testhelpers.MakeStringsDlitSlice("99", "23"),
@@ -465,11 +465,11 @@ func TestRefine(t *testing.T) {
 					"goalsScore":     dlit.MustNew(0.1),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", false},
-					&GoalAssessment{"numIncomeGt2 == 2", true},
+					{"numIncomeGt2 == 1", false},
+					{"numIncomeGt2 == 2", true},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewGEFV("band", dlit.MustNew(3)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("146"),
@@ -478,11 +478,11 @@ func TestRefine(t *testing.T) {
 					"goalsScore":     dlit.MustNew(0.1),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", false},
-					&GoalAssessment{"numIncomeGt2 == 2", true},
+					{"numIncomeGt2 == 1", false},
+					{"numIncomeGt2 == 2", true},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewGEFV("band", dlit.MustNew(9)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("145"),
@@ -491,11 +491,11 @@ func TestRefine(t *testing.T) {
 					"goalsScore":     dlit.MustNew(0.1),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", false},
-					&GoalAssessment{"numIncomeGt2 == 2", true},
+					{"numIncomeGt2 == 1", false},
+					{"numIncomeGt2 == 2", true},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewInFV("band", testhelpers.MakeStringsDlitSlice("9", "2")),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("144"),
@@ -504,11 +504,11 @@ func TestRefine(t *testing.T) {
 					"goalsScore":     dlit.MustNew(0.1),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", false},
-					&GoalAssessment{"numIncomeGt2 == 2", true},
+					{"numIncomeGt2 == 1", false},
+					{"numIncomeGt2 == 2", true},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewEQFV("band", dlit.MustNew(7)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("0"),
@@ -517,11 +517,11 @@ func TestRefine(t *testing.T) {
 					"goalsScore":     dlit.MustNew(0.1),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", false},
-					&GoalAssessment{"numIncomeGt2 == 2", true},
+					{"numIncomeGt2 == 1", false},
+					{"numIncomeGt2 == 2", true},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewEQFV("band", dlit.MustNew(8)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("142"),
@@ -530,11 +530,11 @@ func TestRefine(t *testing.T) {
 					"goalsScore":     dlit.MustNew(0.1),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", false},
-					&GoalAssessment{"numIncomeGt2 == 2", true},
+					{"numIncomeGt2 == 1", false},
+					{"numIncomeGt2 == 2", true},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewTrue(),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("142"),
@@ -543,11 +543,11 @@ func TestRefine(t *testing.T) {
 					"goalsScore":     dlit.MustNew(0.1),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", false},
-					&GoalAssessment{"numIncomeGt2 == 2", true},
+					{"numIncomeGt2 == 1", false},
+					{"numIncomeGt2 == 2", true},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewGEFV("cost", dlit.MustNew(1.2)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("141"),
@@ -556,8 +556,8 @@ func TestRefine(t *testing.T) {
 					"goalsScore":     dlit.MustNew(0.1),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", false},
-					&GoalAssessment{"numIncomeGt2 == 2", true},
+					{"numIncomeGt2 == 1", false},
+					{"numIncomeGt2 == 2", true},
 				},
 			},
 		},
@@ -589,7 +589,7 @@ func TestRefine_few_ruleassessments(t *testing.T) {
 				"sorted": true,
 			},
 			RuleAssessments: []*RuleAssessment{
-				&RuleAssessment{
+				{
 					Rule: rule.NewTrue(),
 					Aggregators: map[string]*dlit.Literal{
 						"numMatches":     dlit.MustNew("142"),
@@ -598,8 +598,8 @@ func TestRefine_few_ruleassessments(t *testing.T) {
 						"goalsScore":     dlit.MustNew(0.1),
 					},
 					Goals: []*GoalAssessment{
-						&GoalAssessment{"numIncomeGt2 == 1", false},
-						&GoalAssessment{"numIncomeGt2 == 2", true},
+						{"numIncomeGt2 == 1", false},
+						{"numIncomeGt2 == 2", true},
 					},
 				},
 			},
@@ -612,7 +612,7 @@ func TestRefine_few_ruleassessments(t *testing.T) {
 				"sorted": true,
 			},
 			RuleAssessments: []*RuleAssessment{
-				&RuleAssessment{
+				{
 					Rule: rule.NewEQFV("month", dlit.NewString("april")),
 					Aggregators: map[string]*dlit.Literal{
 						"numMatches":     dlit.MustNew("142"),
@@ -620,11 +620,11 @@ func TestRefine_few_ruleassessments(t *testing.T) {
 						"goalsScore":     dlit.MustNew(0.1),
 					},
 					Goals: []*GoalAssessment{
-						&GoalAssessment{"numIncomeGt2 == 1", false},
-						&GoalAssessment{"numIncomeGt2 == 2", true},
+						{"numIncomeGt2 == 1", false},
+						{"numIncomeGt2 == 2", true},
 					},
 				},
-				&RuleAssessment{
+				{
 					Rule: rule.NewTrue(),
 					Aggregators: map[string]*dlit.Literal{
 						"numMatches":     dlit.MustNew("142"),
@@ -633,8 +633,8 @@ func TestRefine_few_ruleassessments(t *testing.T) {
 						"goalsScore":     dlit.MustNew(0.1),
 					},
 					Goals: []*GoalAssessment{
-						&GoalAssessment{"numIncomeGt2 == 1", false},
-						&GoalAssessment{"numIncomeGt2 == 2", true},
+						{"numIncomeGt2 == 1", false},
+						{"numIncomeGt2 == 2", true},
 					},
 				},
 			},
@@ -663,7 +663,7 @@ func TestRefine_between(t *testing.T) {
 			"sorted": true,
 		},
 		RuleAssessments: []*RuleAssessment{
-			&RuleAssessment{
+			{
 				Rule: rule.MustNewBetweenFV("band", dlit.MustNew(5), dlit.MustNew(7)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("150"),
@@ -672,11 +672,11 @@ func TestRefine_between(t *testing.T) {
 					"goalsScore":     dlit.MustNew(1),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", true},
-					&GoalAssessment{"numIncomeGt2 == 2", false},
+					{"numIncomeGt2 == 1", true},
+					{"numIncomeGt2 == 2", false},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewGEFV("band", dlit.MustNew(4)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("149"),
@@ -685,11 +685,11 @@ func TestRefine_between(t *testing.T) {
 					"goalsScore":     dlit.MustNew(1),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", true},
-					&GoalAssessment{"numIncomeGt2 == 2", false},
+					{"numIncomeGt2 == 1", true},
+					{"numIncomeGt2 == 2", false},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.MustNewBetweenFV(
 					"rate",
 					dlit.MustNew(16.2),
@@ -702,11 +702,11 @@ func TestRefine_between(t *testing.T) {
 					"goalsScore":     dlit.MustNew(1),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", true},
-					&GoalAssessment{"numIncomeGt2 == 2", false},
+					{"numIncomeGt2 == 1", true},
+					{"numIncomeGt2 == 2", false},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.MustNewBetweenFV("band", dlit.MustNew(5), dlit.MustNew(6)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("147"),
@@ -715,11 +715,11 @@ func TestRefine_between(t *testing.T) {
 					"goalsScore":     dlit.MustNew(1),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", true},
-					&GoalAssessment{"numIncomeGt2 == 2", false},
+					{"numIncomeGt2 == 1", true},
+					{"numIncomeGt2 == 2", false},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.MustNewBetweenFV(
 					"rate",
 					dlit.MustNew(16.2),
@@ -732,11 +732,11 @@ func TestRefine_between(t *testing.T) {
 					"goalsScore":     dlit.MustNew(1),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", true},
-					&GoalAssessment{"numIncomeGt2 == 2", false},
+					{"numIncomeGt2 == 1", true},
+					{"numIncomeGt2 == 2", false},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewGEFV("band", dlit.MustNew(5)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("145"),
@@ -745,11 +745,11 @@ func TestRefine_between(t *testing.T) {
 					"goalsScore":     dlit.MustNew(1),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", true},
-					&GoalAssessment{"numIncomeGt2 == 2", false},
+					{"numIncomeGt2 == 1", true},
+					{"numIncomeGt2 == 2", false},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.MustNewBetweenFV("band", dlit.MustNew(7), dlit.MustNew(16)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("144"),
@@ -758,11 +758,11 @@ func TestRefine_between(t *testing.T) {
 					"goalsScore":     dlit.MustNew(1),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", true},
-					&GoalAssessment{"numIncomeGt2 == 2", false},
+					{"numIncomeGt2 == 1", true},
+					{"numIncomeGt2 == 2", false},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.MustNewBetweenFV(
 					"rate",
 					dlit.MustNew(15.2),
@@ -775,11 +775,11 @@ func TestRefine_between(t *testing.T) {
 					"goalsScore":     dlit.MustNew(1),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", true},
-					&GoalAssessment{"numIncomeGt2 == 2", false},
+					{"numIncomeGt2 == 1", true},
+					{"numIncomeGt2 == 2", false},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.MustNewBetweenFV(
 					"rate",
 					dlit.MustNew(10.2),
@@ -792,11 +792,11 @@ func TestRefine_between(t *testing.T) {
 					"goalsScore":     dlit.MustNew(1),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", true},
-					&GoalAssessment{"numIncomeGt2 == 2", false},
+					{"numIncomeGt2 == 1", true},
+					{"numIncomeGt2 == 2", false},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.MustNewBetweenFV(
 					"rate",
 					dlit.MustNew(50.1),
@@ -809,11 +809,11 @@ func TestRefine_between(t *testing.T) {
 					"goalsScore":     dlit.MustNew(1),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", true},
-					&GoalAssessment{"numIncomeGt2 == 2", false},
+					{"numIncomeGt2 == 1", true},
+					{"numIncomeGt2 == 2", false},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.MustNewBetweenFV(
 					"rate",
 					dlit.MustNew(16.1),
@@ -826,11 +826,11 @@ func TestRefine_between(t *testing.T) {
 					"goalsScore":     dlit.MustNew(1),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", true},
-					&GoalAssessment{"numIncomeGt2 == 2", false},
+					{"numIncomeGt2 == 1", true},
+					{"numIncomeGt2 == 2", false},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewLEFV("band", dlit.MustNew(5)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("139"),
@@ -839,11 +839,11 @@ func TestRefine_between(t *testing.T) {
 					"goalsScore":     dlit.MustNew(1),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", true},
-					&GoalAssessment{"numIncomeGt2 == 2", false},
+					{"numIncomeGt2 == 1", true},
+					{"numIncomeGt2 == 2", false},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewGEFV("band", dlit.MustNew(6)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("138"),
@@ -852,11 +852,11 @@ func TestRefine_between(t *testing.T) {
 					"goalsScore":     dlit.MustNew(1),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", true},
-					&GoalAssessment{"numIncomeGt2 == 2", false},
+					{"numIncomeGt2 == 1", true},
+					{"numIncomeGt2 == 2", false},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.MustNewBetweenFV(
 					"rate",
 					dlit.MustNew(1.2),
@@ -869,11 +869,11 @@ func TestRefine_between(t *testing.T) {
 					"goalsScore":     dlit.MustNew(1),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", true},
-					&GoalAssessment{"numIncomeGt2 == 2", false},
+					{"numIncomeGt2 == 1", true},
+					{"numIncomeGt2 == 2", false},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewTrue(),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("136"),
@@ -882,8 +882,8 @@ func TestRefine_between(t *testing.T) {
 					"goalsScore":     dlit.MustNew(0.1),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", false},
-					&GoalAssessment{"numIncomeGt2 == 2", true},
+					{"numIncomeGt2 == 1", false},
+					{"numIncomeGt2 == 2", true},
 				},
 			},
 		},
@@ -925,7 +925,7 @@ func TestRefine_outside(t *testing.T) {
 			"sorted": true,
 		},
 		RuleAssessments: []*RuleAssessment{
-			&RuleAssessment{
+			{
 				Rule: rule.MustNewOutsideFV("band", dlit.MustNew(5), dlit.MustNew(7)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("150"),
@@ -934,11 +934,11 @@ func TestRefine_outside(t *testing.T) {
 					"goalsScore":     dlit.MustNew(1),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", true},
-					&GoalAssessment{"numIncomeGt2 == 2", false},
+					{"numIncomeGt2 == 1", true},
+					{"numIncomeGt2 == 2", false},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewGEFV("band", dlit.MustNew(4)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("149"),
@@ -947,11 +947,11 @@ func TestRefine_outside(t *testing.T) {
 					"goalsScore":     dlit.MustNew(1),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", true},
-					&GoalAssessment{"numIncomeGt2 == 2", false},
+					{"numIncomeGt2 == 1", true},
+					{"numIncomeGt2 == 2", false},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.MustNewOutsideFV(
 					"rate",
 					dlit.MustNew(16.2),
@@ -964,11 +964,11 @@ func TestRefine_outside(t *testing.T) {
 					"goalsScore":     dlit.MustNew(1),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", true},
-					&GoalAssessment{"numIncomeGt2 == 2", false},
+					{"numIncomeGt2 == 1", true},
+					{"numIncomeGt2 == 2", false},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.MustNewOutsideFV("band", dlit.MustNew(5), dlit.MustNew(6)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("147"),
@@ -977,11 +977,11 @@ func TestRefine_outside(t *testing.T) {
 					"goalsScore":     dlit.MustNew(1),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", true},
-					&GoalAssessment{"numIncomeGt2 == 2", false},
+					{"numIncomeGt2 == 1", true},
+					{"numIncomeGt2 == 2", false},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.MustNewOutsideFV(
 					"rate",
 					dlit.MustNew(16.2),
@@ -994,11 +994,11 @@ func TestRefine_outside(t *testing.T) {
 					"goalsScore":     dlit.MustNew(1),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", true},
-					&GoalAssessment{"numIncomeGt2 == 2", false},
+					{"numIncomeGt2 == 1", true},
+					{"numIncomeGt2 == 2", false},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewGEFV("band", dlit.MustNew(5)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("145"),
@@ -1007,11 +1007,11 @@ func TestRefine_outside(t *testing.T) {
 					"goalsScore":     dlit.MustNew(1),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", true},
-					&GoalAssessment{"numIncomeGt2 == 2", false},
+					{"numIncomeGt2 == 1", true},
+					{"numIncomeGt2 == 2", false},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.MustNewOutsideFV("band", dlit.MustNew(7), dlit.MustNew(16)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("144"),
@@ -1020,11 +1020,11 @@ func TestRefine_outside(t *testing.T) {
 					"goalsScore":     dlit.MustNew(1),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", true},
-					&GoalAssessment{"numIncomeGt2 == 2", false},
+					{"numIncomeGt2 == 1", true},
+					{"numIncomeGt2 == 2", false},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.MustNewOutsideFV(
 					"rate",
 					dlit.MustNew(15.2),
@@ -1037,11 +1037,11 @@ func TestRefine_outside(t *testing.T) {
 					"goalsScore":     dlit.MustNew(1),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", true},
-					&GoalAssessment{"numIncomeGt2 == 2", false},
+					{"numIncomeGt2 == 1", true},
+					{"numIncomeGt2 == 2", false},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewTrue(),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("142"),
@@ -1050,8 +1050,8 @@ func TestRefine_outside(t *testing.T) {
 					"goalsScore":     dlit.MustNew(0.1),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", false},
-					&GoalAssessment{"numIncomeGt2 == 2", true},
+					{"numIncomeGt2 == 1", false},
+					{"numIncomeGt2 == 2", true},
 				},
 			},
 		},
@@ -1076,7 +1076,7 @@ func TestRefine_panic_1(t *testing.T) {
 	unsortedAssessment := &Assessment{
 		NumRecords: 20,
 		RuleAssessments: []*RuleAssessment{
-			&RuleAssessment{
+			{
 				Rule: rule.NewGEFV("band", dlit.MustNew(4)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
@@ -1084,7 +1084,7 @@ func TestRefine_panic_1(t *testing.T) {
 				},
 				Goals: []*GoalAssessment{},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewTrue(),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("4"),
@@ -1122,7 +1122,7 @@ func TestRefine_panic_2(t *testing.T) {
 			"sorted": true,
 		},
 		RuleAssessments: []*RuleAssessment{
-			&RuleAssessment{
+			{
 				Rule: rule.NewGEFV("band", dlit.MustNew(4)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
@@ -1130,7 +1130,7 @@ func TestRefine_panic_2(t *testing.T) {
 				},
 				Goals: []*GoalAssessment{},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewGEFV("team", dlit.MustNew(7)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("4"),
@@ -1168,16 +1168,16 @@ func TestTruncateRuleAssessments(t *testing.T) {
 			"refined": true,
 		},
 		RuleAssessments: []*RuleAssessment{
-			&RuleAssessment{
+			{
 				Rule: rule.NewGEFV("band", dlit.MustNew(4)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches": dlit.MustNew("2"),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", true},
+					{"numIncomeGt2 == 1", true},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewInFV(
 					"band",
 					testhelpers.MakeStringsDlitSlice("4", "3", "2"),
@@ -1186,19 +1186,19 @@ func TestTruncateRuleAssessments(t *testing.T) {
 					"numMatches": dlit.MustNew("4"),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", false},
+					{"numIncomeGt2 == 1", false},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewInFV("team", testhelpers.MakeStringsDlitSlice("a", "b")),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches": dlit.MustNew("4"),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", false},
+					{"numIncomeGt2 == 1", false},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewInFV(
 					"band",
 					testhelpers.MakeStringsDlitSlice("99", "23"),
@@ -1207,16 +1207,16 @@ func TestTruncateRuleAssessments(t *testing.T) {
 					"numMatches": dlit.MustNew("4"),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", false},
+					{"numIncomeGt2 == 1", false},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewTrue(),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches": dlit.MustNew("2"),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", false},
+					{"numIncomeGt2 == 1", false},
 				},
 			},
 		},
@@ -1290,7 +1290,7 @@ func TestTruncateRuleAssessment_panic_1(t *testing.T) {
 	unsortedAssessment := &Assessment{
 		NumRecords: 20,
 		RuleAssessments: []*RuleAssessment{
-			&RuleAssessment{
+			{
 				Rule: rule.NewGEFV("band", dlit.MustNew(4)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
@@ -1298,7 +1298,7 @@ func TestTruncateRuleAssessment_panic_1(t *testing.T) {
 				},
 				Goals: []*GoalAssessment{},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewTrue(),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("4"),
@@ -1337,7 +1337,7 @@ func TestTruncateRuleAssessment_panic_2(t *testing.T) {
 			"sorted": true,
 		},
 		RuleAssessments: []*RuleAssessment{
-			&RuleAssessment{
+			{
 				Rule: rule.NewGEFV("band", dlit.MustNew(4)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
@@ -1345,7 +1345,7 @@ func TestTruncateRuleAssessment_panic_2(t *testing.T) {
 				},
 				Goals: []*GoalAssessment{},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewTrue(),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("4"),
@@ -1383,7 +1383,7 @@ func TestSort(t *testing.T) {
 			"sorted": false,
 		},
 		RuleAssessments: []*RuleAssessment{
-			&RuleAssessment{
+			{
 				Rule: rule.NewGEFV("band", dlit.MustNew(9)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("5"),
@@ -1393,17 +1393,17 @@ func TestSort(t *testing.T) {
 					"numBandGt4":     dlit.MustNew("2"),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", false},
-					&GoalAssessment{"numIncomeGt2 == 2", true},
-					&GoalAssessment{"numIncomeGt2 == 3", false},
-					&GoalAssessment{"numIncomeGt2 == 4", false},
-					&GoalAssessment{"numBandGt4 == 1", false},
-					&GoalAssessment{"numBandGt4 == 2", true},
-					&GoalAssessment{"numBandGt4 == 3", false},
-					&GoalAssessment{"numBandGt4 == 4", true},
+					{"numIncomeGt2 == 1", false},
+					{"numIncomeGt2 == 2", true},
+					{"numIncomeGt2 == 3", false},
+					{"numIncomeGt2 == 4", false},
+					{"numBandGt4 == 1", false},
+					{"numBandGt4 == 2", true},
+					{"numBandGt4 == 3", false},
+					{"numBandGt4 == 4", true},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewGEFV("band", dlit.MustNew(456)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
@@ -1413,17 +1413,17 @@ func TestSort(t *testing.T) {
 					"numBandGt4":     dlit.MustNew("2"),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", true},
-					&GoalAssessment{"numIncomeGt2 == 2", false},
-					&GoalAssessment{"numIncomeGt2 == 3", false},
-					&GoalAssessment{"numIncomeGt2 == 4", false},
-					&GoalAssessment{"numBandGt4 == 1", false},
-					&GoalAssessment{"numBandGt4 == 2", true},
-					&GoalAssessment{"numBandGt4 == 3", false},
-					&GoalAssessment{"numBandGt4 == 4", false},
+					{"numIncomeGt2 == 1", true},
+					{"numIncomeGt2 == 2", false},
+					{"numIncomeGt2 == 3", false},
+					{"numIncomeGt2 == 4", false},
+					{"numBandGt4 == 1", false},
+					{"numBandGt4 == 2", true},
+					{"numBandGt4 == 3", false},
+					{"numBandGt4 == 4", false},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewGEFV("band", dlit.MustNew(3)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("4"),
@@ -1433,17 +1433,17 @@ func TestSort(t *testing.T) {
 					"numBandGt4":     dlit.MustNew("2"),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", false},
-					&GoalAssessment{"numIncomeGt2 == 2", true},
-					&GoalAssessment{"numIncomeGt2 == 3", false},
-					&GoalAssessment{"numIncomeGt2 == 4", false},
-					&GoalAssessment{"numBandGt4 == 1", false},
-					&GoalAssessment{"numBandGt4 == 2", true},
-					&GoalAssessment{"numBandGt4 == 3", false},
-					&GoalAssessment{"numBandGt4 == 4", false},
+					{"numIncomeGt2 == 1", false},
+					{"numIncomeGt2 == 2", true},
+					{"numIncomeGt2 == 3", false},
+					{"numIncomeGt2 == 4", false},
+					{"numBandGt4 == 1", false},
+					{"numBandGt4 == 2", true},
+					{"numBandGt4 == 3", false},
+					{"numBandGt4 == 4", false},
 				},
 			},
-			&RuleAssessment{
+			{
 				Rule: rule.NewGEFV("cost", dlit.MustNew(1.2)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
@@ -1453,14 +1453,14 @@ func TestSort(t *testing.T) {
 					"numBandGt4":     dlit.MustNew("1"),
 				},
 				Goals: []*GoalAssessment{
-					&GoalAssessment{"numIncomeGt2 == 1", false},
-					&GoalAssessment{"numIncomeGt2 == 2", true},
-					&GoalAssessment{"numIncomeGt2 == 3", false},
-					&GoalAssessment{"numIncomeGt2 == 4", false},
-					&GoalAssessment{"numBandGt4 == 1", true},
-					&GoalAssessment{"numBandGt4 == 2", false},
-					&GoalAssessment{"numBandGt4 == 3", false},
-					&GoalAssessment{"numBandGt4 == 4", false},
+					{"numIncomeGt2 == 1", false},
+					{"numIncomeGt2 == 2", true},
+					{"numIncomeGt2 == 3", false},
+					{"numIncomeGt2 == 4", false},
+					{"numBandGt4 == 1", true},
+					{"numBandGt4 == 2", false},
+					{"numBandGt4 == 3", false},
+					{"numBandGt4 == 4", false},
 				},
 			},
 		},
@@ -1470,7 +1470,7 @@ func TestSort(t *testing.T) {
 		wantRules []rule.Rule
 	}{
 		{[]experiment.SortField{
-			experiment.SortField{"goalsScore", experiment.ASCENDING},
+			{"goalsScore", experiment.ASCENDING},
 		},
 			[]rule.Rule{
 				rule.NewGEFV("band", dlit.MustNew(3)),
@@ -1479,7 +1479,7 @@ func TestSort(t *testing.T) {
 				rule.NewGEFV("band", dlit.MustNew(456)),
 			}},
 		{[]experiment.SortField{
-			experiment.SortField{"percentMatches", experiment.DESCENDING},
+			{"percentMatches", experiment.DESCENDING},
 		},
 			[]rule.Rule{
 				rule.NewGEFV("band", dlit.MustNew(3)),
@@ -1488,7 +1488,7 @@ func TestSort(t *testing.T) {
 				rule.NewGEFV("cost", dlit.MustNew(1.2)),
 			}},
 		{[]experiment.SortField{
-			experiment.SortField{"percentMatches", experiment.ASCENDING},
+			{"percentMatches", experiment.ASCENDING},
 		},
 			[]rule.Rule{
 				rule.NewGEFV("band", dlit.MustNew(456)),
@@ -1497,8 +1497,8 @@ func TestSort(t *testing.T) {
 				rule.NewGEFV("band", dlit.MustNew(3)),
 			}},
 		{[]experiment.SortField{
-			experiment.SortField{"percentMatches", experiment.ASCENDING},
-			experiment.SortField{"numIncomeGt2", experiment.ASCENDING},
+			{"percentMatches", experiment.ASCENDING},
+			{"numIncomeGt2", experiment.ASCENDING},
 		},
 			[]rule.Rule{
 				rule.NewGEFV("cost", dlit.MustNew(1.2)),
@@ -1507,8 +1507,8 @@ func TestSort(t *testing.T) {
 				rule.NewGEFV("band", dlit.MustNew(3)),
 			}},
 		{[]experiment.SortField{
-			experiment.SortField{"percentMatches", experiment.DESCENDING},
-			experiment.SortField{"numIncomeGt2", experiment.ASCENDING},
+			{"percentMatches", experiment.DESCENDING},
+			{"numIncomeGt2", experiment.ASCENDING},
 		},
 			[]rule.Rule{
 				rule.NewGEFV("band", dlit.MustNew(3)),

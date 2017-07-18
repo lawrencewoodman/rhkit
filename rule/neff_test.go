@@ -112,89 +112,89 @@ func TestNEFFFields(t *testing.T) {
 func TestGenerateNEFF(t *testing.T) {
 	inputDescription := &description.Description{
 		map[string]*description.Field{
-			"bandA": &description.Field{
+			"bandA": {
 				Kind:   fieldtype.Number,
 				Min:    dlit.MustNew(1),
 				Max:    dlit.MustNew(3),
 				Values: map[string]description.Value{},
 			},
-			"groupA": &description.Field{
+			"groupA": {
 				Kind: fieldtype.String,
 				Values: map[string]description.Value{
-					"Nelson":      description.Value{dlit.NewString("Nelson"), 3},
-					"Collingwood": description.Value{dlit.NewString("Collingwood"), 1},
-					"Mountbatten": description.Value{dlit.NewString("Mountbatten"), 1},
-					"Drake":       description.Value{dlit.NewString("Drake"), 2},
+					"Nelson":      {dlit.NewString("Nelson"), 3},
+					"Collingwood": {dlit.NewString("Collingwood"), 1},
+					"Mountbatten": {dlit.NewString("Mountbatten"), 1},
+					"Drake":       {dlit.NewString("Drake"), 2},
 				},
 			},
-			"groupB": &description.Field{
+			"groupB": {
 				Kind: fieldtype.String,
 				Values: map[string]description.Value{
-					"Nelson":      description.Value{dlit.NewString("Nelson"), 3},
-					"Mountbatten": description.Value{dlit.NewString("Mountbatten"), 1},
-					"Drake":       description.Value{dlit.NewString("Drake"), 2},
+					"Nelson":      {dlit.NewString("Nelson"), 3},
+					"Mountbatten": {dlit.NewString("Mountbatten"), 1},
+					"Drake":       {dlit.NewString("Drake"), 2},
 				},
 			},
-			"groupC": &description.Field{
+			"groupC": {
 				Kind: fieldtype.String,
 				Values: map[string]description.Value{
-					"Nelson": description.Value{dlit.NewString("Nelson"), 3},
-					"Drake":  description.Value{dlit.NewString("Drake"), 2},
+					"Nelson": {dlit.NewString("Nelson"), 3},
+					"Drake":  {dlit.NewString("Drake"), 2},
 				},
 			},
-			"groupD": &description.Field{
+			"groupD": {
 				Kind: fieldtype.String,
 				Values: map[string]description.Value{
-					"Drake": description.Value{dlit.NewString("Drake"), 2},
+					"Drake": {dlit.NewString("Drake"), 2},
 				},
 			},
-			"groupE": &description.Field{
+			"groupE": {
 				Kind: fieldtype.String,
 				Values: map[string]description.Value{
-					"Drake":       description.Value{dlit.NewString("Drake"), 2},
-					"Chaucer":     description.Value{dlit.NewString("Chaucer"), 2},
-					"Shakespeare": description.Value{dlit.NewString("Shakespeare"), 2},
-					"Marlowe":     description.Value{dlit.NewString("Marlowe"), 2},
+					"Drake":       {dlit.NewString("Drake"), 2},
+					"Chaucer":     {dlit.NewString("Chaucer"), 2},
+					"Shakespeare": {dlit.NewString("Shakespeare"), 2},
+					"Marlowe":     {dlit.NewString("Marlowe"), 2},
 				},
 			},
-			"groupF": &description.Field{
+			"groupF": {
 				Kind: fieldtype.String,
 				Values: map[string]description.Value{
-					"Nelson":      description.Value{dlit.NewString("Nelson"), 3},
-					"Drake":       description.Value{dlit.NewString("Drake"), 2},
-					"Chaucer":     description.Value{dlit.NewString("Chaucer"), 2},
-					"Shakespeare": description.Value{dlit.NewString("Shakespeare"), 2},
-					"Marlowe":     description.Value{dlit.NewString("Marlowe"), 2},
+					"Nelson":      {dlit.NewString("Nelson"), 3},
+					"Drake":       {dlit.NewString("Drake"), 2},
+					"Chaucer":     {dlit.NewString("Chaucer"), 2},
+					"Shakespeare": {dlit.NewString("Shakespeare"), 2},
+					"Marlowe":     {dlit.NewString("Marlowe"), 2},
 				},
 			},
-			"bandB": &description.Field{
+			"bandB": {
 				Kind: fieldtype.Number,
 				Min:  dlit.MustNew(1),
 				Max:  dlit.MustNew(3),
 				Values: map[string]description.Value{
-					"1": description.Value{dlit.NewString("1"), 3},
-					"2": description.Value{dlit.NewString("2"), 2},
-					"3": description.Value{dlit.NewString("3"), 1},
+					"1": {dlit.NewString("1"), 3},
+					"2": {dlit.NewString("2"), 2},
+					"3": {dlit.NewString("3"), 1},
 				},
 			},
-			"bandC": &description.Field{
+			"bandC": {
 				Kind: fieldtype.Number,
 				Min:  dlit.MustNew(2),
 				Max:  dlit.MustNew(7),
 				Values: map[string]description.Value{
-					"7": description.Value{dlit.NewString("7"), 3},
-					"2": description.Value{dlit.NewString("2"), 2},
-					"6": description.Value{dlit.NewString("6"), 1},
+					"7": {dlit.NewString("7"), 3},
+					"2": {dlit.NewString("2"), 2},
+					"6": {dlit.NewString("6"), 1},
 				},
 			},
-			"bandD": &description.Field{
+			"bandD": {
 				Kind: fieldtype.Number,
 				Min:  dlit.MustNew(2),
 				Max:  dlit.MustNew(8),
 				Values: map[string]description.Value{
-					"3": description.Value{dlit.NewString("3"), 3},
-					"2": description.Value{dlit.NewString("2"), 2},
-					"8": description.Value{dlit.NewString("8"), 1},
+					"3": {dlit.NewString("3"), 3},
+					"2": {dlit.NewString("2"), 2},
+					"8": {dlit.NewString("8"), 1},
 				},
 			},
 		},

@@ -25,12 +25,12 @@ func TestAll(t *testing.T) {
 			"campaign", "pdays", "previous", "poutcome", "y",
 		},
 		Aggregators: []*experiment.AggregatorDesc{
-			&experiment.AggregatorDesc{"numSignedUp", "count", "y == \"yes\""},
-			&experiment.AggregatorDesc{"cost", "calc", "numMatches * 4.5"},
-			&experiment.AggregatorDesc{"income", "calc", "numSignedUp * 24"},
-			&experiment.AggregatorDesc{"profit", "calc", "income - cost"},
-			&experiment.AggregatorDesc{"oddFigure", "sum", "balance - age"},
-			&experiment.AggregatorDesc{
+			{"numSignedUp", "count", "y == \"yes\""},
+			{"cost", "calc", "numMatches * 4.5"},
+			{"income", "calc", "numSignedUp * 24"},
+			{"profit", "calc", "income - cost"},
+			{"oddFigure", "sum", "balance - age"},
+			{
 				"percentMarried",
 				"precision",
 				"marital == \"married\"",
@@ -38,9 +38,9 @@ func TestAll(t *testing.T) {
 		},
 		Goals: []string{"profit > 0"},
 		SortOrder: []*experiment.SortDesc{
-			&experiment.SortDesc{"profit", "descending"},
-			&experiment.SortDesc{"numSignedUp", "descending"},
-			&experiment.SortDesc{"goalsScore", "descending"},
+			{"profit", "descending"},
+			{"numSignedUp", "descending"},
+			{"goalsScore", "descending"},
 		},
 	}
 	experiment, err := experiment.New(experimentDesc)

@@ -21,11 +21,11 @@ func TestNewCount_error(t *testing.T) {
 
 func TestCountResult(t *testing.T) {
 	records := []map[string]*dlit.Literal{
-		map[string]*dlit.Literal{"income": dlit.MustNew(3), "band": dlit.MustNew(4)},
-		map[string]*dlit.Literal{"income": dlit.MustNew(3), "band": dlit.MustNew(7)},
-		map[string]*dlit.Literal{"income": dlit.MustNew(2), "band": dlit.MustNew(4)},
-		map[string]*dlit.Literal{"income": dlit.MustNew(2), "band": dlit.MustNew(6)},
-		map[string]*dlit.Literal{"income": dlit.MustNew(0), "band": dlit.MustNew(9)},
+		{"income": dlit.MustNew(3), "band": dlit.MustNew(4)},
+		{"income": dlit.MustNew(3), "band": dlit.MustNew(7)},
+		{"income": dlit.MustNew(2), "band": dlit.MustNew(4)},
+		{"income": dlit.MustNew(2), "band": dlit.MustNew(6)},
+		{"income": dlit.MustNew(0), "band": dlit.MustNew(9)},
 	}
 	goals := []*goal.Goal{}
 	numBandGt4Desc := MustNew("numBandGt4", "count", "band > 4")
