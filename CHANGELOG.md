@@ -1,3 +1,9 @@
+### Master branch
+
+  * Switch to MIT Licence
+  * s/`DescribingError`/`DescribeError`/
+  * Correct MergeError error message
+
 ## 0.2 (15th July 2017)
 
   * Rename rulehunter to rhkit
