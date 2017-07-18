@@ -23,6 +23,7 @@ We would love contributions to improve this project.  To do so easily we ask the
   * Confirm that your contributions can be included via a simple Developer Certificate of Origin (listed below) which we use instead of a full CLA. This can be signed via [cla-assistant](https://cla-assistant.io/vlifesystems/rhkit).
   * Please put your changes in a separate branch to ease integration.
   * For new code please add tests to prove that it works.
+  * Update [CHANGELOG.md](https://github.com/vlifesystems/rhkit/blob/master/CHANGELOG.md).
   * Make a pull request to the [repo](https://github.com/vlifesystems/rhkit) on github.
 
 If you find a bug, please report it at the project's [issues tracker](https://github.com/vlifesystems/rhkit/issues) also on github.
