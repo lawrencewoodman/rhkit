@@ -1,5 +1,5 @@
 // Copyright (C) 2016-2017 vLife Systems Ltd <http://vlifesystems.com>
-// Licensed under an MIT licence.  Please see LICENCE.md for details.
+// Licensed under an MIT licence.  Please see LICENSE.md for details.
 
 // Package goal handles goal expressions and their results
 package goal
