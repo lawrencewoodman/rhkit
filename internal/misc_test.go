@@ -126,7 +126,7 @@ func TestStringInSlice(t *testing.T) {
 	for i, c := range cases {
 		got := StringInSlice(c.needle, c.haystack)
 		if got != c.want {
-			t.Errorf("(%d) StringInSlice got: %d, want: %d", i, got, c.want)
+			t.Errorf("(%d) StringInSlice got: %t, want: %t", i, got, c.want)
 		}
 	}
 }

@@ -40,7 +40,7 @@ func TestGoalsScoreNextRecord(t *testing.T) {
 	record := map[string]*dlit.Literal{}
 	got := ai.NextRecord(record, true)
 	if got != nil {
-		t.Errorf("NextRecord: got: %s, want: %s", got, nil)
+		t.Errorf("NextRecord: got: %s, want: nil", got)
 	}
 }
 
