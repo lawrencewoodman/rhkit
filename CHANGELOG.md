@@ -3,6 +3,7 @@
   * Switch to MIT Licence
   * s/`DescribingError`/`DescribeError`/
   * Correct MergeError error message
+  * Add user defined dynamic rules to Experiment
 
 ## 0.2 (15th July 2017)
 

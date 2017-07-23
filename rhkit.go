@@ -64,6 +64,11 @@ func Process(
 		return nil, ErrNoRulesGenerated
 	}
 
+	userRulesAss, err := assessment.AssessRules(experiment.Rules, experiment)
+	if err != nil {
+		return nil, AssessError{Err: err}
+	}
+
 	ass, err = assessment.AssessRules(rules, experiment)
 	if err != nil {
 		return nil, AssessError{Err: err}
@@ -122,5 +127,13 @@ func Process(
 	ass.Sort(experiment.SortOrder)
 	ass.Refine()
 
-	return ass.TruncateRuleAssessments(maxNumRules), nil
+	ass = ass.TruncateRuleAssessments(maxNumRules - len(experiment.Rules))
+
+	ass, err = ass.Merge(userRulesAss)
+	if err != nil {
+		return nil, MergeError{Err: err}
+	}
+	ass.Sort(experiment.SortOrder)
+
+	return ass, nil
 }

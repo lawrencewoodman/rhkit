@@ -52,24 +52,8 @@ type Valuer interface {
 	Value() *dlit.Literal
 }
 
-type InvalidRuleError struct {
-	Rule Rule
-}
-
-type IncompatibleTypesRuleError struct {
-	Rule Rule
-}
-
 type Complexity struct {
 	Arithmetic bool
-}
-
-func (e InvalidRuleError) Error() string {
-	return "invalid rule: " + e.Rule.String()
-}
-
-func (e IncompatibleTypesRuleError) Error() string {
-	return "incompatible types in rule: " + e.Rule.String()
 }
 
 // Generate generates rules for rules that have registered a generator.

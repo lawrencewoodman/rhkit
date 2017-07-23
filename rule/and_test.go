@@ -116,6 +116,10 @@ func TestNewAnd(t *testing.T) {
 		},
 		{ruleA: NewEQFV("group", dlit.MustNew("bob")),
 			ruleB: NewEQFV("team", dlit.MustNew("ruth"))},
+		{ruleA: NewEQFV("group", dlit.MustNew("bob")),
+			ruleB: mustNewDynamic("team == \"ruth\"")},
+		{ruleA: mustNewDynamic("team == \"ruth\""),
+			ruleB: NewEQFV("group", dlit.MustNew("bob"))},
 	}
 	for _, c := range cases {
 		r, err := NewAnd(c.ruleA, c.ruleB)
@@ -562,4 +566,16 @@ func TestAndFields(t *testing.T) {
 			t.Errorf("Fields() got: %s, want: %s", got, c.want)
 		}
 	}
+}
+
+/************************
+ *  Helper Functions
+ ************************/
+
+func mustNewDynamic(expr string) Rule {
+	r, err := NewDynamic(expr)
+	if err != nil {
+		panic(err)
+	}
+	return r
 }

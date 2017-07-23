@@ -20,6 +20,7 @@ type ExperimentDesc struct {
 	Aggregators    []*AggregatorDesc
 	Goals          []string
 	SortOrder      []*SortDesc
+	Rules          []string
 }
 
 type AggregatorDesc struct {
@@ -41,6 +42,7 @@ type Experiment struct {
 	Aggregators    []aggregators.AggregatorSpec
 	Goals          []*goal.Goal
 	SortOrder      []SortField
+	Rules          []rule.Rule
 }
 
 type SortField struct {
@@ -81,6 +83,11 @@ func New(e *ExperimentDesc) (*Experiment, error) {
 		return nil, err
 	}
 
+	rules, err := makeRules(e.Rules)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Experiment{
 		Title:          e.Title,
 		Dataset:        e.Dataset,
@@ -89,6 +96,7 @@ func New(e *ExperimentDesc) (*Experiment, error) {
 		Aggregators:    aggregators,
 		Goals:          goals,
 		SortOrder:      sortOrder,
+		Rules:          rules,
 	}, nil
 }
 
@@ -226,6 +234,18 @@ func makeSortOrder(eSortOrder []*SortDesc) ([]SortField, error) {
 			r[i] = SortField{field, ASCENDING}
 		} else {
 			r[i] = SortField{field, DESCENDING}
+		}
+	}
+	return r, nil
+}
+
+func makeRules(exprs []string) ([]rule.Rule, error) {
+	var err error
+	r := make([]rule.Rule, len(exprs))
+	for i, expr := range exprs {
+		r[i], err = rule.NewDynamic(expr)
+		if err != nil {
+			return r, err
 		}
 	}
 	return r, nil

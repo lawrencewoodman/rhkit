@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/lawrencewoodman/ddataset"
 	"github.com/lawrencewoodman/ddataset/dcsv"
+	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/aggregators"
 	"github.com/vlifesystems/rhkit/goal"
 	"github.com/vlifesystems/rhkit/rule"
@@ -88,6 +89,46 @@ func TestNew(t *testing.T) {
 				{"goalsScore", DESCENDING},
 			},
 		},
+		{
+			Title: "This is a jolly nice title",
+			Dataset: dcsv.New(
+				filepath.Join("..", "fixtures", "bank.csv"),
+				true,
+				rune(';'),
+				fieldNames,
+			),
+			RuleFields: []string{"age", "job", "marital", "default",
+				"balance", "housing", "loan", "contact", "day", "month", "duration",
+				"campaign", "pdays", "previous", "p_1234567890outcome", "y",
+			},
+			RuleComplexity: rule.Complexity{Arithmetic: false},
+			Aggregators: []aggregators.AggregatorSpec{
+				aggregators.MustNew("numMatches", "count", "true()"),
+				aggregators.MustNew("percentMatches", "calc",
+					"roundto(100.0 * numMatches / numRecords, 2)"),
+				// num_married to check for allowed characters
+				aggregators.MustNew("num_married", "count", "marital == \"married\""),
+				aggregators.MustNew("numSignedUp", "count", "y == \"yes\""),
+				aggregators.MustNew("cost", "calc", "numMatches * 4.5"),
+				aggregators.MustNew("income", "calc", "numSignedUp * 24"),
+				aggregators.MustNew("profit", "calc", "income - cost"),
+				aggregators.MustNew("goalsScore", "goalsscore"),
+			},
+			Goals: []*goal.Goal{goal.MustNew("profit > 0")},
+			SortOrder: []SortField{
+				{"profit", DESCENDING},
+				{"numSignedUp", DESCENDING},
+				{"cost", ASCENDING},
+				{"numMatches", DESCENDING},
+				{"percentMatches", DESCENDING},
+				{"goalsScore", DESCENDING},
+			},
+			Rules: []rule.Rule{
+				rule.NewEQFV("job", dlit.MustNew("manager")),
+				rule.NewGEFV("age", dlit.MustNew(27)),
+				rule.NewLEFV("balance", dlit.MustNew(1500)),
+			},
+		},
 	}
 	cases := []struct {
 		experimentDesc *ExperimentDesc
@@ -155,15 +196,53 @@ func TestNew(t *testing.T) {
 			}},
 			expectedExperiments[1],
 		},
+		{&ExperimentDesc{
+			Title: "This is a jolly nice title",
+			Dataset: dcsv.New(
+				filepath.Join("..", "fixtures", "bank.csv"),
+				true,
+				rune(';'),
+				fieldNames,
+			),
+			RuleFields: []string{"age", "job", "marital", "default",
+				"balance", "housing", "loan", "contact", "day", "month", "duration",
+				"campaign", "pdays", "previous", "p_1234567890outcome", "y",
+			},
+			RuleComplexity: rule.Complexity{Arithmetic: false},
+			Aggregators: []*AggregatorDesc{
+				{"num_married", "count", "marital == \"married\""},
+				{"numSignedUp", "count", "y == \"yes\""},
+				{"cost", "calc", "numMatches * 4.5"},
+				{"income", "calc", "numSignedUp * 24"},
+				{"profit", "calc", "income - cost"},
+			},
+			Goals: []string{"profit > 0"},
+			SortOrder: []*SortDesc{
+				{"profit", "descending"},
+				{"numSignedUp", "descending"},
+				{"cost", "ascending"},
+				{"numMatches", "descending"},
+				{"percentMatches", "descending"},
+				{"goalsScore", "descending"},
+			},
+			Rules: []string{
+				"job == \"manager\"",
+				"age >= 27",
+				"balance <= 1500",
+			}},
+			expectedExperiments[2],
+		},
 	}
-	for _, c := range cases {
+	for i, c := range cases {
 		got, err := New(c.experimentDesc)
 		if err != nil {
-			t.Errorf("New(%v) err: %s", c.experimentDesc, err)
+			t.Errorf("(%d)  -New(%v) err: %s", i, c.experimentDesc, err)
 		}
 		if err := checkExperimentsMatch(got, c.want); err != nil {
-			t.Errorf("New(%v)\n experiments don't match: %s\n got: %v\n want: %v",
-				c.experimentDesc, err, got, c.want)
+			t.Errorf(
+				"(%d) - New(%v)\n experiments don't match: %s\n got: %v\n want: %v",
+				i, c.experimentDesc, err, got, c.want,
+			)
 		}
 	}
 }
@@ -381,6 +460,29 @@ func TestNew_errors(t *testing.T) {
 			}},
 			goal.InvalidGoalError("profit > > 0"),
 		},
+		{&ExperimentDesc{
+			Title:   "This is a nice title",
+			Dataset: dataset,
+			RuleFields: []string{"age", "job", "marital", "education", "default",
+				"balance", "housing", "loan", "contact", "day", "month", "duration",
+				"campaign", "pdays", "previous", "poutcome", "y",
+			},
+			Aggregators: []*AggregatorDesc{
+				{"numSignedUp", "count", "y == \"yes\""},
+			},
+			Goals: []string{},
+			SortOrder: []*SortDesc{
+				{"numMatches", "descending"},
+				{"percentMatches", "descending"},
+			},
+			Rules: []string{
+				"balance >= 27",
+				"day > > 0",
+				"month < 27",
+			},
+		},
+			rule.InvalidExprError{Expr: "day > > 0"},
+		},
 	}
 	for _, c := range cases {
 		_, err := New(c.experimentDesc)
@@ -413,6 +515,9 @@ func checkExperimentsMatch(e1 *Experiment, e2 *Experiment) error {
 	}
 	if !areSortOrdersEqual(e1.SortOrder, e2.SortOrder) {
 		return errors.New("Sort Orders don't match")
+	}
+	if !areRulesEqual(e1.Rules, e2.Rules) {
+		return errors.New("Rules don't match")
 	}
 	return checkDatasetsEqual(e1.Dataset, e2.Dataset)
 }
@@ -474,7 +579,6 @@ func areGoalExpressionsEqual(g1 []*goal.Goal, g2 []*goal.Goal) bool {
 		}
 	}
 	return true
-
 }
 
 func areAggregatorsEqual(
@@ -505,4 +609,17 @@ func areSortOrdersEqual(so1 []SortField, so2 []SortField) bool {
 		}
 	}
 	return true
+}
+
+func areRulesEqual(r1 []rule.Rule, r2 []rule.Rule) bool {
+	if len(r1) != len(r2) {
+		return false
+	}
+	for i, r := range r1 {
+		if r.String() != r2[i].String() {
+			return false
+		}
+	}
+	return true
+
 }
