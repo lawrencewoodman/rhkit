@@ -13,7 +13,6 @@ func TestProcess(t *testing.T) {
 		"balance", "housing", "loan", "contact", "day", "month", "duration",
 		"campaign", "pdays", "previous", "poutcome", "y"}
 	experimentDesc := &experiment.ExperimentDesc{
-		Title: "This is a jolly nice title",
 		Dataset: dcsv.New(
 			filepath.Join("fixtures", "bank.csv"),
 			true,
@@ -69,7 +68,6 @@ func TestProcess_user_rules(t *testing.T) {
 		"balance", "housing", "loan", "contact", "day", "month", "duration",
 		"campaign", "pdays", "previous", "poutcome", "y"}
 	experimentDesc := &experiment.ExperimentDesc{
-		Title: "This is a jolly nice title",
 		Dataset: dcsv.New(
 			filepath.Join("fixtures", "bank.csv"),
 			true,

@@ -4,6 +4,7 @@
   * s/`DescribingError`/`DescribeError`/
   * Correct MergeError error message
   * Add user defined dynamic rules to Experiment
+  * Remove Title from Experiment
 
 ## 0.2 (15th July 2017)
 

@@ -41,7 +41,6 @@ func TestAssessRules(t *testing.T) {
 	}
 	dataset := testhelpers.NewLiteralDataset(fieldNames, records)
 	experimentDesc := &experiment.ExperimentDesc{
-		Title:       "",
 		Dataset:     dataset,
 		RuleFields:  []string{"income", "cost", "band"},
 		Aggregators: aggregators,
@@ -175,7 +174,6 @@ func TestAssessRules_errors(t *testing.T) {
 	dataset := testhelpers.NewLiteralDataset(fieldNames, records)
 	for _, c := range cases {
 		experimentDesc := &experiment.ExperimentDesc{
-			Title:       "",
 			Dataset:     dataset,
 			RuleFields:  []string{"income", "cost", "band"},
 			Aggregators: c.aggregators,
@@ -210,7 +208,6 @@ func BenchmarkAssessRules(b *testing.B) {
 		"balance", "housing", "loan", "contact", "day", "month", "duration",
 		"campaign", "pdays", "previous", "poutcome", "y"}
 	experimentDesc := &experiment.ExperimentDesc{
-		Title: "",
 		Dataset: dcsv.New(
 			filepath.Join("fixtures", "bank_big.csv"),
 			true,

@@ -13,7 +13,6 @@ import (
 )
 
 type ExperimentDesc struct {
-	Title          string
 	Dataset        ddataset.Dataset
 	RuleFields     []string
 	RuleComplexity rule.Complexity
@@ -35,7 +34,6 @@ type SortDesc struct {
 }
 
 type Experiment struct {
-	Title          string
 	Dataset        ddataset.Dataset
 	RuleFields     []string
 	RuleComplexity rule.Complexity
@@ -89,7 +87,6 @@ func New(e *ExperimentDesc) (*Experiment, error) {
 	}
 
 	return &Experiment{
-		Title:          e.Title,
 		Dataset:        e.Dataset,
 		RuleFields:     e.RuleFields,
 		RuleComplexity: e.RuleComplexity,

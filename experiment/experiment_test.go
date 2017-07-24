@@ -20,7 +20,6 @@ func TestNew(t *testing.T) {
 		"campaign", "pdays", "previous", "p_1234567890outcome", "y"}
 	expectedExperiments := []*Experiment{
 		{
-			Title: "This is a jolly nice title",
 			Dataset: dcsv.New(
 				filepath.Join("..", "fixtures", "bank.csv"),
 				true,
@@ -55,7 +54,6 @@ func TestNew(t *testing.T) {
 			},
 		},
 		{
-			Title: "This is a jolly nice title",
 			Dataset: dcsv.New(
 				filepath.Join("..", "fixtures", "bank.csv"),
 				true,
@@ -90,7 +88,6 @@ func TestNew(t *testing.T) {
 			},
 		},
 		{
-			Title: "This is a jolly nice title",
 			Dataset: dcsv.New(
 				filepath.Join("..", "fixtures", "bank.csv"),
 				true,
@@ -135,7 +132,6 @@ func TestNew(t *testing.T) {
 		want           *Experiment
 	}{
 		{&ExperimentDesc{
-			Title: "This is a jolly nice title",
 			Dataset: dcsv.New(
 				filepath.Join("..", "fixtures", "bank.csv"),
 				true,
@@ -166,7 +162,6 @@ func TestNew(t *testing.T) {
 			expectedExperiments[0],
 		},
 		{&ExperimentDesc{
-			Title: "This is a jolly nice title",
 			Dataset: dcsv.New(
 				filepath.Join("..", "fixtures", "bank.csv"),
 				true,
@@ -197,7 +192,6 @@ func TestNew(t *testing.T) {
 			expectedExperiments[1],
 		},
 		{&ExperimentDesc{
-			Title: "This is a jolly nice title",
 			Dataset: dcsv.New(
 				filepath.Join("..", "fixtures", "bank.csv"),
 				true,
@@ -264,7 +258,6 @@ func TestNew_errors(t *testing.T) {
 		wantErr        error
 	}{
 		{&ExperimentDesc{
-			Title:   "This is a nice title",
 			Dataset: dataset,
 			RuleFields: []string{"age", "job", "marital", "education", "default",
 				"balance", "housing", "loan", "contact", "day", "month", "duration",
@@ -287,7 +280,6 @@ func TestNew_errors(t *testing.T) {
 			InvalidSortFieldError("age"),
 		},
 		{&ExperimentDesc{
-			Title:   "This is a nice title",
 			Dataset: dataset,
 			RuleFields: []string{"age", "job", "marital", "education", "default",
 				"balance", "housing", "loan", "contact", "day", "month", "duration",
@@ -301,7 +293,6 @@ func TestNew_errors(t *testing.T) {
 			&InvalidSortDirectionError{"numMatches", "Descending"},
 		},
 		{&ExperimentDesc{
-			Title:   "This is a nice title",
 			Dataset: dataset,
 			RuleFields: []string{"age", "job", "marital", "education", "default",
 				"balance", "housing", "loan", "contact", "day", "month", "duration",
@@ -315,7 +306,6 @@ func TestNew_errors(t *testing.T) {
 			&InvalidSortDirectionError{"percentMatches", "Ascending"},
 		},
 		{&ExperimentDesc{
-			Title:       "This is a nice title",
 			Dataset:     dataset,
 			RuleFields:  []string{},
 			Aggregators: []*AggregatorDesc{},
@@ -327,7 +317,6 @@ func TestNew_errors(t *testing.T) {
 			ErrNoRuleFieldsSpecified,
 		},
 		{&ExperimentDesc{
-			Title:   "This is a nice title",
 			Dataset: dataset,
 			RuleFields: []string{"age", "bob", "job", "education", "default",
 				"balance", "housing", "loan", "contact", "day", "month", "duration",
@@ -342,7 +331,6 @@ func TestNew_errors(t *testing.T) {
 			InvalidRuleFieldError("bob"),
 		},
 		{&ExperimentDesc{
-			Title:   "This is a nice title",
 			Dataset: dataset,
 			RuleFields: []string{"age", "job", "marital", "education", "default",
 				"balance", "housing", "loan", "contact", "day", "month", "duration",
@@ -359,7 +347,6 @@ func TestNew_errors(t *testing.T) {
 			AggregatorNameClashError("pdays"),
 		},
 		{&ExperimentDesc{
-			Title:   "This is a nice title",
 			Dataset: dataset,
 			RuleFields: []string{"age", "job", "marital", "education", "default",
 				"balance", "housing", "loan", "contact", "day", "month", "duration",
@@ -376,7 +363,6 @@ func TestNew_errors(t *testing.T) {
 			AggregatorNameReservedError("numMatches"),
 		},
 		{&ExperimentDesc{
-			Title:   "This is a nice title",
 			Dataset: dataset,
 			RuleFields: []string{"age", "job", "marital", "education", "default",
 				"balance", "housing", "loan", "contact", "day", "month", "duration",
@@ -393,7 +379,6 @@ func TestNew_errors(t *testing.T) {
 			AggregatorNameReservedError("percentMatches"),
 		},
 		{&ExperimentDesc{
-			Title:   "This is a nice title",
 			Dataset: dataset,
 			RuleFields: []string{"age", "job", "marital", "education", "default",
 				"balance", "housing", "loan", "contact", "day", "month", "duration",
@@ -410,7 +395,6 @@ func TestNew_errors(t *testing.T) {
 			AggregatorNameReservedError("goalsScore"),
 		},
 		{&ExperimentDesc{
-			Title:   "This is a nice title",
 			Dataset: dataset,
 			RuleFields: []string{"age", "job", "marital", "education", "default",
 				"balance", "housing", "loan", "contact", "day", "month", "duration",
@@ -427,7 +411,6 @@ func TestNew_errors(t *testing.T) {
 			InvalidAggregatorNameError("3numSignedUp"),
 		},
 		{&ExperimentDesc{
-			Title:   "This is a nice title",
 			Dataset: dataset,
 			RuleFields: []string{"age", "job", "marital", "education", "default",
 				"balance", "housing", "loan", "contact", "day", "month", "duration",
@@ -444,7 +427,6 @@ func TestNew_errors(t *testing.T) {
 			InvalidAggregatorNameError("num-signed-up"),
 		},
 		{&ExperimentDesc{
-			Title:   "This is a nice title",
 			Dataset: dataset,
 			RuleFields: []string{"age", "job", "marital", "education", "default",
 				"balance", "housing", "loan", "contact", "day", "month", "duration",
@@ -461,7 +443,6 @@ func TestNew_errors(t *testing.T) {
 			goal.InvalidGoalError("profit > > 0"),
 		},
 		{&ExperimentDesc{
-			Title:   "This is a nice title",
 			Dataset: dataset,
 			RuleFields: []string{"age", "job", "marital", "education", "default",
 				"balance", "housing", "loan", "contact", "day", "month", "duration",
@@ -498,9 +479,6 @@ func TestNew_errors(t *testing.T) {
 ************************/
 
 func checkExperimentsMatch(e1 *Experiment, e2 *Experiment) error {
-	if e1.Title != e2.Title {
-		return errors.New("Titles don't match")
-	}
 	if !areStringArraysEqual(e1.RuleFields, e2.RuleFields) {
 		return errors.New("RuleFields don't match")
 	}
