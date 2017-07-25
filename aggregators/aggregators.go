@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/goal"
+	"github.com/vlifesystems/rhkit/internal"
 	"sync"
 )
 
@@ -18,6 +19,12 @@ var (
 
 type Aggregator interface {
 	MakeSpec(string, string) (AggregatorSpec, error)
+}
+
+type Desc struct {
+	Name     string
+	Function string
+	Arg      string
 }
 
 type AggregatorSpec interface {
@@ -114,4 +121,51 @@ func InstancesToMap(
 		r[ai.Name()] = l
 	}
 	return r, nil
+}
+
+func MakeAggregatorSpecs(
+	fields []string,
+	descs []*Desc,
+) ([]AggregatorSpec, error) {
+	var err error
+	r := make([]AggregatorSpec, len(descs))
+	for i, desc := range descs {
+		if err = checkDescValid(fields, desc); err != nil {
+			return []AggregatorSpec{}, err
+		}
+		r[i], err = New(desc.Name, desc.Function, desc.Arg)
+		if err != nil {
+			return []AggregatorSpec{}, err
+		}
+	}
+	return addDefaultAggregators(r), nil
+}
+
+func addDefaultAggregators(specs []AggregatorSpec) []AggregatorSpec {
+	newSpecs := make([]AggregatorSpec, 2)
+	newSpecs[0] = MustNew("numMatches", "count", "true()")
+	newSpecs[1] = MustNew(
+		"percentMatches",
+		"calc",
+		"roundto(100.0 * numMatches / numRecords, 2)",
+	)
+	goalsScoreSpec := MustNew("goalsScore", "goalsscore")
+	newSpecs = append(newSpecs, specs...)
+	newSpecs = append(newSpecs, goalsScoreSpec)
+	return newSpecs
+}
+
+func checkDescValid(fields []string, desc *Desc) error {
+	if !internal.IsIdentifierValid(desc.Name) {
+		return InvalidNameError(desc.Name)
+	}
+	if internal.IsStringInSlice(desc.Name, fields) {
+		return NameClashError(desc.Name)
+	}
+	if desc.Name == "percentMatches" ||
+		desc.Name == "numMatches" ||
+		desc.Name == "goalsScore" {
+		return NameReservedError(desc.Name)
+	}
+	return nil
 }

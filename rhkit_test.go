@@ -3,6 +3,7 @@ package rhkit
 import (
 	"fmt"
 	"github.com/lawrencewoodman/ddataset/dcsv"
+	"github.com/vlifesystems/rhkit/aggregators"
 	"github.com/vlifesystems/rhkit/experiment"
 	"path/filepath"
 	"testing"
@@ -23,7 +24,7 @@ func TestProcess(t *testing.T) {
 			"balance", "housing", "loan", "contact", "day", "month", "duration",
 			"campaign", "pdays", "previous", "poutcome", "y",
 		},
-		Aggregators: []*experiment.AggregatorDesc{
+		Aggregators: []*aggregators.Desc{
 			{"numSignedUp", "count", "y == \"yes\""},
 			{"cost", "calc", "numMatches * 4.5"},
 			{"income", "calc", "numSignedUp * 24"},
@@ -78,7 +79,7 @@ func TestProcess_user_rules(t *testing.T) {
 			"balance", "housing", "loan", "contact", "day", "month", "duration",
 			"campaign", "pdays", "previous", "poutcome", "y",
 		},
-		Aggregators: []*experiment.AggregatorDesc{
+		Aggregators: []*aggregators.Desc{
 			{"numSignedUp", "count", "y == \"yes\""},
 			{"cost", "calc", "numMatches * 4.5"},
 			{"income", "calc", "numSignedUp * 24"},

@@ -5,6 +5,11 @@
   * Correct MergeError error message
   * Add user defined dynamic rules to Experiment
   * Remove Title from Experiment
+  * Create aggregators.MakeAggregatorSpecs
+  * Move experiment.AggregatorDesc to aggregators.Desc
+  * s/experiment.InvalidAggregatorNameError/aggregators.InvalidNameError/
+  * s/experiment.AggregatorNameClashError/aggregators.NameClashError/
+  * s/experiment.AggregatorNameReservedError/aggregators.NameReservedError/
 
 ## 0.2 (15th July 2017)
 

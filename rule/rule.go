@@ -67,7 +67,7 @@ func Generate(
 	rules := make([]Rule, 1)
 	rules[0] = NewTrue()
 	for field := range inputDescription.Fields {
-		if internal.StringInSlice(field, ruleFields) {
+		if internal.IsStringInSlice(field, ruleFields) {
 			for _, generator := range generators {
 				newRules := generator(inputDescription, ruleFields, complexity, field)
 				rules = append(rules, newRules...)

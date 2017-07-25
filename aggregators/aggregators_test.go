@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/goal"
+	"reflect"
 	"testing"
 )
 
@@ -159,6 +160,87 @@ func TestInstancesToMap(t *testing.T) {
 	}
 }
 
+func TestMakeAggregators(t *testing.T) {
+	fields := []string{"age", "job", "marital", "education", "default",
+		"balance", "housing", "loan", "contact", "day", "month", "duration",
+		"campaign", "pdays", "previous", "y"}
+	desc := []*Desc{
+		{"num_married", "count", "marital == \"married\""},
+		{"numSignedUp", "count", "y == \"yes\""},
+		{"cost", "calc", "numMatches * 4.5"},
+		{"income", "calc", "numSignedUp * 24"},
+		{"profit", "calc", "income - cost"},
+	}
+	want := []AggregatorSpec{
+		MustNew("numMatches", "count", "true()"),
+		MustNew("percentMatches", "calc",
+			"roundto(100.0 * numMatches / numRecords, 2)"),
+		// num_married to check for allowed characters
+		MustNew("num_married", "count", "marital == \"married\""),
+		MustNew("numSignedUp", "count", "y == \"yes\""),
+		MustNew("cost", "calc", "numMatches * 4.5"),
+		MustNew("income", "calc", "numSignedUp * 24"),
+		MustNew("profit", "calc", "income - cost"),
+		MustNew("goalsScore", "goalsscore"),
+	}
+	got, err := MakeAggregatorSpecs(fields, desc)
+	if err != nil {
+		t.Errorf("MakeAggregatorSpecs(%v): %s", desc, err)
+	}
+	if !areAggregatorsEqual(got, want) {
+		t.Errorf("MakeAggregatorSpecs(%v) got: %v, want: %v",
+			desc, got, want)
+	}
+}
+
+func TestMakeAggregators_errors(t *testing.T) {
+	fields := []string{"age", "job", "marital", "education", "default",
+		"balance", "housing", "loan", "contact", "day", "month", "duration",
+		"campaign", "pdays", "previous", "y"}
+	cases := []struct {
+		desc    []*Desc
+		wantErr error
+	}{
+		{desc: []*Desc{
+			{"pdays", "count", "day > 2"},
+		},
+			wantErr: NameClashError("pdays"),
+		},
+		{desc: []*Desc{
+			{"numMatches", "count", "y == \"yes\""},
+		},
+			wantErr: NameReservedError("numMatches"),
+		},
+		{desc: []*Desc{
+			{"percentMatches", "percent", "y == \"yes\""},
+		},
+			wantErr: NameReservedError("percentMatches"),
+		},
+		{desc: []*Desc{
+			{"goalsScore", "count", "y == \"yes\""},
+		},
+			wantErr: NameReservedError("goalsScore"),
+		},
+		{desc: []*Desc{
+			{"3numSignedUp", "count", "y == \"yes\""},
+		},
+			wantErr: InvalidNameError("3numSignedUp"),
+		},
+		{desc: []*Desc{
+			{"num-signed-up", "count", "y == \"yes\""},
+		},
+			wantErr: InvalidNameError("num-signed-up"),
+		},
+	}
+	for i, c := range cases {
+		_, err := MakeAggregatorSpecs(fields, c.desc)
+		if err == nil || err.Error() != c.wantErr.Error() {
+			t.Errorf("(%d) MakeAggregatorSpecs: err: %s, wantErr: %s",
+				i, err, c.wantErr)
+		}
+	}
+}
+
 /**********************
  *  Helper functions
  **********************/
@@ -201,4 +283,18 @@ func (li *LitInstance) Result(
 	numRecords int64,
 ) *dlit.Literal {
 	return dlit.MustNew(li.result)
+}
+
+func areAggregatorsEqual(a1 []AggregatorSpec, a2 []AggregatorSpec) bool {
+	if len(a1) != len(a2) {
+		return false
+	}
+	for i, a := range a1 {
+		if reflect.TypeOf(a) != reflect.TypeOf(a2[i]) ||
+			a.Name() != a2[i].Name() ||
+			a.Arg() != a2[i].Arg() {
+			return false
+		}
+	}
+	return true
 }

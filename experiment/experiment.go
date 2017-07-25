@@ -16,16 +16,10 @@ type ExperimentDesc struct {
 	Dataset        ddataset.Dataset
 	RuleFields     []string
 	RuleComplexity rule.Complexity
-	Aggregators    []*AggregatorDesc
+	Aggregators    []*aggregators.Desc
 	Goals          []string
 	SortOrder      []*SortDesc
 	Rules          []string
-}
-
-type AggregatorDesc struct {
-	Name     string
-	Function string
-	Arg      string
 }
 
 type SortDesc struct {
@@ -71,7 +65,8 @@ func New(e *ExperimentDesc) (*Experiment, error) {
 	if err != nil {
 		return nil, err
 	}
-	aggregators, err := makeAggregators(e.Aggregators)
+	aggregators, err :=
+		aggregators.MakeAggregatorSpecs(e.Dataset.Fields(), e.Aggregators)
 	if err != nil {
 		return nil, err
 	}
@@ -102,9 +97,6 @@ func checkExperimentDescValid(e *ExperimentDesc) error {
 		return err
 	}
 	if err := checkRuleFieldsValid(e); err != nil {
-		return err
-	}
-	if err := checkAggregatorsValid(e); err != nil {
 		return err
 	}
 	return nil
@@ -145,35 +137,8 @@ func checkRuleFieldsValid(e *ExperimentDesc) error {
 		if !internal.IsIdentifierValid(ruleField) {
 			return InvalidRuleFieldError(ruleField)
 		}
-		if !isStringInSlice(ruleField, fieldNames) {
+		if !internal.IsStringInSlice(ruleField, fieldNames) {
 			return InvalidRuleFieldError(ruleField)
-		}
-	}
-	return nil
-}
-
-func isStringInSlice(needle string, haystack []string) bool {
-	for _, s := range haystack {
-		if needle == s {
-			return true
-		}
-	}
-	return false
-}
-
-func checkAggregatorsValid(e *ExperimentDesc) error {
-	fieldNames := e.Dataset.Fields()
-	for _, aggregator := range e.Aggregators {
-		if !internal.IsIdentifierValid(aggregator.Name) {
-			return InvalidAggregatorNameError(aggregator.Name)
-		}
-		if isStringInSlice(aggregator.Name, fieldNames) {
-			return AggregatorNameClashError(aggregator.Name)
-		}
-		if aggregator.Name == "percentMatches" ||
-			aggregator.Name == "numMatches" ||
-			aggregator.Name == "goalsScore" {
-			return AggregatorNameReservedError(aggregator.Name)
 		}
 	}
 	return nil
@@ -189,36 +154,6 @@ func makeGoals(exprs []string) ([]*goal.Goal, error) {
 		}
 	}
 	return r, nil
-}
-
-func makeAggregators(
-	eAggregators []*AggregatorDesc,
-) ([]aggregators.AggregatorSpec, error) {
-	var err error
-	r := make([]aggregators.AggregatorSpec, len(eAggregators))
-	for i, ea := range eAggregators {
-		r[i], err = aggregators.New(ea.Name, ea.Function, ea.Arg)
-		if err != nil {
-			return r, err
-		}
-	}
-	return addDefaultAggregators(r), nil
-}
-
-func addDefaultAggregators(
-	aggregatorSpecs []aggregators.AggregatorSpec,
-) []aggregators.AggregatorSpec {
-	newAggregatorSpecs := make([]aggregators.AggregatorSpec, 2)
-	newAggregatorSpecs[0] = aggregators.MustNew("numMatches", "count", "true()")
-	newAggregatorSpecs[1] = aggregators.MustNew(
-		"percentMatches",
-		"calc",
-		"roundto(100.0 * numMatches / numRecords, 2)",
-	)
-	goalsScoreAggregatorSpec := aggregators.MustNew("goalsScore", "goalsscore")
-	newAggregatorSpecs = append(newAggregatorSpecs, aggregatorSpecs...)
-	newAggregatorSpecs = append(newAggregatorSpecs, goalsScoreAggregatorSpec)
-	return newAggregatorSpecs
 }
 
 func makeSortOrder(eSortOrder []*SortDesc) ([]SortField, error) {

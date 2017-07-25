@@ -143,7 +143,7 @@ func TestNew(t *testing.T) {
 				"campaign", "pdays", "previous", "p_1234567890outcome", "y",
 			},
 			RuleComplexity: rule.Complexity{Arithmetic: true},
-			Aggregators: []*AggregatorDesc{
+			Aggregators: []*aggregators.Desc{
 				{"num_married", "count", "marital == \"married\""},
 				{"numSignedUp", "count", "y == \"yes\""},
 				{"cost", "calc", "numMatches * 4.5"},
@@ -173,7 +173,7 @@ func TestNew(t *testing.T) {
 				"campaign", "pdays", "previous", "p_1234567890outcome", "y",
 			},
 			RuleComplexity: rule.Complexity{Arithmetic: false},
-			Aggregators: []*AggregatorDesc{
+			Aggregators: []*aggregators.Desc{
 				{"num_married", "count", "marital == \"married\""},
 				{"numSignedUp", "count", "y == \"yes\""},
 				{"cost", "calc", "numMatches * 4.5"},
@@ -203,7 +203,7 @@ func TestNew(t *testing.T) {
 				"campaign", "pdays", "previous", "p_1234567890outcome", "y",
 			},
 			RuleComplexity: rule.Complexity{Arithmetic: false},
-			Aggregators: []*AggregatorDesc{
+			Aggregators: []*aggregators.Desc{
 				{"num_married", "count", "marital == \"married\""},
 				{"numSignedUp", "count", "y == \"yes\""},
 				{"cost", "calc", "numMatches * 4.5"},
@@ -263,7 +263,7 @@ func TestNew_errors(t *testing.T) {
 				"balance", "housing", "loan", "contact", "day", "month", "duration",
 				"campaign", "pdays", "previous", "poutcome", "y",
 			},
-			Aggregators: []*AggregatorDesc{
+			Aggregators: []*aggregators.Desc{
 				{"numSignedUp", "count", "y == \"yes\""},
 				{"cost", "calc", "numMatches * 4.5"},
 				{"income", "calc", "numSignedUp * 24"},
@@ -285,7 +285,7 @@ func TestNew_errors(t *testing.T) {
 				"balance", "housing", "loan", "contact", "day", "month", "duration",
 				"campaign", "pdays", "previous", "poutcome", "y",
 			},
-			Aggregators: []*AggregatorDesc{},
+			Aggregators: []*aggregators.Desc{},
 			Goals:       []string{"profit > 0"},
 			SortOrder: []*SortDesc{
 				{"numMatches", "Descending"},
@@ -298,7 +298,7 @@ func TestNew_errors(t *testing.T) {
 				"balance", "housing", "loan", "contact", "day", "month", "duration",
 				"campaign", "pdays", "previous", "poutcome", "y",
 			},
-			Aggregators: []*AggregatorDesc{},
+			Aggregators: []*aggregators.Desc{},
 			Goals:       []string{"profit > 0"},
 			SortOrder: []*SortDesc{
 				{"percentMatches", "Ascending"},
@@ -308,7 +308,7 @@ func TestNew_errors(t *testing.T) {
 		{&ExperimentDesc{
 			Dataset:     dataset,
 			RuleFields:  []string{},
-			Aggregators: []*AggregatorDesc{},
+			Aggregators: []*aggregators.Desc{},
 			Goals:       []string{"profit > 0"},
 			SortOrder: []*SortDesc{
 				{"numMatches", "descending"},
@@ -322,7 +322,7 @@ func TestNew_errors(t *testing.T) {
 				"balance", "housing", "loan", "contact", "day", "month", "duration",
 				"campaign", "pdays", "previous", "poutcome", "y",
 			},
-			Aggregators: []*AggregatorDesc{},
+			Aggregators: []*aggregators.Desc{},
 			Goals:       []string{"profit > 0"},
 			SortOrder: []*SortDesc{
 				{"numMatches", "descending"},
@@ -336,7 +336,7 @@ func TestNew_errors(t *testing.T) {
 				"balance", "housing", "loan", "contact", "day", "month", "duration",
 				"campaign", "pdays", "previous", "poutcome", "y",
 			},
-			Aggregators: []*AggregatorDesc{
+			Aggregators: []*aggregators.Desc{
 				{"pdays", "count", "day > 2"},
 			},
 			Goals: []string{"profit > 0"},
@@ -344,7 +344,7 @@ func TestNew_errors(t *testing.T) {
 				{"numMatches", "descending"},
 				{"percentMatches", "descending"},
 			}},
-			AggregatorNameClashError("pdays"),
+			aggregators.NameClashError("pdays"),
 		},
 		{&ExperimentDesc{
 			Dataset: dataset,
@@ -352,7 +352,7 @@ func TestNew_errors(t *testing.T) {
 				"balance", "housing", "loan", "contact", "day", "month", "duration",
 				"campaign", "pdays", "previous", "poutcome", "y",
 			},
-			Aggregators: []*AggregatorDesc{
+			Aggregators: []*aggregators.Desc{
 				{"numMatches", "count", "y == \"yes\""},
 			},
 			Goals: []string{"profit > 0"},
@@ -360,7 +360,7 @@ func TestNew_errors(t *testing.T) {
 				{"numMatches", "descending"},
 				{"percentMatches", "descending"},
 			}},
-			AggregatorNameReservedError("numMatches"),
+			aggregators.NameReservedError("numMatches"),
 		},
 		{&ExperimentDesc{
 			Dataset: dataset,
@@ -368,7 +368,7 @@ func TestNew_errors(t *testing.T) {
 				"balance", "housing", "loan", "contact", "day", "month", "duration",
 				"campaign", "pdays", "previous", "poutcome", "y",
 			},
-			Aggregators: []*AggregatorDesc{
+			Aggregators: []*aggregators.Desc{
 				{"percentMatches", "percent", "y == \"yes\""},
 			},
 			Goals: []string{"profit > 0"},
@@ -376,7 +376,7 @@ func TestNew_errors(t *testing.T) {
 				{"numMatches", "descending"},
 				{"percentMatches", "descending"},
 			}},
-			AggregatorNameReservedError("percentMatches"),
+			aggregators.NameReservedError("percentMatches"),
 		},
 		{&ExperimentDesc{
 			Dataset: dataset,
@@ -384,7 +384,7 @@ func TestNew_errors(t *testing.T) {
 				"balance", "housing", "loan", "contact", "day", "month", "duration",
 				"campaign", "pdays", "previous", "poutcome", "y",
 			},
-			Aggregators: []*AggregatorDesc{
+			Aggregators: []*aggregators.Desc{
 				{"goalsScore", "count", "y == \"yes\""},
 			},
 			Goals: []string{"profit > 0"},
@@ -392,7 +392,7 @@ func TestNew_errors(t *testing.T) {
 				{"numMatches", "descending"},
 				{"percentMatches", "descending"},
 			}},
-			AggregatorNameReservedError("goalsScore"),
+			aggregators.NameReservedError("goalsScore"),
 		},
 		{&ExperimentDesc{
 			Dataset: dataset,
@@ -400,7 +400,7 @@ func TestNew_errors(t *testing.T) {
 				"balance", "housing", "loan", "contact", "day", "month", "duration",
 				"campaign", "pdays", "previous", "poutcome", "y",
 			},
-			Aggregators: []*AggregatorDesc{
+			Aggregators: []*aggregators.Desc{
 				{"3numSignedUp", "count", "y == \"yes\""},
 			},
 			Goals: []string{"profit > 0"},
@@ -408,7 +408,7 @@ func TestNew_errors(t *testing.T) {
 				{"numMatches", "descending"},
 				{"percentMatches", "descending"},
 			}},
-			InvalidAggregatorNameError("3numSignedUp"),
+			aggregators.InvalidNameError("3numSignedUp"),
 		},
 		{&ExperimentDesc{
 			Dataset: dataset,
@@ -416,7 +416,7 @@ func TestNew_errors(t *testing.T) {
 				"balance", "housing", "loan", "contact", "day", "month", "duration",
 				"campaign", "pdays", "previous", "poutcome", "y",
 			},
-			Aggregators: []*AggregatorDesc{
+			Aggregators: []*aggregators.Desc{
 				{"num-signed-up", "count", "y == \"yes\""},
 			},
 			Goals: []string{"profit > 0"},
@@ -424,7 +424,7 @@ func TestNew_errors(t *testing.T) {
 				{"numMatches", "descending"},
 				{"percentMatches", "descending"},
 			}},
-			InvalidAggregatorNameError("num-signed-up"),
+			aggregators.InvalidNameError("num-signed-up"),
 		},
 		{&ExperimentDesc{
 			Dataset: dataset,
@@ -432,7 +432,7 @@ func TestNew_errors(t *testing.T) {
 				"balance", "housing", "loan", "contact", "day", "month", "duration",
 				"campaign", "pdays", "previous", "poutcome", "y",
 			},
-			Aggregators: []*AggregatorDesc{
+			Aggregators: []*aggregators.Desc{
 				{"numSignedUp", "count", "y == \"yes\""},
 			},
 			Goals: []string{"profit > > 0"},
@@ -448,7 +448,7 @@ func TestNew_errors(t *testing.T) {
 				"balance", "housing", "loan", "contact", "day", "month", "duration",
 				"campaign", "pdays", "previous", "poutcome", "y",
 			},
-			Aggregators: []*AggregatorDesc{
+			Aggregators: []*aggregators.Desc{
 				{"numSignedUp", "count", "y == \"yes\""},
 			},
 			Goals: []string{},

@@ -5,6 +5,7 @@ import (
 	"github.com/lawrencewoodman/ddataset/dcsv"
 	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
+	"github.com/vlifesystems/rhkit/aggregators"
 	"github.com/vlifesystems/rhkit/experiment"
 	"github.com/vlifesystems/rhkit/internal/testhelpers"
 	"github.com/vlifesystems/rhkit/rule"
@@ -18,7 +19,7 @@ func TestAssessRules(t *testing.T) {
 		rule.NewGEFV("band", dlit.MustNew(4)),
 		rule.NewGEFV("cost", dlit.MustNew(1.3)),
 	}
-	aggregators := []*experiment.AggregatorDesc{
+	aggregators := []*aggregators.Desc{
 		{"numIncomeGt2", "count", "income > 2"},
 		{"numBandGt4", "count", "band > 4"},
 	}
@@ -135,19 +136,19 @@ func TestAssessRules(t *testing.T) {
 func TestAssessRules_errors(t *testing.T) {
 	cases := []struct {
 		rules       []rule.Rule
-		aggregators []*experiment.AggregatorDesc
+		aggregators []*aggregators.Desc
 		goals       []string
 		wantErr     error
 	}{
 		{[]rule.Rule{rule.NewGEFV("hand", dlit.MustNew(3))},
-			[]*experiment.AggregatorDesc{
+			[]*aggregators.Desc{
 				{"numIncomeGt2", "count", "income > 2"},
 			},
 			[]string{"numIncomeGt2 == 1"},
 			rule.InvalidRuleError{Rule: rule.NewGEFV("hand", dlit.MustNew(3))},
 		},
 		{[]rule.Rule{rule.NewGEFV("band", dlit.MustNew(3))},
-			[]*experiment.AggregatorDesc{
+			[]*aggregators.Desc{
 				{"numIncomeGt2", "count", "bincome > 2"},
 			},
 			[]string{"numIncomeGt2 == 1"},
@@ -157,7 +158,7 @@ func TestAssessRules_errors(t *testing.T) {
 			},
 		},
 		{[]rule.Rule{rule.NewGEFV("band", dlit.MustNew(3))},
-			[]*experiment.AggregatorDesc{
+			[]*aggregators.Desc{
 				{"numIncomeGt2", "count", "income > 2"},
 			},
 			[]string{"numIncomeGt == 1"},
@@ -218,7 +219,7 @@ func BenchmarkAssessRules(b *testing.B) {
 			"balance", "housing", "loan", "contact", "day", "month", "duration",
 			"campaign", "pdays", "previous", "poutcome",
 		},
-		Aggregators: []*experiment.AggregatorDesc{
+		Aggregators: []*aggregators.Desc{
 			{"numMarried", "count", "marital == \"married\""},
 			{"numSignedUp", "count", "y == \"yes\""},
 			{"cost", "calc", "numMatches * 4.5"},

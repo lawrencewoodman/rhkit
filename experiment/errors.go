@@ -28,21 +28,3 @@ type InvalidRuleFieldError string
 func (e InvalidRuleFieldError) Error() string {
 	return "invalid rule field: " + string(e)
 }
-
-type InvalidAggregatorNameError string
-
-func (e InvalidAggregatorNameError) Error() string {
-	return "invalid aggregator name: " + string(e)
-}
-
-type AggregatorNameClashError string
-
-func (e AggregatorNameClashError) Error() string {
-	return "aggregator name clashes with field name: " + string(e)
-}
-
-type AggregatorNameReservedError string
-
-func (e AggregatorNameReservedError) Error() string {
-	return "aggregator name reserved: " + string(e)
-}
