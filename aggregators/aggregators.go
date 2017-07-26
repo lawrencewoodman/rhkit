@@ -17,7 +17,7 @@ var (
 )
 
 type Aggregator interface {
-	MakeSpec(string, string) (AggregatorSpec, error)
+	MakeSpec(string, string) (Spec, error)
 }
 
 type Desc struct {
@@ -26,16 +26,16 @@ type Desc struct {
 	Arg  string
 }
 
-type AggregatorSpec interface {
-	New() AggregatorInstance
+type Spec interface {
+	New() Instance
 	Name() string
 	Kind() string
 	Arg() string
 }
 
-type AggregatorInstance interface {
+type Instance interface {
 	Name() string
-	Result([]AggregatorInstance, []*goal.Goal, int64) *dlit.Literal
+	Result([]Instance, []*goal.Goal, int64) *dlit.Literal
 	NextRecord(map[string]*dlit.Literal, bool) error
 }
 
@@ -57,8 +57,8 @@ func Register(kind string, aggregator Aggregator) {
 // Create a new Aggregator where 'name' is what the aggregator will be
 // known as, 'kind' is the name of the Aggregator as Registered,
 // 'args' are any arguments to pass to the Aggregator.
-func New(name string, kind string, args ...string) (AggregatorSpec, error) {
-	var ad AggregatorSpec
+func New(name string, kind string, args ...string) (Spec, error) {
+	var ad Spec
 	var err error
 	aggregatorsMu.RLock()
 	aggregator, ok := aggregators[kind]
@@ -85,7 +85,7 @@ func New(name string, kind string, args ...string) (AggregatorSpec, error) {
 	return ad, nil
 }
 
-func MustNew(name string, kind string, args ...string) AggregatorSpec {
+func MustNew(name string, kind string, args ...string) Spec {
 	a, err := New(name, kind, args...)
 	if err != nil {
 		panic(err)
@@ -93,24 +93,24 @@ func MustNew(name string, kind string, args ...string) AggregatorSpec {
 	return a
 }
 
-// InstancesToMap gets the results of each AggregatorInstance and
+// InstancesToMap gets the results of each Instance and
 // returns the results as a map with the aggregatorSpec name as the key
 func InstancesToMap(
-	aggregatorInstances []AggregatorInstance,
+	Instances []Instance,
 	goals []*goal.Goal,
 	numRecords int64,
 	stopNames ...string,
 ) (map[string]*dlit.Literal, error) {
-	r := make(map[string]*dlit.Literal, len(aggregatorInstances))
+	r := make(map[string]*dlit.Literal, len(Instances))
 	numRecordsL := dlit.MustNew(numRecords)
 	r["numRecords"] = numRecordsL
-	for _, ai := range aggregatorInstances {
+	for _, ai := range Instances {
 		for _, stopName := range stopNames {
 			if stopName == ai.Name() {
 				return r, nil
 			}
 		}
-		l := ai.Result(aggregatorInstances, goals, numRecords)
+		l := ai.Result(Instances, goals, numRecords)
 		if err := l.Err(); err != nil {
 			return r, err
 		}
@@ -119,26 +119,26 @@ func InstancesToMap(
 	return r, nil
 }
 
-func MakeAggregatorSpecs(
+func MakeSpecs(
 	fields []string,
 	descs []*Desc,
-) ([]AggregatorSpec, error) {
+) ([]Spec, error) {
 	var err error
-	r := make([]AggregatorSpec, len(descs))
+	r := make([]Spec, len(descs))
 	for i, desc := range descs {
 		if err = checkDescValid(fields, desc); err != nil {
-			return []AggregatorSpec{}, err
+			return []Spec{}, err
 		}
 		r[i], err = New(desc.Name, desc.Kind, desc.Arg)
 		if err != nil {
-			return []AggregatorSpec{}, err
+			return []Spec{}, err
 		}
 	}
 	return addDefaultAggregators(r), nil
 }
 
-func addDefaultAggregators(specs []AggregatorSpec) []AggregatorSpec {
-	newSpecs := make([]AggregatorSpec, 2)
+func addDefaultAggregators(specs []Spec) []Spec {
+	newSpecs := make([]Spec, 2)
 	newSpecs[0] = MustNew("numMatches", "count", "true()")
 	newSpecs[1] = MustNew(
 		"percentMatches",

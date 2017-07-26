@@ -110,7 +110,7 @@ func TestMCCResult(t *testing.T) {
 	for _, c := range cases {
 		mccCostGt2Desc := MustNew("mccCostGt2", "mcc", "cost > 2")
 		mccCostGt2 := mccCostGt2Desc.New()
-		instances := []AggregatorInstance{mccCostGt2}
+		instances := []Instance{mccCostGt2}
 
 		for _, record := range c.records {
 			isTrue, err := c.ruleExpr.EvalBool(record)

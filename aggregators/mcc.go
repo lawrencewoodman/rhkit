@@ -46,7 +46,7 @@ func init() {
 func (a *mccAggregator) MakeSpec(
 	name string,
 	expr string,
-) (AggregatorSpec, error) {
+) (Spec, error) {
 	dexpr, err := dexpr.New(expr, dexprfuncs.CallFuncs)
 	if err != nil {
 		return nil, err
@@ -58,7 +58,7 @@ func (a *mccAggregator) MakeSpec(
 	return d, nil
 }
 
-func (ad *mccSpec) New() AggregatorInstance {
+func (ad *mccSpec) New() Instance {
 	return &mccInstance{
 		spec:              ad,
 		numTruePositives:  0,
@@ -110,7 +110,7 @@ func (ai *mccInstance) NextRecord(
 }
 
 func (ai *mccInstance) Result(
-	aggregatorInstances []AggregatorInstance,
+	aggregatorInstances []Instance,
 	goals []*goal.Goal,
 	numRecords int64,
 ) *dlit.Literal {

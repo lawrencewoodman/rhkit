@@ -63,7 +63,7 @@ func TestMeanResult(t *testing.T) {
 	for _, c := range cases {
 		meanProfitDesc := MustNew("meanProfit", "mean", "income-cost")
 		meanProfit := meanProfitDesc.New()
-		instances := []AggregatorInstance{meanProfit}
+		instances := []Instance{meanProfit}
 
 		for i, record := range c.records {
 			meanProfit.NextRecord(record, c.rule(i))

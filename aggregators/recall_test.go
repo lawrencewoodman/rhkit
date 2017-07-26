@@ -83,7 +83,7 @@ func TestRecallResult(t *testing.T) {
 		recallCostGt2Desc := MustNew("recallCostGt2", "recall", "cost > 2")
 		for i := 0; i < 5; i++ {
 			recallCostGt2 := recallCostGt2Desc.New()
-			instances := []AggregatorInstance{recallCostGt2}
+			instances := []Instance{recallCostGt2}
 
 			for i, record := range c.records {
 				recallCostGt2.NextRecord(record, i != 1 && i != 2)

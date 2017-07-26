@@ -84,7 +84,7 @@ func TestPrecisionResult(t *testing.T) {
 		precisionCostGt2Desc := MustNew("precisionCostGt2", "precision", "cost > 2")
 		for i := 0; i < 5; i++ {
 			precisionCostGt2 := precisionCostGt2Desc.New()
-			instances := []AggregatorInstance{precisionCostGt2}
+			instances := []Instance{precisionCostGt2}
 
 			for i, record := range c.records {
 				precisionCostGt2.NextRecord(record, c.rule(i))

@@ -31,7 +31,7 @@ func TestNew(t *testing.T) {
 				"campaign", "pdays", "previous", "p_1234567890outcome", "y",
 			},
 			RuleComplexity: rule.Complexity{Arithmetic: true},
-			Aggregators: []aggregators.AggregatorSpec{
+			Aggregators: []aggregators.Spec{
 				aggregators.MustNew("numMatches", "count", "true()"),
 				aggregators.MustNew("percentMatches", "calc",
 					"roundto(100.0 * numMatches / numRecords, 2)"),
@@ -65,7 +65,7 @@ func TestNew(t *testing.T) {
 				"campaign", "pdays", "previous", "p_1234567890outcome", "y",
 			},
 			RuleComplexity: rule.Complexity{Arithmetic: false},
-			Aggregators: []aggregators.AggregatorSpec{
+			Aggregators: []aggregators.Spec{
 				aggregators.MustNew("numMatches", "count", "true()"),
 				aggregators.MustNew("percentMatches", "calc",
 					"roundto(100.0 * numMatches / numRecords, 2)"),
@@ -99,7 +99,7 @@ func TestNew(t *testing.T) {
 				"campaign", "pdays", "previous", "p_1234567890outcome", "y",
 			},
 			RuleComplexity: rule.Complexity{Arithmetic: false},
-			Aggregators: []aggregators.AggregatorSpec{
+			Aggregators: []aggregators.Spec{
 				aggregators.MustNew("numMatches", "count", "true()"),
 				aggregators.MustNew("percentMatches", "calc",
 					"roundto(100.0 * numMatches / numRecords, 2)"),
@@ -584,8 +584,8 @@ func areGoalExpressionsEqual(g1 []*goal.Goal, g2 []*goal.Goal) bool {
 }
 
 func areAggregatorsEqual(
-	a1 []aggregators.AggregatorSpec,
-	a2 []aggregators.AggregatorSpec,
+	a1 []aggregators.Spec,
+	a2 []aggregators.Spec,
 ) bool {
 	if len(a1) != len(a2) {
 		return false

@@ -105,7 +105,7 @@ func TestMustNew_panic(t *testing.T) {
 }
 
 func TestInstancesToMap(t *testing.T) {
-	instances := []AggregatorInstance{
+	instances := []Instance{
 		MustNewLitInstance("numSignedUp", "54"),
 		MustNewLitInstance("profit", "54.25"),
 		MustNewLitInstance("cost", "203"),
@@ -175,7 +175,7 @@ func TestInstancesToMap(t *testing.T) {
 	}
 }
 
-func TestMakeAggregatorSpecs(t *testing.T) {
+func TestMakeSpecs(t *testing.T) {
 	fields := []string{"age", "job", "marital", "education", "default",
 		"balance", "housing", "loan", "contact", "day", "month", "duration",
 		"campaign", "pdays", "previous", "y"}
@@ -186,7 +186,7 @@ func TestMakeAggregatorSpecs(t *testing.T) {
 		{"income", "calc", "numSignedUp * 24"},
 		{"profit", "calc", "income - cost"},
 	}
-	want := []AggregatorSpec{
+	want := []Spec{
 		MustNew("numMatches", "count", "true()"),
 		MustNew("percentMatches", "calc",
 			"roundto(100.0 * numMatches / numRecords, 2)"),
@@ -198,17 +198,17 @@ func TestMakeAggregatorSpecs(t *testing.T) {
 		MustNew("profit", "calc", "income - cost"),
 		MustNew("goalsScore", "goalsscore"),
 	}
-	got, err := MakeAggregatorSpecs(fields, desc)
+	got, err := MakeSpecs(fields, desc)
 	if err != nil {
-		t.Errorf("MakeAggregatorSpecs(%v): %s", desc, err)
+		t.Errorf("MakeSpecs(%v): %s", desc, err)
 	}
 	if !areAggregatorsEqual(got, want) {
-		t.Errorf("MakeAggregatorSpecs(%v) got: %v, want: %v",
+		t.Errorf("MakeSpecs(%v) got: %v, want: %v",
 			desc, got, want)
 	}
 }
 
-func TestMakeAggregatorSpecs_errors(t *testing.T) {
+func TestMakeSpecs_errors(t *testing.T) {
 	fields := []string{"age", "job", "marital", "education", "default",
 		"balance", "housing", "loan", "contact", "day", "month", "duration",
 		"campaign", "pdays", "previous", "y"}
@@ -277,9 +277,9 @@ func TestMakeAggregatorSpecs_errors(t *testing.T) {
 		},
 	}
 	for i, c := range cases {
-		_, err := MakeAggregatorSpecs(fields, c.desc)
+		_, err := MakeSpecs(fields, c.desc)
 		if err == nil || err.Error() != c.wantErr.Error() {
-			t.Errorf("(%d) MakeAggregatorSpecs: err: %s, wantErr: %s",
+			t.Errorf("(%d) MakeSpecs: err: %s, wantErr: %s",
 				i, err, c.wantErr)
 		}
 	}
@@ -322,14 +322,14 @@ func (li *LitInstance) NextRecord(
 }
 
 func (li *LitInstance) Result(
-	aggregatorInstances []AggregatorInstance,
+	aggregatorInstances []Instance,
 	goals []*goal.Goal,
 	numRecords int64,
 ) *dlit.Literal {
 	return dlit.MustNew(li.result)
 }
 
-func areAggregatorsEqual(a1 []AggregatorSpec, a2 []AggregatorSpec) bool {
+func areAggregatorsEqual(a1 []Spec, a2 []Spec) bool {
 	if len(a1) != len(a2) {
 		return false
 	}

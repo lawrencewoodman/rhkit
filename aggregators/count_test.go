@@ -33,7 +33,7 @@ func TestCountResult(t *testing.T) {
 	goals := []*goal.Goal{}
 	numBandGt4Desc := MustNew("numBandGt4", "count", "band > 4")
 	numBandGt4 := numBandGt4Desc.New()
-	instances := []AggregatorInstance{numBandGt4}
+	instances := []Instance{numBandGt4}
 
 	for i, record := range records {
 		numBandGt4.NextRecord(record, i != 3)

@@ -48,7 +48,7 @@ func TestSumResult(t *testing.T) {
 	goals := []*goal.Goal{}
 	profitDesc := MustNew("profit", "sum", "income-cost")
 	profit := profitDesc.New()
-	instances := []AggregatorInstance{profit}
+	instances := []Instance{profit}
 
 	for i, record := range records {
 		profit.NextRecord(record, i != 2)

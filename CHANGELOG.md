@@ -5,11 +5,13 @@
   * Correct MergeError error message
   * Add user defined dynamic rules to Experiment
   * Remove Title from Experiment
-  * Create aggregators.MakeAggregatorSpecs
+  * Create aggregators.MakeSpecs
   * Move experiment.AggregatorDesc to aggregators.Desc and rename
     its Function variable to Kind
   * Move aggregator specific errors from experiment to a consolidated
     DescError type in aggregators
+  * s/aggregators.AggregatorSpec/aggregators.Spec/
+  * s/aggregators.AggregatorInstance/aggregators.Instance/
 
 ## 0.2 (15th July 2017)
 

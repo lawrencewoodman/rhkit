@@ -45,7 +45,7 @@ func TestGoalsScoreNextRecord(t *testing.T) {
 }
 
 func TestGoalsScoreResult(t *testing.T) {
-	aggregatorSpecs := []AggregatorSpec{
+	aggregatorSpecs := []Spec{
 		MustNew("income", "calc", "3 + 4"),
 		MustNew("costs", "calc", "5 + 6"),
 		MustNew("profit", "calc", "costs - income"),
@@ -106,7 +106,7 @@ func TestGoalsScoreResult(t *testing.T) {
 		},
 	}
 	numRecords := int64(12)
-	instances := make([]AggregatorInstance, len(aggregatorSpecs))
+	instances := make([]Instance, len(aggregatorSpecs))
 	for i, aggregatorSpec := range aggregatorSpecs {
 		instances[i] = aggregatorSpec.New()
 	}
@@ -120,7 +120,7 @@ func TestGoalsScoreResult(t *testing.T) {
 }
 
 func TestGoalsScoreResult_aggregator_error(t *testing.T) {
-	aggregatorSpecs := []AggregatorSpec{
+	aggregatorSpecs := []Spec{
 		MustNew("mid", "calc", "a+e"),
 		MustNew("goalsScore", "goalsscore"),
 	}
@@ -132,7 +132,7 @@ func TestGoalsScoreResult_aggregator_error(t *testing.T) {
 		Err:  dexpr.VarNotExistError("a"),
 	})
 	numRecords := int64(12)
-	instances := make([]AggregatorInstance, len(aggregatorSpecs))
+	instances := make([]Instance, len(aggregatorSpecs))
 	for i, aggregatorSpec := range aggregatorSpecs {
 		instances[i] = aggregatorSpec.New()
 	}

@@ -25,12 +25,12 @@ func init() {
 func (a *goalsScoreAggregator) MakeSpec(
 	name string,
 	expr string,
-) (AggregatorSpec, error) {
+) (Spec, error) {
 	d := &goalsScoreSpec{name: name}
 	return d, nil
 }
 
-func (ad *goalsScoreSpec) New() AggregatorInstance {
+func (ad *goalsScoreSpec) New() Instance {
 	return &goalsScoreInstance{spec: ad}
 }
 
@@ -58,7 +58,7 @@ func (ai *goalsScoreInstance) NextRecord(
 }
 
 func (ai *goalsScoreInstance) Result(
-	aggregatorInstances []AggregatorInstance,
+	aggregatorInstances []Instance,
 	goals []*goal.Goal,
 	numRecords int64,
 ) *dlit.Literal {

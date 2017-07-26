@@ -14,17 +14,17 @@ import (
 
 type ruleAssessor struct {
 	Rule        rule.Rule
-	Aggregators []aggregators.AggregatorInstance
+	Aggregators []aggregators.Instance
 	Goals       []*goal.Goal
 }
 
 func newRuleAssessor(
 	rule rule.Rule,
-	aggregatorSpecs []aggregators.AggregatorSpec,
+	aggregatorSpecs []aggregators.Spec,
 	goals []*goal.Goal,
 ) *ruleAssessor {
 	aggregatorInstances :=
-		make([]aggregators.AggregatorInstance, len(aggregatorSpecs))
+		make([]aggregators.Instance, len(aggregatorSpecs))
 	for i, ad := range aggregatorSpecs {
 		aggregatorInstances[i] = ad.New()
 	}

@@ -35,7 +35,7 @@ func init() {
 func (a *recallAggregator) MakeSpec(
 	name string,
 	expr string,
-) (AggregatorSpec, error) {
+) (Spec, error) {
 	dexpr, err := dexpr.New(expr, dexprfuncs.CallFuncs)
 	if err != nil {
 		return nil, err
@@ -47,7 +47,7 @@ func (a *recallAggregator) MakeSpec(
 	return d, nil
 }
 
-func (ad *recallSpec) New() AggregatorInstance {
+func (ad *recallSpec) New() Instance {
 	return &recallInstance{
 		spec:  ad,
 		numTP: 0,
@@ -90,7 +90,7 @@ func (ai *recallInstance) NextRecord(record map[string]*dlit.Literal,
 }
 
 func (ai *recallInstance) Result(
-	aggregatorInstances []AggregatorInstance,
+	aggregatorInstances []Instance,
 	goals []*goal.Goal,
 	numRecords int64,
 ) *dlit.Literal {

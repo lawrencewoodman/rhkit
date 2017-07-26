@@ -33,7 +33,7 @@ func TestCalcNextRecord(t *testing.T) {
 }
 
 func TestCalcResult(t *testing.T) {
-	aggregatorSpecs := []AggregatorSpec{
+	aggregatorSpecs := []Spec{
 		MustNew("a", "calc", "3 + 4"),
 		MustNew("b", "calc", "5 + 6"),
 		MustNew("c", "calc", "a + b"),
@@ -57,7 +57,7 @@ func TestCalcResult(t *testing.T) {
 		}),
 	}
 	numRecords := int64(12)
-	instances := make([]AggregatorInstance, len(aggregatorSpecs))
+	instances := make([]Instance, len(aggregatorSpecs))
 	for i, aggregatorSpec := range aggregatorSpecs {
 		instances[i] = aggregatorSpec.New()
 	}

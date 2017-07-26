@@ -31,7 +31,7 @@ type Experiment struct {
 	Dataset        ddataset.Dataset
 	RuleFields     []string
 	RuleComplexity rule.Complexity
-	Aggregators    []aggregators.AggregatorSpec
+	Aggregators    []aggregators.Spec
 	Goals          []*goal.Goal
 	SortOrder      []SortField
 	Rules          []rule.Rule
@@ -66,7 +66,7 @@ func New(e *ExperimentDesc) (*Experiment, error) {
 		return nil, err
 	}
 	aggregators, err :=
-		aggregators.MakeAggregatorSpecs(e.Dataset.Fields(), e.Aggregators)
+		aggregators.MakeSpecs(e.Dataset.Fields(), e.Aggregators)
 	if err != nil {
 		return nil, err
 	}

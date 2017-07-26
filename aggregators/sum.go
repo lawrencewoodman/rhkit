@@ -31,7 +31,7 @@ func init() {
 func (a *sumAggregator) MakeSpec(
 	name string,
 	expr string,
-) (AggregatorSpec, error) {
+) (Spec, error) {
 	dexpr, err := dexpr.New(expr, dexprfuncs.CallFuncs)
 	if err != nil {
 		return nil, err
@@ -43,7 +43,7 @@ func (a *sumAggregator) MakeSpec(
 	return d, nil
 }
 
-func (ad *sumSpec) New() AggregatorInstance {
+func (ad *sumSpec) New() Instance {
 	return &sumInstance{
 		spec: ad,
 		sum:  dlit.MustNew(0),
@@ -86,7 +86,7 @@ func (ai *sumInstance) NextRecord(
 }
 
 func (ai *sumInstance) Result(
-	aggregatorInstances []AggregatorInstance,
+	aggregatorInstances []Instance,
 	goals []*goal.Goal,
 	numRecords int64,
 ) *dlit.Literal {

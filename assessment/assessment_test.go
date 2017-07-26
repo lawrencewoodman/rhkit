@@ -20,7 +20,7 @@ func TestAddRuleAssessors_error(t *testing.T) {
 	ruleAssessors := []*ruleAssessor{
 		{
 			Rule:        rule.NewEQFV("month", dlit.NewString("May")),
-			Aggregators: []aggregators.AggregatorInstance{ai},
+			Aggregators: []aggregators.Instance{ai},
 			Goals:       []*goal.Goal{goal.MustNew("cost > 3")},
 		},
 	}
