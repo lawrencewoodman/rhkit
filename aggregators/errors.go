@@ -3,25 +3,30 @@
 
 package aggregators
 
-// NameReservedError indicates that an aggregator name can't be
-// used because it is a reserved name
-type NameReservedError string
+import (
+	"errors"
+	"fmt"
+)
 
-func (e NameReservedError) Error() string {
-	return "aggregator name reserved: " + string(e)
+// DescError indicates that there is a problem with the description
+// of the aggregator
+type DescError struct {
+	Name string
+	Kind string
+	Err  error
 }
 
-// NameClashError indicates that an aggregator name can't be used
-// because it clashes with a field name
-type NameClashError string
+var (
+	ErrInvalidNumArgs   = errors.New("invalid number of arguments")
+	ErrUnregisteredKind = errors.New("unregistered kind")
+	ErrInvalidName      = errors.New("invalid name")
+	ErrNameClash        = errors.New("name clashes with field name")
+	ErrNameReserved     = errors.New("name reserved")
+)
 
-func (e NameClashError) Error() string {
-	return "aggregator name clashes with field name: " + string(e)
-}
-
-// InvalidNameError indicates that the aggregator name is invalid
-type InvalidNameError string
-
-func (e InvalidNameError) Error() string {
-	return "invalid aggregator name: " + string(e)
+func (e DescError) Error() string {
+	return fmt.Sprintf(
+		"problem with aggregator description - name: %s, kind: %s (%s)",
+		e.Name, e.Kind, e.Err,
+	)
 }

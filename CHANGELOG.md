@@ -6,10 +6,10 @@
   * Add user defined dynamic rules to Experiment
   * Remove Title from Experiment
   * Create aggregators.MakeAggregatorSpecs
-  * Move experiment.AggregatorDesc to aggregators.Desc
-  * s/experiment.InvalidAggregatorNameError/aggregators.InvalidNameError/
-  * s/experiment.AggregatorNameClashError/aggregators.NameClashError/
-  * s/experiment.AggregatorNameReservedError/aggregators.NameReservedError/
+  * Move experiment.AggregatorDesc to aggregators.Desc and rename
+    its Function variable to Kind
+  * Move aggregator specific errors from experiment to a consolidated
+    DescError type in aggregators
 
 ## 0.2 (15th July 2017)
 

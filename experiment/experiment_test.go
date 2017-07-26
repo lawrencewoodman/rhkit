@@ -290,7 +290,7 @@ func TestNew_errors(t *testing.T) {
 			SortOrder: []*SortDesc{
 				{"numMatches", "Descending"},
 			}},
-			&InvalidSortDirectionError{"numMatches", "Descending"},
+			InvalidSortDirectionError{"numMatches", "Descending"},
 		},
 		{&ExperimentDesc{
 			Dataset: dataset,
@@ -303,7 +303,7 @@ func TestNew_errors(t *testing.T) {
 			SortOrder: []*SortDesc{
 				{"percentMatches", "Ascending"},
 			}},
-			&InvalidSortDirectionError{"percentMatches", "Ascending"},
+			InvalidSortDirectionError{"percentMatches", "Ascending"},
 		},
 		{&ExperimentDesc{
 			Dataset:     dataset,
@@ -344,7 +344,11 @@ func TestNew_errors(t *testing.T) {
 				{"numMatches", "descending"},
 				{"percentMatches", "descending"},
 			}},
-			aggregators.NameClashError("pdays"),
+			aggregators.DescError{
+				Name: "pdays",
+				Kind: "count",
+				Err:  aggregators.ErrNameClash,
+			},
 		},
 		{&ExperimentDesc{
 			Dataset: dataset,
@@ -360,7 +364,11 @@ func TestNew_errors(t *testing.T) {
 				{"numMatches", "descending"},
 				{"percentMatches", "descending"},
 			}},
-			aggregators.NameReservedError("numMatches"),
+			aggregators.DescError{
+				Name: "numMatches",
+				Kind: "count",
+				Err:  aggregators.ErrNameReserved,
+			},
 		},
 		{&ExperimentDesc{
 			Dataset: dataset,
@@ -376,7 +384,11 @@ func TestNew_errors(t *testing.T) {
 				{"numMatches", "descending"},
 				{"percentMatches", "descending"},
 			}},
-			aggregators.NameReservedError("percentMatches"),
+			aggregators.DescError{
+				Name: "percentMatches",
+				Kind: "percent",
+				Err:  aggregators.ErrNameReserved,
+			},
 		},
 		{&ExperimentDesc{
 			Dataset: dataset,
@@ -392,7 +404,11 @@ func TestNew_errors(t *testing.T) {
 				{"numMatches", "descending"},
 				{"percentMatches", "descending"},
 			}},
-			aggregators.NameReservedError("goalsScore"),
+			aggregators.DescError{
+				Name: "goalsScore",
+				Kind: "count",
+				Err:  aggregators.ErrNameReserved,
+			},
 		},
 		{&ExperimentDesc{
 			Dataset: dataset,
@@ -408,7 +424,11 @@ func TestNew_errors(t *testing.T) {
 				{"numMatches", "descending"},
 				{"percentMatches", "descending"},
 			}},
-			aggregators.InvalidNameError("3numSignedUp"),
+			aggregators.DescError{
+				Name: "3numSignedUp",
+				Kind: "count",
+				Err:  aggregators.ErrInvalidName,
+			},
 		},
 		{&ExperimentDesc{
 			Dataset: dataset,
@@ -424,7 +444,11 @@ func TestNew_errors(t *testing.T) {
 				{"numMatches", "descending"},
 				{"percentMatches", "descending"},
 			}},
-			aggregators.InvalidNameError("num-signed-up"),
+			aggregators.DescError{
+				Name: "num-signed-up",
+				Kind: "count",
+				Err:  aggregators.ErrInvalidName,
+			},
 		},
 		{&ExperimentDesc{
 			Dataset: dataset,

@@ -1,7 +1,6 @@
 package aggregators
 
 import (
-	"errors"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/goal"
 	"reflect"
@@ -46,25 +45,37 @@ func TestRegister_panic2(t *testing.T) {
 
 func TestNew_error(t *testing.T) {
 	cases := []struct {
-		aggType string
+		kind    string
 		args    []string
 		wantErr error
 	}{
-		{aggType: "goalsscore",
-			args:    []string{"5+6"},
-			wantErr: errors.New("invalid number of arguments for aggregator: goalsscore"),
+		{kind: "goalsscore",
+			args: []string{"5+6"},
+			wantErr: DescError{
+				Name: "a",
+				Kind: "goalsscore",
+				Err:  ErrInvalidNumArgs,
+			},
 		},
-		{aggType: "calc",
-			args:    []string{},
-			wantErr: errors.New("invalid number of arguments for aggregator: calc"),
+		{kind: "calc",
+			args: []string{},
+			wantErr: DescError{
+				Name: "a",
+				Kind: "calc",
+				Err:  ErrInvalidNumArgs,
+			},
 		},
-		{aggType: "calc",
-			args:    []string{"3+4", "5+6"},
-			wantErr: errors.New("invalid number of arguments for aggregator: calc"),
+		{kind: "calc",
+			args: []string{"3+4", "5+6"},
+			wantErr: DescError{
+				Name: "a",
+				Kind: "calc",
+				Err:  ErrInvalidNumArgs,
+			},
 		},
 	}
 	for i, c := range cases {
-		_, err := New("a", c.aggType, c.args...)
+		_, err := New("a", c.kind, c.args...)
 		if err == nil || err.Error() != c.wantErr.Error() {
 			t.Errorf("(%d) New: gotErr: %s, wantErr: %s", i, err, c.wantErr)
 		}
@@ -73,7 +84,11 @@ func TestNew_error(t *testing.T) {
 
 func TestMustNew_panic(t *testing.T) {
 	paniced := false
-	wantPanic := "invalid number of arguments for aggregator: goalsscore"
+	wantPanic := DescError{
+		Name: "a",
+		Kind: "goalsscore",
+		Err:  ErrInvalidNumArgs,
+	}.Error()
 	defer func() {
 		if r := recover(); r != nil {
 			if r.(error).Error() == wantPanic {
@@ -160,7 +175,7 @@ func TestInstancesToMap(t *testing.T) {
 	}
 }
 
-func TestMakeAggregators(t *testing.T) {
+func TestMakeAggregatorSpecs(t *testing.T) {
 	fields := []string{"age", "job", "marital", "education", "default",
 		"balance", "housing", "loan", "contact", "day", "month", "duration",
 		"campaign", "pdays", "previous", "y"}
@@ -193,7 +208,7 @@ func TestMakeAggregators(t *testing.T) {
 	}
 }
 
-func TestMakeAggregators_errors(t *testing.T) {
+func TestMakeAggregatorSpecs_errors(t *testing.T) {
 	fields := []string{"age", "job", "marital", "education", "default",
 		"balance", "housing", "loan", "contact", "day", "month", "duration",
 		"campaign", "pdays", "previous", "y"}
@@ -204,32 +219,61 @@ func TestMakeAggregators_errors(t *testing.T) {
 		{desc: []*Desc{
 			{"pdays", "count", "day > 2"},
 		},
-			wantErr: NameClashError("pdays"),
+			wantErr: DescError{Name: "pdays", Kind: "count", Err: ErrNameClash},
 		},
 		{desc: []*Desc{
 			{"numMatches", "count", "y == \"yes\""},
 		},
-			wantErr: NameReservedError("numMatches"),
+			wantErr: DescError{
+				Name: "numMatches",
+				Kind: "count",
+				Err:  ErrNameReserved,
+			},
 		},
 		{desc: []*Desc{
 			{"percentMatches", "percent", "y == \"yes\""},
 		},
-			wantErr: NameReservedError("percentMatches"),
+			wantErr: DescError{
+				Name: "percentMatches",
+				Kind: "percent",
+				Err:  ErrNameReserved,
+			},
 		},
 		{desc: []*Desc{
 			{"goalsScore", "count", "y == \"yes\""},
 		},
-			wantErr: NameReservedError("goalsScore"),
+			wantErr: DescError{
+				Name: "goalsScore",
+				Kind: "count",
+				Err:  ErrNameReserved,
+			},
 		},
 		{desc: []*Desc{
 			{"3numSignedUp", "count", "y == \"yes\""},
 		},
-			wantErr: InvalidNameError("3numSignedUp"),
+			wantErr: DescError{
+				Name: "3numSignedUp",
+				Kind: "count",
+				Err:  ErrInvalidName,
+			},
 		},
 		{desc: []*Desc{
 			{"num-signed-up", "count", "y == \"yes\""},
 		},
-			wantErr: InvalidNameError("num-signed-up"),
+			wantErr: DescError{
+				Name: "num-signed-up",
+				Kind: "count",
+				Err:  ErrInvalidName,
+			},
+		},
+		{desc: []*Desc{
+			{"something", "nothing", "y == \"yes\""},
+		},
+			wantErr: DescError{
+				Name: "something",
+				Kind: "nothing",
+				Err:  ErrUnregisteredKind,
+			},
 		},
 	}
 	for i, c := range cases {

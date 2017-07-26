@@ -5,7 +5,6 @@
 package aggregators
 
 import (
-	"fmt"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/goal"
 	"github.com/vlifesystems/rhkit/internal"
@@ -22,9 +21,9 @@ type Aggregator interface {
 }
 
 type Desc struct {
-	Name     string
-	Function string
-	Arg      string
+	Name string
+	Kind string
+	Arg  string
 }
 
 type AggregatorSpec interface {
@@ -40,57 +39,54 @@ type AggregatorInstance interface {
 	NextRecord(map[string]*dlit.Literal, bool) error
 }
 
-// Register makes an Aggregator available by the provided aggType.
-// If Register is called twice with the same aggType or if
+// Register makes an Aggregator available by the provided kind.
+// If Register is called twice with the same kind or if
 // aggregator is nil, it panics.
-func Register(aggType string, aggregator Aggregator) {
+func Register(kind string, aggregator Aggregator) {
 	aggregatorsMu.Lock()
 	defer aggregatorsMu.Unlock()
 	if aggregator == nil {
 		panic("aggregator.Register aggregator is nil")
 	}
-	if _, dup := aggregators[aggType]; dup {
-		panic("aggregator.Register called twice for aggregator: " + aggType)
+	if _, dup := aggregators[kind]; dup {
+		panic("aggregator.Register called twice for aggregator: " + kind)
 	}
-	aggregators[aggType] = aggregator
+	aggregators[kind] = aggregator
 }
 
 // Create a new Aggregator where 'name' is what the aggregator will be
-// known as, 'aggType' is the name of the Aggregator as Registered,
+// known as, 'kind' is the name of the Aggregator as Registered,
 // 'args' are any arguments to pass to the Aggregator.
-func New(name string, aggType string, args ...string) (AggregatorSpec, error) {
+func New(name string, kind string, args ...string) (AggregatorSpec, error) {
 	var ad AggregatorSpec
 	var err error
 	aggregatorsMu.RLock()
-	aggregator, ok := aggregators[aggType]
+	aggregator, ok := aggregators[kind]
 	aggregatorsMu.RUnlock()
 	if !ok {
-		return nil, fmt.Errorf("unrecognized aggregator: %s", aggType)
+		return nil, DescError{Name: name, Kind: kind, Err: ErrUnregisteredKind}
 	}
 
-	if aggType == "goalsscore" {
+	if kind == "goalsscore" {
 		if len(args) != 0 {
-			return nil,
-				fmt.Errorf("invalid number of arguments for aggregator: goalsscore")
+			return nil, DescError{Name: name, Kind: kind, Err: ErrInvalidNumArgs}
 		}
 		ad, err = aggregator.MakeSpec(name, "")
 	} else {
 		if len(args) != 1 {
-			return nil,
-				fmt.Errorf("invalid number of arguments for aggregator: %s", aggType)
+			return nil, DescError{Name: name, Kind: kind, Err: ErrInvalidNumArgs}
 		}
 		ad, err = aggregator.MakeSpec(name, args[0])
 	}
 
 	if err != nil {
-		return nil,
-			fmt.Errorf("can't make aggregator: %s, error: %s", name, err)
+		return nil, DescError{Name: name, Kind: kind, Err: err}
 	}
 	return ad, nil
 }
 
-func MustNew(name string, aggType string, args ...string) AggregatorSpec {
-	a, err := New(name, aggType, args...)
+func MustNew(name string, kind string, args ...string) AggregatorSpec {
+	a, err := New(name, kind, args...)
 	if err != nil {
 		panic(err)
 	}
@@ -133,7 +129,7 @@ func MakeAggregatorSpecs(
 		if err = checkDescValid(fields, desc); err != nil {
 			return []AggregatorSpec{}, err
 		}
-		r[i], err = New(desc.Name, desc.Function, desc.Arg)
+		r[i], err = New(desc.Name, desc.Kind, desc.Arg)
 		if err != nil {
 			return []AggregatorSpec{}, err
 		}
@@ -157,15 +153,15 @@ func addDefaultAggregators(specs []AggregatorSpec) []AggregatorSpec {
 
 func checkDescValid(fields []string, desc *Desc) error {
 	if !internal.IsIdentifierValid(desc.Name) {
-		return InvalidNameError(desc.Name)
+		return DescError{Name: desc.Name, Kind: desc.Kind, Err: ErrInvalidName}
 	}
 	if internal.IsStringInSlice(desc.Name, fields) {
-		return NameClashError(desc.Name)
+		return DescError{Name: desc.Name, Kind: desc.Kind, Err: ErrNameClash}
 	}
 	if desc.Name == "percentMatches" ||
 		desc.Name == "numMatches" ||
 		desc.Name == "goalsScore" {
-		return NameReservedError(desc.Name)
+		return DescError{Name: desc.Name, Kind: desc.Kind, Err: ErrNameReserved}
 	}
 	return nil
 }

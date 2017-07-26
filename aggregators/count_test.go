@@ -9,11 +9,14 @@ import (
 
 func TestNewCount_error(t *testing.T) {
 	_, err := New("a", "count", "3+4+{")
-	wantErr := "can't make aggregator: a, error: " +
-		dexpr.InvalidExprError{
+	wantErr := DescError{
+		Name: "a",
+		Kind: "count",
+		Err: dexpr.InvalidExprError{
 			Expr: "3+4+{",
 			Err:  dexpr.ErrSyntax,
-		}.Error()
+		},
+	}.Error()
 	if err.Error() != wantErr {
 		t.Errorf("New: gotErr: %s, wantErr: %s", err, wantErr)
 	}

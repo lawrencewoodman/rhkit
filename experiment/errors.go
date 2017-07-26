@@ -12,7 +12,7 @@ type InvalidSortDirectionError struct {
 	direction      string
 }
 
-func (e *InvalidSortDirectionError) Error() string {
+func (e InvalidSortDirectionError) Error() string {
 	return "invalid sort direction: " + e.direction +
 		", for field: " + e.aggregatorName
 }
