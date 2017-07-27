@@ -61,7 +61,7 @@ func New(e *ExperimentDesc) (*Experiment, error) {
 	if err := checkExperimentDescValid(e); err != nil {
 		return nil, err
 	}
-	goals, err := makeGoals(e.Goals)
+	goals, err := goal.MakeGoals(e.Goals)
 	if err != nil {
 		return nil, err
 	}
@@ -142,18 +142,6 @@ func checkRuleFieldsValid(e *ExperimentDesc) error {
 		}
 	}
 	return nil
-}
-
-func makeGoals(exprs []string) ([]*goal.Goal, error) {
-	var err error
-	r := make([]*goal.Goal, len(exprs))
-	for i, expr := range exprs {
-		r[i], err = goal.New(expr)
-		if err != nil {
-			return r, err
-		}
-	}
-	return r, nil
 }
 
 func makeSortOrder(eSortOrder []*SortDesc) ([]SortField, error) {

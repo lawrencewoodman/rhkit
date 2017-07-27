@@ -124,3 +124,50 @@ func TestAssess_errors(t *testing.T) {
 		}
 	}
 }
+
+func TestMakeGoals(t *testing.T) {
+	cases := []struct {
+		exprs []string
+		want  []*Goal
+	}{
+		{exprs: []string{
+			"profit > 27",
+			"cost <= 37",
+			"numMatches >= 1500",
+		},
+			want: []*Goal{
+				MustNew("profit > 27"),
+				MustNew("cost <= 37"),
+				MustNew("numMatches >= 1500"),
+			},
+		},
+		{exprs: []string{}},
+	}
+	for _, c := range cases {
+		got, err := MakeGoals(c.exprs)
+		if err != nil {
+			t.Fatalf("MakeGoals: %s", err)
+		}
+		if len(got) != len(c.exprs) {
+			t.Fatalf("MakeGoals got: %s, want: %s", got, c.want)
+		}
+		for i, g := range got {
+			if g.String() != c.want[i].String() {
+				t.Fatalf("MakeGoals got: %s, want: %s", got, c.want)
+			}
+		}
+	}
+}
+
+func TestMakeGoals_errors(t *testing.T) {
+	exprs := []string{
+		"job == \"manager\"",
+		"age > > 27",
+		"balance <= 1500",
+	}
+	wantErr := InvalidGoalError("age > > 27")
+	_, err := MakeGoals(exprs)
+	if err == nil || err.Error() != wantErr.Error() {
+		t.Fatalf("MakeGoals err: %s, wantErr: %s", err, wantErr)
+	}
+}

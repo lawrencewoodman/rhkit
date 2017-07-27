@@ -13,6 +13,7 @@
   * s/`aggregators.AggregatorSpec`/`aggregators.Spec`/
   * s/`aggregators.AggregatorInstance`/`aggregators.Instance`/
   * Create `rule.MakeDynamicRules`
+  * Create `goal.MakeGoals`
 
 ## 0.2 (15th July 2017)
 
