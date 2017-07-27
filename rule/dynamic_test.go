@@ -115,3 +115,62 @@ func TestDynamicFields(t *testing.T) {
 		t.Errorf("Fields() got: %s, want: %s", got, want)
 	}
 }
+
+func TestMakeDynamicRules(t *testing.T) {
+	cases := []struct {
+		exprs []string
+		want  []Rule
+	}{
+		{exprs: []string{
+			"job == \"manager\"",
+			"age >= 27",
+			"balance <= 1500",
+		},
+			want: []Rule{
+				MustNewDynamic("job == \"manager\""),
+				MustNewDynamic("age >= 27"),
+				MustNewDynamic("balance <= 1500"),
+			},
+		},
+		{exprs: []string{}},
+	}
+	for _, c := range cases {
+		got, err := MakeDynamicRules(c.exprs)
+		if err != nil {
+			t.Fatalf("MakeDynamicRules: %s", err)
+		}
+		if len(got) != len(c.exprs) {
+			t.Fatalf("MakeDynamicRules got: %s, want: %s", got, c.want)
+		}
+		for i, r := range got {
+			if r.String() != c.want[i].String() {
+				t.Fatalf("MakeDynamicRules got: %s, want: %s", got, c.want)
+			}
+		}
+	}
+}
+
+func TestMakeDynamicRules_errors(t *testing.T) {
+	exprs := []string{
+		"job == \"manager\"",
+		"age > > 27",
+		"balance <= 1500",
+	}
+	wantErr := InvalidExprError{Expr: "age > > 27"}
+	_, err := MakeDynamicRules(exprs)
+	if err == nil || err.Error() != wantErr.Error() {
+		t.Fatalf("MakeDynamicRules err: %s, wantErr: %s", err, wantErr)
+	}
+}
+
+/*************************
+ *   Helper functions
+ *************************/
+
+func MustNewDynamic(expr string) Rule {
+	r, err := NewDynamic(expr)
+	if err != nil {
+		panic(err)
+	}
+	return r
+}

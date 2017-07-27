@@ -23,6 +23,18 @@ func NewDynamic(expr string) (Rule, error) {
 	return &Dynamic{dexpr: dexpr}, nil
 }
 
+func MakeDynamicRules(exprs []string) ([]Rule, error) {
+	var err error
+	r := make([]Rule, len(exprs))
+	for i, expr := range exprs {
+		r[i], err = NewDynamic(expr)
+		if err != nil {
+			return r, err
+		}
+	}
+	return r, nil
+}
+
 func (r *Dynamic) String() string {
 	return r.dexpr.String()
 }
