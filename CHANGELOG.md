@@ -12,6 +12,7 @@
     `DescError` type in `aggregators`
   * s/`aggregators.AggregatorSpec`/`aggregators.Spec`/
   * s/`aggregators.AggregatorInstance`/`aggregators.Instance`/
+  * Create `rule.MakeDynamicRules`
 
 ## 0.2 (15th July 2017)
 
