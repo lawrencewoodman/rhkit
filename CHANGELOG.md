@@ -14,6 +14,9 @@
   * s/`aggregators.AggregatorInstance`/`aggregators.Instance`/
   * Create `rule.MakeDynamicRules`
   * Create `goal.MakeGoals`
+  * Change `assessment.AssessRules` so that an `Experiment` is no longer
+    passed in.  Instead the needed fields from the `Experiment` are passed
+  * Move sort descriptions to `assessment`
 
 ## 0.2 (15th July 2017)
 

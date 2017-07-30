@@ -64,12 +64,22 @@ func Process(
 		return nil, ErrNoRulesGenerated
 	}
 
-	userRulesAss, err := assessment.AssessRules(experiment.Rules, experiment)
+	userRulesAss, err := assessment.AssessRules(
+		experiment.Dataset,
+		experiment.Rules,
+		experiment.Aggregators,
+		experiment.Goals,
+	)
 	if err != nil {
 		return nil, AssessError{Err: err}
 	}
 
-	ass, err = assessment.AssessRules(rules, experiment)
+	ass, err = assessment.AssessRules(
+		experiment.Dataset,
+		rules,
+		experiment.Aggregators,
+		experiment.Goals,
+	)
 	if err != nil {
 		return nil, AssessError{Err: err}
 	}
@@ -84,7 +94,12 @@ func Process(
 		fieldDescriptions,
 	)
 
-	newAss, err = assessment.AssessRules(tweakableRules, experiment)
+	newAss, err = assessment.AssessRules(
+		experiment.Dataset,
+		tweakableRules,
+		experiment.Aggregators,
+		experiment.Goals,
+	)
 	if err != nil {
 		return nil, AssessError{Err: err}
 	}
@@ -99,7 +114,12 @@ func Process(
 	rules = ass.Rules()
 	reducedDPRules := rule.ReduceDP(rules)
 
-	newAss, err = assessment.AssessRules(reducedDPRules, experiment)
+	newAss, err = assessment.AssessRules(
+		experiment.Dataset,
+		reducedDPRules,
+		experiment.Aggregators,
+		experiment.Goals,
+	)
 	if err != nil {
 		return nil, AssessError{Err: err}
 	}
@@ -115,7 +135,12 @@ func Process(
 	bestNonCombinedRules := ass.Rules(numRulesToCombine)
 	combinedRules := rule.Combine(bestNonCombinedRules)
 
-	newAss, err = assessment.AssessRules(combinedRules, experiment)
+	newAss, err = assessment.AssessRules(
+		experiment.Dataset,
+		combinedRules,
+		experiment.Aggregators,
+		experiment.Goals,
+	)
 	if err != nil {
 		return nil, AssessError{Err: err}
 	}

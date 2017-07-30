@@ -6,6 +6,7 @@ import (
 	"github.com/lawrencewoodman/ddataset/dcsv"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/aggregators"
+	"github.com/vlifesystems/rhkit/assessment"
 	"github.com/vlifesystems/rhkit/goal"
 	"github.com/vlifesystems/rhkit/rule"
 	"path/filepath"
@@ -44,13 +45,13 @@ func TestNew(t *testing.T) {
 				aggregators.MustNew("goalsScore", "goalsscore"),
 			},
 			Goals: []*goal.Goal{goal.MustNew("profit > 0")},
-			SortOrder: []SortField{
-				{"profit", DESCENDING},
-				{"numSignedUp", DESCENDING},
-				{"cost", ASCENDING},
-				{"numMatches", DESCENDING},
-				{"percentMatches", DESCENDING},
-				{"goalsScore", DESCENDING},
+			SortOrder: []assessment.SortOrder{
+				{"profit", assessment.DESCENDING},
+				{"numSignedUp", assessment.DESCENDING},
+				{"cost", assessment.ASCENDING},
+				{"numMatches", assessment.DESCENDING},
+				{"percentMatches", assessment.DESCENDING},
+				{"goalsScore", assessment.DESCENDING},
 			},
 		},
 		{
@@ -78,13 +79,13 @@ func TestNew(t *testing.T) {
 				aggregators.MustNew("goalsScore", "goalsscore"),
 			},
 			Goals: []*goal.Goal{goal.MustNew("profit > 0")},
-			SortOrder: []SortField{
-				{"profit", DESCENDING},
-				{"numSignedUp", DESCENDING},
-				{"cost", ASCENDING},
-				{"numMatches", DESCENDING},
-				{"percentMatches", DESCENDING},
-				{"goalsScore", DESCENDING},
+			SortOrder: []assessment.SortOrder{
+				{"profit", assessment.DESCENDING},
+				{"numSignedUp", assessment.DESCENDING},
+				{"cost", assessment.ASCENDING},
+				{"numMatches", assessment.DESCENDING},
+				{"percentMatches", assessment.DESCENDING},
+				{"goalsScore", assessment.DESCENDING},
 			},
 		},
 		{
@@ -112,13 +113,13 @@ func TestNew(t *testing.T) {
 				aggregators.MustNew("goalsScore", "goalsscore"),
 			},
 			Goals: []*goal.Goal{goal.MustNew("profit > 0")},
-			SortOrder: []SortField{
-				{"profit", DESCENDING},
-				{"numSignedUp", DESCENDING},
-				{"cost", ASCENDING},
-				{"numMatches", DESCENDING},
-				{"percentMatches", DESCENDING},
-				{"goalsScore", DESCENDING},
+			SortOrder: []assessment.SortOrder{
+				{"profit", assessment.DESCENDING},
+				{"numSignedUp", assessment.DESCENDING},
+				{"cost", assessment.ASCENDING},
+				{"numMatches", assessment.DESCENDING},
+				{"percentMatches", assessment.DESCENDING},
+				{"goalsScore", assessment.DESCENDING},
 			},
 			Rules: []rule.Rule{
 				rule.NewEQFV("job", dlit.MustNew("manager")),
@@ -151,7 +152,7 @@ func TestNew(t *testing.T) {
 				{"profit", "calc", "income - cost"},
 			},
 			Goals: []string{"profit > 0"},
-			SortOrder: []*SortDesc{
+			SortOrder: []assessment.SortDesc{
 				{"profit", "descending"},
 				{"numSignedUp", "descending"},
 				{"cost", "ascending"},
@@ -181,7 +182,7 @@ func TestNew(t *testing.T) {
 				{"profit", "calc", "income - cost"},
 			},
 			Goals: []string{"profit > 0"},
-			SortOrder: []*SortDesc{
+			SortOrder: []assessment.SortDesc{
 				{"profit", "descending"},
 				{"numSignedUp", "descending"},
 				{"cost", "ascending"},
@@ -211,7 +212,7 @@ func TestNew(t *testing.T) {
 				{"profit", "calc", "income - cost"},
 			},
 			Goals: []string{"profit > 0"},
-			SortOrder: []*SortDesc{
+			SortOrder: []assessment.SortDesc{
 				{"profit", "descending"},
 				{"numSignedUp", "descending"},
 				{"cost", "ascending"},
@@ -270,14 +271,18 @@ func TestNew_errors(t *testing.T) {
 				{"profit", "calc", "income - cost"},
 			},
 			Goals: []string{"profit > 0"},
-			SortOrder: []*SortDesc{
+			SortOrder: []assessment.SortDesc{
 				{"profit", "descending"},
 				{"numSignedUp", "descending"},
 				{"numMatches", "descending"},
 				{"percentMatches", "descending"},
 				{"age", "ascending"},
 			}},
-			InvalidSortFieldError("age"),
+			assessment.SortOrderError{
+				"age",
+				"ascending",
+				assessment.ErrUnrecognisedAggregator,
+			},
 		},
 		{&ExperimentDesc{
 			Dataset: dataset,
@@ -287,10 +292,14 @@ func TestNew_errors(t *testing.T) {
 			},
 			Aggregators: []*aggregators.Desc{},
 			Goals:       []string{"profit > 0"},
-			SortOrder: []*SortDesc{
+			SortOrder: []assessment.SortDesc{
 				{"numMatches", "Descending"},
 			}},
-			InvalidSortDirectionError{"numMatches", "Descending"},
+			assessment.SortOrderError{
+				"numMatches",
+				"Descending",
+				assessment.ErrInvalidDirection,
+			},
 		},
 		{&ExperimentDesc{
 			Dataset: dataset,
@@ -300,17 +309,21 @@ func TestNew_errors(t *testing.T) {
 			},
 			Aggregators: []*aggregators.Desc{},
 			Goals:       []string{"profit > 0"},
-			SortOrder: []*SortDesc{
+			SortOrder: []assessment.SortDesc{
 				{"percentMatches", "Ascending"},
 			}},
-			InvalidSortDirectionError{"percentMatches", "Ascending"},
+			assessment.SortOrderError{
+				"percentMatches",
+				"Ascending",
+				assessment.ErrInvalidDirection,
+			},
 		},
 		{&ExperimentDesc{
 			Dataset:     dataset,
 			RuleFields:  []string{},
 			Aggregators: []*aggregators.Desc{},
 			Goals:       []string{"profit > 0"},
-			SortOrder: []*SortDesc{
+			SortOrder: []assessment.SortDesc{
 				{"numMatches", "descending"},
 				{"percentMatches", "descending"},
 			}},
@@ -324,7 +337,7 @@ func TestNew_errors(t *testing.T) {
 			},
 			Aggregators: []*aggregators.Desc{},
 			Goals:       []string{"profit > 0"},
-			SortOrder: []*SortDesc{
+			SortOrder: []assessment.SortDesc{
 				{"numMatches", "descending"},
 				{"percentMatches", "descending"},
 			}},
@@ -340,7 +353,7 @@ func TestNew_errors(t *testing.T) {
 				{"pdays", "count", "day > 2"},
 			},
 			Goals: []string{"profit > 0"},
-			SortOrder: []*SortDesc{
+			SortOrder: []assessment.SortDesc{
 				{"numMatches", "descending"},
 				{"percentMatches", "descending"},
 			}},
@@ -360,7 +373,7 @@ func TestNew_errors(t *testing.T) {
 				{"numMatches", "count", "y == \"yes\""},
 			},
 			Goals: []string{"profit > 0"},
-			SortOrder: []*SortDesc{
+			SortOrder: []assessment.SortDesc{
 				{"numMatches", "descending"},
 				{"percentMatches", "descending"},
 			}},
@@ -380,7 +393,7 @@ func TestNew_errors(t *testing.T) {
 				{"percentMatches", "percent", "y == \"yes\""},
 			},
 			Goals: []string{"profit > 0"},
-			SortOrder: []*SortDesc{
+			SortOrder: []assessment.SortDesc{
 				{"numMatches", "descending"},
 				{"percentMatches", "descending"},
 			}},
@@ -400,7 +413,7 @@ func TestNew_errors(t *testing.T) {
 				{"goalsScore", "count", "y == \"yes\""},
 			},
 			Goals: []string{"profit > 0"},
-			SortOrder: []*SortDesc{
+			SortOrder: []assessment.SortDesc{
 				{"numMatches", "descending"},
 				{"percentMatches", "descending"},
 			}},
@@ -420,7 +433,7 @@ func TestNew_errors(t *testing.T) {
 				{"3numSignedUp", "count", "y == \"yes\""},
 			},
 			Goals: []string{"profit > 0"},
-			SortOrder: []*SortDesc{
+			SortOrder: []assessment.SortDesc{
 				{"numMatches", "descending"},
 				{"percentMatches", "descending"},
 			}},
@@ -440,7 +453,7 @@ func TestNew_errors(t *testing.T) {
 				{"num-signed-up", "count", "y == \"yes\""},
 			},
 			Goals: []string{"profit > 0"},
-			SortOrder: []*SortDesc{
+			SortOrder: []assessment.SortDesc{
 				{"numMatches", "descending"},
 				{"percentMatches", "descending"},
 			}},
@@ -460,7 +473,7 @@ func TestNew_errors(t *testing.T) {
 				{"numSignedUp", "count", "y == \"yes\""},
 			},
 			Goals: []string{"profit > > 0"},
-			SortOrder: []*SortDesc{
+			SortOrder: []assessment.SortDesc{
 				{"numMatches", "descending"},
 				{"percentMatches", "descending"},
 			}},
@@ -476,7 +489,7 @@ func TestNew_errors(t *testing.T) {
 				{"numSignedUp", "count", "y == \"yes\""},
 			},
 			Goals: []string{},
-			SortOrder: []*SortDesc{
+			SortOrder: []assessment.SortDesc{
 				{"numMatches", "descending"},
 				{"percentMatches", "descending"},
 			},
@@ -600,13 +613,16 @@ func areAggregatorsEqual(
 	return true
 }
 
-func areSortOrdersEqual(so1 []SortField, so2 []SortField) bool {
+func areSortOrdersEqual(
+	so1 []assessment.SortOrder,
+	so2 []assessment.SortOrder,
+) bool {
 	if len(so1) != len(so2) {
 		return false
 	}
 	for i, sf1 := range so1 {
 		sf2 := so2[i]
-		if sf1.Field != sf2.Field || sf1.Direction != sf2.Direction {
+		if sf1.Aggregator != sf2.Aggregator || sf1.Direction != sf2.Direction {
 			return false
 		}
 	}

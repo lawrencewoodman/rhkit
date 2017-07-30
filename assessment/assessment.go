@@ -9,10 +9,8 @@ import (
 	"fmt"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/aggregators"
-	"github.com/vlifesystems/rhkit/experiment"
 	"github.com/vlifesystems/rhkit/rule"
 	"sort"
-	"strings"
 )
 
 type Assessment struct {
@@ -74,7 +72,7 @@ func (a *Assessment) AddRuleAssessors(ruleAssessors []*ruleAssessor) error {
 	return nil
 }
 
-func (a *Assessment) Sort(s []experiment.SortField) {
+func (a *Assessment) Sort(s []SortOrder) {
 	sort.Sort(by{a.RuleAssessments, s})
 	a.flags["sorted"] = true
 }
@@ -281,78 +279,6 @@ func (sortedAssessment *Assessment) excludePoorerOverlappingRules() {
 		}
 	}
 	sortedAssessment.RuleAssessments = goodRuleAssessments
-}
-
-// by implements sort.Interface for []*RuleAssessments based
-// on the sortFields
-type by struct {
-	ruleAssessments []*RuleAssessment
-	sortFields      []experiment.SortField
-}
-
-func (b by) Len() int { return len(b.ruleAssessments) }
-func (b by) Swap(i, j int) {
-	b.ruleAssessments[i], b.ruleAssessments[j] =
-		b.ruleAssessments[j], b.ruleAssessments[i]
-}
-
-func (b by) Less(i, j int) bool {
-	var vI *dlit.Literal
-	var vJ *dlit.Literal
-	for _, sortField := range b.sortFields {
-		field := sortField.Field
-		direction := sortField.Direction
-		vI = b.ruleAssessments[i].Aggregators[field]
-		vJ = b.ruleAssessments[j].Aggregators[field]
-		c := compareDlitNums(vI, vJ)
-
-		if direction == experiment.DESCENDING {
-			c *= -1
-		}
-		if c < 0 {
-			return true
-		} else if c > 0 {
-			return false
-		}
-	}
-
-	ruleStrI := b.ruleAssessments[i].Rule.String()
-	ruleStrJ := b.ruleAssessments[j].Rule.String()
-	ruleLenI := len(ruleStrI)
-	ruleLenJ := len(ruleStrJ)
-	if ruleLenI != ruleLenJ {
-		return ruleLenI < ruleLenJ
-	}
-
-	return strings.Compare(ruleStrI, ruleStrJ) == -1
-}
-
-func compareDlitNums(l1 *dlit.Literal, l2 *dlit.Literal) int {
-	i1, l1IsInt := l1.Int()
-	i2, l2IsInt := l2.Int()
-	if l1IsInt && l2IsInt {
-		if i1 < i2 {
-			return -1
-		}
-		if i1 > i2 {
-			return 1
-		}
-		return 0
-	}
-
-	f1, l1IsFloat := l1.Float()
-	f2, l2IsFloat := l2.Float()
-
-	if l1IsFloat && l2IsFloat {
-		if f1 < f2 {
-			return -1
-		}
-		if f1 > f2 {
-			return 1
-		}
-		return 0
-	}
-	panic(fmt.Sprintf("Can't compare numbers: %s, %s", l1, l2))
 }
 
 func (r *RuleAssessment) IsEqual(o *RuleAssessment) bool {

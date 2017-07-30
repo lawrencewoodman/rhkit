@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/lawrencewoodman/ddataset/dcsv"
 	"github.com/vlifesystems/rhkit/aggregators"
+	"github.com/vlifesystems/rhkit/assessment"
 	"github.com/vlifesystems/rhkit/experiment"
 	"path/filepath"
 	"testing"
@@ -37,7 +38,7 @@ func TestProcess(t *testing.T) {
 			},
 		},
 		Goals: []string{"profit > 0"},
-		SortOrder: []*experiment.SortDesc{
+		SortOrder: []assessment.SortDesc{
 			{"profit", "descending"},
 			{"numSignedUp", "descending"},
 			{"goalsScore", "descending"},
@@ -92,7 +93,7 @@ func TestProcess_user_rules(t *testing.T) {
 			},
 		},
 		Goals: []string{"profit > 0"},
-		SortOrder: []*experiment.SortDesc{
+		SortOrder: []assessment.SortDesc{
 			{"profit", "descending"},
 			{"numSignedUp", "descending"},
 			{"goalsScore", "descending"},

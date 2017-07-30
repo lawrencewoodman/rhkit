@@ -1,12 +1,11 @@
 package assessment
 
 import (
-	"fmt"
 	"github.com/lawrencewoodman/ddataset/dcsv"
 	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/aggregators"
-	"github.com/vlifesystems/rhkit/experiment"
+	"github.com/vlifesystems/rhkit/goal"
 	"github.com/vlifesystems/rhkit/internal/testhelpers"
 	"github.com/vlifesystems/rhkit/rule"
 	"path/filepath"
@@ -19,11 +18,11 @@ func TestAssessRules(t *testing.T) {
 		rule.NewGEFV("band", dlit.MustNew(4)),
 		rule.NewGEFV("cost", dlit.MustNew(1.3)),
 	}
-	aggregators := []*aggregators.Desc{
+	aggregatorDescs := []*aggregators.Desc{
 		{"numIncomeGt2", "count", "income > 2"},
 		{"numBandGt4", "count", "band > 4"},
 	}
-	goals := []string{
+	goalExprs := []string{
 		"numIncomeGt2 == 1",
 		"numIncomeGt2 == 2",
 		"numIncomeGt2 == 3",
@@ -33,22 +32,22 @@ func TestAssessRules(t *testing.T) {
 		"numBandGt4 == 3",
 		"numBandGt4 == 4",
 	}
-	fieldNames := []string{"income", "cost", "band"}
+	fields := []string{"income", "cost", "band"}
 	records := [][]string{
 		{"3", "4.5", "4"},
 		{"3", "3.2", "7"},
 		{"2", "1.2", "4"},
 		{"0", "0", "9"},
 	}
-	dataset := testhelpers.NewLiteralDataset(fieldNames, records)
-	experimentDesc := &experiment.ExperimentDesc{
-		Dataset:     dataset,
-		RuleFields:  []string{"income", "cost", "band"},
-		Aggregators: aggregators,
-		Goals:       goals,
-		SortOrder:   []*experiment.SortDesc{},
+	dataset := testhelpers.NewLiteralDataset(fields, records)
+	aggregatorSpecs, err := aggregators.MakeSpecs(fields, aggregatorDescs)
+	if err != nil {
+		t.Fatalf("MakeSpecs: %s", err)
 	}
-	experiment := mustNewExperiment(experimentDesc)
+	goals, err := goal.MakeGoals(goalExprs)
+	if err != nil {
+		t.Fatalf("MakeGoals: %s", err)
+	}
 	wantIsSorted := false
 	wantIsRefined := false
 	wantNumRecords := int64(len(records))
@@ -114,9 +113,9 @@ func TestAssessRules(t *testing.T) {
 			},
 		},
 	}
-	gotAssessment, err := AssessRules(rules, experiment)
+	gotAssessment, err := AssessRules(dataset, rules, aggregatorSpecs, goals)
 	if err != nil {
-		t.Errorf("AssessRules(%v, %v) - err: %v", rules, experiment, err)
+		t.Errorf("AssessRules: %v", err)
 	}
 
 	assessmentsMatch := areAssessmentsEqv(
@@ -127,18 +126,20 @@ func TestAssessRules(t *testing.T) {
 		wantRuleAssessments,
 	)
 	if !assessmentsMatch {
-		t.Errorf("AssessRules(%v, %v)\nassessments don't match\n - got: %v\n - wantRuleAssessments: %v, wantNumRecords: %d, wantIsSorted: %t, wantIsRefined: %t\n",
-			rules, experiment, gotAssessment, wantRuleAssessments,
+		t.Errorf("AssessRules: assessments don't match")
+		t.Errorf("got: %v", gotAssessment)
+		t.Errorf("wantRuleAssessments: %v, wantNumRecords: %d, wantIsSorted: %t, wantIsRefined: %t",
+			wantRuleAssessments,
 			wantNumRecords, wantIsSorted, wantIsRefined)
 	}
 }
 
 func TestAssessRules_errors(t *testing.T) {
 	cases := []struct {
-		rules       []rule.Rule
-		aggregators []*aggregators.Desc
-		goals       []string
-		wantErr     error
+		rules           []rule.Rule
+		aggregatorDescs []*aggregators.Desc
+		goalExprs       []string
+		wantErr         error
 	}{
 		{[]rule.Rule{rule.NewGEFV("hand", dlit.MustNew(3))},
 			[]*aggregators.Desc{
@@ -168,24 +169,23 @@ func TestAssessRules_errors(t *testing.T) {
 			},
 		},
 	}
-	fieldNames := []string{"income", "cost", "band"}
+	fields := []string{"income", "cost", "band"}
 	records := [][]string{
 		{"3", "4.5", "4"},
 	}
-	dataset := testhelpers.NewLiteralDataset(fieldNames, records)
-	for _, c := range cases {
-		experimentDesc := &experiment.ExperimentDesc{
-			Dataset:     dataset,
-			RuleFields:  []string{"income", "cost", "band"},
-			Aggregators: c.aggregators,
-			Goals:       c.goals,
-			SortOrder:   []*experiment.SortDesc{},
+	dataset := testhelpers.NewLiteralDataset(fields, records)
+	for i, c := range cases {
+		aggregatorSpecs, err := aggregators.MakeSpecs(fields, c.aggregatorDescs)
+		if err != nil {
+			t.Fatalf("(%d) MakeSpecs: %s", i, err)
 		}
-		experiment := mustNewExperiment(experimentDesc)
-		_, err := AssessRules(c.rules, experiment)
+		goals, err := goal.MakeGoals(c.goalExprs)
+		if err != nil {
+			t.Fatalf("(%d) MakeGoals: %s", i, err)
+		}
+		_, err = AssessRules(dataset, c.rules, aggregatorSpecs, goals)
 		if err == nil || err.Error() != c.wantErr.Error() {
-			t.Errorf("AssessRules(%v, %v) - err: %s, wantErr: %s",
-				c.rules, experiment, err, c.wantErr)
+			t.Errorf("(%d) AssessRules - err: %s, wantErr: %s", i, err, c.wantErr)
 		}
 	}
 }
@@ -205,47 +205,40 @@ func BenchmarkAssessRules(b *testing.B) {
 		}
 	}
 
-	fieldNames := []string{"age", "job", "marital", "education", "default",
+	fields := []string{"age", "job", "marital", "education", "default",
 		"balance", "housing", "loan", "contact", "day", "month", "duration",
 		"campaign", "pdays", "previous", "poutcome", "y"}
-	experimentDesc := &experiment.ExperimentDesc{
-		Dataset: dcsv.New(
-			filepath.Join("fixtures", "bank_big.csv"),
-			true,
-			rune(';'),
-			fieldNames,
-		),
-		RuleFields: []string{"age", "job", "default",
-			"balance", "housing", "loan", "contact", "day", "month", "duration",
-			"campaign", "pdays", "previous", "poutcome",
-		},
-		Aggregators: []*aggregators.Desc{
-			{"numMarried", "count", "marital == \"married\""},
-			{"numSignedUp", "count", "y == \"yes\""},
-			{"cost", "calc", "numMatches * 4.5"},
-			{"income", "calc", "numSignedUp * 24"},
-			{"profit", "calc", "income - cost"},
-		},
-		Goals: []string{
-			"profit > 0",
-			"numSignedUp > 3",
-			"numMarried > 2",
-		},
-		SortOrder: []*experiment.SortDesc{
-			{"profit", "descending"},
-			{"numSignedUp", "descending"},
-			{"cost", "ascending"},
-			{"numMatches", "descending"},
-			{"percentMatches", "descending"},
-			{"goalsScore", "descending"},
-		},
+	dataset := dcsv.New(
+		filepath.Join("fixtures", "bank_big.csv"),
+		true,
+		rune(';'),
+		fields,
+	)
+	aggregatorDescs := []*aggregators.Desc{
+		{"numMarried", "count", "marital == \"married\""},
+		{"numSignedUp", "count", "y == \"yes\""},
+		{"cost", "calc", "numMatches * 4.5"},
+		{"income", "calc", "numSignedUp * 24"},
+		{"profit", "calc", "income - cost"},
 	}
-	experiment := mustNewExperiment(experimentDesc)
+	goalExprs := []string{
+		"profit > 0",
+		"numSignedUp > 3",
+		"numMarried > 2",
+	}
+	aggregatorSpecs, err := aggregators.MakeSpecs(fields, aggregatorDescs)
+	if err != nil {
+		b.Fatalf("MakeSpecs: %s", err)
+	}
+	goals, err := goal.MakeGoals(goalExprs)
+	if err != nil {
+		b.Fatalf("MakeGoals: %s", err)
+	}
 	b.StartTimer()
 	for n := 0; n < b.N; n++ {
-		_, err := AssessRules(rules, experiment)
+		_, err := AssessRules(dataset, rules, aggregatorSpecs, goals)
 		if err != nil {
-			b.Errorf("AssessRules(%v, %v) - err: %v", rules, experiment, err)
+			b.Errorf("AssessRules: %s", err)
 		}
 	}
 }
@@ -253,14 +246,6 @@ func BenchmarkAssessRules(b *testing.B) {
 /******************************
  *  Helper functions
  ******************************/
-
-func mustNewExperiment(ed *experiment.ExperimentDesc) *experiment.Experiment {
-	e, err := experiment.New(ed)
-	if err != nil {
-		panic(fmt.Sprintf("Can't create Experiment: %s", err))
-	}
-	return e
-}
 
 // Are the assessments equivalent.  The ruleAssessments must match
 // but don't have to be in the same order if both assessments are

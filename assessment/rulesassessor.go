@@ -6,22 +6,24 @@ package assessment
 import (
 	"fmt"
 	"github.com/lawrencewoodman/ddataset"
-	"github.com/vlifesystems/rhkit/experiment"
+	"github.com/vlifesystems/rhkit/aggregators"
+	"github.com/vlifesystems/rhkit/goal"
 	"github.com/vlifesystems/rhkit/rule"
 )
 
-// AssessRules runs the rules against the experiment and returns an
-// Assessment along with any errors
+// AssessRules tests the rules for a Dataset against the aggregators and goals
+// supplied and returns an Assessment along with any errors
 func AssessRules(
+	dataset ddataset.Dataset,
 	rules []rule.Rule,
-	e *experiment.Experiment,
+	aggregatorSpecs []aggregators.Spec,
+	goals []*goal.Goal,
 ) (*Assessment, error) {
 	ruleAssessors := make([]*ruleAssessor, len(rules))
 	for i, rule := range rules {
-		ruleAssessors[i] = newRuleAssessor(rule, e.Aggregators, e.Goals)
+		ruleAssessors[i] = newRuleAssessor(rule, aggregatorSpecs, goals)
 	}
-
-	numRecords, err := processDataset(e.Dataset, ruleAssessors)
+	numRecords, err := processDataset(dataset, ruleAssessors)
 	if err != nil {
 		return &Assessment{}, err
 	}

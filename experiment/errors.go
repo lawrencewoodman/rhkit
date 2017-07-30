@@ -7,22 +7,6 @@ import "errors"
 
 var ErrNoRuleFieldsSpecified = errors.New("no rule fields specified")
 
-type InvalidSortDirectionError struct {
-	aggregatorName string
-	direction      string
-}
-
-func (e InvalidSortDirectionError) Error() string {
-	return "invalid sort direction: " + e.direction +
-		", for field: " + e.aggregatorName
-}
-
-type InvalidSortFieldError string
-
-func (e InvalidSortFieldError) Error() string {
-	return "invalid sort field: " + string(e)
-}
-
 type InvalidRuleFieldError string
 
 func (e InvalidRuleFieldError) Error() string {

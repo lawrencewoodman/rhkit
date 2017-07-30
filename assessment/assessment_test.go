@@ -5,7 +5,6 @@ import (
 	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/aggregators"
-	"github.com/vlifesystems/rhkit/experiment"
 	"github.com/vlifesystems/rhkit/goal"
 	"github.com/vlifesystems/rhkit/internal/testhelpers"
 	"github.com/vlifesystems/rhkit/rule"
@@ -1466,11 +1465,11 @@ func TestSort(t *testing.T) {
 		},
 	}
 	cases := []struct {
-		sortOrder []experiment.SortField
+		sortOrder []SortOrder
 		wantRules []rule.Rule
 	}{
-		{[]experiment.SortField{
-			{"goalsScore", experiment.ASCENDING},
+		{[]SortOrder{
+			{"goalsScore", ASCENDING},
 		},
 			[]rule.Rule{
 				rule.NewGEFV("band", dlit.MustNew(3)),
@@ -1478,8 +1477,8 @@ func TestSort(t *testing.T) {
 				rule.NewGEFV("band", dlit.MustNew(9)),
 				rule.NewGEFV("band", dlit.MustNew(456)),
 			}},
-		{[]experiment.SortField{
-			{"percentMatches", experiment.DESCENDING},
+		{[]SortOrder{
+			{"percentMatches", DESCENDING},
 		},
 			[]rule.Rule{
 				rule.NewGEFV("band", dlit.MustNew(3)),
@@ -1487,8 +1486,8 @@ func TestSort(t *testing.T) {
 				rule.NewGEFV("band", dlit.MustNew(456)),
 				rule.NewGEFV("cost", dlit.MustNew(1.2)),
 			}},
-		{[]experiment.SortField{
-			{"percentMatches", experiment.ASCENDING},
+		{[]SortOrder{
+			{"percentMatches", ASCENDING},
 		},
 			[]rule.Rule{
 				rule.NewGEFV("band", dlit.MustNew(456)),
@@ -1496,9 +1495,9 @@ func TestSort(t *testing.T) {
 				rule.NewGEFV("band", dlit.MustNew(9)),
 				rule.NewGEFV("band", dlit.MustNew(3)),
 			}},
-		{[]experiment.SortField{
-			{"percentMatches", experiment.ASCENDING},
-			{"numIncomeGt2", experiment.ASCENDING},
+		{[]SortOrder{
+			{"percentMatches", ASCENDING},
+			{"numIncomeGt2", ASCENDING},
 		},
 			[]rule.Rule{
 				rule.NewGEFV("cost", dlit.MustNew(1.2)),
@@ -1506,9 +1505,9 @@ func TestSort(t *testing.T) {
 				rule.NewGEFV("band", dlit.MustNew(9)),
 				rule.NewGEFV("band", dlit.MustNew(3)),
 			}},
-		{[]experiment.SortField{
-			{"percentMatches", experiment.DESCENDING},
-			{"numIncomeGt2", experiment.ASCENDING},
+		{[]SortOrder{
+			{"percentMatches", DESCENDING},
+			{"numIncomeGt2", ASCENDING},
 		},
 			[]rule.Rule{
 				rule.NewGEFV("band", dlit.MustNew(3)),
@@ -1516,7 +1515,7 @@ func TestSort(t *testing.T) {
 				rule.NewGEFV("cost", dlit.MustNew(1.2)),
 				rule.NewGEFV("band", dlit.MustNew(456)),
 			}},
-		{[]experiment.SortField{},
+		{[]SortOrder{},
 			[]rule.Rule{
 				rule.NewGEFV("band", dlit.MustNew(3)),
 				rule.NewGEFV("band", dlit.MustNew(9)),
