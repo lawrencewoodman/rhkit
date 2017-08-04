@@ -31,3 +31,12 @@ func TestInvalidExprError(t *testing.T) {
 		t.Errorf("Error() got: %s, want: %s", got, want)
 	}
 }
+
+func TestInvalidRuleFieldErrorError(t *testing.T) {
+	err := InvalidRuleFieldError("bob")
+	want := "invalid rule field: bob"
+	got := err.Error()
+	if got != want {
+		t.Errorf("Error() got: %s, want: %s", got, want)
+	}
+}

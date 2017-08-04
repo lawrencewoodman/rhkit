@@ -360,7 +360,10 @@ func TestGenerate(t *testing.T) {
 		MustNewOutsideFV("position", dlit.MustNew(9), dlit.MustNew(12)),
 	}
 	complexity := Complexity{Arithmetic: true}
-	got := Generate(inputDescription, ruleFields, complexity)
+	got, err := Generate(inputDescription, ruleFields, complexity)
+	if err != nil {
+		t.Fatalf("Generate: %s", err)
+	}
 	if err := rulesContain(got, wantRules); err != nil {
 		t.Errorf("Generate: %s", err)
 	}
@@ -434,12 +437,52 @@ func TestGenerate_combinations(t *testing.T) {
 	}
 
 	complexity := Complexity{Arithmetic: true}
-	got := Generate(inputDescription, ruleFields, complexity)
+	got, err := Generate(inputDescription, ruleFields, complexity)
+	if err != nil {
+		t.Fatalf("Generate: %s", err)
+	}
 	Sort(got)
 	Sort(want)
 	if err := matchRulesUnordered(got, want); err != nil {
 		t.Errorf("matchRulesUnordered: %s\n got: %s\nwant: %s\n",
 			err, got, want)
+	}
+}
+
+func TestGenerate_errors(t *testing.T) {
+	inputDescription := &description.Description{
+		map[string]*description.Field{
+			"directionIn": {
+				Kind: fieldtype.String,
+				Values: map[string]description.Value{
+					"gogledd": {dlit.MustNew("gogledd"), 3},
+					"de":      {dlit.MustNew("de"), 3},
+				},
+			},
+			"directionOut": {
+				Kind: fieldtype.String,
+				Values: map[string]description.Value{
+					"dwyrain":   {dlit.MustNew("dwyrain"), 3},
+					"gorllewin": {dlit.MustNew("gorllewin"), 3},
+				},
+			},
+		},
+	}
+	complexity := Complexity{Arithmetic: true}
+	cases := []struct {
+		ruleFields []string
+		wantErr    error
+	}{
+		{ruleFields: []string{"directionIn", "bob"},
+			wantErr: InvalidRuleFieldError("bob")},
+		{ruleFields: []string{},
+			wantErr: ErrNoRuleFieldsSpecified},
+	}
+	for _, c := range cases {
+		_, err := Generate(inputDescription, c.ruleFields, complexity)
+		if err == nil || err.Error() != c.wantErr.Error() {
+			t.Errorf("Generate - err: %s, wantErr: %s", err, c.wantErr)
+		}
 	}
 }
 

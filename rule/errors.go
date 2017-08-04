@@ -3,6 +3,10 @@
 
 package rule
 
+import "errors"
+
+var ErrNoRuleFieldsSpecified = errors.New("no rule fields specified")
+
 type InvalidRuleError struct {
 	Rule Rule
 }
@@ -25,4 +29,10 @@ func (e IncompatibleTypesRuleError) Error() string {
 
 func (e InvalidExprError) Error() string {
 	return "invalid expression in rule: " + e.Expr
+}
+
+type InvalidRuleFieldError string
+
+func (e InvalidRuleFieldError) Error() string {
+	return "invalid rule field: " + string(e)
 }

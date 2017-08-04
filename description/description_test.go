@@ -11,6 +11,8 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"reflect"
+	"sort"
 	"syscall"
 	"testing"
 )
@@ -172,7 +174,7 @@ func TestDescribeDataset(t *testing.T) {
 	}
 }
 
-func TestDescribeDataset_errors(t *testing.T) {
+func TestDescribeDataset_dataset_errors(t *testing.T) {
 	fieldNames :=
 		[]string{"band", "inputA", "inputB", "version", "flow", "score", "method"}
 	dataset := testhelpers.NewLiteralDataset(fieldNames, flowRecords)
@@ -191,6 +193,18 @@ func TestDescribeDataset_errors(t *testing.T) {
 		}
 	}
 }
+
+func TestDescribeDataset_field_errors(t *testing.T) {
+	fieldNames :=
+		[]string{"band", "5hello", "inputB", "version", "flow", "score", "method"}
+	dataset := testhelpers.NewLiteralDataset(fieldNames, flowRecords)
+	wantErr := InvalidFieldError("5hello")
+	_, err := DescribeDataset(dataset)
+	if err == nil || err.Error() != wantErr.Error() {
+		t.Errorf("DescribeDataset - err: %s, wantErr: %s", err, wantErr)
+	}
+}
+
 func TestDescriptionNew(t *testing.T) {
 	got := New()
 	if len(got.Fields) != 0 {
@@ -583,6 +597,58 @@ func TestDescriptionCheckEqual(t *testing.T) {
 	}
 }
 
+func TestDescriptionFieldNames(t *testing.T) {
+	description := &Description{
+		Fields: map[string]*Field{
+			"band": {fieldtype.String, nil, nil, 0,
+				map[string]Value{
+					"a": {dlit.MustNew("a"), 2},
+					"b": {dlit.MustNew("b"), 3},
+					"c": {dlit.MustNew("c"), 70},
+					"f": {dlit.MustNew("f"), 22},
+					"9": {dlit.MustNew("9"), 1},
+				},
+				31,
+			},
+			"inputA": {
+				fieldtype.Number,
+				dlit.MustNew(7),
+				dlit.MustNew(15.1),
+				1,
+				map[string]Value{
+					"7":    {dlit.MustNew(7), 7},
+					"7.3":  {dlit.MustNew(7.3), 7},
+					"9":    {dlit.MustNew(9), 7},
+					"14":   {dlit.MustNew(14), 7},
+					"15.1": {dlit.MustNew(15.1), 7},
+				},
+				5,
+			},
+			"inputB": {
+				fieldtype.Number,
+				dlit.MustNew(2),
+				dlit.MustNew(5),
+				4,
+				map[string]Value{
+					"2.6":    {dlit.MustNew(2.6), 7},
+					"2.8789": {dlit.MustNew(2.8789), 1},
+					"3":      {dlit.MustNew(3), 7},
+					"5":      {dlit.MustNew(5), 7},
+					"2":      {dlit.MustNew(2), 7},
+					"2.8":    {dlit.MustNew(2.8), 6},
+				},
+				6,
+			},
+		},
+	}
+	want := []string{"band", "inputA", "inputB"}
+	got := description.FieldNames()
+	sort.Strings(got)
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("FieldNames - got: %v, want: %v", got, want)
+	}
+}
+
 func TestFieldCheckEqual(t *testing.T) {
 	fields := []*Field{
 		{fieldtype.String, nil, nil, 0,
@@ -832,6 +898,15 @@ func TestDescriptionCalcFieldNum_panic(t *testing.T) {
 	got := CalcFieldNum(description.Fields, field)
 	if !paniced {
 		t.Errorf("CalcFieldNum: got: %d, failed to panic with: %s", got, wantPanic)
+	}
+}
+
+func TestInvalidFieldErrorError(t *testing.T) {
+	err := InvalidFieldError("bob")
+	want := "invalid field: bob"
+	got := err.Error()
+	if got != want {
+		t.Errorf("Error() got: %s, want: %s", got, want)
 	}
 }
 

@@ -5,56 +5,76 @@ import (
 	"github.com/lawrencewoodman/ddataset/dcsv"
 	"github.com/vlifesystems/rhkit/aggregators"
 	"github.com/vlifesystems/rhkit/assessment"
-	"github.com/vlifesystems/rhkit/experiment"
+	"github.com/vlifesystems/rhkit/goal"
+	"github.com/vlifesystems/rhkit/rule"
 	"path/filepath"
 	"testing"
 )
 
 func TestProcess(t *testing.T) {
-	fieldNames := []string{"age", "job", "marital", "education", "default",
+	fields := []string{"age", "job", "marital", "education", "default",
 		"balance", "housing", "loan", "contact", "day", "month", "duration",
 		"campaign", "pdays", "previous", "poutcome", "y"}
-	experimentDesc := &experiment.ExperimentDesc{
-		Dataset: dcsv.New(
-			filepath.Join("fixtures", "bank.csv"),
-			true,
-			rune(';'),
-			fieldNames,
-		),
-		RuleFields: []string{"age", "job", "marital", "default",
-			"balance", "housing", "loan", "contact", "day", "month", "duration",
-			"campaign", "pdays", "previous", "poutcome", "y",
-		},
-		Aggregators: []*aggregators.Desc{
-			{"numSignedUp", "count", "y == \"yes\""},
-			{"cost", "calc", "numMatches * 4.5"},
-			{"income", "calc", "numSignedUp * 24"},
-			{"profit", "calc", "income - cost"},
-			{"oddFigure", "sum", "balance - age"},
-			{
-				"percentMarried",
-				"precision",
-				"marital == \"married\"",
-			},
-		},
-		Goals: []string{"profit > 0"},
-		SortOrder: []assessment.SortDesc{
-			{"profit", "descending"},
-			{"numSignedUp", "descending"},
-			{"goalsScore", "descending"},
+	dataset := dcsv.New(
+		filepath.Join("fixtures", "bank.csv"),
+		true,
+		rune(';'),
+		fields,
+	)
+	ruleFields := []string{"age", "job", "marital", "default",
+		"balance", "housing", "loan", "contact", "day", "month", "duration",
+		"campaign", "pdays", "previous", "poutcome", "y",
+	}
+	aggregatorDescs := []*aggregators.Desc{
+		{"numSignedUp", "count", "y == \"yes\""},
+		{"cost", "calc", "numMatches * 4.5"},
+		{"income", "calc", "numSignedUp * 24"},
+		{"profit", "calc", "income - cost"},
+		{"oddFigure", "sum", "balance - age"},
+		{
+			"percentMarried",
+			"precision",
+			"marital == \"married\"",
 		},
 	}
-	experiment, err := experiment.New(experimentDesc)
+	goalExprs := []string{"profit > 0"}
+	sortOrderDescs := []assessment.SortDesc{
+		{"profit", "descending"},
+		{"numSignedUp", "descending"},
+		{"goalsScore", "descending"},
+	}
+	goals, err := goal.MakeGoals(goalExprs)
 	if err != nil {
-		t.Fatalf("experiment.New(%s) - err: %s", experimentDesc, err)
+		t.Fatalf("MakeGoals: %s", err)
 	}
+	aggregators, err := aggregators.MakeSpecs(dataset.Fields(), aggregatorDescs)
+	if err != nil {
+		t.Fatalf("MakeSpecs: %s", err)
+	}
+	sortOrder, err := assessment.MakeSortOrders(aggregators, sortOrderDescs)
+	if err != nil {
+		t.Fatalf("MakeSortOrders: %s", err)
+	}
+	ruleComplexity := rule.Complexity{Arithmetic: true}
+	rules := []rule.Rule{}
+
 	for maxNumRules := 0; maxNumRules < 1500; maxNumRules += 100 {
 		maxNumRules := maxNumRules
 		t.Run(fmt.Sprintf("maxNumRules %d", maxNumRules), func(t *testing.T) {
 			t.Parallel()
-			ass, err := Process(experiment, maxNumRules)
+			ass, err := Process(
+				dataset,
+				ruleFields,
+				ruleComplexity,
+				aggregators,
+				goals,
+				sortOrder,
+				rules,
+				maxNumRules,
+			)
 			if err != nil {
 				t.Errorf("Process: %s", err)
+				return
 			}
 			numRules := len(ass.Rules())
 			if numRules > maxNumRules || (maxNumRules > 0 && numRules < 1) {
@@ -66,65 +86,86 @@ func TestProcess(t *testing.T) {
 }
 
 func TestProcess_user_rules(t *testing.T) {
-	fieldNames := []string{"age", "job", "marital", "education", "default",
+	fields := []string{"age", "job", "marital", "education", "default",
 		"balance", "housing", "loan", "contact", "day", "month", "duration",
 		"campaign", "pdays", "previous", "poutcome", "y"}
-	experimentDesc := &experiment.ExperimentDesc{
-		Dataset: dcsv.New(
-			filepath.Join("fixtures", "bank.csv"),
-			true,
-			rune(';'),
-			fieldNames,
-		),
-		RuleFields: []string{"age", "job", "marital", "default",
-			"balance", "housing", "loan", "contact", "day", "month", "duration",
-			"campaign", "pdays", "previous", "poutcome", "y",
-		},
-		Aggregators: []*aggregators.Desc{
-			{"numSignedUp", "count", "y == \"yes\""},
-			{"cost", "calc", "numMatches * 4.5"},
-			{"income", "calc", "numSignedUp * 24"},
-			{"profit", "calc", "income - cost"},
-			{"oddFigure", "sum", "balance - age"},
-			{
-				"percentMarried",
-				"precision",
-				"marital == \"married\"",
-			},
-		},
-		Goals: []string{"profit > 0"},
-		SortOrder: []assessment.SortDesc{
-			{"profit", "descending"},
-			{"numSignedUp", "descending"},
-			{"goalsScore", "descending"},
-		},
-		Rules: []string{
-			"age > 30",
-			"age > 30 && duration > 79",
-			"age > 30 && pdays > 5",
-			"age <= 19 || age >= 37",
-			"month == \"may\"",
-			"month == \"unknown\"",
+	dataset := dcsv.New(
+		filepath.Join("fixtures", "bank.csv"),
+		true,
+		rune(';'),
+		fields,
+	)
+	ruleFields := []string{"age", "job", "marital", "default",
+		"balance", "housing", "loan", "contact", "day", "month", "duration",
+		"campaign", "pdays", "previous", "poutcome", "y",
+	}
+	aggregatorDescs := []*aggregators.Desc{
+		{"numSignedUp", "count", "y == \"yes\""},
+		{"cost", "calc", "numMatches * 4.5"},
+		{"income", "calc", "numSignedUp * 24"},
+		{"profit", "calc", "income - cost"},
+		{"oddFigure", "sum", "balance - age"},
+		{
+			"percentMarried",
+			"precision",
+			"marital == \"married\"",
 		},
 	}
+	goalExprs := []string{"profit > 0"}
+	sortOrderDescs := []assessment.SortDesc{
+		{"profit", "descending"},
+		{"numSignedUp", "descending"},
+		{"goalsScore", "descending"},
+	}
+	ruleExprs := []string{
+		"age > 30",
+		"age > 30 && duration > 79",
+		"age > 30 && pdays > 5",
+		"age <= 19 || age >= 37",
+		"month == \"may\"",
+		"month == \"unknown\"",
+	}
+	ruleComplexity := rule.Complexity{Arithmetic: true}
+	maxNumRules := 50
 	wantRules := []string{
 		"age > 30",
 		"age > 30 && duration > 79",
 		"age <= 19 || age >= 37",
 		"month == \"may\"",
 	}
-	experiment, err := experiment.New(experimentDesc)
+
+	goals, err := goal.MakeGoals(goalExprs)
 	if err != nil {
-		t.Fatalf("experiment.New(%s) - err: %s", experimentDesc, err)
+		t.Fatalf("MakeGoals: %s", err)
 	}
-	maxNumRules := 50
-	ass, err := Process(experiment, maxNumRules)
+	aggregators, err := aggregators.MakeSpecs(dataset.Fields(), aggregatorDescs)
+	if err != nil {
+		t.Fatalf("MakeSpecs: %s", err)
+	}
+	sortOrder, err := assessment.MakeSortOrders(aggregators, sortOrderDescs)
+	if err != nil {
+		t.Fatalf("MakeSortOrders: %s", err)
+	}
+	rules, err := rule.MakeDynamicRules(ruleExprs)
+	if err != nil {
+		t.Fatalf("MakeDynamicRules: %s", err)
+	}
+	ass, err := Process(
+		dataset,
+		ruleFields,
+		ruleComplexity,
+		aggregators,
+		goals,
+		sortOrder,
+		rules,
+		maxNumRules,
+	)
 	if err != nil {
 		t.Errorf("Process: %s", err)
 	}
 
-	rules := ass.Rules()
-	numRules := len(rules)
+	gotRules := ass.Rules()
+	numRules := len(gotRules)
 	if numRules > maxNumRules || (maxNumRules > 0 && numRules < 1) {
 		t.Errorf("Process - numRules: %d, maxNumRules: %d",
 			numRules, maxNumRules)
@@ -132,7 +173,7 @@ func TestProcess_user_rules(t *testing.T) {
 
 	for _, wantRule := range wantRules {
 		foundRule := false
-		for _, r := range rules {
+		for _, r := range gotRules {
 			if wantRule == r.String() {
 				foundRule = true
 			}

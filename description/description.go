@@ -39,8 +39,17 @@ type Value struct {
 	Num   int
 }
 
+type InvalidFieldError string
+
+func (e InvalidFieldError) Error() string {
+	return "invalid field: " + string(e)
+}
+
 // DescribeDataset analyses a Dataset and returns a Description of it
 func DescribeDataset(dataset ddataset.Dataset) (*Description, error) {
+	if err := checkFieldsValid(dataset.Fields()); err != nil {
+		return nil, err
+	}
 	desc := New()
 	conn, err := dataset.Open()
 	if err != nil {
@@ -145,6 +154,16 @@ func (d *Description) CheckEqual(o *Description) error {
 		}
 	}
 	return nil
+}
+
+func (d *Description) FieldNames() []string {
+	names := make([]string, len(d.Fields))
+	i := 0
+	for n := range d.Fields {
+		names[i] = n
+		i++
+	}
+	return names
 }
 
 // New creates a new Description
@@ -317,6 +336,15 @@ func fieldValuesEqual(
 		}
 		if vA.Num != vB.Num || vA.Value.String() != vB.Value.String() {
 			return fmt.Errorf("Value not equal for: %s, %v != %v", k, vA, vB)
+		}
+	}
+	return nil
+}
+
+func checkFieldsValid(fields []string) error {
+	for _, field := range fields {
+		if !internal.IsIdentifierValid(field) {
+			return InvalidFieldError(field)
 		}
 	}
 	return nil

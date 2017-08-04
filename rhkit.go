@@ -7,9 +7,11 @@ package rhkit
 
 import (
 	"errors"
+	"github.com/lawrencewoodman/ddataset"
+	"github.com/vlifesystems/rhkit/aggregators"
 	"github.com/vlifesystems/rhkit/assessment"
 	"github.com/vlifesystems/rhkit/description"
-	"github.com/vlifesystems/rhkit/experiment"
+	"github.com/vlifesystems/rhkit/goal"
 	"github.com/vlifesystems/rhkit/rule"
 )
 
@@ -23,6 +25,15 @@ type DescribeError struct {
 
 func (e DescribeError) Error() string {
 	return "problem describing dataset: " + e.Err.Error()
+}
+
+// GenerateRulesError indicates an error generating rules
+type GenerateRulesError struct {
+	Err error
+}
+
+func (e GenerateRulesError) Error() string {
+	return "problem generating rules: " + e.Err.Error()
 }
 
 // AssessError indicates an error assessing rules
@@ -43,62 +54,67 @@ func (e MergeError) Error() string {
 	return "problem merging assessments: " + e.Err.Error()
 }
 
-// Process processes an Experiment and returns an assessment
+// Process processes a Dataset to find Rules to meet the supplied requirements
 func Process(
-	experiment *experiment.Experiment,
+	dataset ddataset.Dataset,
+	ruleFields []string,
+	ruleComplexity rule.Complexity,
+	aggregators []aggregators.Spec,
+	goals []*goal.Goal,
+	sortOrder []assessment.SortOrder,
+	rules []rule.Rule,
 	maxNumRules int,
 ) (*assessment.Assessment, error) {
 	var ass *assessment.Assessment
 	var newAss *assessment.Assessment
 	var err error
-	fieldDescriptions, err := description.DescribeDataset(experiment.Dataset)
+
+	fieldDescriptions, err := description.DescribeDataset(dataset)
 	if err != nil {
 		return nil, DescribeError{Err: err}
 	}
-	rules := rule.Generate(
+	generatedRules, err := rule.Generate(
 		fieldDescriptions,
-		experiment.RuleFields,
-		experiment.RuleComplexity,
+		ruleFields,
+		ruleComplexity,
 	)
-	if len(rules) < 2 {
+	if err != nil {
+		return nil, GenerateRulesError{Err: err}
+	}
+	if len(generatedRules) < 2 {
 		return nil, ErrNoRulesGenerated
 	}
 
 	userRulesAss, err := assessment.AssessRules(
-		experiment.Dataset,
-		experiment.Rules,
-		experiment.Aggregators,
-		experiment.Goals,
+		dataset,
+		rules,
+		aggregators,
+		goals,
 	)
 	if err != nil {
 		return nil, AssessError{Err: err}
 	}
 
 	ass, err = assessment.AssessRules(
-		experiment.Dataset,
-		rules,
-		experiment.Aggregators,
-		experiment.Goals,
+		dataset,
+		generatedRules,
+		aggregators,
+		goals,
 	)
 	if err != nil {
 		return nil, AssessError{Err: err}
 	}
 
-	ass.Sort(experiment.SortOrder)
+	ass.Sort(sortOrder)
 	ass.Refine()
-	rules = ass.Rules()
+	bestRules := ass.Rules()
 
-	tweakableRules := rule.Tweak(
-		1,
-		rules,
-		fieldDescriptions,
-	)
-
+	tweakableRules := rule.Tweak(1, bestRules, fieldDescriptions)
 	newAss, err = assessment.AssessRules(
-		experiment.Dataset,
+		dataset,
 		tweakableRules,
-		experiment.Aggregators,
-		experiment.Goals,
+		aggregators,
+		goals,
 	)
 	if err != nil {
 		return nil, AssessError{Err: err}
@@ -108,17 +124,17 @@ func Process(
 	if err != nil {
 		return nil, MergeError{Err: err}
 	}
-	ass.Sort(experiment.SortOrder)
+	ass.Sort(sortOrder)
 	ass.Refine()
 
-	rules = ass.Rules()
-	reducedDPRules := rule.ReduceDP(rules)
+	bestRules = ass.Rules()
+	reducedDPRules := rule.ReduceDP(bestRules)
 
 	newAss, err = assessment.AssessRules(
-		experiment.Dataset,
+		dataset,
 		reducedDPRules,
-		experiment.Aggregators,
-		experiment.Goals,
+		aggregators,
+		goals,
 	)
 	if err != nil {
 		return nil, AssessError{Err: err}
@@ -128,7 +144,7 @@ func Process(
 	if err != nil {
 		return nil, MergeError{Err: err}
 	}
-	ass.Sort(experiment.SortOrder)
+	ass.Sort(sortOrder)
 	ass.Refine()
 
 	numRulesToCombine := 50
@@ -136,10 +152,10 @@ func Process(
 	combinedRules := rule.Combine(bestNonCombinedRules)
 
 	newAss, err = assessment.AssessRules(
-		experiment.Dataset,
+		dataset,
 		combinedRules,
-		experiment.Aggregators,
-		experiment.Goals,
+		aggregators,
+		goals,
 	)
 	if err != nil {
 		return nil, AssessError{Err: err}
@@ -149,16 +165,16 @@ func Process(
 	if err != nil {
 		return nil, MergeError{Err: err}
 	}
-	ass.Sort(experiment.SortOrder)
+	ass.Sort(sortOrder)
 	ass.Refine()
 
-	ass = ass.TruncateRuleAssessments(maxNumRules - len(experiment.Rules))
+	ass = ass.TruncateRuleAssessments(maxNumRules - len(rules))
 
 	ass, err = ass.Merge(userRulesAss)
 	if err != nil {
 		return nil, MergeError{Err: err}
 	}
-	ass.Sort(experiment.SortOrder)
+	ass.Sort(sortOrder)
 
 	return ass, nil
 }

@@ -63,7 +63,10 @@ func Generate(
 	inputDescription *description.Description,
 	ruleFields []string,
 	complexity Complexity,
-) []Rule {
+) ([]Rule, error) {
+	if err := checkRuleFieldsValid(inputDescription, ruleFields); err != nil {
+		return []Rule{}, err
+	}
 	rules := make([]Rule, 1)
 	rules[0] = NewTrue()
 	for field := range inputDescription.Fields {
@@ -79,7 +82,7 @@ func Generate(
 		rules = append(rules, cRules...)
 	}
 	Sort(rules)
-	return Uniq(rules)
+	return Uniq(rules), nil
 }
 
 func Combine(rules []Rule) []Rule {
@@ -247,4 +250,20 @@ func hasComparableNumberRange(
 	}
 	isComparable, err := compareExpr.EvalBool(vars)
 	return err == nil && isComparable
+}
+
+func checkRuleFieldsValid(
+	inputDescription *description.Description,
+	ruleFields []string,
+) error {
+	if len(ruleFields) == 0 {
+		return ErrNoRuleFieldsSpecified
+	}
+	fields := inputDescription.FieldNames()
+	for _, ruleField := range ruleFields {
+		if !internal.IsStringInSlice(ruleField, fields) {
+			return InvalidRuleFieldError(ruleField)
+		}
+	}
+	return nil
 }
