@@ -55,14 +55,61 @@ func TestProcess(t *testing.T) {
 	if err != nil {
 		t.Fatalf("MakeSortOrders: %s", err)
 	}
-	ruleComplexity := rule.Complexity{Arithmetic: true}
 	rules := []rule.Rule{}
 
-	for maxNumRules := 0; maxNumRules < 1500; maxNumRules += 100 {
-		maxNumRules := maxNumRules
-		t.Run(fmt.Sprintf("maxNumRules %d", maxNumRules), func(t *testing.T) {
+	cases := []struct {
+		opts            Options
+		wantMinNumRules int
+		wantMaxNumRules int
+	}{
+		{opts: Options{MaxNumRules: 0, GenerateRules: false},
+			wantMinNumRules: 1,
+			wantMaxNumRules: 1,
+		},
+		{opts: Options{MaxNumRules: 1, GenerateRules: false},
+			wantMinNumRules: 1,
+			wantMaxNumRules: 1,
+		},
+		{opts: Options{MaxNumRules: 1500, GenerateRules: false},
+			wantMinNumRules: 1,
+			wantMaxNumRules: 1,
+		},
+		{opts: Options{MaxNumRules: 0, GenerateRules: true},
+			wantMinNumRules: 1,
+			wantMaxNumRules: 1,
+		},
+		{opts: Options{MaxNumRules: 1, GenerateRules: true},
+			wantMinNumRules: 1,
+			wantMaxNumRules: 1,
+		},
+		{opts: Options{MaxNumRules: 100, GenerateRules: true},
+			wantMinNumRules: 100,
+			wantMaxNumRules: 100,
+		},
+		{opts: Options{MaxNumRules: 500, GenerateRules: true},
+			wantMinNumRules: 500,
+			wantMaxNumRules: 500,
+		},
+		{opts: Options{MaxNumRules: 3000, GenerateRules: true},
+			wantMinNumRules: 1000,
+			wantMaxNumRules: 1050,
+		},
+		{opts: Options{
+			MaxNumRules:    3000,
+			GenerateRules:  true,
+			RuleComplexity: rule.Complexity{Arithmetic: true},
+		},
+			wantMinNumRules: 1100,
+			wantMaxNumRules: 1200,
+		},
+	}
+	for i, c := range cases {
+		opts := c.opts
+		i := i
+		wantMinNumRules := c.wantMinNumRules
+		wantMaxNumRules := c.wantMaxNumRules
+		t.Run(fmt.Sprintf("case %d", i), func(t *testing.T) {
 			t.Parallel()
-			opts := Options{MaxNumRules: maxNumRules, RuleComplexity: ruleComplexity}
 			ass, err := Process(
 				dataset,
 				ruleFields,
@@ -73,13 +120,12 @@ func TestProcess(t *testing.T) {
 				opts,
 			)
 			if err != nil {
-				t.Errorf("Process: %s", err)
-				return
+				t.Fatalf("(%d) Process: %s", i, err)
 			}
 			numRules := len(ass.Rules())
-			if numRules > maxNumRules || (maxNumRules > 0 && numRules < 1) {
-				t.Errorf("Process - numRules: %d, maxNumRules: %d",
-					numRules, maxNumRules)
+			if numRules > wantMaxNumRules || numRules < wantMinNumRules {
+				t.Errorf("(%d) Process - opts: %v - gotNumRules: %d, wantMinNumRules: %d wantMaxNumRules: %d",
+					i, opts, numRules, wantMinNumRules, wantMaxNumRules)
 			}
 		})
 	}

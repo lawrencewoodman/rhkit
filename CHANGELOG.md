@@ -22,6 +22,7 @@
   * Have `rule.Generate` return an error if rule fields not valid
   * Create `GenerateRulesError`
   * Create `Options` struct to pass some parameters to `Process`
+  * Add `GenerateRules` option to `Options`
 
 ## 0.2 (15th July 2017)
 

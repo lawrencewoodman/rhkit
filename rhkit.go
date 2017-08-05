@@ -56,6 +56,7 @@ func (e MergeError) Error() string {
 
 type Options struct {
 	MaxNumRules    int
+	GenerateRules  bool
 	RuleComplexity rule.Complexity
 }
 
@@ -69,14 +70,63 @@ func Process(
 	rules []rule.Rule,
 	opts Options,
 ) (*assessment.Assessment, error) {
-	var ass *assessment.Assessment
-	var newAss *assessment.Assessment
-	var err error
-
 	fieldDescriptions, err := description.DescribeDataset(dataset)
 	if err != nil {
 		return nil, DescribeError{Err: err}
 	}
+
+	if !opts.GenerateRules {
+		rules = append(rules, rule.NewTrue())
+	}
+	ass, err := assessment.AssessRules(
+		dataset,
+		rules,
+		aggregators,
+		goals,
+	)
+	if err != nil {
+		return nil, AssessError{Err: err}
+	}
+
+	if opts.GenerateRules {
+		generatedAss, err := processGenerate(
+			dataset,
+			ruleFields,
+			fieldDescriptions,
+			aggregators,
+			goals,
+			sortOrder,
+			len(rules),
+			opts,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		ass, err = ass.Merge(generatedAss)
+		if err != nil {
+			return nil, MergeError{Err: err}
+		}
+	}
+
+	ass.Sort(sortOrder)
+	return ass, nil
+}
+
+func processGenerate(
+	dataset ddataset.Dataset,
+	ruleFields []string,
+	fieldDescriptions *description.Description,
+	aggregators []aggregators.Spec,
+	goals []*goal.Goal,
+	sortOrder []assessment.SortOrder,
+	numUserRules int,
+	opts Options,
+) (*assessment.Assessment, error) {
+	var ass *assessment.Assessment
+	var newAss *assessment.Assessment
+	var err error
+
 	generatedRules, err := rule.Generate(
 		fieldDescriptions,
 		ruleFields,
@@ -87,16 +137,6 @@ func Process(
 	}
 	if len(generatedRules) < 2 {
 		return nil, ErrNoRulesGenerated
-	}
-
-	userRulesAss, err := assessment.AssessRules(
-		dataset,
-		rules,
-		aggregators,
-		goals,
-	)
-	if err != nil {
-		return nil, AssessError{Err: err}
 	}
 
 	ass, err = assessment.AssessRules(
@@ -172,13 +212,9 @@ func Process(
 	ass.Sort(sortOrder)
 	ass.Refine()
 
-	ass = ass.TruncateRuleAssessments(opts.MaxNumRules - len(rules))
-
-	ass, err = ass.Merge(userRulesAss)
-	if err != nil {
-		return nil, MergeError{Err: err}
+	if opts.MaxNumRules-numUserRules < 1 {
+		return ass.TruncateRuleAssessments(1), nil
 	}
-	ass.Sort(sortOrder)
 
-	return ass, nil
+	return ass.TruncateRuleAssessments(opts.MaxNumRules - numUserRules), nil
 }
