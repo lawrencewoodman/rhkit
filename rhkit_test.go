@@ -62,15 +62,15 @@ func TestProcess(t *testing.T) {
 		maxNumRules := maxNumRules
 		t.Run(fmt.Sprintf("maxNumRules %d", maxNumRules), func(t *testing.T) {
 			t.Parallel()
+			opts := Options{MaxNumRules: maxNumRules, RuleComplexity: ruleComplexity}
 			ass, err := Process(
 				dataset,
 				ruleFields,
-				ruleComplexity,
 				aggregators,
 				goals,
 				sortOrder,
 				rules,
-				maxNumRules,
+				opts,
 			)
 			if err != nil {
 				t.Errorf("Process: %s", err)
@@ -150,15 +150,15 @@ func TestProcess_user_rules(t *testing.T) {
 	if err != nil {
 		t.Fatalf("MakeDynamicRules: %s", err)
 	}
+	opts := Options{MaxNumRules: maxNumRules, RuleComplexity: ruleComplexity}
 	ass, err := Process(
 		dataset,
 		ruleFields,
-		ruleComplexity,
 		aggregators,
 		goals,
 		sortOrder,
 		rules,
-		maxNumRules,
+		opts,
 	)
 	if err != nil {
 		t.Errorf("Process: %s", err)

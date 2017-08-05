@@ -54,16 +54,20 @@ func (e MergeError) Error() string {
 	return "problem merging assessments: " + e.Err.Error()
 }
 
+type Options struct {
+	MaxNumRules    int
+	RuleComplexity rule.Complexity
+}
+
 // Process processes a Dataset to find Rules to meet the supplied requirements
 func Process(
 	dataset ddataset.Dataset,
 	ruleFields []string,
-	ruleComplexity rule.Complexity,
 	aggregators []aggregators.Spec,
 	goals []*goal.Goal,
 	sortOrder []assessment.SortOrder,
 	rules []rule.Rule,
-	maxNumRules int,
+	opts Options,
 ) (*assessment.Assessment, error) {
 	var ass *assessment.Assessment
 	var newAss *assessment.Assessment
@@ -76,7 +80,7 @@ func Process(
 	generatedRules, err := rule.Generate(
 		fieldDescriptions,
 		ruleFields,
-		ruleComplexity,
+		opts.RuleComplexity,
 	)
 	if err != nil {
 		return nil, GenerateRulesError{Err: err}
@@ -168,7 +172,7 @@ func Process(
 	ass.Sort(sortOrder)
 	ass.Refine()
 
-	ass = ass.TruncateRuleAssessments(maxNumRules - len(rules))
+	ass = ass.TruncateRuleAssessments(opts.MaxNumRules - len(rules))
 
 	ass, err = ass.Merge(userRulesAss)
 	if err != nil {

@@ -21,6 +21,7 @@
   * Remove `experiment` package
   * Have `rule.Generate` return an error if rule fields not valid
   * Create `GenerateRulesError`
+  * Create `Options` struct to pass some parameters to `Process`
 
 ## 0.2 (15th July 2017)
 
