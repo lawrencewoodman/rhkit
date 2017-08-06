@@ -50,7 +50,7 @@ func DescribeDataset(dataset ddataset.Dataset) (*Description, error) {
 	if err := checkFieldsValid(dataset.Fields()); err != nil {
 		return nil, err
 	}
-	desc := New()
+	desc := newDescription()
 	conn, err := dataset.Open()
 	if err != nil {
 		return nil, err
@@ -59,7 +59,7 @@ func DescribeDataset(dataset ddataset.Dataset) (*Description, error) {
 
 	for conn.Next() {
 		record := conn.Read()
-		desc.NextRecord(record)
+		desc.nextRecord(record)
 	}
 
 	return desc, conn.Err()
@@ -166,8 +166,8 @@ func (d *Description) FieldNames() []string {
 	return names
 }
 
-// New creates a new Description
-func New() *Description {
+// newDescription creates a new Description
+func newDescription() *Description {
 	fd := map[string]*Field{}
 	return &Description{fd}
 }
@@ -222,8 +222,8 @@ func (fd *Field) String() string {
 		fd.Kind, fd.Min, fd.Max, fd.MaxDP, fd.Values)
 }
 
-// NextRecord updates the description after analysing the supplied record
-func (d *Description) NextRecord(record ddataset.Record) {
+// nextRecord updates the description after analysing the supplied record
+func (d *Description) nextRecord(record ddataset.Record) {
 	if len(d.Fields) == 0 {
 		for field, value := range record {
 			d.Fields[field] = &Field{
