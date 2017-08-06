@@ -126,7 +126,7 @@ func CalcFieldNum(fieldDescriptions map[string]*Field, fieldN string) int {
 func (d *Description) WriteJSON(filename string) error {
 	fields := make(map[string]*fieldJ, len(d.Fields))
 	for field, fd := range d.Fields {
-		fields[field] = newFieldDescriptionJ(fd)
+		fields[field] = newFieldJ(fd)
 	}
 	dj := descriptionJ{Fields: fields}
 	json, err := json.Marshal(dj)
@@ -181,19 +181,19 @@ type fieldJ struct {
 	Min       string
 	Max       string
 	MaxDP     int
-	Values    map[string]valueDescriptionJ
+	Values    map[string]valueJ
 	NumValues int
 }
 
-type valueDescriptionJ struct {
+type valueJ struct {
 	Value string
 	Num   int
 }
 
-func newFieldDescriptionJ(fd *Field) *fieldJ {
-	values := make(map[string]valueDescriptionJ, len(fd.Values))
+func newFieldJ(fd *Field) *fieldJ {
+	values := make(map[string]valueJ, len(fd.Values))
 	for v, vd := range fd.Values {
-		values[v] = valueDescriptionJ{
+		values[v] = valueJ{
 			Value: vd.Value.String(),
 			Num:   vd.Num,
 		}
