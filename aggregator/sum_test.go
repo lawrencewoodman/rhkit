@@ -1,4 +1,4 @@
-package aggregators
+package aggregator
 
 import (
 	"github.com/lawrencewoodman/dexpr"
@@ -7,11 +7,11 @@ import (
 	"testing"
 )
 
-func TestNewMean_error(t *testing.T) {
-	_, err := New("a", "mean", "3+4+{")
+func TestNewSum_error(t *testing.T) {
+	_, err := New("a", "sum", "3+4+{")
 	wantErr := DescError{
 		Name: "a",
-		Kind: "mean",
+		Kind: "sum",
 		Err: dexpr.InvalidExprError{
 			Expr: "3+4+{",
 			Err:  dexpr.ErrSyntax,
@@ -22,7 +22,7 @@ func TestNewMean_error(t *testing.T) {
 	}
 }
 
-func TestMeanResult(t *testing.T) {
+func TestSumResult(t *testing.T) {
 	records := []map[string]*dlit.Literal{
 		{
 			"income": dlit.MustNew(3),
@@ -44,41 +44,26 @@ func TestMeanResult(t *testing.T) {
 			"cost":   dlit.MustNew(2),
 			"band":   dlit.MustNew(9),
 		},
-		{
-			"income": dlit.MustNew(3.98),
-			"cost":   dlit.MustNew(1.2),
-			"band":   dlit.MustNew(9),
-		},
 	}
 	goals := []*goal.Goal{}
-	cases := []struct {
-		records []map[string]*dlit.Literal
-		rule    func(int) bool
-		want    float64
-	}{
-		{records, func(i int) bool { return i != 2 }, 2.02},
-		{records, func(i int) bool { return false }, 0},
-		{[]map[string]*dlit.Literal{}, func(i int) bool { return true }, 0},
-	}
-	for _, c := range cases {
-		meanProfitDesc := MustNew("meanProfit", "mean", "income-cost")
-		meanProfit := meanProfitDesc.New()
-		instances := []Instance{meanProfit}
+	profitDesc := MustNew("profit", "sum", "income-cost")
+	profit := profitDesc.New()
+	instances := []Instance{profit}
 
-		for i, record := range c.records {
-			meanProfit.NextRecord(record, c.rule(i))
-		}
-		numRecords := int64(len(records))
-		got := meanProfit.Result(instances, goals, numRecords)
-		gotFloat, gotIsFloat := got.Float()
-		if !gotIsFloat || gotFloat != c.want {
-			t.Errorf("Result() got: %v, want: %f", got, c.want)
-		}
+	for i, record := range records {
+		profit.NextRecord(record, i != 2)
+	}
+	want := 5.3
+	numRecords := int64(len(records))
+	got := profit.Result(instances, goals, numRecords)
+	gotFloat, gotIsFloat := got.Float()
+	if !gotIsFloat || gotFloat != want {
+		t.Errorf("Result() got: %f, want: %f", got, want)
 	}
 }
 
-func TestMeanNextRecord_errors(t *testing.T) {
-	as := MustNew("a", "mean", "cost + 2")
+func TestSumNextRecord_errors(t *testing.T) {
+	as := MustNew("a", "sum", "cost + 2")
 	ai := as.New()
 	cases := []struct {
 		record map[string]*dlit.Literal
@@ -105,35 +90,35 @@ func TestMeanNextRecord_errors(t *testing.T) {
 	}
 }
 
-func TestMeanSpecName(t *testing.T) {
+func TestSumSpecName(t *testing.T) {
 	name := "a"
-	as := MustNew(name, "mean", "income - cost")
+	as := MustNew(name, "sum", "income-cost")
 	got := as.Name()
 	if got != name {
 		t.Errorf("Name - got: %s, want: %s", got, name)
 	}
 }
 
-func TestMeanSpecKind(t *testing.T) {
-	kind := "mean"
-	as := MustNew("a", kind, "income - cost")
+func TestSumSpecKind(t *testing.T) {
+	kind := "sum"
+	as := MustNew("a", kind, "income-cost")
 	got := as.Kind()
 	if got != kind {
 		t.Errorf("Kind - got: %s, want: %s", got, kind)
 	}
 }
 
-func TestMeanSpecArg(t *testing.T) {
-	arg := "income - cost"
-	as := MustNew("a", "mean", arg)
+func TestSumSpecArg(t *testing.T) {
+	arg := "income-cost"
+	as := MustNew("a", "sum", arg)
 	got := as.Arg()
 	if got != arg {
 		t.Errorf("Arg - got: %s, want: %s", got, arg)
 	}
 }
 
-func TestMeanInstanceName(t *testing.T) {
-	as := MustNew("abc", "mean", "cost + 2")
+func TestSumInstanceName(t *testing.T) {
+	as := MustNew("abc", "sum", "cost > 2")
 	ai := as.New()
 	got := ai.Name()
 	want := "abc"

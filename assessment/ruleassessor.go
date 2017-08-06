@@ -7,24 +7,24 @@ import (
 	"errors"
 	"github.com/lawrencewoodman/ddataset"
 	"github.com/lawrencewoodman/dlit"
-	"github.com/vlifesystems/rhkit/aggregators"
+	"github.com/vlifesystems/rhkit/aggregator"
 	"github.com/vlifesystems/rhkit/goal"
 	"github.com/vlifesystems/rhkit/rule"
 )
 
 type ruleAssessor struct {
 	Rule        rule.Rule
-	Aggregators []aggregators.Instance
+	Aggregators []aggregator.Instance
 	Goals       []*goal.Goal
 }
 
 func newRuleAssessor(
 	rule rule.Rule,
-	aggregatorSpecs []aggregators.Spec,
+	aggregatorSpecs []aggregator.Spec,
 	goals []*goal.Goal,
 ) *ruleAssessor {
 	aggregatorInstances :=
-		make([]aggregators.Instance, len(aggregatorSpecs))
+		make([]aggregator.Instance, len(aggregatorSpecs))
 	for i, ad := range aggregatorSpecs {
 		aggregatorInstances[i] = ad.New()
 	}

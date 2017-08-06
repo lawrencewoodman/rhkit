@@ -4,9 +4,10 @@
   * s/`DescribingError`/`DescribeError`/
   * Correct `MergeError` error message
   * Remove `Title` from `Experiment`
-  * Create `aggregators.MakeSpecs`
-  * s/`aggregators.AggregatorSpec`/`aggregators.Spec`/
-  * s/`aggregators.AggregatorInstance`/`aggregators.Instance`/
+  * s/`aggregators`/`aggregator`/ for package name
+  * Create `aggregator.MakeSpecs`
+  * s/`aggregator.AggregatorSpec`/`aggregator.Spec`/
+  * s/`aggregator.AggregatorInstance`/`aggregator.Instance`/
   * Create `rule.MakeDynamicRules` and allow these to be passed to `Process`
   * Create `goal.MakeGoals`
   * Change `assessment.AssessRules` and `Process` so that an `Experiment` is
@@ -14,10 +15,10 @@
     passed
   * Move sort descriptions to `assessment`
   * Add `FieldNames` method to `Description`
-  * Move `experiment.AggregatorDesc` to `aggregators.Desc` and rename
+  * Move `experiment.AggregatorDesc` to `aggregator.Desc` and rename
     its `Function` variable to `Kind`
   * Move aggregator specific errors from `experiment` to a consolidated
-    `DescError` type in `aggregators`
+    `DescError` type in `aggregator`
   * Remove `experiment` package
   * Have `rule.Generate` return an error if rule fields not valid
   * Create `GenerateRulesError`

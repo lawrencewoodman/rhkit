@@ -8,7 +8,7 @@ package rhkit
 import (
 	"errors"
 	"github.com/lawrencewoodman/ddataset"
-	"github.com/vlifesystems/rhkit/aggregators"
+	"github.com/vlifesystems/rhkit/aggregator"
 	"github.com/vlifesystems/rhkit/assessment"
 	"github.com/vlifesystems/rhkit/description"
 	"github.com/vlifesystems/rhkit/goal"
@@ -64,7 +64,7 @@ type Options struct {
 func Process(
 	dataset ddataset.Dataset,
 	ruleFields []string,
-	aggregators []aggregators.Spec,
+	aggregators []aggregator.Spec,
 	goals []*goal.Goal,
 	sortOrder []assessment.SortOrder,
 	rules []rule.Rule,
@@ -117,7 +117,7 @@ func processGenerate(
 	dataset ddataset.Dataset,
 	ruleFields []string,
 	fieldDescriptions *description.Description,
-	aggregators []aggregators.Spec,
+	aggregators []aggregator.Spec,
 	goals []*goal.Goal,
 	sortOrder []assessment.SortOrder,
 	numUserRules int,

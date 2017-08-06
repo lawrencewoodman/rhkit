@@ -6,7 +6,7 @@ package assessment
 import (
 	"fmt"
 	"github.com/lawrencewoodman/ddataset"
-	"github.com/vlifesystems/rhkit/aggregators"
+	"github.com/vlifesystems/rhkit/aggregator"
 	"github.com/vlifesystems/rhkit/goal"
 	"github.com/vlifesystems/rhkit/rule"
 )
@@ -16,7 +16,7 @@ import (
 func AssessRules(
 	dataset ddataset.Dataset,
 	rules []rule.Rule,
-	aggregatorSpecs []aggregators.Spec,
+	aggregatorSpecs []aggregator.Spec,
 	goals []*goal.Goal,
 ) (*Assessment, error) {
 	ruleAssessors := make([]*ruleAssessor, len(rules))

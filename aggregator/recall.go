@@ -1,7 +1,7 @@
 // Copyright (C) 2016-2017 vLife Systems Ltd <http://vlifesystems.com>
 // Licensed under an MIT licence.  Please see LICENSE.md for details.
 
-package aggregators
+package aggregator
 
 import (
 	"github.com/lawrencewoodman/dexpr"
@@ -10,29 +10,29 @@ import (
 	"github.com/vlifesystems/rhkit/internal/dexprfuncs"
 )
 
-type precisionAggregator struct{}
+type recallAggregator struct{}
 
-type precisionSpec struct {
+type recallSpec struct {
 	name string
 	expr *dexpr.Expr
 }
 
-type precisionInstance struct {
-	spec  *precisionSpec
+type recallInstance struct {
+	spec  *recallSpec
 	numTP int64
-	numFP int64
+	numFN int64
 }
 
-var precisionExpr = dexpr.MustNew(
-	"roundto(numTP/(numTP+numFP),4)",
+var recallExpr = dexpr.MustNew(
+	"roundto(numTP/(numTP+numFN),4)",
 	dexprfuncs.CallFuncs,
 )
 
 func init() {
-	Register("precision", &precisionAggregator{})
+	Register("recall", &recallAggregator{})
 }
 
-func (a *precisionAggregator) MakeSpec(
+func (a *recallAggregator) MakeSpec(
 	name string,
 	expr string,
 ) (Spec, error) {
@@ -40,38 +40,38 @@ func (a *precisionAggregator) MakeSpec(
 	if err != nil {
 		return nil, err
 	}
-	d := &precisionSpec{
+	d := &recallSpec{
 		name: name,
 		expr: dexpr,
 	}
 	return d, nil
 }
 
-func (ad *precisionSpec) New() Instance {
-	return &precisionInstance{
+func (ad *recallSpec) New() Instance {
+	return &recallInstance{
 		spec:  ad,
 		numTP: 0,
-		numFP: 0,
+		numFN: 0,
 	}
 }
 
-func (ad *precisionSpec) Name() string {
+func (ad *recallSpec) Name() string {
 	return ad.name
 }
 
-func (ad *precisionSpec) Kind() string {
-	return "precision"
+func (ad *recallSpec) Kind() string {
+	return "recall"
 }
 
-func (ad *precisionSpec) Arg() string {
+func (ad *recallSpec) Arg() string {
 	return ad.expr.String()
 }
 
-func (ai *precisionInstance) Name() string {
+func (ai *recallInstance) Name() string {
 	return ai.spec.name
 }
 
-func (ai *precisionInstance) NextRecord(record map[string]*dlit.Literal,
+func (ai *recallInstance) NextRecord(record map[string]*dlit.Literal,
 	isRuleTrue bool) error {
 	matchExprIsTrue, err := ai.spec.expr.EvalBool(record)
 	if err != nil {
@@ -80,25 +80,27 @@ func (ai *precisionInstance) NextRecord(record map[string]*dlit.Literal,
 	if isRuleTrue {
 		if matchExprIsTrue {
 			ai.numTP++
-		} else {
-			ai.numFP++
+		}
+	} else {
+		if matchExprIsTrue {
+			ai.numFN++
 		}
 	}
 	return nil
 }
 
-func (ai *precisionInstance) Result(
+func (ai *recallInstance) Result(
 	aggregatorInstances []Instance,
 	goals []*goal.Goal,
 	numRecords int64,
 ) *dlit.Literal {
-	if ai.numTP == 0 && ai.numFP == 0 {
+	if ai.numTP == 0 && ai.numFN == 0 {
 		return dlit.MustNew(0)
 	}
 
 	vars := map[string]*dlit.Literal{
 		"numTP": dlit.MustNew(ai.numTP),
-		"numFP": dlit.MustNew(ai.numFP),
+		"numFN": dlit.MustNew(ai.numFN),
 	}
-	return precisionExpr.Eval(vars)
+	return recallExpr.Eval(vars)
 }

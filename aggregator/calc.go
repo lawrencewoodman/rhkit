@@ -1,7 +1,7 @@
 // Copyright (C) 2016-2017 vLife Systems Ltd <http://vlifesystems.com>
 // Licensed under an MIT licence.  Please see LICENSE.md for details.
 
-package aggregators
+package aggregator
 
 import (
 	"github.com/lawrencewoodman/dexpr"
@@ -10,23 +10,22 @@ import (
 	"github.com/vlifesystems/rhkit/internal/dexprfuncs"
 )
 
-type countAggregator struct{}
+type calcAggregator struct{}
 
-type countSpec struct {
+type calcSpec struct {
 	name string
 	expr *dexpr.Expr
 }
 
-type countInstance struct {
-	spec       *countSpec
-	numMatches int64
+type calcInstance struct {
+	spec *calcSpec
 }
 
 func init() {
-	Register("count", &countAggregator{})
+	Register("calc", &calcAggregator{})
 }
 
-func (a *countAggregator) MakeSpec(
+func (a *calcAggregator) MakeSpec(
 	name string,
 	expr string,
 ) (Spec, error) {
@@ -34,54 +33,49 @@ func (a *countAggregator) MakeSpec(
 	if err != nil {
 		return nil, err
 	}
-	d := &countSpec{
+	d := &calcSpec{
 		name: name,
 		expr: dexpr,
 	}
 	return d, nil
 }
 
-func (ad *countSpec) New() Instance {
-	return &countInstance{
-		spec:       ad,
-		numMatches: 0,
-	}
+func (ad *calcSpec) New() Instance {
+	return &calcInstance{spec: ad}
 }
 
-func (ad *countSpec) Name() string {
+func (ad *calcSpec) Name() string {
 	return ad.name
 }
 
-func (ad *countSpec) Kind() string {
-	return "count"
+func (ad *calcSpec) Kind() string {
+	return "calc"
 }
 
-func (ad *countSpec) Arg() string {
+func (ad *calcSpec) Arg() string {
 	return ad.expr.String()
 }
 
-func (ai *countInstance) Name() string {
+func (ai *calcInstance) Name() string {
 	return ai.spec.name
 }
 
-func (ai *countInstance) NextRecord(
+func (ai *calcInstance) NextRecord(
 	record map[string]*dlit.Literal,
 	isRuleTrue bool,
 ) error {
-	countExprIsTrue, err := ai.spec.expr.EvalBool(record)
-	if err != nil {
-		return err
-	}
-	if isRuleTrue && countExprIsTrue {
-		ai.numMatches++
-	}
 	return nil
 }
 
-func (ai *countInstance) Result(
+func (ai *calcInstance) Result(
 	aggregatorInstances []Instance,
 	goals []*goal.Goal,
 	numRecords int64,
 ) *dlit.Literal {
-	return dlit.MustNew(ai.numMatches)
+	instancesMap, err :=
+		InstancesToMap(aggregatorInstances, goals, numRecords, ai.Name())
+	if err != nil {
+		return dlit.MustNew(err)
+	}
+	return ai.spec.expr.Eval(instancesMap)
 }

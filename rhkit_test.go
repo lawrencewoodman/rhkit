@@ -3,7 +3,7 @@ package rhkit
 import (
 	"fmt"
 	"github.com/lawrencewoodman/ddataset/dcsv"
-	"github.com/vlifesystems/rhkit/aggregators"
+	"github.com/vlifesystems/rhkit/aggregator"
 	"github.com/vlifesystems/rhkit/assessment"
 	"github.com/vlifesystems/rhkit/goal"
 	"github.com/vlifesystems/rhkit/rule"
@@ -25,7 +25,7 @@ func TestProcess(t *testing.T) {
 		"balance", "housing", "loan", "contact", "day", "month", "duration",
 		"campaign", "pdays", "previous", "poutcome", "y",
 	}
-	aggregatorDescs := []*aggregators.Desc{
+	aggregatorDescs := []*aggregator.Desc{
 		{"numSignedUp", "count", "y == \"yes\""},
 		{"cost", "calc", "numMatches * 4.5"},
 		{"income", "calc", "numSignedUp * 24"},
@@ -47,7 +47,7 @@ func TestProcess(t *testing.T) {
 	if err != nil {
 		t.Fatalf("MakeGoals: %s", err)
 	}
-	aggregators, err := aggregators.MakeSpecs(dataset.Fields(), aggregatorDescs)
+	aggregators, err := aggregator.MakeSpecs(dataset.Fields(), aggregatorDescs)
 	if err != nil {
 		t.Fatalf("MakeSpecs: %s", err)
 	}
@@ -145,7 +145,7 @@ func TestProcess_user_rules(t *testing.T) {
 		"balance", "housing", "loan", "contact", "day", "month", "duration",
 		"campaign", "pdays", "previous", "poutcome", "y",
 	}
-	aggregatorDescs := []*aggregators.Desc{
+	aggregatorDescs := []*aggregator.Desc{
 		{"numSignedUp", "count", "y == \"yes\""},
 		{"cost", "calc", "numMatches * 4.5"},
 		{"income", "calc", "numSignedUp * 24"},
@@ -184,7 +184,7 @@ func TestProcess_user_rules(t *testing.T) {
 	if err != nil {
 		t.Fatalf("MakeGoals: %s", err)
 	}
-	aggregators, err := aggregators.MakeSpecs(dataset.Fields(), aggregatorDescs)
+	aggregators, err := aggregator.MakeSpecs(dataset.Fields(), aggregatorDescs)
 	if err != nil {
 		t.Fatalf("MakeSpecs: %s", err)
 	}

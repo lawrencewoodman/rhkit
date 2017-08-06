@@ -4,7 +4,7 @@ import (
 	"errors"
 	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
-	"github.com/vlifesystems/rhkit/aggregators"
+	"github.com/vlifesystems/rhkit/aggregator"
 	"github.com/vlifesystems/rhkit/goal"
 	"github.com/vlifesystems/rhkit/internal/testhelpers"
 	"github.com/vlifesystems/rhkit/rule"
@@ -14,12 +14,12 @@ import (
 
 func TestAddRuleAssessors_error(t *testing.T) {
 	numRecords := int64(100)
-	as := aggregators.MustNew("a", "calc", "3+4")
+	as := aggregator.MustNew("a", "calc", "3+4")
 	ai := as.New()
 	ruleAssessors := []*ruleAssessor{
 		{
 			Rule:        rule.NewEQFV("month", dlit.NewString("May")),
-			Aggregators: []aggregators.Instance{ai},
+			Aggregators: []aggregator.Instance{ai},
 			Goals:       []*goal.Goal{goal.MustNew("cost > 3")},
 		},
 	}

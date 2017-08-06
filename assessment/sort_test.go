@@ -1,7 +1,7 @@
 package assessment
 
 import (
-	"github.com/vlifesystems/rhkit/aggregators"
+	"github.com/vlifesystems/rhkit/aggregator"
 	"testing"
 )
 
@@ -26,10 +26,10 @@ func TestMakeSortOrders(t *testing.T) {
 		},
 	}
 	fields := []string{"in"}
-	aggregatorDescs := []*aggregators.Desc{
+	aggregatorDescs := []*aggregator.Desc{
 		{Name: "income", Kind: "sum", Arg: "in"},
 	}
-	aggregatorSpecs, err := aggregators.MakeSpecs(fields, aggregatorDescs)
+	aggregatorSpecs, err := aggregator.MakeSpecs(fields, aggregatorDescs)
 	if err != nil {
 		t.Fatalf("MakeSpecs: %s", err)
 	}
@@ -128,10 +128,10 @@ func TestMakeSortOrders_errors(t *testing.T) {
 		},
 	}
 	fields := []string{"in"}
-	aggregatorDescs := []*aggregators.Desc{
+	aggregatorDescs := []*aggregator.Desc{
 		{Name: "income", Kind: "sum", Arg: "in"},
 	}
-	aggregatorSpecs, err := aggregators.MakeSpecs(fields, aggregatorDescs)
+	aggregatorSpecs, err := aggregator.MakeSpecs(fields, aggregatorDescs)
 	if err != nil {
 		t.Fatalf("MakeSpecs: %s", err)
 	}

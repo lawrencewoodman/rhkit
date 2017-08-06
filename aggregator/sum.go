@@ -1,7 +1,7 @@
 // Copyright (C) 2016-2017 vLife Systems Ltd <http://vlifesystems.com>
 // Licensed under an MIT licence.  Please see LICENSE.md for details.
 
-package aggregators
+package aggregator
 
 import (
 	"github.com/lawrencewoodman/dexpr"
@@ -10,27 +10,25 @@ import (
 	"github.com/vlifesystems/rhkit/internal/dexprfuncs"
 )
 
-type meanAggregator struct{}
+type sumAggregator struct{}
 
-type meanSpec struct {
+type sumSpec struct {
 	name string
 	expr *dexpr.Expr
 }
 
-type meanInstance struct {
-	spec       *meanSpec
-	sum        *dlit.Literal
-	numRecords int64
+type sumInstance struct {
+	spec *sumSpec
+	sum  *dlit.Literal
 }
 
-var meanExpr = dexpr.MustNew("sum/n", dexprfuncs.CallFuncs)
-var meanSumExpr = dexpr.MustNew("sum+value", dexprfuncs.CallFuncs)
+var sumExpr = dexpr.MustNew("sum+value", dexprfuncs.CallFuncs)
 
 func init() {
-	Register("mean", &meanAggregator{})
+	Register("sum", &sumAggregator{})
 }
 
-func (a *meanAggregator) MakeSpec(
+func (a *sumAggregator) MakeSpec(
 	name string,
 	expr string,
 ) (Spec, error) {
@@ -38,43 +36,41 @@ func (a *meanAggregator) MakeSpec(
 	if err != nil {
 		return nil, err
 	}
-	d := &meanSpec{
+	d := &sumSpec{
 		name: name,
 		expr: dexpr,
 	}
 	return d, nil
 }
 
-func (ad *meanSpec) New() Instance {
-	return &meanInstance{
-		spec:       ad,
-		sum:        dlit.MustNew(0),
-		numRecords: 0,
+func (ad *sumSpec) New() Instance {
+	return &sumInstance{
+		spec: ad,
+		sum:  dlit.MustNew(0),
 	}
 }
 
-func (ad *meanSpec) Name() string {
+func (ad *sumSpec) Name() string {
 	return ad.name
 }
 
-func (ad *meanSpec) Kind() string {
-	return "mean"
+func (ad *sumSpec) Kind() string {
+	return "sum"
 }
 
-func (ad *meanSpec) Arg() string {
+func (ad *sumSpec) Arg() string {
 	return ad.expr.String()
 }
 
-func (ai *meanInstance) Name() string {
+func (ai *sumInstance) Name() string {
 	return ai.spec.name
 }
 
-func (ai *meanInstance) NextRecord(
+func (ai *sumInstance) NextRecord(
 	record map[string]*dlit.Literal,
 	isRuleTrue bool,
 ) error {
 	if isRuleTrue {
-		ai.numRecords++
 		exprValue := ai.spec.expr.Eval(record)
 		if err := exprValue.Err(); err != nil {
 			return err
@@ -84,23 +80,15 @@ func (ai *meanInstance) NextRecord(
 			"sum":   ai.sum,
 			"value": exprValue,
 		}
-		ai.sum = meanSumExpr.Eval(vars)
+		ai.sum = sumExpr.Eval(vars)
 	}
 	return nil
 }
 
-func (ai *meanInstance) Result(
+func (ai *sumInstance) Result(
 	aggregatorInstances []Instance,
 	goals []*goal.Goal,
 	numRecords int64,
 ) *dlit.Literal {
-	if ai.numRecords == 0 {
-		return dlit.MustNew(0)
-	}
-
-	vars := map[string]*dlit.Literal{
-		"sum": ai.sum,
-		"n":   dlit.MustNew(ai.numRecords),
-	}
-	return meanExpr.Eval(vars)
+	return ai.sum
 }

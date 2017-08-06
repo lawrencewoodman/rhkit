@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
-	"github.com/vlifesystems/rhkit/aggregators"
+	"github.com/vlifesystems/rhkit/aggregator"
 	"github.com/vlifesystems/rhkit/goal"
 	"github.com/vlifesystems/rhkit/internal/testhelpers"
 	"github.com/vlifesystems/rhkit/rule"
@@ -14,10 +14,10 @@ import (
 func TestNextRecord(t *testing.T) {
 	// It is important for this test to reuse the goals
 	// to ensure that they are cloned properly.
-	inAggregators := []aggregators.Spec{
-		aggregators.MustNew("numIncomeGt2", "count", "income > 2"),
-		aggregators.MustNew("numBandGt4", "count", "band > 4"),
-		aggregators.MustNew("goalsScore", "goalsscore"),
+	inAggregators := []aggregator.Spec{
+		aggregator.MustNew("numIncomeGt2", "count", "income > 2"),
+		aggregator.MustNew("numBandGt4", "count", "band > 4"),
+		aggregator.MustNew("goalsScore", "goalsscore"),
 	}
 	records := [4]map[string]*dlit.Literal{
 		{
@@ -117,23 +117,23 @@ func TestNextRecord_Errors(t *testing.T) {
 	goals := []*goal.Goal{goal.MustNew("numIncomeGt2 == 1")}
 	cases := []struct {
 		rule        rule.Rule
-		aggregators []aggregators.Spec
+		aggregators []aggregator.Spec
 		wantErr     error
 	}{
 		{rule.NewGEFV("band", dlit.MustNew(4)),
-			[]aggregators.Spec{
-				aggregators.MustNew("numIncomeGt2", "count", "fred > 2")},
+			[]aggregator.Spec{
+				aggregator.MustNew("numIncomeGt2", "count", "fred > 2")},
 			dexpr.InvalidExprError{
 				Expr: "fred > 2",
 				Err:  dexpr.VarNotExistError("fred"),
 			},
 		},
 		{rule.NewGEFV("band", dlit.MustNew(4)),
-			[]aggregators.Spec{
-				aggregators.MustNew("numIncomeGt2", "count", "income > 2")}, nil},
+			[]aggregator.Spec{
+				aggregator.MustNew("numIncomeGt2", "count", "income > 2")}, nil},
 		{rule.NewGEFV("hand", dlit.MustNew(4)),
-			[]aggregators.Spec{
-				aggregators.MustNew("numIncomeGt2", "count", "income > 2")},
+			[]aggregator.Spec{
+				aggregator.MustNew("numIncomeGt2", "count", "income > 2")},
 			rule.InvalidRuleError{Rule: rule.NewGEFV("hand", dlit.MustNew(4))},
 		},
 	}

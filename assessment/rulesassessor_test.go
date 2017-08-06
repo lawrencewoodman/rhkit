@@ -4,7 +4,7 @@ import (
 	"github.com/lawrencewoodman/ddataset/dcsv"
 	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
-	"github.com/vlifesystems/rhkit/aggregators"
+	"github.com/vlifesystems/rhkit/aggregator"
 	"github.com/vlifesystems/rhkit/goal"
 	"github.com/vlifesystems/rhkit/internal/testhelpers"
 	"github.com/vlifesystems/rhkit/rule"
@@ -18,7 +18,7 @@ func TestAssessRules(t *testing.T) {
 		rule.NewGEFV("band", dlit.MustNew(4)),
 		rule.NewGEFV("cost", dlit.MustNew(1.3)),
 	}
-	aggregatorDescs := []*aggregators.Desc{
+	aggregatorDescs := []*aggregator.Desc{
 		{"numIncomeGt2", "count", "income > 2"},
 		{"numBandGt4", "count", "band > 4"},
 	}
@@ -40,7 +40,7 @@ func TestAssessRules(t *testing.T) {
 		{"0", "0", "9"},
 	}
 	dataset := testhelpers.NewLiteralDataset(fields, records)
-	aggregatorSpecs, err := aggregators.MakeSpecs(fields, aggregatorDescs)
+	aggregatorSpecs, err := aggregator.MakeSpecs(fields, aggregatorDescs)
 	if err != nil {
 		t.Fatalf("MakeSpecs: %s", err)
 	}
@@ -137,19 +137,19 @@ func TestAssessRules(t *testing.T) {
 func TestAssessRules_errors(t *testing.T) {
 	cases := []struct {
 		rules           []rule.Rule
-		aggregatorDescs []*aggregators.Desc
+		aggregatorDescs []*aggregator.Desc
 		goalExprs       []string
 		wantErr         error
 	}{
 		{[]rule.Rule{rule.NewGEFV("hand", dlit.MustNew(3))},
-			[]*aggregators.Desc{
+			[]*aggregator.Desc{
 				{"numIncomeGt2", "count", "income > 2"},
 			},
 			[]string{"numIncomeGt2 == 1"},
 			rule.InvalidRuleError{Rule: rule.NewGEFV("hand", dlit.MustNew(3))},
 		},
 		{[]rule.Rule{rule.NewGEFV("band", dlit.MustNew(3))},
-			[]*aggregators.Desc{
+			[]*aggregator.Desc{
 				{"numIncomeGt2", "count", "bincome > 2"},
 			},
 			[]string{"numIncomeGt2 == 1"},
@@ -159,7 +159,7 @@ func TestAssessRules_errors(t *testing.T) {
 			},
 		},
 		{[]rule.Rule{rule.NewGEFV("band", dlit.MustNew(3))},
-			[]*aggregators.Desc{
+			[]*aggregator.Desc{
 				{"numIncomeGt2", "count", "income > 2"},
 			},
 			[]string{"numIncomeGt == 1"},
@@ -175,7 +175,7 @@ func TestAssessRules_errors(t *testing.T) {
 	}
 	dataset := testhelpers.NewLiteralDataset(fields, records)
 	for i, c := range cases {
-		aggregatorSpecs, err := aggregators.MakeSpecs(fields, c.aggregatorDescs)
+		aggregatorSpecs, err := aggregator.MakeSpecs(fields, c.aggregatorDescs)
 		if err != nil {
 			t.Fatalf("(%d) MakeSpecs: %s", i, err)
 		}
@@ -214,7 +214,7 @@ func BenchmarkAssessRules(b *testing.B) {
 		rune(';'),
 		fields,
 	)
-	aggregatorDescs := []*aggregators.Desc{
+	aggregatorDescs := []*aggregator.Desc{
 		{"numMarried", "count", "marital == \"married\""},
 		{"numSignedUp", "count", "y == \"yes\""},
 		{"cost", "calc", "numMatches * 4.5"},
@@ -226,7 +226,7 @@ func BenchmarkAssessRules(b *testing.B) {
 		"numSignedUp > 3",
 		"numMarried > 2",
 	}
-	aggregatorSpecs, err := aggregators.MakeSpecs(fields, aggregatorDescs)
+	aggregatorSpecs, err := aggregator.MakeSpecs(fields, aggregatorDescs)
 	if err != nil {
 		b.Fatalf("MakeSpecs: %s", err)
 	}

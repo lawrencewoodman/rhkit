@@ -8,7 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/lawrencewoodman/dlit"
-	"github.com/vlifesystems/rhkit/aggregators"
+	"github.com/vlifesystems/rhkit/aggregator"
 	"github.com/vlifesystems/rhkit/rule"
 	"sort"
 )
@@ -45,7 +45,7 @@ func (a *Assessment) AddRuleAssessors(ruleAssessors []*ruleAssessor) error {
 	for i, ruleAssessment := range ruleAssessors {
 		rule := ruleAssessment.Rule
 		aggregatorInstancesMap, err :=
-			aggregators.InstancesToMap(
+			aggregator.InstancesToMap(
 				ruleAssessment.Aggregators,
 				ruleAssessment.Goals,
 				a.NumRecords,

@@ -7,7 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/lawrencewoodman/dlit"
-	"github.com/vlifesystems/rhkit/aggregators"
+	"github.com/vlifesystems/rhkit/aggregator"
 	"strings"
 )
 
@@ -51,7 +51,7 @@ type Namer interface {
 }
 
 func NewSortOrder(
-	aggregatorSpecs []aggregators.Spec,
+	aggregatorSpecs []aggregator.Spec,
 	aggregator string,
 	direction string,
 ) (SortOrder, error) {
@@ -79,7 +79,7 @@ func NewSortOrder(
 }
 
 func MakeSortOrders(
-	aggregatorSpecs []aggregators.Spec,
+	aggregatorSpecs []aggregator.Spec,
 	descs []SortDesc,
 ) ([]SortOrder, error) {
 	var err error
