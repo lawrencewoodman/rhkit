@@ -123,10 +123,6 @@ func processGenerate(
 	numUserRules int,
 	opts Options,
 ) (*assessment.Assessment, error) {
-	var ass *assessment.Assessment
-	var newAss *assessment.Assessment
-	var err error
-
 	generatedRules, err := rule.Generate(
 		fieldDescriptions,
 		ruleFields,
@@ -139,7 +135,7 @@ func processGenerate(
 		return nil, ErrNoRulesGenerated
 	}
 
-	ass, err = assessment.AssessRules(
+	ass, err := assessment.AssessRules(
 		dataset,
 		generatedRules,
 		aggregators,
@@ -154,7 +150,7 @@ func processGenerate(
 	bestRules := ass.Rules()
 
 	tweakableRules := rule.Tweak(1, bestRules, fieldDescriptions)
-	newAss, err = assessment.AssessRules(
+	newAss, err := assessment.AssessRules(
 		dataset,
 		tweakableRules,
 		aggregators,
