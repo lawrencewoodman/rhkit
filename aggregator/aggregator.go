@@ -58,7 +58,7 @@ func Register(kind string, aggregator Aggregator) {
 // known as, 'kind' is the name of the Aggregator as Registered,
 // 'args' are any arguments to pass to the Aggregator.
 func New(name string, kind string, args ...string) (Spec, error) {
-	var ad Spec
+	var spec Spec
 	var err error
 	aggregatorsMu.RLock()
 	aggregator, ok := aggregators[kind]
@@ -67,22 +67,26 @@ func New(name string, kind string, args ...string) (Spec, error) {
 		return nil, DescError{Name: name, Kind: kind, Err: ErrUnregisteredKind}
 	}
 
+	if !internal.IsIdentifierValid(name) {
+		return nil, DescError{Name: name, Kind: kind, Err: ErrInvalidName}
+	}
+
 	if kind == "goalsscore" {
 		if len(args) != 0 {
 			return nil, DescError{Name: name, Kind: kind, Err: ErrInvalidNumArgs}
 		}
-		ad, err = aggregator.MakeSpec(name, "")
+		spec, err = aggregator.MakeSpec(name, "")
 	} else {
 		if len(args) != 1 {
 			return nil, DescError{Name: name, Kind: kind, Err: ErrInvalidNumArgs}
 		}
-		ad, err = aggregator.MakeSpec(name, args[0])
+		spec, err = aggregator.MakeSpec(name, args[0])
 	}
 
 	if err != nil {
 		return nil, DescError{Name: name, Kind: kind, Err: err}
 	}
-	return ad, nil
+	return spec, nil
 }
 
 func MustNew(name string, kind string, args ...string) Spec {
@@ -152,9 +156,6 @@ func addDefaultAggregators(specs []Spec) []Spec {
 }
 
 func checkDescValid(fields []string, desc *Desc) error {
-	if !internal.IsIdentifierValid(desc.Name) {
-		return DescError{Name: desc.Name, Kind: desc.Kind, Err: ErrInvalidName}
-	}
 	if internal.IsStringInSlice(desc.Name, fields) {
 		return DescError{Name: desc.Name, Kind: desc.Kind, Err: ErrNameClash}
 	}

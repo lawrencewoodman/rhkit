@@ -37,7 +37,7 @@ func TestCalcResult(t *testing.T) {
 		MustNew("a", "calc", "3 + 4"),
 		MustNew("b", "calc", "5 + 6"),
 		MustNew("c", "calc", "a + b"),
-		MustNew("2NumRecords", "calc", "numRecords * 2"),
+		MustNew("TwiceNumRecords", "calc", "numRecords * 2"),
 		MustNew("d", "calc", "a + e"),
 		MustNew("f", "calc", "a + d"),
 	}

@@ -45,11 +45,13 @@ func TestRegister_panic2(t *testing.T) {
 
 func TestNew_error(t *testing.T) {
 	cases := []struct {
+		name    string
 		kind    string
 		args    []string
 		wantErr error
 	}{
-		{kind: "goalsscore",
+		{name: "a",
+			kind: "goalsscore",
 			args: []string{"5+6"},
 			wantErr: DescError{
 				Name: "a",
@@ -57,7 +59,8 @@ func TestNew_error(t *testing.T) {
 				Err:  ErrInvalidNumArgs,
 			},
 		},
-		{kind: "calc",
+		{name: "a",
+			kind: "calc",
 			args: []string{},
 			wantErr: DescError{
 				Name: "a",
@@ -65,7 +68,8 @@ func TestNew_error(t *testing.T) {
 				Err:  ErrInvalidNumArgs,
 			},
 		},
-		{kind: "calc",
+		{name: "a",
+			kind: "calc",
 			args: []string{"3+4", "5+6"},
 			wantErr: DescError{
 				Name: "a",
@@ -73,9 +77,27 @@ func TestNew_error(t *testing.T) {
 				Err:  ErrInvalidNumArgs,
 			},
 		},
+		{name: "a",
+			kind: "invalid",
+			args: []string{"3+4"},
+			wantErr: DescError{
+				Name: "a",
+				Kind: "invalid",
+				Err:  ErrUnregisteredKind,
+			},
+		},
+		{name: "2nums",
+			kind: "calc",
+			args: []string{"3+4"},
+			wantErr: DescError{
+				Name: "2nums",
+				Kind: "calc",
+				Err:  ErrInvalidName,
+			},
+		},
 	}
 	for i, c := range cases {
-		_, err := New("a", c.kind, c.args...)
+		_, err := New(c.name, c.kind, c.args...)
 		if err == nil || err.Error() != c.wantErr.Error() {
 			t.Errorf("(%d) New: gotErr: %s, wantErr: %s", i, err, c.wantErr)
 		}
