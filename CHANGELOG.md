@@ -25,6 +25,7 @@
   * Create `Options` struct to pass some parameters to `Process`
   * Add `GenerateRules` option to `Options`
   * Unexport `description.New` and `description` `.NextRecord` method
+  * Unexport `assessment.NewAssessment`
 
 ## 0.2 (15th July 2017)
 

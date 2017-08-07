@@ -27,7 +27,7 @@ func TestAddRuleAssessors_error(t *testing.T) {
 		Expr: "cost > 3",
 		Err:  dexpr.VarNotExistError("cost"),
 	}
-	assessment := NewAssessment(numRecords)
+	assessment := newAssessment(numRecords)
 	err := assessment.AddRuleAssessors(ruleAssessors)
 	if err == nil || err.Error() != wantErr.Error() {
 		t.Errorf("AddRuleAssessors: err: %s, wantErr: %s", err, wantErr)

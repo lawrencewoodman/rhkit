@@ -30,7 +30,7 @@ type GoalAssessment struct {
 	Passed bool
 }
 
-func NewAssessment(numRecords int64) *Assessment {
+func newAssessment(numRecords int64) *Assessment {
 	return &Assessment{
 		NumRecords: numRecords,
 		flags: map[string]bool{
