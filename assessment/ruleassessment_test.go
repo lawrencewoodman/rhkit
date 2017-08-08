@@ -57,7 +57,7 @@ func TestNextRecord(t *testing.T) {
 		{rule.NewGEFV("cost", dlit.MustNew(1.3)), 2, 1, 0},
 	}
 	for _, c := range cases {
-		ra := newRuleAssessor(c.rule, inAggregators, goals)
+		ra := newRuleAssessment(c.rule, inAggregators, goals)
 		for _, record := range records {
 			err := ra.NextRecord(record)
 			if err != nil {
@@ -65,8 +65,8 @@ func TestNextRecord(t *testing.T) {
 					record, c.rule, inAggregators, goals, err)
 			}
 		}
-		gotNumIncomeGt2, gt2Exists :=
-			ra.AggregatorValue("numIncomeGt2", numRecords)
+		ra.update(numRecords)
+		gotNumIncomeGt2, gt2Exists := ra.Aggregators["numIncomeGt2"]
 		if !gt2Exists {
 			t.Errorf("numIncomeGt2 aggregator doesn't exist")
 		}
@@ -78,8 +78,7 @@ func TestNextRecord(t *testing.T) {
 			t.Errorf("nextRecord() rule: %s, aggregators: %v, goals: %v - wantNumIncomeGt2: %d, got: %d",
 				c.rule, inAggregators, goals, c.wantNumIncomeGt2, gotNumIncomeGt2Int)
 		}
-		gotNumBandGt4, gt4Exists :=
-			ra.AggregatorValue("numBandGt4", numRecords)
+		gotNumBandGt4, gt4Exists := ra.Aggregators["numBandGt4"]
 		if !gt4Exists {
 			t.Errorf("numBandGt4 aggregator doesn't exist")
 		}
@@ -91,8 +90,7 @@ func TestNextRecord(t *testing.T) {
 			t.Errorf("nextRecord() rule: %s, aggregators: %v, goals: %v - wantNumBandGt4: %d, got: %d",
 				c.rule, inAggregators, goals, c.wantNumBandGt4, gotNumBandGt4Int)
 		}
-		gotGoalsScore, goalsScoreExists :=
-			ra.AggregatorValue("goalsScore", numRecords)
+		gotGoalsScore, goalsScoreExists := ra.Aggregators["goalsScore"]
 		if !goalsScoreExists {
 			t.Errorf("goalsScore aggregator doesn't exist")
 		}
@@ -138,7 +136,7 @@ func TestNextRecord_Errors(t *testing.T) {
 		},
 	}
 	for _, c := range cases {
-		ra := newRuleAssessor(c.rule, c.aggregators, goals)
+		ra := newRuleAssessment(c.rule, c.aggregators, goals)
 		for _, record := range records {
 			err := ra.NextRecord(record)
 			context := fmt.Sprintf(

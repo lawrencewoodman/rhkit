@@ -27,6 +27,8 @@
   * Unexport `description.New` and `Description.NextRecord` method
   * Change error for `Assessment.Merge`
   * Create `Assessment.AssessRules` method
+  * Consolidate `assessment.RuleAssessment` and `assessment.RuleAssessor` into
+    `assessment.RuleAssessment`
 
 ## 0.2 (15th July 2017)
 

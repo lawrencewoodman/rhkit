@@ -13,23 +13,21 @@ import (
 	"testing"
 )
 
-func TestAddRuleAssessors_error(t *testing.T) {
+func TestAddRuleAssessments_error(t *testing.T) {
 	numRecords := int64(100)
-	as := aggregator.MustNew("a", "calc", "3+4")
-	ai := as.New()
-	ruleAssessors := []*ruleAssessor{
-		{
-			Rule:        rule.NewEQFV("month", dlit.NewString("May")),
-			Aggregators: []aggregator.Instance{ai},
-			Goals:       []*goal.Goal{goal.MustNew("cost > 3")},
-		},
+	ruleAssessments := []*RuleAssessment{
+		newRuleAssessment(
+			rule.NewEQFV("month", dlit.NewString("May")),
+			[]aggregator.Spec{aggregator.MustNew("a", "calc", "3+4")},
+			[]*goal.Goal{goal.MustNew("cost > 3")},
+		),
 	}
 	wantErr := dexpr.InvalidExprError{
 		Expr: "cost > 3",
 		Err:  dexpr.VarNotExistError("cost"),
 	}
 	assessment := New(numRecords)
-	err := assessment.AddRuleAssessors(ruleAssessors)
+	err := assessment.addRuleAssessments(ruleAssessments)
 	if err == nil || err.Error() != wantErr.Error() {
 		t.Errorf("AddRuleAssessors: err: %s, wantErr: %s", err, wantErr)
 	}

@@ -4,7 +4,6 @@
 package assessment
 
 import (
-	"fmt"
 	"github.com/lawrencewoodman/ddataset"
 	"github.com/vlifesystems/rhkit/aggregator"
 	"github.com/vlifesystems/rhkit/goal"
@@ -19,45 +18,22 @@ func AssessRules(
 	aggregatorSpecs []aggregator.Spec,
 	goals []*goal.Goal,
 ) (*Assessment, error) {
-	ruleAssessors := make([]*ruleAssessor, len(rules))
+	ruleAssessments := make([]*RuleAssessment, len(rules))
 	for i, rule := range rules {
-		ruleAssessors[i] = newRuleAssessor(rule, aggregatorSpecs, goals)
+		ruleAssessments[i] = newRuleAssessment(rule, aggregatorSpecs, goals)
 	}
-	numRecords, err := processDataset(dataset, ruleAssessors)
+	numRecords, err := processDataset(dataset, ruleAssessments)
 	if err != nil {
 		return &Assessment{}, err
 	}
-	goodRuleAssessors := filterGoodRuleAssessors(ruleAssessors, numRecords)
 	assessment := New(numRecords)
-	err = assessment.AddRuleAssessors(goodRuleAssessors)
+	err = assessment.addRuleAssessments(ruleAssessments)
 	return assessment, err
-}
-
-func filterGoodRuleAssessors(
-	ruleAssessments []*ruleAssessor,
-	numRecords int64,
-) []*ruleAssessor {
-	goodRuleAssessors := make([]*ruleAssessor, 0)
-	for _, ruleAssessment := range ruleAssessments {
-		numMatches, exists :=
-			ruleAssessment.AggregatorValue("numMatches", numRecords)
-		if !exists {
-			panic("numMatches doesn't exist in aggregators")
-		}
-		numMatchesInt, isInt := numMatches.Int()
-		if !isInt {
-			panic(fmt.Sprintf("can't cast numMatches to Int: %s", numMatches))
-		}
-		if numMatchesInt > 0 {
-			goodRuleAssessors = append(goodRuleAssessors, ruleAssessment)
-		}
-	}
-	return goodRuleAssessors
 }
 
 func processDataset(
 	dataset ddataset.Dataset,
-	ruleAssessors []*ruleAssessor,
+	ruleAssessments []*RuleAssessment,
 ) (int64, error) {
 	numRecords := int64(0)
 	conn, err := dataset.Open()
@@ -69,8 +45,8 @@ func processDataset(
 	for conn.Next() {
 		record := conn.Read()
 		numRecords++
-		for _, ruleAssessor := range ruleAssessors {
-			err := ruleAssessor.NextRecord(record)
+		for _, ruleAssessment := range ruleAssessments {
+			err := ruleAssessment.NextRecord(record)
 			if err != nil {
 				return numRecords, err
 			}

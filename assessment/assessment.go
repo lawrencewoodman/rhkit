@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/lawrencewoodman/ddataset"
-	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/aggregator"
 	"github.com/vlifesystems/rhkit/goal"
 	"github.com/vlifesystems/rhkit/rule"
@@ -25,12 +24,6 @@ type Assessment struct {
 	mux             sync.RWMutex
 }
 
-type RuleAssessment struct {
-	Rule        rule.Rule
-	Aggregators map[string]*dlit.Literal
-	Goals       []*GoalAssessment
-}
-
 type GoalAssessment struct {
 	Expr   string
 	Passed bool
@@ -38,44 +31,13 @@ type GoalAssessment struct {
 
 func New(numRecords int64) *Assessment {
 	return &Assessment{
-		NumRecords: numRecords,
+		NumRecords:      numRecords,
+		RuleAssessments: []*RuleAssessment{},
 		flags: map[string]bool{
 			"sorted":  false,
 			"refined": false,
 		},
 	}
-}
-
-func (a *Assessment) AddRuleAssessors(ruleAssessors []*ruleAssessor) error {
-	ruleAssessments := make([]*RuleAssessment, len(ruleAssessors))
-	for i, ruleAssessment := range ruleAssessors {
-		rule := ruleAssessment.Rule
-		aggregatorInstancesMap, err :=
-			aggregator.InstancesToMap(
-				ruleAssessment.Aggregators,
-				ruleAssessment.Goals,
-				a.NumRecords,
-			)
-		if err != nil {
-			return err
-		}
-		goalAssessments := make([]*GoalAssessment, len(ruleAssessment.Goals))
-		for j, goal := range ruleAssessment.Goals {
-			passed, err := goal.Assess(aggregatorInstancesMap)
-			if err != nil {
-				return err
-			}
-			goalAssessments[j] = &GoalAssessment{goal.String(), passed}
-		}
-		delete(aggregatorInstancesMap, "numRecords")
-		ruleAssessments[i] = &RuleAssessment{
-			Rule:        rule,
-			Aggregators: aggregatorInstancesMap,
-			Goals:       goalAssessments,
-		}
-	}
-	a.RuleAssessments = ruleAssessments
-	return nil
 }
 
 func (a *Assessment) Sort(s []SortOrder) {
@@ -240,6 +202,28 @@ func (a *Assessment) AssessRules(
 	return nil
 }
 
+func (a *Assessment) addRuleAssessments(
+	ruleAssessments []*RuleAssessment,
+) error {
+	for _, ruleAssessment := range ruleAssessments {
+		if err := ruleAssessment.update(a.NumRecords); err != nil {
+			return err
+		}
+		numMatches, ok := ruleAssessment.Aggregators["numMatches"]
+		if !ok {
+			panic("numMatches doesn't exist in aggregators")
+		}
+		numMatchesInt, isInt := numMatches.Int()
+		if !isInt {
+			panic(fmt.Sprintf("can't cast numMatches to Int: %s", numMatches))
+		}
+		if numMatchesInt > 0 {
+			a.RuleAssessments = append(a.RuleAssessments, ruleAssessment.clone())
+		}
+	}
+	return nil
+}
+
 func (sortedAssessment *Assessment) excludeSameRecordsRules() {
 	if len(sortedAssessment.RuleAssessments) < 2 {
 		return
@@ -320,33 +304,6 @@ func (sortedAssessment *Assessment) excludePoorerOverlappingRules() {
 		}
 	}
 	sortedAssessment.RuleAssessments = goodRuleAssessments
-}
-
-func (r *RuleAssessment) IsEqual(o *RuleAssessment) bool {
-	if r.Rule.String() != o.Rule.String() {
-		return false
-	}
-	if len(r.Aggregators) != len(o.Aggregators) {
-		return false
-	}
-	for aName, value := range r.Aggregators {
-		if o.Aggregators[aName].String() != value.String() {
-			return false
-		}
-	}
-	if len(r.Goals) != len(o.Goals) {
-		return false
-	}
-	for i, goal := range r.Goals {
-		if !goal.IsEqual(o.Goals[i]) {
-			return false
-		}
-	}
-	return true
-}
-
-func (r *RuleAssessment) clone() *RuleAssessment {
-	return &RuleAssessment{r.Rule, r.Aggregators, r.Goals}
 }
 
 func (g *GoalAssessment) IsEqual(o *GoalAssessment) bool {
