@@ -24,8 +24,9 @@
   * Create `GenerateRulesError`
   * Create `Options` struct to pass some parameters to `Process`
   * Add `GenerateRules` option to `Options`
-  * Unexport `description.New` and `description` `.NextRecord` method
-  * Unexport `assessment.NewAssessment`
+  * Unexport `description.New` and `Description.NextRecord` method
+  * Change error for `Assessment.Merge`
+  * Create `Assessment.AssessRules` method
 
 ## 0.2 (15th July 2017)
 

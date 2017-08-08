@@ -28,7 +28,7 @@ func AssessRules(
 		return &Assessment{}, err
 	}
 	goodRuleAssessors := filterGoodRuleAssessors(ruleAssessors, numRecords)
-	assessment := newAssessment(numRecords)
+	assessment := New(numRecords)
 	err = assessment.AddRuleAssessors(goodRuleAssessors)
 	return assessment, err
 }

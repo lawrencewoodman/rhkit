@@ -1,7 +1,7 @@
 package assessment
 
 import (
-	"errors"
+	"github.com/lawrencewoodman/ddataset/dtruncate"
 	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/aggregator"
@@ -9,6 +9,7 @@ import (
 	"github.com/vlifesystems/rhkit/internal/testhelpers"
 	"github.com/vlifesystems/rhkit/rule"
 	"reflect"
+	"sync"
 	"testing"
 )
 
@@ -27,7 +28,7 @@ func TestAddRuleAssessors_error(t *testing.T) {
 		Expr: "cost > 3",
 		Err:  dexpr.VarNotExistError("cost"),
 	}
-	assessment := newAssessment(numRecords)
+	assessment := New(numRecords)
 	err := assessment.AddRuleAssessors(ruleAssessors)
 	if err == nil || err.Error() != wantErr.Error() {
 		t.Errorf("AddRuleAssessors: err: %s, wantErr: %s", err, wantErr)
@@ -378,15 +379,10 @@ func TestMerge_errors(t *testing.T) {
 			},
 		},
 	}
-	wantError :=
-		errors.New("Can't merge assessments: Number of records don't match")
+	wantErr := ErrNumRecordsDiffer
 	_, err := assessment1.Merge(assessment2)
-	if err == nil {
-		t.Errorf("Merge() not error, expected: %s", wantError)
-		return
-	}
-	if err.Error() != wantError.Error() {
-		t.Errorf("Merge() got error: %s, want: %s", err, wantError)
+	if err == nil || err != wantErr {
+		t.Errorf("Merge - err: %s, wantErr: %s", err, wantErr)
 	}
 }
 
@@ -1533,6 +1529,140 @@ func TestSort(t *testing.T) {
 			t.Errorf("matchRules() rules don't match:\n - sortOrder: %s\n - got: %s\n - want: %s\n",
 				c.sortOrder, gotRules, c.wantRules)
 		}
+	}
+}
+
+func TestAssessmentAssessRules(t *testing.T) {
+	numGoRoutines := 10
+	numRulesEach := 300
+	if testing.Short() {
+		numRulesEach = 20
+	}
+	allRules := make([][]rule.Rule, numGoRoutines)
+	flatRules := make([]rule.Rule, numGoRoutines*numRulesEach)
+	k := 0
+	for i := 0; i < numGoRoutines; i++ {
+		rules := make([]rule.Rule, numRulesEach)
+		for j := 0; j < numRulesEach; j++ {
+			rules[j] = rule.NewGEFV(
+				"band",
+				dlit.MustNew(0.001*(float64(i)*1100+float64(j))),
+			)
+			flatRules[k] = rules[j]
+			k++
+		}
+		allRules[i] = rules
+	}
+	aggregatorDescs := []*aggregator.Desc{
+		{"numIncomeGt2", "count", "income > 2"},
+		{"numBandGt4", "count", "band > 4"},
+	}
+	goalExprs := []string{
+		"numIncomeGt2 == 1",
+		"numIncomeGt2 == 2",
+		"numIncomeGt2 == 3",
+		"numIncomeGt2 == 4",
+		"numBandGt4 == 1",
+		"numBandGt4 == 2",
+		"numBandGt4 == 3",
+		"numBandGt4 == 4",
+	}
+	sortOrder := []SortOrder{}
+	fields := []string{"income", "cost", "band"}
+	numRecords := 10000
+	records := make([][]string, numRecords)
+	for i := 0; i < numRecords; i++ {
+		switch i % 4 {
+		case 0:
+			records[i] = []string{"3", "4.5", "4"}
+		case 1:
+			records[i] = []string{"3", "3.2", "7"}
+		case 2:
+			records[i] = []string{"2", "1.2", "4"}
+		case 3:
+			records[i] = []string{"0", "0", "9"}
+		default:
+			t.Fatalf("io dear")
+		}
+	}
+	dataset := testhelpers.NewLiteralDataset(fields, records)
+	aggregatorSpecs, err := aggregator.MakeSpecs(fields, aggregatorDescs)
+	if err != nil {
+		t.Fatalf("MakeSpecs: %s", err)
+	}
+	goals, err := goal.MakeGoals(goalExprs)
+	if err != nil {
+		t.Fatalf("MakeGoals: %s", err)
+	}
+	wantAssessment, err :=
+		AssessRules(dataset, flatRules, aggregatorSpecs, goals)
+	if err != nil {
+		t.Fatalf("AssessRules: %v", err)
+	}
+	gotAssessment := New(int64(numRecords))
+
+	var wg sync.WaitGroup
+	wg.Add(numGoRoutines)
+	for i := 0; i < numGoRoutines; i++ {
+		rules := allRules[i]
+		go func() {
+			err := gotAssessment.AssessRules(dataset, rules, aggregatorSpecs, goals)
+			defer wg.Done()
+			if err != nil {
+				t.Fatalf("AssessRules: %s", err)
+			}
+		}()
+	}
+	wg.Wait()
+	gotAssessment.Sort(sortOrder)
+	wantAssessment.Sort(sortOrder)
+
+	if !wantAssessment.IsEqual(gotAssessment) {
+		t.Errorf("AssessRules assessments don't match\n - got num ruleAssessments: %d, want: %d\n",
+			len(gotAssessment.RuleAssessments), len(wantAssessment.RuleAssessments))
+	}
+}
+
+func TestAssessmentAssessRules_merge_error(t *testing.T) {
+	rules := []rule.Rule{
+		rule.NewGEFV("band", dlit.MustNew(5)),
+		rule.NewGEFV("band", dlit.MustNew(4)),
+		rule.NewGEFV("cost", dlit.MustNew(1.3)),
+	}
+	aggregatorDescs := []*aggregator.Desc{
+		{"numIncomeGt2", "count", "income > 2"},
+		{"numBandGt4", "count", "band > 4"},
+	}
+	goalExprs := []string{
+		"numIncomeGt2 == 1",
+		"numBandGt4 == 4",
+	}
+	fields := []string{"income", "cost", "band"}
+	records := [][]string{
+		{"3", "4.5", "4"},
+		{"3", "3.2", "7"},
+		{"2", "1.2", "4"},
+		{"0", "0", "9"},
+	}
+	dataset := testhelpers.NewLiteralDataset(fields, records)
+	aggregatorSpecs, err := aggregator.MakeSpecs(fields, aggregatorDescs)
+	if err != nil {
+		t.Fatalf("MakeSpecs: %s", err)
+	}
+	goals, err := goal.MakeGoals(goalExprs)
+	if err != nil {
+		t.Fatalf("MakeGoals: %s", err)
+	}
+	trueRules := []rule.Rule{rule.NewTrue()}
+	wantErr := ErrNumRecordsDiffer
+	assessment, err := AssessRules(dataset, trueRules, aggregatorSpecs, goals)
+	if err != nil {
+		t.Fatalf("AssessRules: %v", err)
+	}
+	tDataset := dtruncate.New(dataset, len(records)-1)
+	err = assessment.AssessRules(tDataset, rules, aggregatorSpecs, goals)
+	if err == nil || err.Error() != wantErr.Error() {
+		t.Errorf("AssessRules - err: %s, wantErr: %s", err, wantErr)
 	}
 }
 

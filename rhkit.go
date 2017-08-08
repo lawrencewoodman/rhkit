@@ -150,19 +150,9 @@ func processGenerate(
 	bestRules := ass.Rules()
 
 	tweakableRules := rule.Tweak(1, bestRules, fieldDescriptions)
-	newAss, err := assessment.AssessRules(
-		dataset,
-		tweakableRules,
-		aggregators,
-		goals,
-	)
+	err = ass.AssessRules(dataset, tweakableRules, aggregators, goals)
 	if err != nil {
 		return nil, AssessError{Err: err}
-	}
-
-	ass, err = ass.Merge(newAss)
-	if err != nil {
-		return nil, MergeError{Err: err}
 	}
 	ass.Sort(sortOrder)
 	ass.Refine()
@@ -170,19 +160,9 @@ func processGenerate(
 	bestRules = ass.Rules()
 	reducedDPRules := rule.ReduceDP(bestRules)
 
-	newAss, err = assessment.AssessRules(
-		dataset,
-		reducedDPRules,
-		aggregators,
-		goals,
-	)
+	err = ass.AssessRules(dataset, reducedDPRules, aggregators, goals)
 	if err != nil {
 		return nil, AssessError{Err: err}
-	}
-
-	ass, err = ass.Merge(newAss)
-	if err != nil {
-		return nil, MergeError{Err: err}
 	}
 	ass.Sort(sortOrder)
 	ass.Refine()
@@ -191,19 +171,9 @@ func processGenerate(
 	bestNonCombinedRules := ass.Rules(numRulesToCombine)
 	combinedRules := rule.Combine(bestNonCombinedRules)
 
-	newAss, err = assessment.AssessRules(
-		dataset,
-		combinedRules,
-		aggregators,
-		goals,
-	)
+	err = ass.AssessRules(dataset, combinedRules, aggregators, goals)
 	if err != nil {
 		return nil, AssessError{Err: err}
-	}
-
-	ass, err = ass.Merge(newAss)
-	if err != nil {
-		return nil, MergeError{Err: err}
 	}
 	ass.Sort(sortOrder)
 	ass.Refine()

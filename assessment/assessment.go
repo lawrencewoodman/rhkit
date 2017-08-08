@@ -7,16 +7,22 @@ package assessment
 import (
 	"errors"
 	"fmt"
+	"github.com/lawrencewoodman/ddataset"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/aggregator"
+	"github.com/vlifesystems/rhkit/goal"
 	"github.com/vlifesystems/rhkit/rule"
 	"sort"
+	"sync"
 )
+
+var ErrNumRecordsDiffer = errors.New("number of records differ in datasets")
 
 type Assessment struct {
 	NumRecords      int64
 	RuleAssessments []*RuleAssessment
 	flags           map[string]bool
+	mux             sync.RWMutex
 }
 
 type RuleAssessment struct {
@@ -30,7 +36,7 @@ type GoalAssessment struct {
 	Passed bool
 }
 
-func newAssessment(numRecords int64) *Assessment {
+func New(numRecords int64) *Assessment {
 	return &Assessment{
 		NumRecords: numRecords,
 		flags: map[string]bool{
@@ -126,16 +132,18 @@ func (sortedAssessment *Assessment) Refine() {
 
 func (a *Assessment) Merge(o *Assessment) (*Assessment, error) {
 	if a.NumRecords != o.NumRecords {
-		// TODO: Create error type
-		err := errors.New("Can't merge assessments: Number of records don't match")
-		return nil, err
+		return nil, ErrNumRecordsDiffer
 	}
 	newRuleAssessments := append(a.RuleAssessments, o.RuleAssessments...)
 	flags := map[string]bool{
 		"sorted":  false,
 		"refined": false,
 	}
-	return &Assessment{a.NumRecords, newRuleAssessments, flags}, nil
+	return &Assessment{
+		NumRecords:      a.NumRecords,
+		RuleAssessments: newRuleAssessments,
+		flags:           flags,
+	}, nil
 }
 
 // Assessment must be sorted and refined first
@@ -171,7 +179,11 @@ func (a *Assessment) TruncateRuleAssessments(
 		"sorted":  true,
 		"refined": true,
 	}
-	return &Assessment{a.NumRecords, ruleAssessments, flags}
+	return &Assessment{
+		NumRecords:      a.NumRecords,
+		RuleAssessments: ruleAssessments,
+		flags:           flags,
+	}
 }
 
 // Can optionally pass maximum number of rules to return
@@ -197,6 +209,35 @@ func (a *Assessment) Rules(args ...int) []rule.Rule {
 		r[i] = ruleAssessment.Rule
 	}
 	return r
+}
+
+// AssessRules assesses the given rules and adds their assessment to the
+// existing assessment.  This function is thread safe.
+func (a *Assessment) AssessRules(
+	dataset ddataset.Dataset,
+	rules []rule.Rule,
+	aggregatorSpecs []aggregator.Spec,
+	goals []*goal.Goal,
+) error {
+	ass, err := AssessRules(
+		dataset,
+		rules,
+		aggregatorSpecs,
+		goals,
+	)
+	if err != nil {
+		return err
+	}
+
+	ass, err = a.Merge(ass)
+	if err != nil {
+		return err
+	}
+	a.mux.Lock()
+	defer a.mux.Unlock()
+	a.flags = ass.flags
+	a.RuleAssessments = ass.RuleAssessments
+	return nil
 }
 
 func (sortedAssessment *Assessment) excludeSameRecordsRules() {
