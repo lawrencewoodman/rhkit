@@ -2,17 +2,12 @@
 
   * Switch to MIT Licence
   * s/`DescribingError`/`DescribeError`/
-  * Correct `MergeError` error message
-  * Remove `Title` from `Experiment`
   * s/`aggregators`/`aggregator`/ for package name
   * Create `aggregator.MakeSpecs`
   * s/`aggregator.AggregatorSpec`/`aggregator.Spec`/
   * s/`aggregator.AggregatorInstance`/`aggregator.Instance`/
   * Create `rule.MakeDynamicRules` and allow these to be passed to `Process`
   * Create `goal.MakeGoals`
-  * Change `assessment.AssessRules` and `Process` so that an `Experiment` is
-    no longer passed in, instead the needed fields from the `Experiment` are
-    passed
   * Move sort descriptions to `assessment`
   * Add `FieldNames` method to `Description`
   * Move `experiment.AggregatorDesc` to `aggregator.Desc` and rename
@@ -26,7 +21,12 @@
   * Add `GenerateRules` option to `Options`
   * Unexport `description.New` and `Description.NextRecord` method
   * Change error for `Assessment.Merge`
-  * Create `Assessment.AssessRules` method
+  * Create `Assessment.AssessRules` method to replace `assessment.AssessRules`
+    function
+  * Remove `experiment.Experiment`
+  * Change `Assessment.AssessRules` and `Process` so that an `Experiment` is
+    no longer passed in, instead the needed fields from the `Experiment` are
+    passed
   * Consolidate `assessment.RuleAssessment` and `assessment.RuleAssessor` into
     `assessment.RuleAssessment`
 

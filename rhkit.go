@@ -45,15 +45,6 @@ func (e AssessError) Error() string {
 	return "problem assessing rules: " + e.Err.Error()
 }
 
-// MergeError indicates an error Merging assessments
-type MergeError struct {
-	Err error
-}
-
-func (e MergeError) Error() string {
-	return "problem merging assessments: " + e.Err.Error()
-}
-
 type Options struct {
 	MaxNumRules    int
 	GenerateRules  bool
@@ -74,22 +65,18 @@ func Process(
 	if err != nil {
 		return nil, DescribeError{Err: err}
 	}
-
 	if !opts.GenerateRules {
 		rules = append(rules, rule.NewTrue())
 	}
-	ass, err := assessment.AssessRules(
-		dataset,
-		rules,
-		aggregators,
-		goals,
-	)
+	ass := assessment.New()
+	err = ass.AssessRules(dataset, rules, aggregators, goals)
 	if err != nil {
 		return nil, AssessError{Err: err}
 	}
 
 	if opts.GenerateRules {
-		generatedAss, err := processGenerate(
+		err := processGenerate(
+			ass,
 			dataset,
 			ruleFields,
 			fieldDescriptions,
@@ -102,18 +89,18 @@ func Process(
 		if err != nil {
 			return nil, err
 		}
-
-		ass, err = ass.Merge(generatedAss)
-		if err != nil {
-			return nil, MergeError{Err: err}
-		}
 	}
-
 	ass.Sort(sortOrder)
-	return ass, nil
+	ass.Refine()
+
+	if opts.MaxNumRules-len(rules) < 1 {
+		return ass.TruncateRuleAssessments(1), nil
+	}
+	return ass.TruncateRuleAssessments(opts.MaxNumRules - len(rules)), nil
 }
 
 func processGenerate(
+	ass *assessment.Assessment,
 	dataset ddataset.Dataset,
 	ruleFields []string,
 	fieldDescriptions *description.Description,
@@ -122,27 +109,22 @@ func processGenerate(
 	sortOrder []assessment.SortOrder,
 	numUserRules int,
 	opts Options,
-) (*assessment.Assessment, error) {
+) error {
 	generatedRules, err := rule.Generate(
 		fieldDescriptions,
 		ruleFields,
 		opts.RuleComplexity,
 	)
 	if err != nil {
-		return nil, GenerateRulesError{Err: err}
+		return GenerateRulesError{Err: err}
 	}
 	if len(generatedRules) < 2 {
-		return nil, ErrNoRulesGenerated
+		return ErrNoRulesGenerated
 	}
 
-	ass, err := assessment.AssessRules(
-		dataset,
-		generatedRules,
-		aggregators,
-		goals,
-	)
+	err = ass.AssessRules(dataset, generatedRules, aggregators, goals)
 	if err != nil {
-		return nil, AssessError{Err: err}
+		return AssessError{Err: err}
 	}
 
 	ass.Sort(sortOrder)
@@ -152,7 +134,7 @@ func processGenerate(
 	tweakableRules := rule.Tweak(1, bestRules, fieldDescriptions)
 	err = ass.AssessRules(dataset, tweakableRules, aggregators, goals)
 	if err != nil {
-		return nil, AssessError{Err: err}
+		return AssessError{Err: err}
 	}
 	ass.Sort(sortOrder)
 	ass.Refine()
@@ -162,7 +144,7 @@ func processGenerate(
 
 	err = ass.AssessRules(dataset, reducedDPRules, aggregators, goals)
 	if err != nil {
-		return nil, AssessError{Err: err}
+		return AssessError{Err: err}
 	}
 	ass.Sort(sortOrder)
 	ass.Refine()
@@ -173,14 +155,7 @@ func processGenerate(
 
 	err = ass.AssessRules(dataset, combinedRules, aggregators, goals)
 	if err != nil {
-		return nil, AssessError{Err: err}
+		return AssessError{Err: err}
 	}
-	ass.Sort(sortOrder)
-	ass.Refine()
-
-	if opts.MaxNumRules-numUserRules < 1 {
-		return ass.TruncateRuleAssessments(1), nil
-	}
-
-	return ass.TruncateRuleAssessments(opts.MaxNumRules - numUserRules), nil
+	return nil
 }

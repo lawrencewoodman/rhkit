@@ -177,7 +177,6 @@ func TestProcess_user_rules(t *testing.T) {
 		"age > 30",
 		"age > 30 && duration > 79",
 		"age <= 19 || age >= 37",
-		"month == \"may\"",
 	}
 
 	goals, err := goal.MakeGoals(goalExprs)

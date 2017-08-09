@@ -15,7 +15,7 @@ import (
 	"sync"
 )
 
-var ErrNumRecordsDiffer = errors.New("number of records differ in datasets")
+var ErrNumRecordsChanged = errors.New("number of records changed in dataset")
 
 type Assessment struct {
 	NumRecords      int64
@@ -29,15 +29,13 @@ type GoalAssessment struct {
 	Passed bool
 }
 
-func New(numRecords int64) *Assessment {
-	return &Assessment{
-		NumRecords:      numRecords,
+func New() *Assessment {
+	a := &Assessment{
+		NumRecords:      0,
 		RuleAssessments: []*RuleAssessment{},
-		flags: map[string]bool{
-			"sorted":  false,
-			"refined": false,
-		},
 	}
+	a.resetFlags()
+	return a
 }
 
 func (a *Assessment) Sort(s []SortOrder) {
@@ -94,18 +92,15 @@ func (sortedAssessment *Assessment) Refine() {
 
 func (a *Assessment) Merge(o *Assessment) (*Assessment, error) {
 	if a.NumRecords != o.NumRecords {
-		return nil, ErrNumRecordsDiffer
+		return nil, ErrNumRecordsChanged
 	}
 	newRuleAssessments := append(a.RuleAssessments, o.RuleAssessments...)
-	flags := map[string]bool{
-		"sorted":  false,
-		"refined": false,
-	}
-	return &Assessment{
+	r := &Assessment{
 		NumRecords:      a.NumRecords,
 		RuleAssessments: newRuleAssessments,
-		flags:           flags,
-	}, nil
+	}
+	r.resetFlags()
+	return r, nil
 }
 
 // Assessment must be sorted and refined first
@@ -173,38 +168,68 @@ func (a *Assessment) Rules(args ...int) []rule.Rule {
 	return r
 }
 
-// AssessRules assesses the given rules and adds their assessment to the
-// existing assessment.  This function is thread safe.
+// AssessRules assesses the given rules against a Dataset and
+// adds their assessment to the existing assessment.
+// This function is thread safe.
 func (a *Assessment) AssessRules(
 	dataset ddataset.Dataset,
 	rules []rule.Rule,
 	aggregatorSpecs []aggregator.Spec,
 	goals []*goal.Goal,
 ) error {
-	ass, err := AssessRules(
-		dataset,
-		rules,
-		aggregatorSpecs,
-		goals,
-	)
+	ruleAssessments := make([]*RuleAssessment, len(rules))
+	for i, rule := range rules {
+		ruleAssessments[i] = newRuleAssessment(rule, aggregatorSpecs, goals)
+	}
+	numRecords, err := processDataset(dataset, ruleAssessments)
 	if err != nil {
 		return err
 	}
+	if a.NumRecords == 0 {
+		a.NumRecords = numRecords
+	} else if numRecords != a.NumRecords {
+		return ErrNumRecordsChanged
+	}
+	return a.addRuleAssessments(ruleAssessments)
+}
 
-	ass, err = a.Merge(ass)
+func processDataset(
+	dataset ddataset.Dataset,
+	ruleAssessments []*RuleAssessment,
+) (int64, error) {
+	numRecords := int64(0)
+	conn, err := dataset.Open()
 	if err != nil {
-		return err
+		return numRecords, err
 	}
-	a.mux.Lock()
-	defer a.mux.Unlock()
-	a.flags = ass.flags
-	a.RuleAssessments = ass.RuleAssessments
-	return nil
+	defer conn.Close()
+
+	for conn.Next() {
+		record := conn.Read()
+		numRecords++
+		for _, ruleAssessment := range ruleAssessments {
+			err := ruleAssessment.NextRecord(record)
+			if err != nil {
+				return numRecords, err
+			}
+		}
+	}
+	return numRecords, conn.Err()
+}
+
+func (a *Assessment) resetFlags() {
+	a.flags = map[string]bool{
+		"sorted":  false,
+		"refined": false,
+	}
 }
 
 func (a *Assessment) addRuleAssessments(
 	ruleAssessments []*RuleAssessment,
 ) error {
+	a.mux.Lock()
+	defer a.mux.Unlock()
+	a.resetFlags()
 	for _, ruleAssessment := range ruleAssessments {
 		if err := ruleAssessment.update(a.NumRecords); err != nil {
 			return err
