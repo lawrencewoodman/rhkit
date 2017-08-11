@@ -1,4 +1,4 @@
-### Master branch
+## Master branch
 
   * Switch to MIT Licence
   * s/`DescribingError`/`DescribeError`/
