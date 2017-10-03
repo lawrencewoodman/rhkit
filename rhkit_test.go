@@ -62,42 +62,42 @@ func TestProcess(t *testing.T) {
 		wantMinNumRules int
 		wantMaxNumRules int
 	}{
-		{opts: Options{MaxNumRules: 0, GenerateRules: false},
+		{opts: Options{MaxNumRules: 0, RuleFields: []string{}},
 			wantMinNumRules: 1,
 			wantMaxNumRules: 1,
 		},
-		{opts: Options{MaxNumRules: 1, GenerateRules: false},
+		{opts: Options{MaxNumRules: 1, RuleFields: []string{}},
 			wantMinNumRules: 1,
 			wantMaxNumRules: 1,
 		},
-		{opts: Options{MaxNumRules: 1500, GenerateRules: false},
+		{opts: Options{MaxNumRules: 1500, RuleFields: []string{}},
 			wantMinNumRules: 1,
 			wantMaxNumRules: 1,
 		},
-		{opts: Options{MaxNumRules: 0, GenerateRules: true},
+		{opts: Options{MaxNumRules: 0, RuleFields: ruleFields},
 			wantMinNumRules: 1,
 			wantMaxNumRules: 1,
 		},
-		{opts: Options{MaxNumRules: 1, GenerateRules: true},
+		{opts: Options{MaxNumRules: 1, RuleFields: ruleFields},
 			wantMinNumRules: 1,
 			wantMaxNumRules: 1,
 		},
-		{opts: Options{MaxNumRules: 100, GenerateRules: true},
+		{opts: Options{MaxNumRules: 100, RuleFields: ruleFields},
 			wantMinNumRules: 100,
 			wantMaxNumRules: 100,
 		},
-		{opts: Options{MaxNumRules: 500, GenerateRules: true},
+		{opts: Options{MaxNumRules: 500, RuleFields: ruleFields},
 			wantMinNumRules: 500,
 			wantMaxNumRules: 500,
 		},
-		{opts: Options{MaxNumRules: 3000, GenerateRules: true},
+		{opts: Options{MaxNumRules: 3000, RuleFields: ruleFields},
 			wantMinNumRules: 1000,
 			wantMaxNumRules: 1050,
 		},
 		{opts: Options{
-			MaxNumRules:    3000,
-			GenerateRules:  true,
-			RuleComplexity: rule.Complexity{Arithmetic: true},
+			MaxNumRules:             3000,
+			RuleFields:              ruleFields,
+			GenerateArithmeticRules: true,
 		},
 			wantMinNumRules: 1100,
 			wantMaxNumRules: 1200,
@@ -110,15 +110,7 @@ func TestProcess(t *testing.T) {
 		wantMaxNumRules := c.wantMaxNumRules
 		t.Run(fmt.Sprintf("case %d", i), func(t *testing.T) {
 			t.Parallel()
-			ass, err := Process(
-				dataset,
-				ruleFields,
-				aggregators,
-				goals,
-				sortOrder,
-				rules,
-				opts,
-			)
+			ass, err := Process(dataset, aggregators, goals, sortOrder, rules, opts)
 			if err != nil {
 				t.Fatalf("(%d) Process: %s", i, err)
 			}
@@ -141,10 +133,6 @@ func TestProcess_user_rules(t *testing.T) {
 		rune(';'),
 		fields,
 	)
-	ruleFields := []string{"age", "job", "marital", "default",
-		"balance", "housing", "loan", "contact", "day", "month", "duration",
-		"campaign", "pdays", "previous", "poutcome", "y",
-	}
 	aggregatorDescs := []*aggregator.Desc{
 		{"numSignedUp", "count", "y == \"yes\""},
 		{"cost", "calc", "numMatches * 4.5"},
@@ -171,7 +159,6 @@ func TestProcess_user_rules(t *testing.T) {
 		"month == \"may\"",
 		"month == \"unknown\"",
 	}
-	ruleComplexity := rule.Complexity{Arithmetic: true}
 	maxNumRules := 50
 	wantRules := []string{
 		"age > 30",
@@ -195,16 +182,12 @@ func TestProcess_user_rules(t *testing.T) {
 	if err != nil {
 		t.Fatalf("MakeDynamicRules: %s", err)
 	}
-	opts := Options{MaxNumRules: maxNumRules, RuleComplexity: ruleComplexity}
-	ass, err := Process(
-		dataset,
-		ruleFields,
-		aggregators,
-		goals,
-		sortOrder,
-		rules,
-		opts,
-	)
+	opts := Options{
+		MaxNumRules:             maxNumRules,
+		RuleFields:              []string{},
+		GenerateArithmeticRules: true,
+	}
+	ass, err := Process(dataset, aggregators, goals, sortOrder, rules, opts)
 	if err != nil {
 		t.Errorf("Process: %s", err)
 	}

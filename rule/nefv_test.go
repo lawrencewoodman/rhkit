@@ -5,6 +5,7 @@ import (
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/description"
 	"github.com/vlifesystems/rhkit/internal/fieldtype"
+	"github.com/vlifesystems/rhkit/internal/testhelpers"
 	"math"
 	"reflect"
 	"testing"
@@ -196,10 +197,12 @@ func TestGenerateNEFV(t *testing.T) {
 			want: []Rule{},
 		},
 	}
-	ruleFields := []string{"band", "flow", "group", "month"}
-	complexity := Complexity{}
+	generationDesc := testhelpers.GenerationDesc{
+		DFields:     []string{"band", "flow", "group", "month"},
+		DArithmetic: false,
+	}
 	for _, c := range cases {
-		got := generateNEFV(inputDescription, ruleFields, complexity, c.field)
+		got := generateNEFV(inputDescription, generationDesc, c.field)
 		if err := matchRulesUnordered(got, c.want); err != nil {
 			t.Errorf("matchRulesUnordered() rules don't match: %s\ngot: %s\nwant: %s\n",
 				err, got, c.want)

@@ -5,6 +5,7 @@ import (
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/description"
 	"github.com/vlifesystems/rhkit/internal/fieldtype"
+	"github.com/vlifesystems/rhkit/internal/testhelpers"
 	"reflect"
 	"testing"
 )
@@ -333,10 +334,12 @@ func TestGenerateLEFV(t *testing.T) {
 		}
 		return nil
 	}
-	complexity := Complexity{}
-	ruleFields := []string{"income"}
+	generationDesc := testhelpers.GenerationDesc{
+		DFields:     []string{"income"},
+		DArithmetic: false,
+	}
 	for i, c := range cases {
-		got := generateLEFV(c.description, ruleFields, complexity, c.field)
+		got := generateLEFV(c.description, generationDesc, c.field)
 		err := checkRulesComply(
 			got,
 			c.minNumRules,

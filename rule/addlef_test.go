@@ -5,6 +5,7 @@ import (
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/description"
 	"github.com/vlifesystems/rhkit/internal/fieldtype"
+	"github.com/vlifesystems/rhkit/internal/testhelpers"
 	"reflect"
 	"testing"
 )
@@ -334,15 +335,16 @@ func TestAddLEFTweak(t *testing.T) {
 
 func TestGenerateAddLEF(t *testing.T) {
 	fieldA := "balance"
+	ruleFields := []string{"balance", "income"}
 	cases := []struct {
-		description *description.Description
-		complexity  Complexity
-		minNumRules int
-		maxNumRules int
-		min         *dlit.Literal
-		max         *dlit.Literal
-		mid         *dlit.Literal
-		maxDP       int
+		description    *description.Description
+		generationDesc GenerationDescriber
+		minNumRules    int
+		maxNumRules    int
+		min            *dlit.Literal
+		max            *dlit.Literal
+		mid            *dlit.Literal
+		maxDP          int
 	}{
 		{description: &description.Description{
 			map[string]*description.Field{
@@ -358,7 +360,10 @@ func TestGenerateAddLEF(t *testing.T) {
 				},
 			},
 		},
-			complexity:  Complexity{Arithmetic: true},
+			generationDesc: testhelpers.GenerationDesc{
+				DFields:     ruleFields,
+				DArithmetic: true,
+			},
 			minNumRules: 18,
 			maxNumRules: 20,
 			min:         dlit.MustNew(500),
@@ -380,7 +385,10 @@ func TestGenerateAddLEF(t *testing.T) {
 				},
 			},
 		},
-			complexity:  Complexity{Arithmetic: true},
+			generationDesc: testhelpers.GenerationDesc{
+				DFields:     ruleFields,
+				DArithmetic: true,
+			},
 			minNumRules: 18,
 			maxNumRules: 20,
 			min:         dlit.MustNew(790),
@@ -402,7 +410,10 @@ func TestGenerateAddLEF(t *testing.T) {
 				},
 			},
 		},
-			complexity:  Complexity{Arithmetic: true},
+			generationDesc: testhelpers.GenerationDesc{
+				DFields:     ruleFields,
+				DArithmetic: true,
+			},
 			minNumRules: 18,
 			maxNumRules: 20,
 			min:         dlit.MustNew(500),
@@ -424,7 +435,10 @@ func TestGenerateAddLEF(t *testing.T) {
 				},
 			},
 		},
-			complexity:  Complexity{Arithmetic: true},
+			generationDesc: testhelpers.GenerationDesc{
+				DFields:     ruleFields,
+				DArithmetic: true,
+			},
 			minNumRules: 18,
 			maxNumRules: 19,
 			min:         dlit.MustNew(790),
@@ -448,7 +462,10 @@ func TestGenerateAddLEF(t *testing.T) {
 				},
 			},
 		},
-			complexity:  Complexity{Arithmetic: true},
+			generationDesc: testhelpers.GenerationDesc{
+				DFields:     ruleFields,
+				DArithmetic: true,
+			},
 			minNumRules: 18,
 			maxNumRules: 20,
 			min:         dlit.MustNew(797.924),
@@ -470,7 +487,10 @@ func TestGenerateAddLEF(t *testing.T) {
 				},
 			},
 		},
-			complexity:  Complexity{Arithmetic: true},
+			generationDesc: testhelpers.GenerationDesc{
+				DFields:     ruleFields,
+				DArithmetic: true,
+			},
 			minNumRules: 4,
 			maxNumRules: 4,
 			min:         dlit.MustNew(400),
@@ -494,7 +514,10 @@ func TestGenerateAddLEF(t *testing.T) {
 				},
 			},
 		},
-			complexity:  Complexity{Arithmetic: false},
+			generationDesc: testhelpers.GenerationDesc{
+				DFields:     ruleFields,
+				DArithmetic: false,
+			},
 			minNumRules: 0,
 			maxNumRules: 0,
 			min:         dlit.MustNew(797.924),
@@ -513,9 +536,8 @@ func TestGenerateAddLEF(t *testing.T) {
 		}
 		return nil
 	}
-	ruleFields := []string{"balance", "income"}
 	for i, c := range cases {
-		got := generateAddLEF(c.description, ruleFields, c.complexity, fieldA)
+		got := generateAddLEF(c.description, c.generationDesc, fieldA)
 		err := checkRulesComply(
 			got,
 			c.minNumRules,
@@ -557,9 +579,11 @@ func TestGenerateAddLEF_multiple_fields(t *testing.T) {
 		},
 	}
 
-	ruleFields := []string{"balance", "income", "reserve"}
-	complexity := Complexity{Arithmetic: true}
-	got := generateAddLEF(description, ruleFields, complexity, fieldA)
+	generationDesc := testhelpers.GenerationDesc{
+		DFields:     []string{"balance", "income", "reserve"},
+		DArithmetic: true,
+	}
+	got := generateAddLEF(description, generationDesc, fieldA)
 
 	numIncome := 0
 	numReserve := 0

@@ -5,6 +5,7 @@ import (
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/description"
 	"github.com/vlifesystems/rhkit/internal/fieldtype"
+	"github.com/vlifesystems/rhkit/internal/testhelpers"
 	"reflect"
 	"strings"
 	"testing"
@@ -484,11 +485,13 @@ func TestGenerateInFV(t *testing.T) {
 			},
 		},
 	}
-	ruleFields :=
-		[]string{"band", "flow", "groupA", "groupB", "groupC", "groupD", "groupE"}
-	complexity := Complexity{}
+	generationDesc := testhelpers.GenerationDesc{
+		DFields: []string{"band", "flow", "groupA", "groupB",
+			"groupC", "groupD", "groupE"},
+		DArithmetic: false,
+	}
 	for i, c := range cases {
-		got := generateInFV(inputDescription, ruleFields, complexity, c.field)
+		got := generateInFV(inputDescription, generationDesc, c.field)
 		if err := matchRulesUnordered(got, c.want); err != nil {
 			t.Errorf("(%d) matchRulesUnordered() rules don't match: %s\ngot: %s\nwant: %s\n",
 				i, err, got, c.want)
@@ -513,13 +516,17 @@ func TestGenerateInFV_num_fields(t *testing.T) {
 		},
 	}
 	cases := []struct {
-		ruleFields       []string
+		generationDesc   GenerationDescriber
 		groupValues      map[string]description.Value
 		wantMinNumRules  int
 		wantMaxNumRules  int
 		wantMaxNumValues int
 	}{
-		{ruleFields: []string{"group", "flowA", "flowB"},
+		{
+			generationDesc: testhelpers.GenerationDesc{
+				DFields:     []string{"group", "flowA", "flowB"},
+				DArithmetic: false,
+			},
 			groupValues: map[string]description.Value{
 				"Fred":    {dlit.NewString("Fred"), 3},
 				"Mary":    {dlit.NewString("Mary"), 4},
@@ -538,7 +545,11 @@ func TestGenerateInFV_num_fields(t *testing.T) {
 			wantMaxNumRules:  2000,
 			wantMaxNumValues: 5,
 		},
-		{ruleFields: []string{"group", "flowA"},
+		{
+			generationDesc: testhelpers.GenerationDesc{
+				DFields:     []string{"group", "flowA"},
+				DArithmetic: false,
+			},
 			groupValues: map[string]description.Value{
 				"Fred":    {dlit.NewString("Fred"), 3},
 				"Mary":    {dlit.NewString("Mary"), 4},
@@ -558,10 +569,9 @@ func TestGenerateInFV_num_fields(t *testing.T) {
 			wantMaxNumValues: 8,
 		},
 	}
-	complexity := Complexity{}
 	for i, c := range cases {
 		inputDescription.Fields["group"].Values = c.groupValues
-		got := generateInFV(inputDescription, c.ruleFields, complexity, "group")
+		got := generateInFV(inputDescription, c.generationDesc, "group")
 		if len(got) < c.wantMinNumRules || len(got) > c.wantMaxNumRules {
 			t.Errorf("(%d) generateInFV: got wrong number of rules: %d", i, len(got))
 		}

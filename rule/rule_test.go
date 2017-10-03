@@ -325,8 +325,7 @@ func TestGenerate(t *testing.T) {
 				},
 			},
 		}}
-	ruleFields :=
-		[]string{"team", "teamOut", "level", "flow", "position"}
+
 	wantRules := []Rule{
 		NewTrue(),
 		NewEQFV("team", dlit.MustNew("a")),
@@ -359,8 +358,11 @@ func TestGenerate(t *testing.T) {
 		MustNewBetweenFV("position", dlit.MustNew(9), dlit.MustNew(12)),
 		MustNewOutsideFV("position", dlit.MustNew(9), dlit.MustNew(12)),
 	}
-	complexity := Complexity{Arithmetic: true}
-	got, err := Generate(inputDescription, ruleFields, complexity)
+	generationDesc := testhelpers.GenerationDesc{
+		DFields:     []string{"team", "teamOut", "level", "flow", "position"},
+		DArithmetic: true,
+	}
+	got, err := Generate(inputDescription, generationDesc)
 	if err != nil {
 		t.Fatalf("Generate: %s", err)
 	}
@@ -387,7 +389,7 @@ func TestGenerate_combinations(t *testing.T) {
 				},
 			},
 		}}
-	ruleFields := []string{"directionIn", "directionOut"}
+
 	want := []Rule{
 		NewEQFV("directionIn", dlit.MustNew("de")),
 		NewEQFV("directionIn", dlit.MustNew("gogledd")),
@@ -436,8 +438,11 @@ func TestGenerate_combinations(t *testing.T) {
 		NewTrue(),
 	}
 
-	complexity := Complexity{Arithmetic: true}
-	got, err := Generate(inputDescription, ruleFields, complexity)
+	generationDesc := testhelpers.GenerationDesc{
+		DFields:     []string{"directionIn", "directionOut"},
+		DArithmetic: true,
+	}
+	got, err := Generate(inputDescription, generationDesc)
 	if err != nil {
 		t.Fatalf("Generate: %s", err)
 	}
@@ -468,7 +473,6 @@ func TestGenerate_errors(t *testing.T) {
 			},
 		},
 	}
-	complexity := Complexity{Arithmetic: true}
 	cases := []struct {
 		ruleFields []string
 		wantErr    error
@@ -479,7 +483,11 @@ func TestGenerate_errors(t *testing.T) {
 			wantErr: ErrNoRuleFieldsSpecified},
 	}
 	for _, c := range cases {
-		_, err := Generate(inputDescription, c.ruleFields, complexity)
+		generationDesc := testhelpers.GenerationDesc{
+			DFields:     c.ruleFields,
+			DArithmetic: true,
+		}
+		_, err := Generate(inputDescription, generationDesc)
 		if err == nil || err.Error() != c.wantErr.Error() {
 			t.Errorf("Generate - err: %s, wantErr: %s", err, c.wantErr)
 		}

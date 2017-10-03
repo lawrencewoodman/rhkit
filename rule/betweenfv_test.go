@@ -7,6 +7,7 @@ import (
 	"github.com/vlifesystems/rhkit/description"
 	"github.com/vlifesystems/rhkit/internal/dexprfuncs"
 	"github.com/vlifesystems/rhkit/internal/fieldtype"
+	"github.com/vlifesystems/rhkit/internal/testhelpers"
 	"reflect"
 	"testing"
 )
@@ -374,8 +375,10 @@ func TestGenerateBetweenFV(t *testing.T) {
 			maxDP:       0,
 		},
 	}
-	complexity := Complexity{}
-	ruleFields := []string{"income"}
+	generationDesc := testhelpers.GenerationDesc{
+		DFields:     []string{"income"},
+		DArithmetic: false,
+	}
 	for i, c := range cases {
 		complyFunc := func(r Rule) error {
 			x, ok := r.(*BetweenFV)
@@ -387,7 +390,7 @@ func TestGenerateBetweenFV(t *testing.T) {
 			}
 			return nil
 		}
-		got := generateBetweenFV(c.description, ruleFields, complexity, c.field)
+		got := generateBetweenFV(c.description, generationDesc, c.field)
 		err := checkRulesComply(
 			got,
 			c.minNumRules,

@@ -5,6 +5,7 @@ import (
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/description"
 	"github.com/vlifesystems/rhkit/internal/fieldtype"
+	"github.com/vlifesystems/rhkit/internal/testhelpers"
 	"reflect"
 	"testing"
 )
@@ -314,15 +315,16 @@ func TestMulLEFTweak(t *testing.T) {
 
 func TestGenerateMulLEF(t *testing.T) {
 	fieldA := "balance"
+	ruleFields := []string{"balance", "income"}
 	cases := []struct {
-		description *description.Description
-		complexity  Complexity
-		minNumRules int
-		maxNumRules int
-		min         *dlit.Literal
-		max         *dlit.Literal
-		mid         *dlit.Literal
-		maxDP       int
+		description    *description.Description
+		generationDesc GenerationDescriber
+		minNumRules    int
+		maxNumRules    int
+		min            *dlit.Literal
+		max            *dlit.Literal
+		mid            *dlit.Literal
+		maxDP          int
 	}{
 		{description: &description.Description{
 			map[string]*description.Field{
@@ -338,7 +340,10 @@ func TestGenerateMulLEF(t *testing.T) {
 				},
 			},
 		},
-			complexity:  Complexity{Arithmetic: true},
+			generationDesc: testhelpers.GenerationDesc{
+				DFields:     ruleFields,
+				DArithmetic: true,
+			},
 			minNumRules: 18,
 			maxNumRules: 20,
 			min:         dlit.MustNew(62500),
@@ -360,7 +365,10 @@ func TestGenerateMulLEF(t *testing.T) {
 				},
 			},
 		},
-			complexity:  Complexity{Arithmetic: true},
+			generationDesc: testhelpers.GenerationDesc{
+				DFields:     ruleFields,
+				DArithmetic: true,
+			},
 			minNumRules: 18,
 			maxNumRules: 20,
 			min:         dlit.MustNew(135000),
@@ -382,7 +390,10 @@ func TestGenerateMulLEF(t *testing.T) {
 				},
 			},
 		},
-			complexity:  Complexity{Arithmetic: true},
+			generationDesc: testhelpers.GenerationDesc{
+				DFields:     ruleFields,
+				DArithmetic: true,
+			},
 			minNumRules: 18,
 			maxNumRules: 20,
 			min:         dlit.MustNew(60000),
@@ -404,7 +415,10 @@ func TestGenerateMulLEF(t *testing.T) {
 				},
 			},
 		},
-			complexity:  Complexity{Arithmetic: true},
+			generationDesc: testhelpers.GenerationDesc{
+				DFields:     ruleFields,
+				DArithmetic: true,
+			},
 			minNumRules: 18,
 			maxNumRules: 19,
 			min:         dlit.MustNew(118000),
@@ -428,7 +442,10 @@ func TestGenerateMulLEF(t *testing.T) {
 				},
 			},
 		},
-			complexity:  Complexity{Arithmetic: true},
+			generationDesc: testhelpers.GenerationDesc{
+				DFields:     ruleFields,
+				DArithmetic: true,
+			},
 			minNumRules: 18,
 			maxNumRules: 20,
 			min:         dlit.MustNew(119687.642928),
@@ -450,7 +467,10 @@ func TestGenerateMulLEF(t *testing.T) {
 				},
 			},
 		},
-			complexity:  Complexity{Arithmetic: true},
+			generationDesc: testhelpers.GenerationDesc{
+				DFields:     ruleFields,
+				DArithmetic: true,
+			},
 			minNumRules: 4,
 			maxNumRules: 4,
 			min:         dlit.MustNew(1),
@@ -472,7 +492,10 @@ func TestGenerateMulLEF(t *testing.T) {
 				},
 			},
 		},
-			complexity:  Complexity{Arithmetic: false},
+			generationDesc: testhelpers.GenerationDesc{
+				DFields:     ruleFields,
+				DArithmetic: false,
+			},
 			minNumRules: 0,
 			maxNumRules: 0,
 			min:         dlit.MustNew(118000),
@@ -491,9 +514,8 @@ func TestGenerateMulLEF(t *testing.T) {
 		}
 		return nil
 	}
-	ruleFields := []string{"balance", "income"}
 	for i, c := range cases {
-		got := generateMulLEF(c.description, ruleFields, c.complexity, fieldA)
+		got := generateMulLEF(c.description, c.generationDesc, fieldA)
 		err := checkRulesComply(
 			got,
 			c.minNumRules,
@@ -535,9 +557,11 @@ func TestGenerateMulLEF_multiple_fields(t *testing.T) {
 		},
 	}
 
-	ruleFields := []string{"balance", "income", "reserve"}
-	complexity := Complexity{Arithmetic: true}
-	got := generateMulLEF(description, ruleFields, complexity, fieldA)
+	generationDesc := testhelpers.GenerationDesc{
+		DFields:     []string{"balance", "income", "reserve"},
+		DArithmetic: true,
+	}
+	got := generateMulLEF(description, generationDesc, fieldA)
 
 	numIncome := 0
 	numReserve := 0

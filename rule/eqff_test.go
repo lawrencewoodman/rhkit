@@ -5,6 +5,7 @@ import (
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/description"
 	"github.com/vlifesystems/rhkit/internal/fieldtype"
+	"github.com/vlifesystems/rhkit/internal/testhelpers"
 	"reflect"
 	"testing"
 )
@@ -238,19 +239,15 @@ func TestGenerateEQFF(t *testing.T) {
 			},
 		},
 	}
-	ruleFields :=
-		[]string{
+	generationDesc := testhelpers.GenerationDesc{
+		DFields: []string{
 			"bandA", "groupA", "groupB", "groupC", "groupD",
 			"groupE", "groupF", "bandB", "bandC", "bandD",
-		}
-	complexity := Complexity{}
+		},
+		DArithmetic: false,
+	}
 	for _, c := range cases {
-		got := generateEQFF(
-			inputDescription,
-			ruleFields,
-			complexity,
-			c.field,
-		)
+		got := generateEQFF(inputDescription, generationDesc, c.field)
 		if err := matchRulesUnordered(got, c.want); err != nil {
 			t.Errorf("matchRulesUnordered() rules don't match: %s\ngot: %s\nwant: %s\n",
 				err, got, c.want)

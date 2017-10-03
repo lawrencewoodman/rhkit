@@ -4,6 +4,7 @@ import (
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/description"
 	"github.com/vlifesystems/rhkit/internal/fieldtype"
+	"github.com/vlifesystems/rhkit/internal/testhelpers"
 	"reflect"
 	"testing"
 )
@@ -182,16 +183,13 @@ func TestGenerateLTFF(t *testing.T) {
 			want: []Rule{},
 		},
 	}
-	ruleFields :=
-		[]string{"band", "flowIn", "flowOut", "rateIn", "rateOut", "group"}
-	complexity := Complexity{}
+	generationDesc := testhelpers.GenerationDesc{
+		DFields: []string{"band", "flowIn", "flowOut", "rateIn",
+			"rateOut", "group"},
+		DArithmetic: false,
+	}
 	for _, c := range cases {
-		got := generateLTFF(
-			inputDescription,
-			ruleFields,
-			complexity,
-			c.field,
-		)
+		got := generateLTFF(inputDescription, generationDesc, c.field)
 		if err := matchRulesUnordered(got, c.want); err != nil {
 			t.Errorf("matchRulesUnordered() rules don't match: %s\ngot: %s\nwant: %s\n",
 				err, got, c.want)
