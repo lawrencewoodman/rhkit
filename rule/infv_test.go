@@ -4,7 +4,6 @@ import (
 	"errors"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/description"
-	"github.com/vlifesystems/rhkit/internal/fieldtype"
 	"github.com/vlifesystems/rhkit/internal/testhelpers"
 	"reflect"
 	"strings"
@@ -261,20 +260,20 @@ func TestGenerateInFV(t *testing.T) {
 	inputDescription := &description.Description{
 		map[string]*description.Field{
 			"band": {
-				Kind:   fieldtype.Number,
+				Kind:   description.Number,
 				Min:    dlit.MustNew(1),
 				Max:    dlit.MustNew(3),
 				Values: map[string]description.Value{},
 			},
 			"flow": {
-				Kind:   fieldtype.Number,
+				Kind:   description.Number,
 				Min:    dlit.MustNew(1),
 				Max:    dlit.MustNew(3),
 				MaxDP:  2,
 				Values: map[string]description.Value{},
 			},
 			"groupA": {
-				Kind: fieldtype.String,
+				Kind: description.String,
 				Values: map[string]description.Value{
 					"Fred":    {dlit.NewString("Fred"), 3},
 					"Mary":    {dlit.NewString("Mary"), 4},
@@ -283,7 +282,7 @@ func TestGenerateInFV(t *testing.T) {
 			},
 
 			"groupB": {
-				Kind: fieldtype.String,
+				Kind: description.String,
 				Values: map[string]description.Value{
 					"Fred":    {dlit.NewString("Fred"), 3},
 					"Mary":    {dlit.NewString("Mary"), 4},
@@ -301,7 +300,7 @@ func TestGenerateInFV(t *testing.T) {
 				},
 			},
 			"groupC": {
-				Kind: fieldtype.String,
+				Kind: description.String,
 				Values: map[string]description.Value{
 					"Fred":    {dlit.NewString("Fred"), 3},
 					"Mary":    {dlit.NewString("Mary"), 4},
@@ -310,7 +309,7 @@ func TestGenerateInFV(t *testing.T) {
 				},
 			},
 			"groupD": {
-				Kind: fieldtype.String,
+				Kind: description.String,
 				Values: map[string]description.Value{
 					"Fred":    {dlit.NewString("Fred"), 3},
 					"Mary":    {dlit.NewString("Mary"), 4},
@@ -319,7 +318,7 @@ func TestGenerateInFV(t *testing.T) {
 				},
 			},
 			"groupE": {
-				Kind: fieldtype.String,
+				Kind: description.String,
 				Values: map[string]description.Value{
 					"Fred":    {dlit.NewString("Fred"), 3},
 					"Mary":    {dlit.NewString("Mary"), 4},
@@ -505,13 +504,13 @@ func TestGenerateInFV_num_fields(t *testing.T) {
 	inputDescription := &description.Description{
 		map[string]*description.Field{
 			"group": {
-				Kind: fieldtype.String,
+				Kind: description.String,
 			},
 			"flowA": {
-				Kind: fieldtype.Number,
+				Kind: description.Number,
 			},
 			"flowB": {
-				Kind: fieldtype.Number,
+				Kind: description.Number,
 			},
 		},
 	}

@@ -4,7 +4,6 @@ import (
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/description"
 	"github.com/vlifesystems/rhkit/internal"
-	"github.com/vlifesystems/rhkit/internal/fieldtype"
 	"github.com/vlifesystems/rhkit/internal/testhelpers"
 	"testing"
 )
@@ -14,13 +13,13 @@ func TestTweak_1(t *testing.T) {
 	inputDescription := &description.Description{
 		map[string]*description.Field{
 			"band": {
-				fieldtype.Number, dlit.MustNew(3), dlit.MustNew(40), 0,
+				description.Number, dlit.MustNew(3), dlit.MustNew(40), 0,
 				map[string]description.Value{}, 0},
 			"age": {
-				fieldtype.Number, dlit.MustNew(4), dlit.MustNew(90), 0,
+				description.Number, dlit.MustNew(4), dlit.MustNew(90), 0,
 				map[string]description.Value{}, 0},
 			"flow": {
-				fieldtype.Number, dlit.MustNew(50), dlit.MustNew(400), 2,
+				description.Number, dlit.MustNew(50), dlit.MustNew(400), 2,
 				map[string]description.Value{}, 0},
 		}}
 	rulesIn := []Rule{
@@ -106,7 +105,7 @@ func TestTweak_2(t *testing.T) {
 	inputDescription := &description.Description{
 		map[string]*description.Field{
 			"age": {
-				fieldtype.Number, dlit.MustNew(10), dlit.MustNew(80), 0,
+				description.Number, dlit.MustNew(10), dlit.MustNew(80), 0,
 				map[string]description.Value{}, 0,
 			},
 		}}
@@ -188,7 +187,7 @@ func TestTweak_3(t *testing.T) {
 	inputDescription := &description.Description{
 		map[string]*description.Field{
 			"flow": {
-				Kind:      fieldtype.Number,
+				Kind:      description.Number,
 				Min:       dlit.MustNew(10),
 				Max:       dlit.MustNew(80),
 				MaxDP:     6,
@@ -297,7 +296,7 @@ func TestTweak_4(t *testing.T) {
 	inputDescription := &description.Description{
 		map[string]*description.Field{
 			"flow": {
-				fieldtype.Number, dlit.MustNew(4), dlit.MustNew(30), 6,
+				description.Number, dlit.MustNew(4), dlit.MustNew(30), 6,
 				map[string]description.Value{}, 0,
 			},
 		}}
@@ -327,13 +326,13 @@ func TestTweak_5(t *testing.T) {
 	inputDescription := &description.Description{
 		map[string]*description.Field{
 			"band": {
-				fieldtype.Number, dlit.MustNew(3), dlit.MustNew(40), 0,
+				description.Number, dlit.MustNew(3), dlit.MustNew(40), 0,
 				map[string]description.Value{}, 0},
 			"age": {
-				fieldtype.Number, dlit.MustNew(4), dlit.MustNew(30), 0,
+				description.Number, dlit.MustNew(4), dlit.MustNew(30), 0,
 				map[string]description.Value{}, 0},
 			"flow": {
-				fieldtype.Number, dlit.MustNew(50), dlit.MustNew(400), 2,
+				description.Number, dlit.MustNew(50), dlit.MustNew(400), 2,
 				map[string]description.Value{}, 0},
 		}}
 	rulesIn := []Rule{

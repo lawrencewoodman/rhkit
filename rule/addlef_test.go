@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/description"
-	"github.com/vlifesystems/rhkit/internal/fieldtype"
 	"github.com/vlifesystems/rhkit/internal/testhelpers"
 	"reflect"
 	"testing"
@@ -173,12 +172,12 @@ func TestAddLEFTweak(t *testing.T) {
 		{description: &description.Description{
 			map[string]*description.Field{
 				"balance": {
-					Kind: fieldtype.Number,
+					Kind: description.Number,
 					Min:  dlit.MustNew(250),
 					Max:  dlit.MustNew(500),
 				},
 				"income": {
-					Kind: fieldtype.Number,
+					Kind: description.Number,
 					Min:  dlit.MustNew(250),
 					Max:  dlit.MustNew(500),
 				},
@@ -195,12 +194,12 @@ func TestAddLEFTweak(t *testing.T) {
 		{description: &description.Description{
 			map[string]*description.Field{
 				"balance": {
-					Kind: fieldtype.Number,
+					Kind: description.Number,
 					Min:  dlit.MustNew(250),
 					Max:  dlit.MustNew(300),
 				},
 				"income": {
-					Kind: fieldtype.Number,
+					Kind: description.Number,
 					Min:  dlit.MustNew(540),
 					Max:  dlit.MustNew(700),
 				},
@@ -217,12 +216,12 @@ func TestAddLEFTweak(t *testing.T) {
 		{description: &description.Description{
 			map[string]*description.Field{
 				"balance": {
-					Kind: fieldtype.Number,
+					Kind: description.Number,
 					Min:  dlit.MustNew(200),
 					Max:  dlit.MustNew(300),
 				},
 				"income": {
-					Kind: fieldtype.Number,
+					Kind: description.Number,
 					Min:  dlit.MustNew(300),
 					Max:  dlit.MustNew(510),
 				},
@@ -239,12 +238,12 @@ func TestAddLEFTweak(t *testing.T) {
 		{description: &description.Description{
 			map[string]*description.Field{
 				"balance": {
-					Kind: fieldtype.Number,
+					Kind: description.Number,
 					Min:  dlit.MustNew(200),
 					Max:  dlit.MustNew(300),
 				},
 				"income": {
-					Kind: fieldtype.Number,
+					Kind: description.Number,
 					Min:  dlit.MustNew(590),
 					Max:  dlit.MustNew(510),
 				},
@@ -261,13 +260,13 @@ func TestAddLEFTweak(t *testing.T) {
 		{description: &description.Description{
 			map[string]*description.Field{
 				"balance": {
-					Kind:  fieldtype.Number,
+					Kind:  description.Number,
 					Min:   dlit.MustNew(200),
 					Max:   dlit.MustNew(300),
 					MaxDP: 0,
 				},
 				"income": {
-					Kind:  fieldtype.Number,
+					Kind:  description.Number,
 					Min:   dlit.MustNew(597.924),
 					Max:   dlit.MustNew(505),
 					MaxDP: 3,
@@ -285,12 +284,12 @@ func TestAddLEFTweak(t *testing.T) {
 		{description: &description.Description{
 			map[string]*description.Field{
 				"balance": {
-					Kind: fieldtype.Number,
+					Kind: description.Number,
 					Min:  dlit.MustNew(200),
 					Max:  dlit.MustNew(300),
 				},
 				"income": {
-					Kind: fieldtype.Number,
+					Kind: description.Number,
 					Min:  dlit.MustNew(300),
 					Max:  dlit.MustNew(700),
 				},
@@ -349,12 +348,12 @@ func TestGenerateAddLEF(t *testing.T) {
 		{description: &description.Description{
 			map[string]*description.Field{
 				"balance": {
-					Kind: fieldtype.Number,
+					Kind: description.Number,
 					Min:  dlit.MustNew(250),
 					Max:  dlit.MustNew(500),
 				},
 				"income": {
-					Kind: fieldtype.Number,
+					Kind: description.Number,
 					Min:  dlit.MustNew(250),
 					Max:  dlit.MustNew(500),
 				},
@@ -374,12 +373,12 @@ func TestGenerateAddLEF(t *testing.T) {
 		{description: &description.Description{
 			map[string]*description.Field{
 				"balance": {
-					Kind: fieldtype.Number,
+					Kind: description.Number,
 					Min:  dlit.MustNew(250),
 					Max:  dlit.MustNew(300),
 				},
 				"income": {
-					Kind: fieldtype.Number,
+					Kind: description.Number,
 					Min:  dlit.MustNew(540),
 					Max:  dlit.MustNew(700),
 				},
@@ -399,12 +398,12 @@ func TestGenerateAddLEF(t *testing.T) {
 		{description: &description.Description{
 			map[string]*description.Field{
 				"balance": {
-					Kind: fieldtype.Number,
+					Kind: description.Number,
 					Min:  dlit.MustNew(200),
 					Max:  dlit.MustNew(300),
 				},
 				"income": {
-					Kind: fieldtype.Number,
+					Kind: description.Number,
 					Min:  dlit.MustNew(300),
 					Max:  dlit.MustNew(510),
 				},
@@ -424,12 +423,12 @@ func TestGenerateAddLEF(t *testing.T) {
 		{description: &description.Description{
 			map[string]*description.Field{
 				"balance": {
-					Kind: fieldtype.Number,
+					Kind: description.Number,
 					Min:  dlit.MustNew(200),
 					Max:  dlit.MustNew(300),
 				},
 				"income": {
-					Kind: fieldtype.Number,
+					Kind: description.Number,
 					Min:  dlit.MustNew(590),
 					Max:  dlit.MustNew(510),
 				},
@@ -449,13 +448,13 @@ func TestGenerateAddLEF(t *testing.T) {
 		{description: &description.Description{
 			map[string]*description.Field{
 				"balance": {
-					Kind:  fieldtype.Number,
+					Kind:  description.Number,
 					Min:   dlit.MustNew(200),
 					Max:   dlit.MustNew(300),
 					MaxDP: 0,
 				},
 				"income": {
-					Kind:  fieldtype.Number,
+					Kind:  description.Number,
 					Min:   dlit.MustNew(597.924),
 					Max:   dlit.MustNew(505),
 					MaxDP: 3,
@@ -476,12 +475,12 @@ func TestGenerateAddLEF(t *testing.T) {
 		{description: &description.Description{
 			map[string]*description.Field{
 				"balance": {
-					Kind: fieldtype.Number,
+					Kind: description.Number,
 					Min:  dlit.MustNew(200),
 					Max:  dlit.MustNew(200),
 				},
 				"income": {
-					Kind: fieldtype.Number,
+					Kind: description.Number,
 					Min:  dlit.MustNew(200),
 					Max:  dlit.MustNew(205),
 				},
@@ -501,13 +500,13 @@ func TestGenerateAddLEF(t *testing.T) {
 		{description: &description.Description{
 			map[string]*description.Field{
 				"balance": {
-					Kind:  fieldtype.Number,
+					Kind:  description.Number,
 					Min:   dlit.MustNew(200),
 					Max:   dlit.MustNew(300),
 					MaxDP: 0,
 				},
 				"income": {
-					Kind:  fieldtype.Number,
+					Kind:  description.Number,
 					Min:   dlit.MustNew(597.924),
 					Max:   dlit.MustNew(505),
 					MaxDP: 3,
@@ -559,20 +558,20 @@ func TestGenerateAddLEF_multiple_fields(t *testing.T) {
 	description := &description.Description{
 		map[string]*description.Field{
 			"balance": {
-				Kind: fieldtype.Number,
+				Kind: description.Number,
 				Min:  dlit.MustNew(250),
 				Max:  dlit.MustNew(500),
 			},
 			"income": {
-				Kind: fieldtype.Number,
+				Kind: description.Number,
 				Min:  dlit.MustNew(250),
 				Max:  dlit.MustNew(500),
 			},
 			"day": {
-				Kind: fieldtype.String,
+				Kind: description.String,
 			},
 			"reserve": {
-				Kind: fieldtype.Number,
+				Kind: description.Number,
 				Min:  dlit.MustNew(660),
 				Max:  dlit.MustNew(990),
 			},

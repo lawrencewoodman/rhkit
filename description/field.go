@@ -11,12 +11,11 @@ import (
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/internal"
 	"github.com/vlifesystems/rhkit/internal/dexprfuncs"
-	"github.com/vlifesystems/rhkit/internal/fieldtype"
 )
 
 // Field describes a field
 type Field struct {
-	Kind      fieldtype.FieldType
+	Kind      FieldType
 	Min       *dlit.Literal
 	Max       *dlit.Literal
 	MaxDP     int
@@ -43,7 +42,7 @@ func (f *Field) UnmarshalJSON(b []byte) error {
 	for v, n := range fj.Values {
 		values[v] = Value{Value: dlit.NewString(v), Num: n}
 	}
-	f.Kind = fieldtype.New(fj.Kind)
+	f.Kind = NewFieldType(fj.Kind)
 	f.Min = dlit.NewString(fj.Min)
 	f.Max = dlit.NewString(fj.Max)
 	f.MaxDP = fj.MaxDP
@@ -88,26 +87,26 @@ func (f *Field) processValue(value *dlit.Literal) {
 
 func (f *Field) updateKind(value *dlit.Literal) {
 	switch f.Kind {
-	case fieldtype.Unknown:
+	case Unknown:
 		fallthrough
-	case fieldtype.Number:
+	case Number:
 		if _, isInt := value.Int(); isInt {
-			f.Kind = fieldtype.Number
+			f.Kind = Number
 			break
 		}
 		if _, isFloat := value.Float(); isFloat {
-			f.Kind = fieldtype.Number
+			f.Kind = Number
 			break
 		}
-		f.Kind = fieldtype.String
+		f.Kind = String
 	}
 }
 
 func (f *Field) updateValues(value *dlit.Literal) {
 	// Chose 31 so could hold each day in month
 	const maxNumValues = 31
-	if f.Kind == fieldtype.Ignore ||
-		f.Kind == fieldtype.Unknown ||
+	if f.Kind == Ignore ||
+		f.Kind == Unknown ||
 		f.NumValues == -1 {
 		return
 	}
@@ -116,8 +115,8 @@ func (f *Field) updateValues(value *dlit.Literal) {
 		return
 	}
 	if f.NumValues >= maxNumValues {
-		if f.Kind == fieldtype.String {
-			f.Kind = fieldtype.Ignore
+		if f.Kind == String {
+			f.Kind = Ignore
 		}
 		f.Values = map[string]Value{}
 		f.NumValues = -1
@@ -128,7 +127,7 @@ func (f *Field) updateValues(value *dlit.Literal) {
 }
 
 func (f *Field) updateNumBoundaries(value *dlit.Literal) {
-	if f.Kind == fieldtype.Number {
+	if f.Kind == Number {
 		vars := map[string]*dlit.Literal{"min": f.Min, "max": f.Max, "v": value}
 		f.Min = dexpr.Eval("min(min, v)", dexprfuncs.CallFuncs, vars)
 		f.Max = dexpr.Eval("max(max, v)", dexprfuncs.CallFuncs, vars)
@@ -147,7 +146,7 @@ func (f *Field) checkEqual(o *Field) error {
 		return fmt.Errorf("NumValues not equal: %d != %d", f.NumValues, o.NumValues)
 	}
 
-	if f.Kind == fieldtype.Number {
+	if f.Kind == Number {
 		if f.Min.String() != o.Min.String() {
 			return fmt.Errorf("Min not equal: %s != %s", f.Min, o.Min)
 		}

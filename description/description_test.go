@@ -10,7 +10,6 @@ import (
 
 	"github.com/lawrencewoodman/ddataset"
 	"github.com/lawrencewoodman/dlit"
-	"github.com/vlifesystems/rhkit/internal/fieldtype"
 	"github.com/vlifesystems/rhkit/internal/testhelpers"
 )
 
@@ -63,7 +62,7 @@ func TestDescribeDataset(t *testing.T) {
 		[]string{"band", "inputA", "inputB", "version", "flow", "score", "method"}
 	expected := &Description{
 		map[string]*Field{
-			"band": {fieldtype.String, nil, nil, 0,
+			"band": {String, nil, nil, 0,
 				map[string]Value{
 					"a": {dlit.MustNew("a"), 2},
 					"b": {dlit.MustNew("b"), 3},
@@ -100,7 +99,7 @@ func TestDescribeDataset(t *testing.T) {
 				31,
 			},
 			"inputA": {
-				fieldtype.Number,
+				Number,
 				dlit.MustNew(7),
 				dlit.MustNew(15.1),
 				1,
@@ -114,7 +113,7 @@ func TestDescribeDataset(t *testing.T) {
 				5,
 			},
 			"inputB": {
-				fieldtype.Number,
+				Number,
 				dlit.MustNew(2),
 				dlit.MustNew(5),
 				4,
@@ -128,7 +127,7 @@ func TestDescribeDataset(t *testing.T) {
 				},
 				6,
 			},
-			"version": {fieldtype.String, nil, nil, 0,
+			"version": {String, nil, nil, 0,
 				map[string]Value{
 					"9.9":   {dlit.MustNew("9.9"), 7},
 					"9.97":  {dlit.MustNew("9.97"), 7},
@@ -140,13 +139,13 @@ func TestDescribeDataset(t *testing.T) {
 				6,
 			},
 			"flow": {
-				fieldtype.Number,
+				Number,
 				dlit.MustNew(21),
 				dlit.MustNew(87),
 				0,
 				map[string]Value{}, -1},
 			"score": {
-				fieldtype.Number,
+				Number,
 				dlit.MustNew(1),
 				dlit.MustNew(5),
 				0,
@@ -158,7 +157,7 @@ func TestDescribeDataset(t *testing.T) {
 					"5": {dlit.MustNew(5), 8},
 				}, 5,
 			},
-			"method": {fieldtype.Ignore, nil, nil, 0,
+			"method": {Ignore, nil, nil, 0,
 				map[string]Value{}, -1},
 		}}
 	dataset := testhelpers.NewLiteralDataset(fieldNames, flowRecords)
@@ -205,7 +204,7 @@ func TestDescribeDataset_field_errors(t *testing.T) {
 func TestDescriptionMarshalUnmarshalJSON(t *testing.T) {
 	description := &Description{
 		map[string]*Field{
-			"band": {fieldtype.String, nil, nil, 0,
+			"band": {String, nil, nil, 0,
 				map[string]Value{
 					"a": {dlit.MustNew("a"), 2},
 					"b": {dlit.MustNew("b"), 3},
@@ -216,7 +215,7 @@ func TestDescriptionMarshalUnmarshalJSON(t *testing.T) {
 				31,
 			},
 			"inputA": {
-				fieldtype.Number,
+				Number,
 				dlit.MustNew(7),
 				dlit.MustNew(15.1),
 				1,
@@ -230,7 +229,7 @@ func TestDescriptionMarshalUnmarshalJSON(t *testing.T) {
 				5,
 			},
 			"inputB": {
-				fieldtype.Number,
+				Number,
 				dlit.MustNew(2),
 				dlit.MustNew(5),
 				4,
@@ -244,7 +243,7 @@ func TestDescriptionMarshalUnmarshalJSON(t *testing.T) {
 				},
 				6,
 			},
-			"version": {fieldtype.String, nil, nil, 0,
+			"version": {String, nil, nil, 0,
 				map[string]Value{
 					"9.9":   {dlit.MustNew("9.9"), 7},
 					"9.97":  {dlit.MustNew("9.97"), 7},
@@ -256,13 +255,13 @@ func TestDescriptionMarshalUnmarshalJSON(t *testing.T) {
 				6,
 			},
 			"flow": {
-				fieldtype.Number,
+				Number,
 				dlit.MustNew(21),
 				dlit.MustNew(87),
 				0,
 				map[string]Value{}, -1},
 			"score": {
-				fieldtype.Number,
+				Number,
 				dlit.MustNew(1),
 				dlit.MustNew(5),
 				0,
@@ -274,7 +273,7 @@ func TestDescriptionMarshalUnmarshalJSON(t *testing.T) {
 					"5": {dlit.MustNew(5), 8},
 				}, 5,
 			},
-			"method": {fieldtype.Ignore, nil, nil, 0,
+			"method": {Ignore, nil, nil, 0,
 				map[string]Value{}, -1},
 		},
 	}
@@ -295,7 +294,7 @@ func TestDescriptionCheckEqual(t *testing.T) {
 	descriptions := []*Description{
 		{
 			map[string]*Field{
-				"band": {fieldtype.String, nil, nil, 0,
+				"band": {String, nil, nil, 0,
 					map[string]Value{
 						"a": {dlit.MustNew("a"), 2},
 						"b": {dlit.MustNew("b"), 3},
@@ -306,7 +305,7 @@ func TestDescriptionCheckEqual(t *testing.T) {
 					31,
 				},
 				"inputA": {
-					fieldtype.Number,
+					Number,
 					dlit.MustNew(7),
 					dlit.MustNew(15.1),
 					1,
@@ -320,7 +319,7 @@ func TestDescriptionCheckEqual(t *testing.T) {
 					5,
 				},
 				"inputB": {
-					fieldtype.Number,
+					Number,
 					dlit.MustNew(2),
 					dlit.MustNew(5),
 					4,
@@ -338,7 +337,7 @@ func TestDescriptionCheckEqual(t *testing.T) {
 		},
 		{
 			map[string]*Field{
-				"band": {fieldtype.String, nil, nil, 0,
+				"band": {String, nil, nil, 0,
 					map[string]Value{
 						"a": {dlit.MustNew("a"), 2},
 						"b": {dlit.MustNew("b"), 3},
@@ -349,7 +348,7 @@ func TestDescriptionCheckEqual(t *testing.T) {
 					31,
 				},
 				"inputB": {
-					fieldtype.Number,
+					Number,
 					dlit.MustNew(2),
 					dlit.MustNew(5),
 					4,
@@ -367,7 +366,7 @@ func TestDescriptionCheckEqual(t *testing.T) {
 		},
 		{
 			map[string]*Field{
-				"strata": {fieldtype.String, nil, nil, 0,
+				"strata": {String, nil, nil, 0,
 					map[string]Value{
 						"a": {dlit.MustNew("a"), 2},
 						"b": {dlit.MustNew("b"), 3},
@@ -378,7 +377,7 @@ func TestDescriptionCheckEqual(t *testing.T) {
 					31,
 				},
 				"inputA": {
-					fieldtype.Number,
+					Number,
 					dlit.MustNew(7),
 					dlit.MustNew(15.1),
 					1,
@@ -392,7 +391,7 @@ func TestDescriptionCheckEqual(t *testing.T) {
 					5,
 				},
 				"inputB": {
-					fieldtype.Number,
+					Number,
 					dlit.MustNew(2),
 					dlit.MustNew(5),
 					4,
@@ -410,7 +409,7 @@ func TestDescriptionCheckEqual(t *testing.T) {
 		},
 		{
 			map[string]*Field{
-				"band": {fieldtype.String, nil, nil, 0,
+				"band": {String, nil, nil, 0,
 					map[string]Value{
 						"a": {dlit.MustNew("a"), 2},
 						"b": {dlit.MustNew("b"), 3},
@@ -421,7 +420,7 @@ func TestDescriptionCheckEqual(t *testing.T) {
 					31,
 				},
 				"inputA": {
-					fieldtype.Number,
+					Number,
 					dlit.MustNew(6),
 					dlit.MustNew(15.1),
 					1,
@@ -435,7 +434,7 @@ func TestDescriptionCheckEqual(t *testing.T) {
 					5,
 				},
 				"inputB": {
-					fieldtype.Number,
+					Number,
 					dlit.MustNew(2),
 					dlit.MustNew(5),
 					4,
@@ -476,7 +475,7 @@ func TestDescriptionCheckEqual(t *testing.T) {
 func TestDescriptionFieldNames(t *testing.T) {
 	description := &Description{
 		Fields: map[string]*Field{
-			"band": {fieldtype.String, nil, nil, 0,
+			"band": {String, nil, nil, 0,
 				map[string]Value{
 					"a": {dlit.MustNew("a"), 2},
 					"b": {dlit.MustNew("b"), 3},
@@ -487,7 +486,7 @@ func TestDescriptionFieldNames(t *testing.T) {
 				31,
 			},
 			"inputA": {
-				fieldtype.Number,
+				Number,
 				dlit.MustNew(7),
 				dlit.MustNew(15.1),
 				1,
@@ -501,7 +500,7 @@ func TestDescriptionFieldNames(t *testing.T) {
 				5,
 			},
 			"inputB": {
-				fieldtype.Number,
+				Number,
 				dlit.MustNew(2),
 				dlit.MustNew(5),
 				4,
@@ -527,7 +526,7 @@ func TestDescriptionFieldNames(t *testing.T) {
 
 func TestFieldCheckEqual(t *testing.T) {
 	fields := []*Field{
-		{fieldtype.String, nil, nil, 0,
+		{String, nil, nil, 0,
 			map[string]Value{
 				"a": {dlit.MustNew("a"), 2},
 				"b": {dlit.MustNew("b"), 3},
@@ -537,7 +536,7 @@ func TestFieldCheckEqual(t *testing.T) {
 			},
 			31,
 		},
-		{fieldtype.String, nil, nil, 0,
+		{String, nil, nil, 0,
 			map[string]Value{
 				"a": {dlit.MustNew("a"), 2},
 				"b": {dlit.MustNew("b"), 3},
@@ -548,7 +547,7 @@ func TestFieldCheckEqual(t *testing.T) {
 			18,
 		},
 		{
-			fieldtype.Number,
+			Number,
 			dlit.MustNew(2),
 			dlit.MustNew(5),
 			4,
@@ -563,7 +562,7 @@ func TestFieldCheckEqual(t *testing.T) {
 			6,
 		},
 		{
-			fieldtype.Number,
+			Number,
 			dlit.MustNew(7),
 			dlit.MustNew(5),
 			4,
@@ -578,7 +577,7 @@ func TestFieldCheckEqual(t *testing.T) {
 			6,
 		},
 		{
-			fieldtype.Number,
+			Number,
 			dlit.MustNew(2),
 			dlit.MustNew(4),
 			4,
@@ -593,7 +592,7 @@ func TestFieldCheckEqual(t *testing.T) {
 			6,
 		},
 		{
-			fieldtype.Number,
+			Number,
 			dlit.MustNew(2),
 			dlit.MustNew(5),
 			2,
@@ -608,7 +607,7 @@ func TestFieldCheckEqual(t *testing.T) {
 			6,
 		},
 		{
-			fieldtype.Number,
+			Number,
 			dlit.MustNew(7),
 			dlit.MustNew(5),
 			4,
@@ -623,7 +622,7 @@ func TestFieldCheckEqual(t *testing.T) {
 			6,
 		},
 		{
-			fieldtype.Number,
+			Number,
 			dlit.MustNew(7),
 			dlit.MustNew(5),
 			4,
@@ -639,7 +638,7 @@ func TestFieldCheckEqual(t *testing.T) {
 			6,
 		},
 		{
-			fieldtype.Number,
+			Number,
 			dlit.MustNew(7),
 			dlit.MustNew(5),
 			4,
@@ -684,7 +683,7 @@ func TestDescriptionCalcFieldNum(t *testing.T) {
 	description := &Description{
 		map[string]*Field{
 			"inputA": {
-				fieldtype.Number,
+				Number,
 				dlit.MustNew(7),
 				dlit.MustNew(15.1),
 				1,
@@ -697,7 +696,7 @@ func TestDescriptionCalcFieldNum(t *testing.T) {
 				},
 				5,
 			},
-			"band": {fieldtype.String, nil, nil, 0,
+			"band": {String, nil, nil, 0,
 				map[string]Value{
 					"a": {dlit.MustNew("a"), 2},
 					"b": {dlit.MustNew("b"), 3},
@@ -708,7 +707,7 @@ func TestDescriptionCalcFieldNum(t *testing.T) {
 				31,
 			},
 			"inputB": {
-				fieldtype.Number,
+				Number,
 				dlit.MustNew(2),
 				dlit.MustNew(5),
 				4,
@@ -744,7 +743,7 @@ func TestDescriptionCalcFieldNum_panic(t *testing.T) {
 	description := &Description{
 		map[string]*Field{
 			"inputA": {
-				fieldtype.Number,
+				Number,
 				dlit.MustNew(7),
 				dlit.MustNew(15.1),
 				1,

@@ -4,7 +4,6 @@ import (
 	"errors"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/description"
-	"github.com/vlifesystems/rhkit/internal/fieldtype"
 	"github.com/vlifesystems/rhkit/internal/testhelpers"
 	"math"
 	"reflect"
@@ -125,7 +124,7 @@ func TestGenerateEQFV(t *testing.T) {
 	inputDescription := &description.Description{
 		map[string]*description.Field{
 			"band": {
-				Kind: fieldtype.Number,
+				Kind: description.Number,
 				Min:  dlit.MustNew(1),
 				Max:  dlit.MustNew(4),
 				Values: map[string]description.Value{
@@ -136,7 +135,7 @@ func TestGenerateEQFV(t *testing.T) {
 				},
 			},
 			"flow": {
-				Kind:  fieldtype.Number,
+				Kind:  description.Number,
 				Min:   dlit.MustNew(1),
 				Max:   dlit.MustNew(4),
 				MaxDP: 2,
@@ -150,7 +149,7 @@ func TestGenerateEQFV(t *testing.T) {
 				},
 			},
 			"group": {
-				Kind: fieldtype.String,
+				Kind: description.String,
 				Values: map[string]description.Value{
 					"Nelson":      {dlit.NewString("Nelson"), 3},
 					"Collingwood": {dlit.NewString("Collingwood"), 1},
@@ -159,7 +158,7 @@ func TestGenerateEQFV(t *testing.T) {
 				},
 			},
 			"month": {
-				Kind: fieldtype.String,
+				Kind: description.String,
 				Values: map[string]description.Value{
 					"May": {dlit.NewString("May"), 3},
 				},

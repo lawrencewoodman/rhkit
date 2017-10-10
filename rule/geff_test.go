@@ -3,7 +3,6 @@ package rule
 import (
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/description"
-	"github.com/vlifesystems/rhkit/internal/fieldtype"
 	"github.com/vlifesystems/rhkit/internal/testhelpers"
 	"reflect"
 	"testing"
@@ -111,41 +110,41 @@ func TestGenerateGEFF(t *testing.T) {
 	inputDescription := &description.Description{
 		map[string]*description.Field{
 			"band": {
-				Kind:   fieldtype.Number,
+				Kind:   description.Number,
 				Min:    dlit.MustNew(1),
 				Max:    dlit.MustNew(3),
 				Values: map[string]description.Value{},
 			},
 			"flowIn": {
-				Kind:   fieldtype.Number,
+				Kind:   description.Number,
 				Min:    dlit.MustNew(1),
 				Max:    dlit.MustNew(4),
 				MaxDP:  2,
 				Values: map[string]description.Value{},
 			},
 			"flowOut": {
-				Kind:   fieldtype.Number,
+				Kind:   description.Number,
 				Min:    dlit.MustNew(0.95),
 				Max:    dlit.MustNew(4.1),
 				MaxDP:  2,
 				Values: map[string]description.Value{},
 			},
 			"rateIn": {
-				Kind:   fieldtype.Number,
+				Kind:   description.Number,
 				Min:    dlit.MustNew(4.2),
 				Max:    dlit.MustNew(8.9),
 				MaxDP:  2,
 				Values: map[string]description.Value{},
 			},
 			"rateOut": {
-				Kind:   fieldtype.Number,
+				Kind:   description.Number,
 				Min:    dlit.MustNew(0.1),
 				Max:    dlit.MustNew(0.9),
 				MaxDP:  2,
 				Values: map[string]description.Value{},
 			},
 			"group": {
-				Kind: fieldtype.String,
+				Kind: description.String,
 				Values: map[string]description.Value{
 					"Nelson":      {dlit.NewString("Nelson"), 3},
 					"Collingwood": {dlit.NewString("Collingwood"), 1},

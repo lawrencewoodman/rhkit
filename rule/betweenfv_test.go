@@ -6,7 +6,6 @@ import (
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/description"
 	"github.com/vlifesystems/rhkit/internal/dexprfuncs"
-	"github.com/vlifesystems/rhkit/internal/fieldtype"
 	"github.com/vlifesystems/rhkit/internal/testhelpers"
 	"reflect"
 	"testing"
@@ -201,7 +200,7 @@ func TestBetweenFVTweak(t *testing.T) {
 		description := &description.Description{
 			map[string]*description.Field{
 				"income": {
-					Kind:  fieldtype.Number,
+					Kind:  description.Number,
 					Min:   c.fdMin,
 					Max:   c.fdMax,
 					MaxDP: 2,
@@ -302,7 +301,7 @@ func TestGenerateBetweenFV(t *testing.T) {
 		{description: &description.Description{
 			map[string]*description.Field{
 				"income": {
-					Kind:  fieldtype.Number,
+					Kind:  description.Number,
 					Min:   dlit.MustNew(500),
 					Max:   dlit.MustNew(1000),
 					MaxDP: 2,
@@ -320,7 +319,7 @@ func TestGenerateBetweenFV(t *testing.T) {
 		{description: &description.Description{
 			map[string]*description.Field{
 				"income": {
-					Kind:  fieldtype.Number,
+					Kind:  description.Number,
 					Min:   dlit.MustNew(790.73),
 					Max:   dlit.MustNew(1000),
 					MaxDP: 2,
@@ -338,7 +337,7 @@ func TestGenerateBetweenFV(t *testing.T) {
 		{description: &description.Description{
 			map[string]*description.Field{
 				"income": {
-					Kind:  fieldtype.Number,
+					Kind:  description.Number,
 					Min:   dlit.MustNew(799),
 					Max:   dlit.MustNew(801),
 					MaxDP: 0,
@@ -356,13 +355,13 @@ func TestGenerateBetweenFV(t *testing.T) {
 		{description: &description.Description{
 			map[string]*description.Field{
 				"income": {
-					Kind:  fieldtype.Number,
+					Kind:  description.Number,
 					Min:   dlit.MustNew(700),
 					Max:   dlit.MustNew(800),
 					MaxDP: 0,
 				},
 				"month": {
-					Kind: fieldtype.String,
+					Kind: description.String,
 				},
 			},
 		},

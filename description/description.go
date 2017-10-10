@@ -11,7 +11,6 @@ import (
 	"github.com/lawrencewoodman/ddataset"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/internal"
-	"github.com/vlifesystems/rhkit/internal/fieldtype"
 )
 
 // Description describes a Dataset
@@ -112,7 +111,7 @@ func (d *Description) nextRecord(record ddataset.Record) {
 	if len(d.Fields) == 0 {
 		for field, value := range record {
 			d.Fields[field] = &Field{
-				Kind:   fieldtype.Unknown,
+				Kind:   Unknown,
 				Min:    value,
 				Max:    value,
 				Values: map[string]Value{},

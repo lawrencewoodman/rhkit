@@ -6,7 +6,6 @@ import (
 	"github.com/vlifesystems/rhkit/description"
 	"github.com/vlifesystems/rhkit/internal"
 	"github.com/vlifesystems/rhkit/internal/dexprfuncs"
-	"github.com/vlifesystems/rhkit/internal/fieldtype"
 	"github.com/vlifesystems/rhkit/internal/testhelpers"
 	"testing"
 )
@@ -261,7 +260,7 @@ func TestGenerate(t *testing.T) {
 	inputDescription := &description.Description{
 		map[string]*description.Field{
 			"team": {
-				Kind: fieldtype.String,
+				Kind: description.String,
 				Values: map[string]description.Value{
 					"a": {dlit.NewString("a"), 3},
 					"b": {dlit.NewString("b"), 3},
@@ -269,7 +268,7 @@ func TestGenerate(t *testing.T) {
 				},
 			},
 			"teamOut": {
-				Kind: fieldtype.String,
+				Kind: description.String,
 				Values: map[string]description.Value{
 					"a": {dlit.NewString("a"), 3},
 					"c": {dlit.NewString("c"), 1},
@@ -279,7 +278,7 @@ func TestGenerate(t *testing.T) {
 				},
 			},
 			"level": {
-				Kind:  fieldtype.Number,
+				Kind:  description.Number,
 				Min:   dlit.MustNew(0),
 				Max:   dlit.MustNew(5),
 				MaxDP: 0,
@@ -293,7 +292,7 @@ func TestGenerate(t *testing.T) {
 				},
 			},
 			"flow": {
-				Kind:  fieldtype.Number,
+				Kind:  description.Number,
 				Min:   dlit.MustNew(0),
 				Max:   dlit.MustNew(10.5),
 				MaxDP: 2,
@@ -304,7 +303,7 @@ func TestGenerate(t *testing.T) {
 				},
 			},
 			"position": {
-				Kind:  fieldtype.Number,
+				Kind:  description.Number,
 				Min:   dlit.MustNew(1),
 				Max:   dlit.MustNew(13),
 				MaxDP: 0,
@@ -375,14 +374,14 @@ func TestGenerate_combinations(t *testing.T) {
 	inputDescription := &description.Description{
 		map[string]*description.Field{
 			"directionIn": {
-				Kind: fieldtype.String,
+				Kind: description.String,
 				Values: map[string]description.Value{
 					"gogledd": {dlit.MustNew("gogledd"), 3},
 					"de":      {dlit.MustNew("de"), 3},
 				},
 			},
 			"directionOut": {
-				Kind: fieldtype.String,
+				Kind: description.String,
 				Values: map[string]description.Value{
 					"dwyrain":   {dlit.MustNew("dwyrain"), 3},
 					"gorllewin": {dlit.MustNew("gorllewin"), 3},
@@ -458,14 +457,14 @@ func TestGenerate_errors(t *testing.T) {
 	inputDescription := &description.Description{
 		map[string]*description.Field{
 			"directionIn": {
-				Kind: fieldtype.String,
+				Kind: description.String,
 				Values: map[string]description.Value{
 					"gogledd": {dlit.MustNew("gogledd"), 3},
 					"de":      {dlit.MustNew("de"), 3},
 				},
 			},
 			"directionOut": {
-				Kind: fieldtype.String,
+				Kind: description.String,
 				Values: map[string]description.Value{
 					"dwyrain":   {dlit.MustNew("dwyrain"), 3},
 					"gorllewin": {dlit.MustNew("gorllewin"), 3},

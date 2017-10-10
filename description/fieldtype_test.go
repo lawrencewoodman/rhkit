@@ -1,11 +1,11 @@
-package fieldtype
+package description
 
 import (
 	"fmt"
 	"testing"
 )
 
-func TestFieldTypeNew(t *testing.T) {
+func TestNewFieldType(t *testing.T) {
 	cases := []struct {
 		in   string
 		want FieldType
@@ -17,14 +17,14 @@ func TestFieldTypeNew(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		got := New(c.in)
+		got := NewFieldType(c.in)
 		if got != c.want {
 			t.Errorf("New: got: %s, want: %s", got, c.want)
 		}
 	}
 }
 
-func TestFieldTypeNew_panic(t *testing.T) {
+func TestNewFieldType_panic(t *testing.T) {
 	kind := "invalid"
 	paniced := false
 	wantPanic := fmt.Sprintf("unsupported type: %s", kind)
@@ -37,7 +37,7 @@ func TestFieldTypeNew_panic(t *testing.T) {
 			}
 		}
 	}()
-	got := New(kind)
+	got := NewFieldType(kind)
 	if !paniced {
 		t.Errorf("New: got: %s, failed to panic with: %s", got, wantPanic)
 	}
