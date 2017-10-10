@@ -1,19 +1,17 @@
 package description
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"reflect"
+	"sort"
+	"testing"
+
 	"github.com/lawrencewoodman/ddataset"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/internal/fieldtype"
 	"github.com/vlifesystems/rhkit/internal/testhelpers"
-	"io/ioutil"
-	"os"
-	"path/filepath"
-	"reflect"
-	"sort"
-	"syscall"
-	"testing"
 )
 
 var flowRecords = [][]string{
@@ -204,7 +202,7 @@ func TestDescribeDataset_field_errors(t *testing.T) {
 	}
 }
 
-func TestDescriptionWriteLoadJSON(t *testing.T) {
+func TestDescriptionMarshalUnmarshalJSON(t *testing.T) {
 	description := &Description{
 		map[string]*Field{
 			"band": {fieldtype.String, nil, nil, 0,
@@ -280,48 +278,16 @@ func TestDescriptionWriteLoadJSON(t *testing.T) {
 				map[string]Value{}, -1},
 		},
 	}
-	tempDir, err := ioutil.TempDir("", "rulehunter_test")
+	b, err := json.Marshal(description)
 	if err != nil {
-		t.Fatalf("TempDir() err: %s", err)
+		t.Fatalf("Marshal: %s", err)
 	}
-	defer os.RemoveAll(tempDir)
-	filename := filepath.Join(tempDir, "fd.json")
-	if err := description.WriteJSON(filename); err != nil {
-		t.Fatalf("WriteJSON: %s", err)
-	}
-	got, err := LoadJSON(filename)
-	if err != nil {
-		t.Fatalf("LoadJSON: %s", err)
+	var got Description
+	if err := json.Unmarshal(b, &got); err != nil {
+		t.Fatalf("Unmarshal: %s", err)
 	}
 	if err := got.CheckEqual(description); err != nil {
-		t.Errorf("LoadJSON got not expected: %s", err)
-	}
-}
-
-func TestDescriptionLoadJSON_errors(t *testing.T) {
-	cases := []struct {
-		filename string
-		wantErr  error
-	}{
-		{filename: filepath.Join("fixtures", "nonexistant.json"),
-			wantErr: &os.PathError{
-				Op:   "open",
-				Path: filepath.Join("fixtures", "nonexistant.json"),
-				Err:  syscall.ENOENT,
-			},
-		},
-		{filename: filepath.Join("fixtures", "broken.json"),
-			wantErr: errors.New("unexpected EOF"),
-		},
-	}
-	for i, c := range cases {
-		_, err := LoadJSON(c.filename)
-		testhelpers.CheckErrorMatch(
-			t,
-			fmt.Sprintf("(%d) LoadJSON:", i),
-			err,
-			c.wantErr,
-		)
+		t.Errorf("Unmarshal got not expected: %s", err)
 	}
 }
 
