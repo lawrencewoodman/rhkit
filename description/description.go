@@ -83,10 +83,10 @@ func LoadJSON(filename string) (*Description, error) {
 	fields := make(map[string]*Field, len(dj.Fields))
 	for field, fd := range dj.Fields {
 		values := make(map[string]Value, len(fd.Values))
-		for v, vd := range fd.Values {
+		for v, num := range fd.Values {
 			values[v] = Value{
-				Value: dlit.NewString(vd.Value),
-				Num:   vd.Num,
+				Value: dlit.NewString(v),
+				Num:   num,
 			}
 		}
 		fields[field] = &Field{
@@ -181,22 +181,14 @@ type fieldJ struct {
 	Min       string
 	Max       string
 	MaxDP     int
-	Values    map[string]valueJ
+	Values    map[string]int
 	NumValues int
 }
 
-type valueJ struct {
-	Value string
-	Num   int
-}
-
 func newFieldJ(fd *Field) *fieldJ {
-	values := make(map[string]valueJ, len(fd.Values))
+	values := make(map[string]int, len(fd.Values))
 	for v, vd := range fd.Values {
-		values[v] = valueJ{
-			Value: vd.Value.String(),
-			Num:   vd.Num,
-		}
+		values[v] = vd.Num
 	}
 	min := ""
 	max := ""
