@@ -583,204 +583,98 @@ func TestGenerateInFV_num_fields(t *testing.T) {
 	}
 }
 
-func TestMakeCompareValues(t *testing.T) {
-	values1 := map[string]description.Value{
-		"a": {dlit.MustNew("a"), 2},
-		"c": {dlit.MustNew("c"), 2},
-		"d": {dlit.MustNew("d"), 2},
-		"e": {dlit.MustNew("e"), 2},
-		"f": {dlit.MustNew("f"), 2},
-	}
-	values2 := map[string]description.Value{
-		"a": {dlit.MustNew("a"), 2},
-		"c": {dlit.MustNew("c"), 1},
-		"d": {dlit.MustNew("d"), 2},
-		"e": {dlit.MustNew("e"), 2},
-		"f": {dlit.MustNew("f"), 2},
-	}
+func TestCombinations(t *testing.T) {
 	cases := []struct {
-		values map[string]description.Value
-		i      int
-		want   []*dlit.Literal
+		values []*dlit.Literal
+		min    int
+		max    int
+		want   [][]*dlit.Literal
 	}{
-		{
-			values: values1,
-			i:      2,
-			want:   []*dlit.Literal{dlit.NewString("c")},
+		{values: []*dlit.Literal{
+			dlit.NewString("a"),
 		},
-		{
-			values: values2,
-			i:      2,
-			want:   []*dlit.Literal{},
+			min:  2,
+			max:  3,
+			want: [][]*dlit.Literal{},
 		},
-		{
-			values: values1,
-			i:      3,
-			want:   []*dlit.Literal{dlit.NewString("a"), dlit.NewString("c")},
+		{values: []*dlit.Literal{
+			dlit.NewString("a"),
+			dlit.NewString("c"),
 		},
-		{
-			values: values2,
-			i:      3,
-			want:   []*dlit.Literal{},
-		},
-		{
-			values: values1,
-			i:      4,
-			want:   []*dlit.Literal{dlit.NewString("d")},
-		},
-		{
-			values: values2,
-			i:      4,
-			want:   []*dlit.Literal{dlit.NewString("d")},
-		},
-		{
-			values: values1,
-			i:      5,
-			want:   []*dlit.Literal{dlit.NewString("a"), dlit.NewString("d")},
-		},
-		{
-			values: values2,
-			i:      5,
-			want:   []*dlit.Literal{dlit.NewString("a"), dlit.NewString("d")},
-		},
-		{
-			values: values1,
-			i:      6,
-			want:   []*dlit.Literal{dlit.NewString("c"), dlit.NewString("d")},
-		},
-		{
-			values: values2,
-			i:      6,
-			want:   []*dlit.Literal{},
-		},
-		{
-			values: values1,
-			i:      7,
-			want: []*dlit.Literal{
-				dlit.NewString("a"),
-				dlit.NewString("c"),
-				dlit.NewString("d"),
+			min: 2,
+			max: 3,
+			want: [][]*dlit.Literal{
+				[]*dlit.Literal{dlit.NewString("a"), dlit.NewString("c")},
 			},
 		},
-		{
-			values: values2,
-			i:      7,
-			want:   []*dlit.Literal{},
+		{values: []*dlit.Literal{
+			dlit.NewString("a"),
+			dlit.NewString("b"),
+			dlit.NewString("c"),
 		},
-		{
-			values: values1,
-			i:      8,
-			want:   []*dlit.Literal{dlit.NewString("e")},
-		},
-		{
-			values: values2,
-			i:      8,
-			want:   []*dlit.Literal{dlit.NewString("e")},
-		},
-		{
-			values: values1,
-			i:      9,
-			want:   []*dlit.Literal{dlit.NewString("a"), dlit.NewString("e")},
-		},
-		{
-			values: values2,
-			i:      9,
-			want:   []*dlit.Literal{dlit.NewString("a"), dlit.NewString("e")},
-		},
-		{
-			values: values1,
-			i:      10,
-			want:   []*dlit.Literal{dlit.NewString("c"), dlit.NewString("e")},
-		},
-		{
-			values: values2,
-			i:      10,
-			want:   []*dlit.Literal{},
-		},
-		{
-			values: values1,
-			i:      11,
-			want: []*dlit.Literal{
-				dlit.NewString("a"),
-				dlit.NewString("c"),
-				dlit.NewString("e"),
+			min: 2,
+			max: 2,
+			want: [][]*dlit.Literal{
+				[]*dlit.Literal{dlit.NewString("b"), dlit.NewString("c")},
+				[]*dlit.Literal{dlit.NewString("a"), dlit.NewString("c")},
+				[]*dlit.Literal{dlit.NewString("a"), dlit.NewString("b")},
 			},
 		},
-		{
-			values: values2,
-			i:      11,
-			want:   []*dlit.Literal{},
+		{values: []*dlit.Literal{
+			dlit.NewString("a"),
+			dlit.NewString("b"),
+			dlit.NewString("c"),
 		},
-		{
-			values: values1,
-			i:      12,
-			want:   []*dlit.Literal{dlit.NewString("d"), dlit.NewString("e")},
-		},
-		{
-			values: values2,
-			i:      12,
-			want:   []*dlit.Literal{dlit.NewString("d"), dlit.NewString("e")},
-		},
-		{
-			values: values1,
-			i:      13,
-			want: []*dlit.Literal{
-				dlit.NewString("a"),
-				dlit.NewString("d"),
-				dlit.NewString("e"),
+			min: 2,
+			max: 3,
+			want: [][]*dlit.Literal{
+				[]*dlit.Literal{dlit.NewString("b"), dlit.NewString("c")},
+				[]*dlit.Literal{dlit.NewString("a"), dlit.NewString("c")},
+				[]*dlit.Literal{dlit.NewString("a"), dlit.NewString("b")},
+				[]*dlit.Literal{
+					dlit.NewString("a"),
+					dlit.NewString("b"),
+					dlit.NewString("c"),
+				},
 			},
 		},
-		{
-			values: values1,
-			i:      14,
-			want: []*dlit.Literal{
-				dlit.NewString("c"),
-				dlit.NewString("d"),
-				dlit.NewString("e"),
+		{values: []*dlit.Literal{
+			dlit.NewString("a"),
+			dlit.NewString("b"),
+			dlit.NewString("c"),
+		},
+			min: 2,
+			max: 4,
+			want: [][]*dlit.Literal{
+				[]*dlit.Literal{dlit.NewString("b"), dlit.NewString("c")},
+				[]*dlit.Literal{dlit.NewString("a"), dlit.NewString("c")},
+				[]*dlit.Literal{dlit.NewString("a"), dlit.NewString("b")},
+				[]*dlit.Literal{
+					dlit.NewString("a"),
+					dlit.NewString("b"),
+					dlit.NewString("c"),
+				},
 			},
-		},
-		{
-			values: values1,
-			i:      15,
-			want: []*dlit.Literal{
-				dlit.NewString("a"),
-				dlit.NewString("c"),
-				dlit.NewString("d"),
-				dlit.NewString("e"),
-			},
-		},
-		{
-			values: values1,
-			i:      16,
-			want:   []*dlit.Literal{dlit.NewString("f")},
-		},
-		{
-			values: values2,
-			i:      16,
-			want:   []*dlit.Literal{dlit.NewString("f")},
-		},
-		{
-			values: values1,
-			i:      17,
-			want:   []*dlit.Literal{dlit.NewString("a"), dlit.NewString("f")},
-		},
-		{
-			values: values2,
-			i:      17,
-			want:   []*dlit.Literal{dlit.NewString("a"), dlit.NewString("f")},
 		},
 	}
 	for _, c := range cases {
-		got := makeCompareValues(c.values, c.i)
+		got := combinations(c.values, c.min, c.max)
 		if len(got) != len(c.want) {
-			t.Errorf("makeCompareValues(%v, %d) got: %v, want: %v",
-				c.values, c.i, got, c.want)
+			t.Errorf("makeCompareValues(%v, %d, %d) got: %v, want: %v",
+				c.values, c.min, c.max, got, c.want)
+			continue
 		}
-		for j, v := range got {
-			o := c.want[j]
-			if o.String() != v.String() {
-				t.Errorf("makeCompareValues(%v, %d) got: %v, want: %v",
-					c.values, c.i, got, c.want)
+		for i, subset := range got {
+			if len(subset) != len(c.want[i]) {
+				t.Errorf("makeCompareValues(%v, %d, %d) got: %v, want: %v",
+					c.values, c.min, c.max, got, c.want)
+				continue
+			}
+			for j, v := range subset {
+				if v.String() != c.want[i][j].String() {
+					t.Errorf("makeCompareValues(%v, %d, %d) got: %v, want: %v",
+						c.values, c.min, c.max, got, c.want)
+				}
 			}
 		}
 	}
