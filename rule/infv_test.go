@@ -583,7 +583,7 @@ func TestGenerateInFV_num_fields(t *testing.T) {
 	}
 }
 
-func TestCombinations(t *testing.T) {
+func TestLiteralCombinations(t *testing.T) {
 	cases := []struct {
 		values []*dlit.Literal
 		min    int
@@ -658,21 +658,21 @@ func TestCombinations(t *testing.T) {
 		},
 	}
 	for _, c := range cases {
-		got := combinations(c.values, c.min, c.max)
+		got := literalCombinations(c.values, c.min, c.max)
 		if len(got) != len(c.want) {
-			t.Errorf("makeCompareValues(%v, %d, %d) got: %v, want: %v",
+			t.Errorf("literalCombinations(%v, %d, %d) got: %v, want: %v",
 				c.values, c.min, c.max, got, c.want)
 			continue
 		}
 		for i, subset := range got {
 			if len(subset) != len(c.want[i]) {
-				t.Errorf("makeCompareValues(%v, %d, %d) got: %v, want: %v",
+				t.Errorf("literalCombinations(%v, %d, %d) got: %v, want: %v",
 					c.values, c.min, c.max, got, c.want)
 				continue
 			}
 			for j, v := range subset {
 				if v.String() != c.want[i][j].String() {
-					t.Errorf("makeCompareValues(%v, %d, %d) got: %v, want: %v",
+					t.Errorf("literalCombinations(%v, %d, %d) got: %v, want: %v",
 						c.values, c.min, c.max, got, c.want)
 				}
 			}

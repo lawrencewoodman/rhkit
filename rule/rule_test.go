@@ -1,13 +1,14 @@
 package rule
 
 import (
+	"testing"
+
 	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/description"
 	"github.com/vlifesystems/rhkit/internal"
 	"github.com/vlifesystems/rhkit/internal/dexprfuncs"
 	"github.com/vlifesystems/rhkit/internal/testhelpers"
-	"testing"
 )
 
 func TestSort(t *testing.T) {
@@ -360,6 +361,143 @@ func TestGenerate(t *testing.T) {
 	generationDesc := testhelpers.GenerationDesc{
 		DFields:     []string{"team", "teamOut", "level", "flow", "position"},
 		DArithmetic: true,
+	}
+	got, err := Generate(inputDescription, generationDesc)
+	if err != nil {
+		t.Fatalf("Generate: %s", err)
+	}
+	if err := rulesContain(got, wantRules); err != nil {
+		t.Errorf("Generate: %s", err)
+	}
+}
+
+func TestGenerate_counteqfv(t *testing.T) {
+	inputDescription := &description.Description{
+		map[string]*description.Field{
+			"teamA": {
+				Kind: description.String,
+				Values: map[string]description.Value{
+					"a": {dlit.NewString("a"), 3},
+					"b": {dlit.NewString("b"), 3},
+					"c": {dlit.NewString("c"), 3},
+				},
+				NumValues: 3,
+			},
+			"teamB": {
+				Kind: description.String,
+				Values: map[string]description.Value{
+					"a": {dlit.NewString("a"), 3},
+					"c": {dlit.NewString("c"), 1},
+					"d": {dlit.NewString("d"), 3},
+					"e": {dlit.NewString("e"), 3},
+				},
+				NumValues: 4,
+			},
+			"teamC": {
+				Kind: description.String,
+				Values: map[string]description.Value{
+					"z": {dlit.NewString("a"), 3},
+					"y": {dlit.NewString("c"), 1},
+					"c": {dlit.NewString("d"), 3},
+					"x": {dlit.NewString("e"), 3},
+				},
+				NumValues: 4,
+			},
+			"teamD": {
+				Kind: description.String,
+				Values: map[string]description.Value{
+					"a": {dlit.NewString("a"), 3},
+					"b": {dlit.NewString("c"), 1},
+					"c": {dlit.NewString("d"), 3},
+					"d": {dlit.NewString("e"), 3},
+					"e": {dlit.NewString("e"), 3},
+				},
+				NumValues: 5,
+			},
+			"teamZ": {
+				Kind: description.String,
+				Values: map[string]description.Value{
+					"a": {dlit.NewString("a"), 3},
+					"b": {dlit.NewString("c"), 1},
+					"c": {dlit.NewString("d"), 3},
+					"d": {dlit.NewString("e"), 3},
+				},
+				NumValues: 4,
+			},
+		},
+	}
+
+	wantRules := []Rule{
+		NewTrue(),
+		NewCountEQVF(
+			dlit.NewString("a"),
+			[]string{"teamA", "teamB"},
+			int64(0),
+		),
+		NewCountEQVF(
+			dlit.NewString("a"),
+			[]string{"teamA", "teamB"},
+			int64(1),
+		),
+		NewCountEQVF(
+			dlit.NewString("a"),
+			[]string{"teamA", "teamB"},
+			int64(2),
+		),
+		NewCountEQVF(
+			dlit.NewString("a"),
+			[]string{"teamA", "teamB", "teamC"},
+			int64(0),
+		),
+		NewCountEQVF(
+			dlit.NewString("a"),
+			[]string{"teamA", "teamB", "teamC"},
+			int64(1),
+		),
+		NewCountEQVF(
+			dlit.NewString("a"),
+			[]string{"teamA", "teamB", "teamC"},
+			int64(2),
+		),
+		NewCountEQVF(
+			dlit.NewString("a"),
+			[]string{"teamA", "teamB", "teamC"},
+			int64(3),
+		),
+		NewCountEQVF(
+			dlit.NewString("a"),
+			[]string{"teamA", "teamC"},
+			int64(0),
+		),
+		NewCountEQVF(
+			dlit.NewString("a"),
+			[]string{"teamA", "teamC"},
+			int64(1),
+		),
+		NewCountEQVF(
+			dlit.NewString("a"),
+			[]string{"teamA", "teamC"},
+			int64(2),
+		),
+		NewCountEQVF(
+			dlit.NewString("c"),
+			[]string{"teamA", "teamC"},
+			int64(1),
+		),
+		NewCountEQVF(
+			dlit.NewString("c"),
+			[]string{"teamA", "teamC"},
+			int64(1),
+		),
+		NewCountEQVF(
+			dlit.NewString("c"),
+			[]string{"teamA", "teamC"},
+			int64(2),
+		),
+	}
+	generationDesc := testhelpers.GenerationDesc{
+		DFields:     []string{"teamA", "teamB", "teamC", "teamD"},
+		DArithmetic: false,
 	}
 	got, err := Generate(inputDescription, generationDesc)
 	if err != nil {
