@@ -39,6 +39,10 @@ func (l *LiteralDataset) Open() (ddataset.Conn, error) {
 	}, nil
 }
 
+func (l *LiteralDataset) Release() error {
+	return nil
+}
+
 func (l *LiteralDataset) Fields() []string {
 	return l.fieldNames
 }

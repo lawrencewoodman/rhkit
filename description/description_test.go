@@ -829,6 +829,10 @@ func (l *FailingDataset) Open() (ddataset.Conn, error) {
 	}, nil
 }
 
+func (l *FailingDataset) Release() error {
+	return nil
+}
+
 func (l *FailingDataset) Fields() []string {
 	return l.dataset.Fields()
 }
