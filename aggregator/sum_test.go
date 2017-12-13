@@ -58,7 +58,7 @@ func TestSumResult(t *testing.T) {
 	got := profit.Result(instances, goals, numRecords)
 	gotFloat, gotIsFloat := got.Float()
 	if !gotIsFloat || gotFloat != want {
-		t.Errorf("Result() got: %f, want: %f", got, want)
+		t.Errorf("Result() got: %s, want: %f", got, want)
 	}
 }
 

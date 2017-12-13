@@ -26,7 +26,7 @@ func TestGEFVValue(t *testing.T) {
 	r := NewGEFV(field, value)
 	got := r.Value()
 	if got.String() != "8.93" {
-		t.Errorf("Value() got: %s, want: %f", got, value)
+		t.Errorf("Value() got: %s, want: %s", got, value)
 	}
 }
 

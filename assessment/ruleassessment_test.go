@@ -100,7 +100,7 @@ func TestNextRecord(t *testing.T) {
 		}
 		if gotGoalsScoreFloat != c.wantGoalsScore {
 			t.Errorf("nextRecord() rule: %s, aggregators: %v, goals: %v - wantGoalsScore: %f, got: %f",
-				c.rule, inAggregators, goals, c.wantGoalsScore, gotGoalsScore)
+				c.rule, inAggregators, goals, c.wantGoalsScore, gotGoalsScoreFloat)
 		}
 	}
 }
