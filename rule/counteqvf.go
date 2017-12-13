@@ -38,7 +38,7 @@ func (r *CountEQVF) Fields() []string {
 }
 
 func (r *CountEQVF) IsTrue(record ddataset.Record) (bool, error) {
-	n := 0
+	n := int64(0)
 	for _, f := range r.fields {
 		fieldValue, ok := record[f]
 		if !ok {
@@ -51,8 +51,7 @@ func (r *CountEQVF) IsTrue(record ddataset.Record) (bool, error) {
 			n++
 		}
 	}
-	n++
-	return false, nil
+	return n == r.num, nil
 }
 
 // TODO: work out if any value in this
