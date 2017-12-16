@@ -54,28 +54,6 @@ func (r *CountEQVF) IsTrue(record ddataset.Record) (bool, error) {
 	return n == r.num, nil
 }
 
-// TODO: work out if any value in this
-/*
-func (r *CountEQVF) Overlaps(o Rule) bool {
-	switch x := o.(type) {
-	case *CountEQVF:
-		oValues := x.Values()
-		oField := x.Fields()[0]
-		if r.field != oField {
-			return false
-		}
-		for _, v := range r.values {
-			for _, oV := range oValues {
-				if v.String() == oV.String() {
-					return true
-				}
-			}
-		}
-	}
-	return false
-}
-*/
-
 func generateCountEQVF(
 	inputDescription *description.Description,
 	generationDesc GenerationDescriber,
@@ -93,14 +71,16 @@ func generateCountEQVF(
 	allValuesMap := map[string]bool{}
 	for _, f := range validFields {
 		for _, v := range inputDescription.Fields[f].Values {
-			if _, ok := allValuesMap[v.Value.String()]; !ok {
-				allValues = append(allValues, v.Value)
-				allValuesMap[v.Value.String()] = true
+			if v.Num >= 2 {
+				if _, ok := allValuesMap[v.Value.String()]; !ok {
+					allValues = append(allValues, v.Value)
+					allValuesMap[v.Value.String()] = true
+				}
 			}
 		}
 	}
 
-	valueInField := func(field string, v *dlit.Literal) bool {
+	isValueInField := func(v *dlit.Literal, field string) bool {
 		for _, fv := range inputDescription.Fields[field].Values {
 			if fv.Value.String() == v.String() {
 				return true
@@ -109,11 +89,20 @@ func generateCountEQVF(
 		return false
 	}
 
+	isValueInAllFields := func(v *dlit.Literal, fields []string) bool {
+		for _, f := range fields {
+			if !isValueInField(v, f) {
+				return false
+			}
+		}
+		return true
+	}
+
 	possibleValues := []*dlit.Literal{}
 	for _, v := range allValues {
 		presentInNumFields := 0
 		for _, f := range validFields {
-			if valueInField(f, v) {
+			if isValueInField(v, f) {
 				presentInNumFields++
 			}
 		}
@@ -126,21 +115,26 @@ func generateCountEQVF(
 	possibleFieldsMap := map[string]bool{}
 	for _, v := range possibleValues {
 		for _, f := range validFields {
-			if _, ok := possibleFieldsMap[f]; !ok && valueInField(f, v) {
+			if _, ok := possibleFieldsMap[f]; !ok && isValueInField(v, f) {
 				possibleFields = append(possibleFields, f)
 				possibleFieldsMap[f] = true
 			}
 		}
 	}
 
-	// TODO: put a return empty rules here if going to generate too many rules
+	if len(possibleFields) < 2 {
+		return []Rule{}
+	}
 
 	rules := make([]Rule, 0)
+	maxNumFields := 40.0 / len(possibleFields)
 	for _, v := range possibleValues {
-		for _, fields := range stringCombinations(possibleFields, 2, 12) {
-			for n := int64(0); n <= int64(len(fields)); n++ {
-				r := NewCountEQVF(v, fields, n)
-				rules = append(rules, r)
+		for _, fields := range stringCombinations(possibleFields, 2, maxNumFields) {
+			if isValueInAllFields(v, fields) {
+				for n := int64(0); n <= int64(len(fields)); n++ {
+					r := NewCountEQVF(v, fields, n)
+					rules = append(rules, r)
+				}
 			}
 		}
 	}

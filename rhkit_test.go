@@ -91,8 +91,8 @@ func TestProcess(t *testing.T) {
 			wantMaxNumRules: 500,
 		},
 		{opts: Options{MaxNumRules: 3000, RuleFields: ruleFields},
-			wantMinNumRules: 1000,
-			wantMaxNumRules: 1050,
+			wantMinNumRules: 1400,
+			wantMaxNumRules: 1500,
 		},
 		{opts: Options{
 			MaxNumRules:             3000,
