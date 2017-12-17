@@ -58,13 +58,7 @@ type Valuer interface {
 	Value() *dlit.Literal
 }
 
-type Complexity struct {
-	Arithmetic bool
-}
-
 // Generate generates rules for rules that have registered a generator.
-// complexity is used to indicate how complex rules should be and therefore
-// has an impact on how many rules are generated.
 func Generate(
 	inputDescription *description.Description,
 	generationDesc GenerationDescriber,
