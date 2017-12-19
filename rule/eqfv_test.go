@@ -165,44 +165,24 @@ func TestGenerateEQFV(t *testing.T) {
 			},
 		},
 	}
-	cases := []struct {
-		field string
-		want  []Rule
-	}{
-		{field: "band",
-			want: []Rule{
-				NewEQFV("band", dlit.MustNew(1)),
-				NewEQFV("band", dlit.MustNew(3)),
-				NewEQFV("band", dlit.MustNew(4)),
-			},
-		},
-		{field: "flow",
-			want: []Rule{
-				NewEQFV("flow", dlit.MustNew(1)),
-				NewEQFV("flow", dlit.MustNew(3.37)),
-				NewEQFV("flow", dlit.MustNew(3.3)),
-				NewEQFV("flow", dlit.MustNew(4)),
-			},
-		},
-		{field: "group",
-			want: []Rule{
-				NewEQFV("group", dlit.MustNew("Nelson")),
-				NewEQFV("group", dlit.MustNew("Drake")),
-			},
-		},
-		{field: "month",
-			want: []Rule{},
-		},
+	want := []Rule{
+		NewEQFV("band", dlit.MustNew(1)),
+		NewEQFV("band", dlit.MustNew(3)),
+		NewEQFV("band", dlit.MustNew(4)),
+		NewEQFV("flow", dlit.MustNew(1)),
+		NewEQFV("flow", dlit.MustNew(3.37)),
+		NewEQFV("flow", dlit.MustNew(3.3)),
+		NewEQFV("flow", dlit.MustNew(4)),
+		NewEQFV("group", dlit.MustNew("Nelson")),
+		NewEQFV("group", dlit.MustNew("Drake")),
 	}
 	generationDesc := testhelpers.GenerationDesc{
 		DFields:     []string{"band", "flow", "group", "month"},
 		DArithmetic: false,
 	}
-	for _, c := range cases {
-		got := generateEQFV(inputDescription, generationDesc, c.field)
-		if err := matchRulesUnordered(got, c.want); err != nil {
-			t.Errorf("matchRulesUnordered() rules don't match: %s\ngot: %s\nwant: %s\n",
-				err, got, c.want)
-		}
+	got := generateEQFV(inputDescription, generationDesc)
+	if err := matchRulesUnordered(got, want); err != nil {
+		t.Errorf("matchRulesUnordered() rules don't match: %s\ngot: %s\nwant: %s\n",
+			err, got, want)
 	}
 }

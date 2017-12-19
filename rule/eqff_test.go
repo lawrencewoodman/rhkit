@@ -199,44 +199,15 @@ func TestGenerateEQFF(t *testing.T) {
 			},
 		},
 	}
-	cases := []struct {
-		field string
-		want  []Rule
-	}{
-		{field: "bandA",
-			want: []Rule{},
-		},
-		{field: "groupA",
-			want: []Rule{
-				NewEQFF("groupA", "groupB"),
-				NewEQFF("groupA", "groupC"),
-				NewEQFF("groupA", "groupF"),
-			},
-		},
-		{field: "groupB",
-			want: []Rule{
-				NewEQFF("groupB", "groupC"),
-				NewEQFF("groupB", "groupF"),
-			},
-		},
-		{field: "groupC",
-			want: []Rule{
-				NewEQFF("groupC", "groupF"),
-			},
-		},
-		{field: "groupD",
-			want: []Rule{},
-		},
-		{field: "groupE",
-			want: []Rule{
-				NewEQFF("groupE", "groupF"),
-			},
-		},
-		{field: "bandB",
-			want: []Rule{
-				NewEQFF("bandB", "bandD"),
-			},
-		},
+	want := []Rule{
+		NewEQFF("groupA", "groupB"),
+		NewEQFF("groupA", "groupC"),
+		NewEQFF("groupA", "groupF"),
+		NewEQFF("groupB", "groupC"),
+		NewEQFF("groupB", "groupF"),
+		NewEQFF("groupC", "groupF"),
+		NewEQFF("groupE", "groupF"),
+		NewEQFF("bandB", "bandD"),
 	}
 	generationDesc := testhelpers.GenerationDesc{
 		DFields: []string{
@@ -245,11 +216,9 @@ func TestGenerateEQFF(t *testing.T) {
 		},
 		DArithmetic: false,
 	}
-	for _, c := range cases {
-		got := generateEQFF(inputDescription, generationDesc, c.field)
-		if err := matchRulesUnordered(got, c.want); err != nil {
-			t.Errorf("matchRulesUnordered() rules don't match: %s\ngot: %s\nwant: %s\n",
-				err, got, c.want)
-		}
+	got := generateEQFF(inputDescription, generationDesc)
+	if err := matchRulesUnordered(got, want); err != nil {
+		t.Errorf("matchRulesUnordered() rules don't match: %s\ngot: %s\nwant: %s\n",
+			err, got, want)
 	}
 }

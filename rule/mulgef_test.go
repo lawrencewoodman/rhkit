@@ -313,7 +313,6 @@ func TestMulGEFTweak(t *testing.T) {
 }
 
 func TestGenerateMulGEF(t *testing.T) {
-	fieldA := "balance"
 	ruleFields := []string{"balance", "income"}
 	cases := []struct {
 		description    *description.Description
@@ -514,7 +513,7 @@ func TestGenerateMulGEF(t *testing.T) {
 		return nil
 	}
 	for i, c := range cases {
-		got := generateMulGEF(c.description, c.generationDesc, fieldA)
+		got := generateMulGEF(c.description, c.generationDesc)
 		err := checkRulesComply(
 			got,
 			c.minNumRules,
@@ -532,7 +531,6 @@ func TestGenerateMulGEF(t *testing.T) {
 }
 
 func TestGenerateMulGEF_multiple_fields(t *testing.T) {
-	fieldA := "balance"
 	description := &description.Description{
 		map[string]*description.Field{
 			"balance": {
@@ -560,7 +558,7 @@ func TestGenerateMulGEF_multiple_fields(t *testing.T) {
 		DFields:     []string{"balance", "income", "reserve"},
 		DArithmetic: true,
 	}
-	got := generateMulGEF(description, generationDesc, fieldA)
+	got := generateMulGEF(description, generationDesc)
 
 	numIncome := 0
 	numReserve := 0
@@ -569,15 +567,14 @@ func TestGenerateMulGEF_multiple_fields(t *testing.T) {
 		if !ok {
 			t.Errorf("wrong type: %T (%s)", r, r)
 		}
-		if x.fieldA != "balance" {
-			t.Errorf("fields aren't correct for rule: %s", r)
-		}
-		if x.fieldB == "income" {
-			numIncome++
-		} else if x.fieldB == "reserve" {
-			numReserve++
-		} else {
-			t.Errorf("fields aren't correct for rule: %s", r)
+		if x.fieldA == "balance" {
+			if x.fieldB == "income" {
+				numIncome++
+			} else if x.fieldB == "reserve" {
+				numReserve++
+			} else {
+				t.Errorf("fields aren't correct for rule: %s", r)
+			}
 		}
 	}
 

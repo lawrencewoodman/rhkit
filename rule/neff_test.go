@@ -199,44 +199,15 @@ func TestGenerateNEFF(t *testing.T) {
 			},
 		},
 	}
-	cases := []struct {
-		field string
-		want  []Rule
-	}{
-		{field: "bandA",
-			want: []Rule{},
-		},
-		{field: "groupA",
-			want: []Rule{
-				NewNEFF("groupA", "groupB"),
-				NewNEFF("groupA", "groupC"),
-				NewNEFF("groupA", "groupF"),
-			},
-		},
-		{field: "groupB",
-			want: []Rule{
-				NewNEFF("groupB", "groupC"),
-				NewNEFF("groupB", "groupF"),
-			},
-		},
-		{field: "groupC",
-			want: []Rule{
-				NewNEFF("groupC", "groupF"),
-			},
-		},
-		{field: "groupD",
-			want: []Rule{},
-		},
-		{field: "groupE",
-			want: []Rule{
-				NewNEFF("groupE", "groupF"),
-			},
-		},
-		{field: "bandB",
-			want: []Rule{
-				NewNEFF("bandB", "bandD"),
-			},
-		},
+	want := []Rule{
+		NewNEFF("groupA", "groupB"),
+		NewNEFF("groupA", "groupC"),
+		NewNEFF("groupA", "groupF"),
+		NewNEFF("groupB", "groupC"),
+		NewNEFF("groupB", "groupF"),
+		NewNEFF("groupC", "groupF"),
+		NewNEFF("groupE", "groupF"),
+		NewNEFF("bandB", "bandD"),
 	}
 	generationDesc := testhelpers.GenerationDesc{
 		DFields: []string{
@@ -245,11 +216,9 @@ func TestGenerateNEFF(t *testing.T) {
 		},
 		DArithmetic: false,
 	}
-	for _, c := range cases {
-		got := generateNEFF(inputDescription, generationDesc, c.field)
-		if err := matchRulesUnordered(got, c.want); err != nil {
-			t.Errorf("matchRulesUnordered() rules don't match: %s\ngot: %s\nwant: %s\n",
-				err, got, c.want)
-		}
+	got := generateNEFF(inputDescription, generationDesc)
+	if err := matchRulesUnordered(got, want); err != nil {
+		t.Errorf("matchRulesUnordered() rules don't match: %s\ngot: %s\nwant: %s\n",
+			err, got, want)
 	}
 }

@@ -167,44 +167,24 @@ func TestGenerateNEFV(t *testing.T) {
 			},
 		},
 	}
-	cases := []struct {
-		field string
-		want  []Rule
-	}{
-		{field: "band",
-			want: []Rule{
-				NewNEFV("band", dlit.MustNew(1)),
-				NewNEFV("band", dlit.MustNew(3)),
-				NewNEFV("band", dlit.MustNew(4)),
-			},
-		},
-		{field: "flow",
-			want: []Rule{
-				NewNEFV("flow", dlit.MustNew(1)),
-				NewNEFV("flow", dlit.MustNew(3.37)),
-				NewNEFV("flow", dlit.MustNew(3.3)),
-				NewNEFV("flow", dlit.MustNew(4)),
-			},
-		},
-		{field: "group",
-			want: []Rule{
-				NewNEFV("group", dlit.MustNew("Nelson")),
-				NewNEFV("group", dlit.MustNew("Drake")),
-			},
-		},
-		{field: "month",
-			want: []Rule{},
-		},
+	want := []Rule{
+		NewNEFV("band", dlit.MustNew(1)),
+		NewNEFV("band", dlit.MustNew(3)),
+		NewNEFV("band", dlit.MustNew(4)),
+		NewNEFV("flow", dlit.MustNew(1)),
+		NewNEFV("flow", dlit.MustNew(3.37)),
+		NewNEFV("flow", dlit.MustNew(3.3)),
+		NewNEFV("flow", dlit.MustNew(4)),
+		NewNEFV("group", dlit.MustNew("Nelson")),
+		NewNEFV("group", dlit.MustNew("Drake")),
 	}
 	generationDesc := testhelpers.GenerationDesc{
 		DFields:     []string{"band", "flow", "group", "month"},
 		DArithmetic: false,
 	}
-	for _, c := range cases {
-		got := generateNEFV(inputDescription, generationDesc, c.field)
-		if err := matchRulesUnordered(got, c.want); err != nil {
-			t.Errorf("matchRulesUnordered() rules don't match: %s\ngot: %s\nwant: %s\n",
-				err, got, c.want)
-		}
+	got := generateNEFV(inputDescription, generationDesc)
+	if err := matchRulesUnordered(got, want); err != nil {
+		t.Errorf("matchRulesUnordered() rules don't match: %s\ngot: %s\nwant: %s\n",
+			err, got, want)
 	}
 }

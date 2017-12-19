@@ -329,172 +329,143 @@ func TestGenerateInFV(t *testing.T) {
 			},
 		},
 	}
-	cases := []struct {
-		field string
-		want  []Rule
-	}{
-		{field: "band",
-			want: []Rule{},
-		},
-		{field: "flow",
-			want: []Rule{},
-		},
-		{field: "groupA",
-			want: []Rule{},
-		},
-		{field: "groupB",
-			want: []Rule{},
-		},
-		{field: "groupC",
-			want: []Rule{
-				NewInFV("groupC", []*dlit.Literal{
-					dlit.NewString("Fred"),
-					dlit.NewString("Harry"),
-				}),
-				NewInFV("groupC", []*dlit.Literal{
-					dlit.NewString("Fred"),
-					dlit.NewString("Mary"),
-				}),
-				NewInFV("groupC", []*dlit.Literal{
-					dlit.NewString("Fred"),
-					dlit.NewString("Rebecca"),
-				}),
-				NewInFV("groupC", []*dlit.Literal{
-					dlit.NewString("Harry"),
-					dlit.NewString("Mary"),
-				}),
-				NewInFV("groupC", []*dlit.Literal{
-					dlit.NewString("Harry"),
-					dlit.NewString("Rebecca"),
-				}),
-				NewInFV("groupC", []*dlit.Literal{
-					dlit.NewString("Mary"),
-					dlit.NewString("Rebecca"),
-				}),
-			},
-		},
-		{field: "groupD",
-			want: []Rule{
-				NewInFV("groupD", []*dlit.Literal{
-					dlit.NewString("Fred"),
-					dlit.NewString("Harry"),
-				}),
-				NewInFV("groupD", []*dlit.Literal{
-					dlit.NewString("Fred"),
-					dlit.NewString("Mary"),
-				}),
-				NewInFV("groupD", []*dlit.Literal{
-					dlit.NewString("Harry"),
-					dlit.NewString("Mary"),
-				}),
-			},
-		},
-		{field: "groupE",
-			want: []Rule{
-				NewInFV("groupE", []*dlit.Literal{
-					dlit.NewString("Fred"),
-					dlit.NewString("Harry"),
-				}),
-				NewInFV("groupE", []*dlit.Literal{
-					dlit.NewString("Fred"),
-					dlit.NewString("Harry"),
-					dlit.NewString("Juliet"),
-				}),
-				NewInFV("groupE", []*dlit.Literal{
-					dlit.NewString("Fred"),
-					dlit.NewString("Harry"),
-					dlit.NewString("Mary"),
-				}),
-				NewInFV("groupE", []*dlit.Literal{
-					dlit.NewString("Fred"),
-					dlit.NewString("Harry"),
-					dlit.NewString("Rebecca"),
-				}),
-				NewInFV("groupE", []*dlit.Literal{
-					dlit.NewString("Fred"),
-					dlit.NewString("Juliet"),
-					dlit.NewString("Rebecca"),
-				}),
-				NewInFV("groupE", []*dlit.Literal{
-					dlit.NewString("Fred"),
-					dlit.NewString("Juliet"),
-					dlit.NewString("Mary"),
-				}),
-				NewInFV("groupE", []*dlit.Literal{
-					dlit.NewString("Fred"),
-					dlit.NewString("Mary"),
-				}),
-				NewInFV("groupE", []*dlit.Literal{
-					dlit.NewString("Fred"),
-					dlit.NewString("Mary"),
-					dlit.NewString("Rebecca"),
-				}),
-				NewInFV("groupE", []*dlit.Literal{
-					dlit.NewString("Fred"),
-					dlit.NewString("Rebecca"),
-				}),
-				NewInFV("groupE", []*dlit.Literal{
-					dlit.NewString("Fred"),
-					dlit.NewString("Juliet"),
-				}),
-				NewInFV("groupE", []*dlit.Literal{
-					dlit.NewString("Harry"),
-					dlit.NewString("Mary"),
-				}),
-				NewInFV("groupE", []*dlit.Literal{
-					dlit.NewString("Harry"),
-					dlit.NewString("Rebecca"),
-				}),
-				NewInFV("groupE", []*dlit.Literal{
-					dlit.NewString("Harry"),
-					dlit.NewString("Juliet"),
-				}),
-				NewInFV("groupE", []*dlit.Literal{
-					dlit.NewString("Harry"),
-					dlit.NewString("Juliet"),
-					dlit.NewString("Mary"),
-				}),
-				NewInFV("groupE", []*dlit.Literal{
-					dlit.NewString("Harry"),
-					dlit.NewString("Juliet"),
-					dlit.NewString("Rebecca"),
-				}),
-				NewInFV("groupE", []*dlit.Literal{
-					dlit.NewString("Harry"),
-					dlit.NewString("Mary"),
-					dlit.NewString("Rebecca"),
-				}),
-				NewInFV("groupE", []*dlit.Literal{
-					dlit.NewString("Juliet"),
-					dlit.NewString("Mary"),
-				}),
-				NewInFV("groupE", []*dlit.Literal{
-					dlit.NewString("Juliet"),
-					dlit.NewString("Mary"),
-					dlit.NewString("Rebecca"),
-				}),
-				NewInFV("groupE", []*dlit.Literal{
-					dlit.NewString("Mary"),
-					dlit.NewString("Rebecca"),
-				}),
-				NewInFV("groupE", []*dlit.Literal{
-					dlit.NewString("Juliet"),
-					dlit.NewString("Rebecca"),
-				}),
-			},
-		},
+	want := []Rule{
+		NewInFV("groupC", []*dlit.Literal{
+			dlit.NewString("Fred"),
+			dlit.NewString("Harry"),
+		}),
+		NewInFV("groupC", []*dlit.Literal{
+			dlit.NewString("Fred"),
+			dlit.NewString("Mary"),
+		}),
+		NewInFV("groupC", []*dlit.Literal{
+			dlit.NewString("Fred"),
+			dlit.NewString("Rebecca"),
+		}),
+		NewInFV("groupC", []*dlit.Literal{
+			dlit.NewString("Harry"),
+			dlit.NewString("Mary"),
+		}),
+		NewInFV("groupC", []*dlit.Literal{
+			dlit.NewString("Harry"),
+			dlit.NewString("Rebecca"),
+		}),
+		NewInFV("groupC", []*dlit.Literal{
+			dlit.NewString("Mary"),
+			dlit.NewString("Rebecca"),
+		}),
+		NewInFV("groupD", []*dlit.Literal{
+			dlit.NewString("Fred"),
+			dlit.NewString("Harry"),
+		}),
+		NewInFV("groupD", []*dlit.Literal{
+			dlit.NewString("Fred"),
+			dlit.NewString("Mary"),
+		}),
+		NewInFV("groupD", []*dlit.Literal{
+			dlit.NewString("Harry"),
+			dlit.NewString("Mary"),
+		}),
+		NewInFV("groupE", []*dlit.Literal{
+			dlit.NewString("Fred"),
+			dlit.NewString("Harry"),
+		}),
+		NewInFV("groupE", []*dlit.Literal{
+			dlit.NewString("Fred"),
+			dlit.NewString("Harry"),
+			dlit.NewString("Juliet"),
+		}),
+		NewInFV("groupE", []*dlit.Literal{
+			dlit.NewString("Fred"),
+			dlit.NewString("Harry"),
+			dlit.NewString("Mary"),
+		}),
+		NewInFV("groupE", []*dlit.Literal{
+			dlit.NewString("Fred"),
+			dlit.NewString("Harry"),
+			dlit.NewString("Rebecca"),
+		}),
+		NewInFV("groupE", []*dlit.Literal{
+			dlit.NewString("Fred"),
+			dlit.NewString("Juliet"),
+			dlit.NewString("Rebecca"),
+		}),
+		NewInFV("groupE", []*dlit.Literal{
+			dlit.NewString("Fred"),
+			dlit.NewString("Juliet"),
+			dlit.NewString("Mary"),
+		}),
+		NewInFV("groupE", []*dlit.Literal{
+			dlit.NewString("Fred"),
+			dlit.NewString("Mary"),
+		}),
+		NewInFV("groupE", []*dlit.Literal{
+			dlit.NewString("Fred"),
+			dlit.NewString("Mary"),
+			dlit.NewString("Rebecca"),
+		}),
+		NewInFV("groupE", []*dlit.Literal{
+			dlit.NewString("Fred"),
+			dlit.NewString("Rebecca"),
+		}),
+		NewInFV("groupE", []*dlit.Literal{
+			dlit.NewString("Fred"),
+			dlit.NewString("Juliet"),
+		}),
+		NewInFV("groupE", []*dlit.Literal{
+			dlit.NewString("Harry"),
+			dlit.NewString("Mary"),
+		}),
+		NewInFV("groupE", []*dlit.Literal{
+			dlit.NewString("Harry"),
+			dlit.NewString("Rebecca"),
+		}),
+		NewInFV("groupE", []*dlit.Literal{
+			dlit.NewString("Harry"),
+			dlit.NewString("Juliet"),
+		}),
+		NewInFV("groupE", []*dlit.Literal{
+			dlit.NewString("Harry"),
+			dlit.NewString("Juliet"),
+			dlit.NewString("Mary"),
+		}),
+		NewInFV("groupE", []*dlit.Literal{
+			dlit.NewString("Harry"),
+			dlit.NewString("Juliet"),
+			dlit.NewString("Rebecca"),
+		}),
+		NewInFV("groupE", []*dlit.Literal{
+			dlit.NewString("Harry"),
+			dlit.NewString("Mary"),
+			dlit.NewString("Rebecca"),
+		}),
+		NewInFV("groupE", []*dlit.Literal{
+			dlit.NewString("Juliet"),
+			dlit.NewString("Mary"),
+		}),
+		NewInFV("groupE", []*dlit.Literal{
+			dlit.NewString("Juliet"),
+			dlit.NewString("Mary"),
+			dlit.NewString("Rebecca"),
+		}),
+		NewInFV("groupE", []*dlit.Literal{
+			dlit.NewString("Mary"),
+			dlit.NewString("Rebecca"),
+		}),
+		NewInFV("groupE", []*dlit.Literal{
+			dlit.NewString("Juliet"),
+			dlit.NewString("Rebecca"),
+		}),
 	}
 	generationDesc := testhelpers.GenerationDesc{
 		DFields: []string{"band", "flow", "groupA", "groupB",
 			"groupC", "groupD", "groupE"},
 		DArithmetic: false,
 	}
-	for i, c := range cases {
-		got := generateInFV(inputDescription, generationDesc, c.field)
-		if err := matchRulesUnordered(got, c.want); err != nil {
-			t.Errorf("(%d) matchRulesUnordered() rules don't match: %s\ngot: %s\nwant: %s\n",
-				i, err, got, c.want)
-		}
+	got := generateInFV(inputDescription, generationDesc)
+	if err := matchRulesUnordered(got, want); err != nil {
+		t.Errorf("matchRulesUnordered() rules don't match: %s\ngot: %s\nwant: %s\n",
+			err, got, want)
 	}
 }
 
@@ -570,7 +541,7 @@ func TestGenerateInFV_num_fields(t *testing.T) {
 	}
 	for i, c := range cases {
 		inputDescription.Fields["group"].Values = c.groupValues
-		got := generateInFV(inputDescription, c.generationDesc, "group")
+		got := generateInFV(inputDescription, c.generationDesc)
 		if len(got) < c.wantMinNumRules || len(got) > c.wantMaxNumRules {
 			t.Errorf("(%d) generateInFV: got wrong number of rules: %d", i, len(got))
 		}

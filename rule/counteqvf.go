@@ -21,6 +21,10 @@ type CountEQVF struct {
 	num    int64
 }
 
+func init() {
+	registerGenerator("CountEQVF", generateCountEQVF)
+}
+
 func NewCountEQVF(value *dlit.Literal, fields []string, num int64) *CountEQVF {
 	if len(fields) < 2 {
 		panic("NewCountEQVF: Must contain at least two fields")

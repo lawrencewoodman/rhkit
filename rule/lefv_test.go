@@ -333,12 +333,12 @@ func TestGenerateLEFV(t *testing.T) {
 		}
 		return nil
 	}
-	generationDesc := testhelpers.GenerationDesc{
-		DFields:     []string{"income"},
-		DArithmetic: false,
-	}
 	for i, c := range cases {
-		got := generateLEFV(c.description, generationDesc, c.field)
+		generationDesc := testhelpers.GenerationDesc{
+			DFields:     []string{c.field},
+			DArithmetic: false,
+		}
+		got := generateLEFV(c.description, generationDesc)
 		err := checkRulesComply(
 			got,
 			c.minNumRules,

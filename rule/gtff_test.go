@@ -154,44 +154,19 @@ func TestGenerateGTFF(t *testing.T) {
 			},
 		},
 	}
-	cases := []struct {
-		field string
-		want  []Rule
-	}{
-		{field: "band",
-			want: []Rule{
-				NewGTFF("band", "flowIn"),
-				NewGTFF("band", "flowOut"),
-			},
-		},
-		{field: "flowIn",
-			want: []Rule{
-				NewGTFF("flowIn", "flowOut"),
-			},
-		},
-		{field: "flowOut",
-			want: []Rule{},
-		},
-		{field: "rateIn",
-			want: []Rule{},
-		},
-		{field: "rateOut",
-			want: []Rule{},
-		},
-		{field: "group",
-			want: []Rule{},
-		},
+	want := []Rule{
+		NewGTFF("band", "flowIn"),
+		NewGTFF("band", "flowOut"),
+		NewGTFF("flowIn", "flowOut"),
 	}
 	generationDesc := testhelpers.GenerationDesc{
 		DFields: []string{"band", "flowIn", "flowOut", "rateIn",
 			"rateOut", "group"},
 		DArithmetic: false,
 	}
-	for _, c := range cases {
-		got := generateGTFF(inputDescription, generationDesc, c.field)
-		if err := matchRulesUnordered(got, c.want); err != nil {
-			t.Errorf("matchRulesUnordered() rules don't match: %s\ngot: %s\nwant: %s\n",
-				err, got, c.want)
-		}
+	got := generateGTFF(inputDescription, generationDesc)
+	if err := matchRulesUnordered(got, want); err != nil {
+		t.Errorf("matchRulesUnordered() rules don't match: %s\ngot: %s\nwant: %s\n",
+			err, got, want)
 	}
 }

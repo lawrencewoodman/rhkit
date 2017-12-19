@@ -33,7 +33,6 @@ type GenerationDescriber interface {
 type generatorFunc func(
 	desc *description.Description,
 	generationDesc GenerationDescriber,
-	field string,
 ) []Rule
 
 type Rule interface {
@@ -69,17 +68,10 @@ func Generate(
 	}
 	rules := make([]Rule, 1)
 	rules[0] = NewTrue()
-	for field := range inputDescription.Fields {
-		if internal.IsStringInSlice(field, generationDesc.Fields()) {
-			for _, generator := range generators {
-				newRules := generator(inputDescription, generationDesc, field)
-				rules = append(rules, newRules...)
-			}
-		}
+	for _, generator := range generators {
+		newRules := generator(inputDescription, generationDesc)
+		rules = append(rules, newRules...)
 	}
-
-	countEQVFRules := generateCountEQVF(inputDescription, generationDesc)
-	rules = append(rules, countEQVFRules...)
 
 	if len(generationDesc.Fields()) == 2 {
 		cRules := Combine(rules)

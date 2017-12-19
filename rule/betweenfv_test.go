@@ -374,11 +374,11 @@ func TestGenerateBetweenFV(t *testing.T) {
 			maxDP:       0,
 		},
 	}
-	generationDesc := testhelpers.GenerationDesc{
-		DFields:     []string{"income"},
-		DArithmetic: false,
-	}
 	for i, c := range cases {
+		generationDesc := testhelpers.GenerationDesc{
+			DFields:     []string{c.field},
+			DArithmetic: false,
+		}
 		complyFunc := func(r Rule) error {
 			x, ok := r.(*BetweenFV)
 			if !ok {
@@ -389,7 +389,7 @@ func TestGenerateBetweenFV(t *testing.T) {
 			}
 			return nil
 		}
-		got := generateBetweenFV(c.description, generationDesc, c.field)
+		got := generateBetweenFV(c.description, generationDesc)
 		err := checkRulesComply(
 			got,
 			c.minNumRules,
