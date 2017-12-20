@@ -271,3 +271,32 @@ func countNumOnBits(mask string) int {
 func makeMask(numPlaces, i int) string {
 	return fmt.Sprintf("%0*b", numPlaces, i)
 }
+
+func getMaskStrings(mask string, values []string) []string {
+	r := []string{}
+	for j, b := range mask {
+		if j >= len(values) {
+			break
+		}
+		if b == '1' {
+			v := values[j]
+			r = append(r, v)
+		}
+	}
+	return r
+}
+
+func stringCombinations(values []string, min, max int) [][]string {
+	r := [][]string{}
+	for i := 3; ; i++ {
+		mask := makeMask(len(values), i)
+		numOnBits := countNumOnBits(mask)
+		if len(mask) > len(values) {
+			break
+		}
+		if numOnBits >= min && numOnBits <= max && numOnBits <= len(values) {
+			r = append(r, getMaskStrings(mask, values))
+		}
+	}
+	return r
+}

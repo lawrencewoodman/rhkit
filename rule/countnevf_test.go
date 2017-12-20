@@ -11,11 +11,11 @@ import (
 	"github.com/vlifesystems/rhkit/internal/testhelpers"
 )
 
-func TestCountEQVFNew_panics(t *testing.T) {
+func TestCountNEVFNew_panics(t *testing.T) {
 	value := dlit.NewString("station")
 	fields := []string{"place"}
 	num := int64(3)
-	wantPanic := "NewCountEQVF: Must contain at least two fields"
+	wantPanic := "NewCountNEVF: Must contain at least two fields"
 	defer func() {
 		if r := recover(); r == nil {
 			t.Errorf("New() didn't panic")
@@ -24,16 +24,16 @@ func TestCountEQVFNew_panics(t *testing.T) {
 				r, wantPanic)
 		}
 	}()
-	NewCountEQVF(value, fields, num)
+	NewCountNEVF(value, fields, num)
 }
 
-func TestCountEQVFString(t *testing.T) {
+func TestCountNEVFString(t *testing.T) {
 	cases := []struct {
 		rule Rule
 		want string
 	}{
-		{rule: NewCountEQVF(dlit.MustNew(7.892), []string{"flowIn", "flowOut"}, 2),
-			want: "count(\"7.892\", flowIn, flowOut) == 2",
+		{rule: NewCountNEVF(dlit.MustNew(7.892), []string{"flowIn", "flowOut"}, 2),
+			want: "count(\"7.892\", flowIn, flowOut) != 2",
 		},
 	}
 
@@ -45,11 +45,11 @@ func TestCountEQVFString(t *testing.T) {
 	}
 }
 
-func TestCountEQVFFields(t *testing.T) {
+func TestCountNEVFFields(t *testing.T) {
 	fields := []string{"station", "destination"}
 	value := dlit.MustNew(7.892)
 	num := int64(2)
-	r := NewCountEQVF(value, fields, num)
+	r := NewCountNEVF(value, fields, num)
 	wantFields := fields
 	gotFields := r.Fields()
 	if !reflect.DeepEqual(gotFields, wantFields) {
@@ -57,59 +57,59 @@ func TestCountEQVFFields(t *testing.T) {
 	}
 }
 
-func TestCountEQVFIsTrue(t *testing.T) {
+func TestCountNEVFIsTrue(t *testing.T) {
 	cases := []struct {
 		rule Rule
 		want bool
 	}{
-		{rule: NewCountEQVF(
+		{rule: NewCountNEVF(
 			dlit.MustNew("harry"),
 			[]string{"station1", "station2", "station3"},
 			int64(0),
 		),
-			want: false,
+			want: true,
 		},
-		{rule: NewCountEQVF(
+		{rule: NewCountNEVF(
 			dlit.MustNew("harry"),
 			[]string{"station1", "station2", "station3"},
 			int64(1),
 		),
-			want: true,
+			want: false,
 		},
-		{rule: NewCountEQVF(
+		{rule: NewCountNEVF(
 			dlit.MustNew("true"),
 			[]string{"success1", "success2", "success3"},
 			int64(0),
 		),
-			want: false,
+			want: true,
 		},
-		{rule: NewCountEQVF(
+		{rule: NewCountNEVF(
 			dlit.MustNew("true"),
 			[]string{"success1", "success2", "success3"},
 			int64(1),
 		),
-			want: true,
+			want: false,
 		},
-		{rule: NewCountEQVF(
+		{rule: NewCountNEVF(
 			dlit.MustNew("true"),
 			[]string{"success1", "success2", "success3"},
 			int64(2),
 		),
-			want: false,
+			want: true,
 		},
-		{rule: NewCountEQVF(
+		{rule: NewCountNEVF(
 			dlit.MustNew("true"),
 			[]string{"success1", "success2", "success3"},
 			int64(3),
 		),
-			want: false,
+			want: true,
 		},
-		{rule: NewCountEQVF(
+		{rule: NewCountNEVF(
 			dlit.MustNew("TRUE"),
 			[]string{"success1", "success2", "success3"},
 			int64(2),
 		),
-			want: true,
+			want: false,
 		},
 	}
 	record := map[string]*dlit.Literal{
@@ -135,31 +135,31 @@ func TestCountEQVFIsTrue(t *testing.T) {
 	}
 }
 
-func TestCountEQVFIsTrue_errors(t *testing.T) {
+func TestCountNEVFIsTrue_errors(t *testing.T) {
 	cases := []struct {
 		rule    Rule
 		wantErr error
 	}{
-		{rule: NewCountEQVF(
+		{rule: NewCountNEVF(
 			dlit.NewString("alpha"),
 			[]string{"nonexistant", "income"},
 			int64(1),
 		),
 			wantErr: InvalidRuleError{
-				Rule: NewCountEQVF(
+				Rule: NewCountNEVF(
 					dlit.NewString("alpha"),
 					[]string{"nonexistant", "income"},
 					int64(1),
 				),
 			},
 		},
-		{rule: NewCountEQVF(
+		{rule: NewCountNEVF(
 			dlit.NewString("alpha"),
 			[]string{"problem", "income"},
 			int64(1),
 		),
 			wantErr: IncompatibleTypesRuleError{
-				Rule: NewCountEQVF(
+				Rule: NewCountNEVF(
 					dlit.NewString("alpha"),
 					[]string{"problem", "income"},
 					int64(1),
@@ -181,220 +181,220 @@ func TestCountEQVFIsTrue_errors(t *testing.T) {
 	}
 }
 
-var wantGenerateCountEQVFRules = []Rule{
-	NewCountEQVF(
+var wantGenerateCountNEVFRules = []Rule{
+	NewCountNEVF(
 		dlit.NewString("Fred"),
 		[]string{"groupC", "groupD"},
 		int64(0),
 	),
-	NewCountEQVF(
+	NewCountNEVF(
 		dlit.NewString("Fred"),
 		[]string{"groupC", "groupD"},
 		int64(1),
 	),
-	NewCountEQVF(
+	NewCountNEVF(
 		dlit.NewString("Fred"),
 		[]string{"groupC", "groupD"},
 		int64(2),
 	),
-	NewCountEQVF(
+	NewCountNEVF(
 		dlit.NewString("Fred"),
 		[]string{"groupA", "groupD"},
 		int64(0),
 	),
-	NewCountEQVF(
+	NewCountNEVF(
 		dlit.NewString("Fred"),
 		[]string{"groupA", "groupD"},
 		int64(1),
 	),
-	NewCountEQVF(
+	NewCountNEVF(
 		dlit.NewString("Fred"),
 		[]string{"groupA", "groupD"},
 		int64(2),
 	),
-	NewCountEQVF(
+	NewCountNEVF(
 		dlit.NewString("Fred"),
 		[]string{"groupA", "groupC"},
 		int64(0),
 	),
-	NewCountEQVF(
+	NewCountNEVF(
 		dlit.NewString("Fred"),
 		[]string{"groupA", "groupC"},
 		int64(1),
 	),
-	NewCountEQVF(
+	NewCountNEVF(
 		dlit.NewString("Fred"),
 		[]string{"groupA", "groupC"},
 		int64(2),
 	),
-	NewCountEQVF(
+	NewCountNEVF(
 		dlit.NewString("Fred"),
 		[]string{"groupA", "groupC", "groupD"},
 		int64(0),
 	),
-	NewCountEQVF(
+	NewCountNEVF(
 		dlit.NewString("Fred"),
 		[]string{"groupA", "groupC", "groupD"},
 		int64(1),
 	),
-	NewCountEQVF(
+	NewCountNEVF(
 		dlit.NewString("Fred"),
 		[]string{"groupA", "groupC", "groupD"},
 		int64(2),
 	),
-	NewCountEQVF(
+	NewCountNEVF(
 		dlit.NewString("Fred"),
 		[]string{"groupA", "groupC", "groupD"},
 		int64(3),
 	),
-	NewCountEQVF(
+	NewCountNEVF(
 		dlit.NewString("Mary"),
 		[]string{"groupC", "groupD"},
 		int64(0),
 	),
-	NewCountEQVF(
+	NewCountNEVF(
 		dlit.NewString("Mary"),
 		[]string{"groupC", "groupD"},
 		int64(1),
 	),
-	NewCountEQVF(
+	NewCountNEVF(
 		dlit.NewString("Mary"),
 		[]string{"groupC", "groupD"},
 		int64(2),
 	),
-	NewCountEQVF(
+	NewCountNEVF(
 		dlit.NewString("Mary"),
 		[]string{"groupA", "groupD"},
 		int64(0),
 	),
-	NewCountEQVF(
+	NewCountNEVF(
 		dlit.NewString("Mary"),
 		[]string{"groupA", "groupD"},
 		int64(1),
 	),
-	NewCountEQVF(
+	NewCountNEVF(
 		dlit.NewString("Mary"),
 		[]string{"groupA", "groupD"},
 		int64(2),
 	),
-	NewCountEQVF(
+	NewCountNEVF(
 		dlit.NewString("Mary"),
 		[]string{"groupA", "groupC"},
 		int64(0),
 	),
-	NewCountEQVF(
+	NewCountNEVF(
 		dlit.NewString("Mary"),
 		[]string{"groupA", "groupC"},
 		int64(1),
 	),
-	NewCountEQVF(
+	NewCountNEVF(
 		dlit.NewString("Mary"),
 		[]string{"groupA", "groupC"},
 		int64(2),
 	),
-	NewCountEQVF(
+	NewCountNEVF(
 		dlit.NewString("Mary"),
 		[]string{"groupA", "groupC", "groupD"},
 		int64(0),
 	),
-	NewCountEQVF(
+	NewCountNEVF(
 		dlit.NewString("Mary"),
 		[]string{"groupA", "groupC", "groupD"},
 		int64(1),
 	),
-	NewCountEQVF(
+	NewCountNEVF(
 		dlit.NewString("Mary"),
 		[]string{"groupA", "groupC", "groupD"},
 		int64(2),
 	),
-	NewCountEQVF(
+	NewCountNEVF(
 		dlit.NewString("Mary"),
 		[]string{"groupA", "groupC", "groupD"},
 		int64(3),
 	),
-	NewCountEQVF(
+	NewCountNEVF(
 		dlit.NewString("Rebecca"),
 		[]string{"groupC", "groupD"},
 		int64(0),
 	),
-	NewCountEQVF(
+	NewCountNEVF(
 		dlit.NewString("Rebecca"),
 		[]string{"groupC", "groupD"},
 		int64(1),
 	),
-	NewCountEQVF(
+	NewCountNEVF(
 		dlit.NewString("Rebecca"),
 		[]string{"groupC", "groupD"},
 		int64(2),
 	),
-	NewCountEQVF(
+	NewCountNEVF(
 		dlit.NewString("Rebecca"),
 		[]string{"groupA", "groupD"},
 		int64(0),
 	),
-	NewCountEQVF(
+	NewCountNEVF(
 		dlit.NewString("Rebecca"),
 		[]string{"groupA", "groupD"},
 		int64(1),
 	),
-	NewCountEQVF(
+	NewCountNEVF(
 		dlit.NewString("Rebecca"),
 		[]string{"groupA", "groupD"},
 		int64(2),
 	),
-	NewCountEQVF(
+	NewCountNEVF(
 		dlit.NewString("Rebecca"),
 		[]string{"groupA", "groupC"},
 		int64(0),
 	),
-	NewCountEQVF(
+	NewCountNEVF(
 		dlit.NewString("Rebecca"),
 		[]string{"groupA", "groupC"},
 		int64(1),
 	),
-	NewCountEQVF(
+	NewCountNEVF(
 		dlit.NewString("Rebecca"),
 		[]string{"groupA", "groupC"},
 		int64(2),
 	),
-	NewCountEQVF(
+	NewCountNEVF(
 		dlit.NewString("Rebecca"),
 		[]string{"groupA", "groupC", "groupD"},
 		int64(0),
 	),
-	NewCountEQVF(
+	NewCountNEVF(
 		dlit.NewString("Rebecca"),
 		[]string{"groupA", "groupC", "groupD"},
 		int64(1),
 	),
-	NewCountEQVF(
+	NewCountNEVF(
 		dlit.NewString("Rebecca"),
 		[]string{"groupA", "groupC", "groupD"},
 		int64(2),
 	),
-	NewCountEQVF(
+	NewCountNEVF(
 		dlit.NewString("Rebecca"),
 		[]string{"groupA", "groupC", "groupD"},
 		int64(3),
 	),
-	NewCountEQVF(
+	NewCountNEVF(
 		dlit.NewString("Harry"),
 		[]string{"groupC", "groupD"},
 		int64(0),
 	),
-	NewCountEQVF(
+	NewCountNEVF(
 		dlit.NewString("Harry"),
 		[]string{"groupC", "groupD"},
 		int64(1),
 	),
-	NewCountEQVF(
+	NewCountNEVF(
 		dlit.NewString("Harry"),
 		[]string{"groupC", "groupD"},
 		int64(2),
 	),
 }
 
-func TestGenerateCountEQVF(t *testing.T) {
+func TestGenerateCountNEVF(t *testing.T) {
 	inputDescription := &description.Description{
 		map[string]*description.Field{
 			"band": {
@@ -477,15 +477,15 @@ func TestGenerateCountEQVF(t *testing.T) {
 			"groupC", "groupD", "groupE"},
 		DArithmetic: false,
 	}
-	got := generateCountEQVF(inputDescription, generationDesc)
-	if err := matchRulesUnordered(got, wantGenerateCountEQVFRules); err != nil {
+	got := generateCountNEVF(inputDescription, generationDesc)
+	if err := matchRulesUnordered(got, wantGenerateCountNEVFRules); err != nil {
 		t.Errorf("matchRulesUnordered() rules don't match: %s\ngot: %s\nwant: %s\n",
-			err, got, wantGenerateCountEQVFRules)
+			err, got, wantGenerateCountNEVFRules)
 	}
 }
 
 // Test that will generate correct number of fields
-func TestGenerateCountEQVF_num_fields(t *testing.T) {
+func TestGenerateCountNEVF_num_fields(t *testing.T) {
 	inputDescription := &description.Description{
 		map[string]*description.Field{
 			"band": {
@@ -798,15 +798,15 @@ func TestGenerateCountEQVF_num_fields(t *testing.T) {
 		},
 	}
 	for i, c := range cases {
-		got := generateCountEQVF(inputDescription, c.generationDesc)
+		got := generateCountNEVF(inputDescription, c.generationDesc)
 		if len(got) < c.wantMinNumRules || len(got) > c.wantMaxNumRules {
-			t.Errorf("(%d) generateCountEQVF: got wrong number of rules: %d",
+			t.Errorf("(%d) generateCountNEVF: got wrong number of rules: %d",
 				i, len(got))
 		}
 		for _, r := range got {
 			numFields := strings.Count(r.String(), ",")
 			if numFields < 2 || numFields > c.wantMaxNumFields {
-				t.Errorf("(%d) generateCountEQVF: wrong number of values in rule: %s",
+				t.Errorf("(%d) generateCountNEVF: wrong number of values in rule: %s",
 					i, r)
 			}
 		}

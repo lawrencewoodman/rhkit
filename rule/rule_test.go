@@ -780,3 +780,73 @@ func TestCombine(t *testing.T) {
 		}
 	}
 }
+
+func TestStringCombinations(t *testing.T) {
+	cases := []struct {
+		values []string
+		min    int
+		max    int
+		want   [][]string
+	}{
+		{values: []string{"a"},
+			min:  2,
+			max:  3,
+			want: [][]string{},
+		},
+		{values: []string{"a", "c"},
+			min:  2,
+			max:  3,
+			want: [][]string{[]string{"a", "c"}},
+		},
+		{values: []string{"a", "b", "c"},
+			min: 2,
+			max: 2,
+			want: [][]string{
+				[]string{"b", "c"},
+				[]string{"a", "c"},
+				[]string{"a", "b"},
+			},
+		},
+		{values: []string{"a", "b", "c"},
+			min: 2,
+			max: 3,
+			want: [][]string{
+				[]string{"b", "c"},
+				[]string{"a", "c"},
+				[]string{"a", "b"},
+				[]string{"a", "b", "c"},
+			},
+		},
+		{values: []string{"a", "b", "c"},
+			min: 2,
+			max: 4,
+			want: [][]string{
+				[]string{"b", "c"},
+				[]string{"a", "c"},
+				[]string{"a", "b"},
+				[]string{"a", "b", "c"},
+			},
+		},
+	}
+	for _, c := range cases {
+		got := stringCombinations(c.values, c.min, c.max)
+		if len(got) != len(c.want) {
+			t.Errorf("stringCombinations(%v, %d, %d) got: %v, want: %v",
+				c.values, c.min, c.max, got, c.want)
+			continue
+		}
+		for i, subset := range got {
+			if len(subset) != len(c.want[i]) {
+				t.Errorf("stringCombinations(%v, %d, %d) got: %v, want: %v",
+					c.values, c.min, c.max, got, c.want)
+				continue
+			}
+			for j, v := range subset {
+				if v != c.want[i][j] {
+					t.Errorf("stringCombinations(%v, %d, %d) got: %v, want: %v",
+						c.values, c.min, c.max, got, c.want)
+				}
+			}
+		}
+	}
+}

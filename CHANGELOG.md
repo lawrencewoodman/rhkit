@@ -1,6 +1,9 @@
 ## Master
 
   * Add generation of rules of type: `count("yes", housing, loan, default) == 1`
+  * Add generation of rules of type: `count("yes", housing, loan, default) != 1`
+  * Add generation of rules of type: `count("yes", housing, loan, default) < 2`
+  * Add generation of rules of type: `count("yes", housing, loan, default) > 1`
 
 ## 0.3 (11th October 2017)
 

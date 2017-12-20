@@ -11,11 +11,11 @@ import (
 	"github.com/vlifesystems/rhkit/internal/testhelpers"
 )
 
-func TestCountEQVFNew_panics(t *testing.T) {
+func TestCountLTVFNew_panics(t *testing.T) {
 	value := dlit.NewString("station")
 	fields := []string{"place"}
 	num := int64(3)
-	wantPanic := "NewCountEQVF: Must contain at least two fields"
+	wantPanic := "NewCountLTVF: Must contain at least two fields"
 	defer func() {
 		if r := recover(); r == nil {
 			t.Errorf("New() didn't panic")
@@ -24,16 +24,16 @@ func TestCountEQVFNew_panics(t *testing.T) {
 				r, wantPanic)
 		}
 	}()
-	NewCountEQVF(value, fields, num)
+	NewCountLTVF(value, fields, num)
 }
 
-func TestCountEQVFString(t *testing.T) {
+func TestCountLTVFString(t *testing.T) {
 	cases := []struct {
 		rule Rule
 		want string
 	}{
-		{rule: NewCountEQVF(dlit.MustNew(7.892), []string{"flowIn", "flowOut"}, 2),
-			want: "count(\"7.892\", flowIn, flowOut) == 2",
+		{rule: NewCountLTVF(dlit.MustNew(7.892), []string{"flowIn", "flowOut"}, 2),
+			want: "count(\"7.892\", flowIn, flowOut) < 2",
 		},
 	}
 
@@ -45,11 +45,11 @@ func TestCountEQVFString(t *testing.T) {
 	}
 }
 
-func TestCountEQVFFields(t *testing.T) {
+func TestCountLTVFFields(t *testing.T) {
 	fields := []string{"station", "destination"}
 	value := dlit.MustNew(7.892)
 	num := int64(2)
-	r := NewCountEQVF(value, fields, num)
+	r := NewCountLTVF(value, fields, num)
 	wantFields := fields
 	gotFields := r.Fields()
 	if !reflect.DeepEqual(gotFields, wantFields) {
@@ -57,59 +57,73 @@ func TestCountEQVFFields(t *testing.T) {
 	}
 }
 
-func TestCountEQVFIsTrue(t *testing.T) {
+func TestCountLTVFIsTrue(t *testing.T) {
 	cases := []struct {
 		rule Rule
 		want bool
 	}{
-		{rule: NewCountEQVF(
+		{rule: NewCountLTVF(
 			dlit.MustNew("harry"),
 			[]string{"station1", "station2", "station3"},
 			int64(0),
 		),
 			want: false,
 		},
-		{rule: NewCountEQVF(
+		{rule: NewCountLTVF(
 			dlit.MustNew("harry"),
 			[]string{"station1", "station2", "station3"},
 			int64(1),
 		),
+			want: false,
+		},
+		{rule: NewCountLTVF(
+			dlit.MustNew("harry"),
+			[]string{"station1", "station2", "station3"},
+			int64(2),
+		),
 			want: true,
 		},
-		{rule: NewCountEQVF(
+		{rule: NewCountLTVF(
+			dlit.MustNew("harry"),
+			[]string{"station1", "station2", "station3"},
+			int64(3),
+		),
+			want: true,
+		},
+		{rule: NewCountLTVF(
 			dlit.MustNew("true"),
 			[]string{"success1", "success2", "success3"},
 			int64(0),
 		),
 			want: false,
 		},
-		{rule: NewCountEQVF(
+		{rule: NewCountLTVF(
 			dlit.MustNew("true"),
 			[]string{"success1", "success2", "success3"},
 			int64(1),
 		),
-			want: true,
+			want: false,
 		},
-		{rule: NewCountEQVF(
+		{rule: NewCountLTVF(
 			dlit.MustNew("true"),
 			[]string{"success1", "success2", "success3"},
 			int64(2),
 		),
-			want: false,
+			want: true,
 		},
-		{rule: NewCountEQVF(
+		{rule: NewCountLTVF(
 			dlit.MustNew("true"),
 			[]string{"success1", "success2", "success3"},
 			int64(3),
 		),
-			want: false,
+			want: true,
 		},
-		{rule: NewCountEQVF(
+		{rule: NewCountLTVF(
 			dlit.MustNew("TRUE"),
 			[]string{"success1", "success2", "success3"},
 			int64(2),
 		),
-			want: true,
+			want: false,
 		},
 	}
 	record := map[string]*dlit.Literal{
@@ -135,31 +149,31 @@ func TestCountEQVFIsTrue(t *testing.T) {
 	}
 }
 
-func TestCountEQVFIsTrue_errors(t *testing.T) {
+func TestCountLTVFIsTrue_errors(t *testing.T) {
 	cases := []struct {
 		rule    Rule
 		wantErr error
 	}{
-		{rule: NewCountEQVF(
+		{rule: NewCountLTVF(
 			dlit.NewString("alpha"),
 			[]string{"nonexistant", "income"},
 			int64(1),
 		),
 			wantErr: InvalidRuleError{
-				Rule: NewCountEQVF(
+				Rule: NewCountLTVF(
 					dlit.NewString("alpha"),
 					[]string{"nonexistant", "income"},
 					int64(1),
 				),
 			},
 		},
-		{rule: NewCountEQVF(
+		{rule: NewCountLTVF(
 			dlit.NewString("alpha"),
 			[]string{"problem", "income"},
 			int64(1),
 		),
 			wantErr: IncompatibleTypesRuleError{
-				Rule: NewCountEQVF(
+				Rule: NewCountLTVF(
 					dlit.NewString("alpha"),
 					[]string{"problem", "income"},
 					int64(1),
@@ -181,220 +195,90 @@ func TestCountEQVFIsTrue_errors(t *testing.T) {
 	}
 }
 
-var wantGenerateCountEQVFRules = []Rule{
-	NewCountEQVF(
-		dlit.NewString("Fred"),
-		[]string{"groupC", "groupD"},
-		int64(0),
-	),
-	NewCountEQVF(
-		dlit.NewString("Fred"),
-		[]string{"groupC", "groupD"},
-		int64(1),
-	),
-	NewCountEQVF(
+var wantGenerateCountLTVFRules = []Rule{
+	NewCountLTVF(
 		dlit.NewString("Fred"),
 		[]string{"groupC", "groupD"},
 		int64(2),
 	),
-	NewCountEQVF(
-		dlit.NewString("Fred"),
-		[]string{"groupA", "groupD"},
-		int64(0),
-	),
-	NewCountEQVF(
-		dlit.NewString("Fred"),
-		[]string{"groupA", "groupD"},
-		int64(1),
-	),
-	NewCountEQVF(
+	NewCountLTVF(
 		dlit.NewString("Fred"),
 		[]string{"groupA", "groupD"},
 		int64(2),
 	),
-	NewCountEQVF(
-		dlit.NewString("Fred"),
-		[]string{"groupA", "groupC"},
-		int64(0),
-	),
-	NewCountEQVF(
-		dlit.NewString("Fred"),
-		[]string{"groupA", "groupC"},
-		int64(1),
-	),
-	NewCountEQVF(
+	NewCountLTVF(
 		dlit.NewString("Fred"),
 		[]string{"groupA", "groupC"},
 		int64(2),
 	),
-	NewCountEQVF(
-		dlit.NewString("Fred"),
-		[]string{"groupA", "groupC", "groupD"},
-		int64(0),
-	),
-	NewCountEQVF(
-		dlit.NewString("Fred"),
-		[]string{"groupA", "groupC", "groupD"},
-		int64(1),
-	),
-	NewCountEQVF(
+	NewCountLTVF(
 		dlit.NewString("Fred"),
 		[]string{"groupA", "groupC", "groupD"},
 		int64(2),
 	),
-	NewCountEQVF(
+	NewCountLTVF(
 		dlit.NewString("Fred"),
 		[]string{"groupA", "groupC", "groupD"},
 		int64(3),
 	),
-	NewCountEQVF(
-		dlit.NewString("Mary"),
-		[]string{"groupC", "groupD"},
-		int64(0),
-	),
-	NewCountEQVF(
-		dlit.NewString("Mary"),
-		[]string{"groupC", "groupD"},
-		int64(1),
-	),
-	NewCountEQVF(
+	NewCountLTVF(
 		dlit.NewString("Mary"),
 		[]string{"groupC", "groupD"},
 		int64(2),
 	),
-	NewCountEQVF(
-		dlit.NewString("Mary"),
-		[]string{"groupA", "groupD"},
-		int64(0),
-	),
-	NewCountEQVF(
-		dlit.NewString("Mary"),
-		[]string{"groupA", "groupD"},
-		int64(1),
-	),
-	NewCountEQVF(
+	NewCountLTVF(
 		dlit.NewString("Mary"),
 		[]string{"groupA", "groupD"},
 		int64(2),
 	),
-	NewCountEQVF(
-		dlit.NewString("Mary"),
-		[]string{"groupA", "groupC"},
-		int64(0),
-	),
-	NewCountEQVF(
-		dlit.NewString("Mary"),
-		[]string{"groupA", "groupC"},
-		int64(1),
-	),
-	NewCountEQVF(
+	NewCountLTVF(
 		dlit.NewString("Mary"),
 		[]string{"groupA", "groupC"},
 		int64(2),
 	),
-	NewCountEQVF(
-		dlit.NewString("Mary"),
-		[]string{"groupA", "groupC", "groupD"},
-		int64(0),
-	),
-	NewCountEQVF(
-		dlit.NewString("Mary"),
-		[]string{"groupA", "groupC", "groupD"},
-		int64(1),
-	),
-	NewCountEQVF(
+	NewCountLTVF(
 		dlit.NewString("Mary"),
 		[]string{"groupA", "groupC", "groupD"},
 		int64(2),
 	),
-	NewCountEQVF(
+	NewCountLTVF(
 		dlit.NewString("Mary"),
 		[]string{"groupA", "groupC", "groupD"},
 		int64(3),
 	),
-	NewCountEQVF(
-		dlit.NewString("Rebecca"),
-		[]string{"groupC", "groupD"},
-		int64(0),
-	),
-	NewCountEQVF(
-		dlit.NewString("Rebecca"),
-		[]string{"groupC", "groupD"},
-		int64(1),
-	),
-	NewCountEQVF(
+	NewCountLTVF(
 		dlit.NewString("Rebecca"),
 		[]string{"groupC", "groupD"},
 		int64(2),
 	),
-	NewCountEQVF(
-		dlit.NewString("Rebecca"),
-		[]string{"groupA", "groupD"},
-		int64(0),
-	),
-	NewCountEQVF(
-		dlit.NewString("Rebecca"),
-		[]string{"groupA", "groupD"},
-		int64(1),
-	),
-	NewCountEQVF(
+	NewCountLTVF(
 		dlit.NewString("Rebecca"),
 		[]string{"groupA", "groupD"},
 		int64(2),
 	),
-	NewCountEQVF(
-		dlit.NewString("Rebecca"),
-		[]string{"groupA", "groupC"},
-		int64(0),
-	),
-	NewCountEQVF(
-		dlit.NewString("Rebecca"),
-		[]string{"groupA", "groupC"},
-		int64(1),
-	),
-	NewCountEQVF(
+	NewCountLTVF(
 		dlit.NewString("Rebecca"),
 		[]string{"groupA", "groupC"},
 		int64(2),
 	),
-	NewCountEQVF(
-		dlit.NewString("Rebecca"),
-		[]string{"groupA", "groupC", "groupD"},
-		int64(0),
-	),
-	NewCountEQVF(
-		dlit.NewString("Rebecca"),
-		[]string{"groupA", "groupC", "groupD"},
-		int64(1),
-	),
-	NewCountEQVF(
+	NewCountLTVF(
 		dlit.NewString("Rebecca"),
 		[]string{"groupA", "groupC", "groupD"},
 		int64(2),
 	),
-	NewCountEQVF(
+	NewCountLTVF(
 		dlit.NewString("Rebecca"),
 		[]string{"groupA", "groupC", "groupD"},
 		int64(3),
 	),
-	NewCountEQVF(
-		dlit.NewString("Harry"),
-		[]string{"groupC", "groupD"},
-		int64(0),
-	),
-	NewCountEQVF(
-		dlit.NewString("Harry"),
-		[]string{"groupC", "groupD"},
-		int64(1),
-	),
-	NewCountEQVF(
+	NewCountLTVF(
 		dlit.NewString("Harry"),
 		[]string{"groupC", "groupD"},
 		int64(2),
 	),
 }
 
-func TestGenerateCountEQVF(t *testing.T) {
+func TestGenerateCountLTVF(t *testing.T) {
 	inputDescription := &description.Description{
 		map[string]*description.Field{
 			"band": {
@@ -477,15 +361,15 @@ func TestGenerateCountEQVF(t *testing.T) {
 			"groupC", "groupD", "groupE"},
 		DArithmetic: false,
 	}
-	got := generateCountEQVF(inputDescription, generationDesc)
-	if err := matchRulesUnordered(got, wantGenerateCountEQVFRules); err != nil {
+	got := generateCountLTVF(inputDescription, generationDesc)
+	if err := matchRulesUnordered(got, wantGenerateCountLTVFRules); err != nil {
 		t.Errorf("matchRulesUnordered() rules don't match: %s\ngot: %s\nwant: %s\n",
-			err, got, wantGenerateCountEQVFRules)
+			err, got, wantGenerateCountLTVFRules)
 	}
 }
 
 // Test that will generate correct number of fields
-func TestGenerateCountEQVF_num_fields(t *testing.T) {
+func TestGenerateCountLTVF_num_fields(t *testing.T) {
 	inputDescription := &description.Description{
 		map[string]*description.Field{
 			"band": {
@@ -710,8 +594,8 @@ func TestGenerateCountEQVF_num_fields(t *testing.T) {
 			DFields:     []string{"groupA", "groupC"},
 			DArithmetic: false,
 		},
-			wantMinNumRules:  9,
-			wantMaxNumRules:  9,
+			wantMinNumRules:  3,
+			wantMaxNumRules:  3,
 			wantMaxNumFields: 2,
 		},
 		{generationDesc: testhelpers.GenerationDesc{
@@ -727,8 +611,8 @@ func TestGenerateCountEQVF_num_fields(t *testing.T) {
 				"groupI", "groupJ"},
 			DArithmetic: false,
 		},
-			wantMinNumRules:  600,
-			wantMaxNumRules:  900,
+			wantMinNumRules:  400,
+			wantMaxNumRules:  500,
 			wantMaxNumFields: 6,
 		},
 		{generationDesc: testhelpers.GenerationDesc{
@@ -736,8 +620,8 @@ func TestGenerateCountEQVF_num_fields(t *testing.T) {
 				"groupI", "groupJ", "groupK", "groupL"},
 			DArithmetic: false,
 		},
-			wantMinNumRules:  3000,
-			wantMaxNumRules:  4000,
+			wantMinNumRules:  2000,
+			wantMaxNumRules:  2050,
 			wantMaxNumFields: 8,
 		},
 		{generationDesc: testhelpers.GenerationDesc{
@@ -745,8 +629,8 @@ func TestGenerateCountEQVF_num_fields(t *testing.T) {
 				"groupI", "groupJ", "groupK", "groupL", "groupM"},
 			DArithmetic: false,
 		},
-			wantMinNumRules:  3500,
-			wantMaxNumRules:  4000,
+			wantMinNumRules:  2050,
+			wantMaxNumRules:  2100,
 			wantMaxNumFields: 9,
 		},
 		{generationDesc: testhelpers.GenerationDesc{
@@ -754,8 +638,8 @@ func TestGenerateCountEQVF_num_fields(t *testing.T) {
 				"groupI", "groupJ", "groupK", "groupL", "groupM", "groupN"},
 			DArithmetic: false,
 		},
-			wantMinNumRules:  6000,
-			wantMaxNumRules:  6100,
+			wantMinNumRules:  3000,
+			wantMaxNumRules:  4000,
 			wantMaxNumFields: 10,
 		},
 		{generationDesc: testhelpers.GenerationDesc{
@@ -763,8 +647,8 @@ func TestGenerateCountEQVF_num_fields(t *testing.T) {
 				"groupI", "groupJ", "groupK", "groupL", "groupM", "groupN", "groupO"},
 			DArithmetic: false,
 		},
-			wantMinNumRules:  3000,
-			wantMaxNumRules:  3100,
+			wantMinNumRules:  1400,
+			wantMaxNumRules:  1500,
 			wantMaxNumFields: 11,
 		},
 		{generationDesc: testhelpers.GenerationDesc{
@@ -772,8 +656,8 @@ func TestGenerateCountEQVF_num_fields(t *testing.T) {
 				"groupJ", "groupK", "groupL", "groupM", "groupN", "groupO"},
 			DArithmetic: false,
 		},
-			wantMinNumRules:  3300,
-			wantMaxNumRules:  4000,
+			wantMinNumRules:  1500,
+			wantMaxNumRules:  1600,
 			wantMaxNumFields: 12,
 		},
 		{generationDesc: testhelpers.GenerationDesc{
@@ -782,8 +666,8 @@ func TestGenerateCountEQVF_num_fields(t *testing.T) {
 				"groupP"},
 			DArithmetic: false,
 		},
-			wantMinNumRules:  4000,
-			wantMaxNumRules:  4500,
+			wantMinNumRules:  2000,
+			wantMaxNumRules:  2050,
 			wantMaxNumFields: 12,
 		},
 		{generationDesc: testhelpers.GenerationDesc{
@@ -792,21 +676,21 @@ func TestGenerateCountEQVF_num_fields(t *testing.T) {
 				"groupP", "groupQ"},
 			DArithmetic: false,
 		},
-			wantMinNumRules:  5000,
-			wantMaxNumRules:  6000,
+			wantMinNumRules:  2050,
+			wantMaxNumRules:  3000,
 			wantMaxNumFields: 12,
 		},
 	}
 	for i, c := range cases {
-		got := generateCountEQVF(inputDescription, c.generationDesc)
+		got := generateCountLTVF(inputDescription, c.generationDesc)
 		if len(got) < c.wantMinNumRules || len(got) > c.wantMaxNumRules {
-			t.Errorf("(%d) generateCountEQVF: got wrong number of rules: %d",
+			t.Errorf("(%d) generateCountLTVF: got wrong number of rules: %d",
 				i, len(got))
 		}
 		for _, r := range got {
 			numFields := strings.Count(r.String(), ",")
 			if numFields < 2 || numFields > c.wantMaxNumFields {
-				t.Errorf("(%d) generateCountEQVF: wrong number of values in rule: %s",
+				t.Errorf("(%d) generateCountLTVF: wrong number of values in rule: %s",
 					i, r)
 			}
 		}
