@@ -116,8 +116,8 @@ func TestAssessRules(t *testing.T) {
 			},
 		},
 	}
-	gotAssessment := New()
-	err = gotAssessment.AssessRules(dataset, rules, aggregatorSpecs, goals)
+	gotAssessment := New(aggregatorSpecs, goals)
+	err = gotAssessment.AssessRules(dataset, rules)
 	if err != nil {
 		t.Errorf("AssessRules: %v", err)
 	}
@@ -200,19 +200,19 @@ func TestAssessRules_goroutines(t *testing.T) {
 	if err != nil {
 		t.Fatalf("MakeGoals: %s", err)
 	}
-	wantAssessment := New()
-	err = wantAssessment.AssessRules(dataset, flatRules, aggregatorSpecs, goals)
+	wantAssessment := New(aggregatorSpecs, goals)
+	err = wantAssessment.AssessRules(dataset, flatRules)
 	if err != nil {
 		t.Fatalf("AssessRules: %v", err)
 	}
-	gotAssessment := New()
+	gotAssessment := New(aggregatorSpecs, goals)
 
 	var wg sync.WaitGroup
 	wg.Add(numGoRoutines)
 	for i := 0; i < numGoRoutines; i++ {
 		rules := allRules[i]
 		go func() {
-			err := gotAssessment.AssessRules(dataset, rules, aggregatorSpecs, goals)
+			err := gotAssessment.AssessRules(dataset, rules)
 			defer wg.Done()
 			if err != nil {
 				t.Fatalf("AssessRules: %s", err)
@@ -278,11 +278,133 @@ func TestAssessRules_errors(t *testing.T) {
 		if err != nil {
 			t.Fatalf("(%d) MakeGoals: %s", i, err)
 		}
-		gotAssessment := New()
-		err = gotAssessment.AssessRules(dataset, c.rules, aggregatorSpecs, goals)
+		gotAssessment := New(aggregatorSpecs, goals)
+		err = gotAssessment.AssessRules(dataset, c.rules)
 		if err == nil || err.Error() != c.wantErr.Error() {
 			t.Errorf("(%d) AssessRules - err: %s, wantErr: %s", i, err, c.wantErr)
 		}
+	}
+}
+
+func TestProcessRecord(t *testing.T) {
+	rules := []rule.Rule{
+		rule.NewGEFV("band", dlit.MustNew(5)),
+		rule.NewGEFV("band", dlit.MustNew(4)),
+		rule.NewGEFV("cost", dlit.MustNew(1.3)),
+	}
+	aggregatorDescs := []*aggregator.Desc{
+		{"numIncomeGt2", "count", "income > 2"},
+		{"numBandGt4", "count", "band > 4"},
+	}
+	goalExprs := []string{
+		"numIncomeGt2 == 1",
+		"numIncomeGt2 == 2",
+		"numIncomeGt2 == 3",
+		"numIncomeGt2 == 4",
+		"numBandGt4 == 1",
+		"numBandGt4 == 2",
+		"numBandGt4 == 3",
+		"numBandGt4 == 4",
+	}
+	fields := []string{"income", "cost", "band"}
+	record := map[string]*dlit.Literal{
+		"income": dlit.MustNew(3),
+		"cost":   dlit.MustNew(4.5),
+		"band":   dlit.NewString("4"),
+	}
+	aggregatorSpecs, err := aggregator.MakeSpecs(fields, aggregatorDescs)
+	if err != nil {
+		t.Fatalf("MakeSpecs: %s", err)
+	}
+	goals, err := goal.MakeGoals(goalExprs)
+	if err != nil {
+		t.Fatalf("MakeGoals: %s", err)
+	}
+	wantIsSorted := false
+	wantIsRefined := false
+	wantNumRecords := int64(1)
+	wantRuleAssessments := []*RuleAssessment{
+		{
+			Rule: rule.NewGEFV("band", dlit.MustNew(5)),
+			Aggregators: map[string]*dlit.Literal{
+				"numMatches":     dlit.MustNew("0"),
+				"percentMatches": dlit.MustNew("0"),
+				"numIncomeGt2":   dlit.MustNew("0"),
+				"numBandGt4":     dlit.MustNew("0"),
+				"goalsScore":     dlit.MustNew(0),
+			},
+			Goals: []*GoalAssessment{
+				{"numIncomeGt2 == 1", false},
+				{"numIncomeGt2 == 2", false},
+				{"numIncomeGt2 == 3", false},
+				{"numIncomeGt2 == 4", false},
+				{"numBandGt4 == 1", false},
+				{"numBandGt4 == 2", false},
+				{"numBandGt4 == 3", false},
+				{"numBandGt4 == 4", false},
+			},
+		},
+		{
+			Rule: rule.NewGEFV("band", dlit.MustNew(4)),
+			Aggregators: map[string]*dlit.Literal{
+				"numMatches":     dlit.MustNew("1"),
+				"percentMatches": dlit.MustNew("100"),
+				"numIncomeGt2":   dlit.MustNew("1"),
+				"numBandGt4":     dlit.MustNew("0"),
+				"goalsScore":     dlit.MustNew(0.0),
+			},
+			Goals: []*GoalAssessment{
+				{"numIncomeGt2 == 1", false},
+				{"numIncomeGt2 == 2", false},
+				{"numIncomeGt2 == 3", false},
+				{"numIncomeGt2 == 4", false},
+				{"numBandGt4 == 1", false},
+				{"numBandGt4 == 2", false},
+				{"numBandGt4 == 3", false},
+				{"numBandGt4 == 4", false},
+			},
+		},
+		{
+			Rule: rule.NewGEFV("cost", dlit.MustNew(1.3)),
+			Aggregators: map[string]*dlit.Literal{
+				"numMatches":     dlit.MustNew("1"),
+				"percentMatches": dlit.MustNew("100"),
+				"numIncomeGt2":   dlit.MustNew("1"),
+				"numBandGt4":     dlit.MustNew("0"),
+				"goalsScore":     dlit.MustNew(0.0),
+			},
+			Goals: []*GoalAssessment{
+				{"numIncomeGt2 == 1", false},
+				{"numIncomeGt2 == 2", false},
+				{"numIncomeGt2 == 3", false},
+				{"numIncomeGt2 == 4", false},
+				{"numBandGt4 == 1", false},
+				{"numBandGt4 == 2", false},
+				{"numBandGt4 == 3", false},
+				{"numBandGt4 == 4", false},
+			},
+		},
+	}
+	gotAssessment := New(aggregatorSpecs, goals)
+	gotAssessment.AddRules(rules)
+	err = gotAssessment.ProcessRecord(record)
+	if err != nil {
+		t.Errorf("AssessRules: %v", err)
+	}
+
+	assessmentsMatch := areAssessmentsEqv(
+		gotAssessment,
+		wantNumRecords,
+		wantIsSorted,
+		wantIsRefined,
+		wantRuleAssessments,
+	)
+	if !assessmentsMatch {
+		t.Errorf("ProcessRecord: assessments don't match")
+		t.Errorf("got: %v", gotAssessment)
+		t.Errorf("wantRuleAssessments: %v, wantNumRecords: %d, wantIsSorted: %t, wantIsRefined: %t",
+			wantRuleAssessments,
+			wantNumRecords, wantIsSorted, wantIsRefined)
 	}
 }
 
@@ -318,31 +440,33 @@ func TestAssessmentAssessRules_dataset_changed_error(t *testing.T) {
 	}
 	trueRules := []rule.Rule{rule.NewTrue()}
 	wantErr := ErrNumRecordsChanged
-	assessment := New()
-	err = assessment.AssessRules(dataset, trueRules, aggregatorSpecs, goals)
+	assessment := New(aggregatorSpecs, goals)
+	err = assessment.AssessRules(dataset, trueRules)
 	if err != nil {
 		t.Fatalf("AssessRules: %v", err)
 	}
-	tDataset := dtruncate.New(dataset, len(records)-1)
-	err = assessment.AssessRules(tDataset, rules, aggregatorSpecs, goals)
+	tDataset := dtruncate.New(dataset, int64(len(records)-1))
+	err = assessment.AssessRules(tDataset, rules)
 	if err == nil || err.Error() != wantErr.Error() {
 		t.Errorf("AssessRules - err: %s, wantErr: %s", err, wantErr)
 	}
 }
 
 func TestAssessmentAddRuleAssessments_error(t *testing.T) {
+	aggregatorSpecs := []aggregator.Spec{aggregator.MustNew("a", "calc", "3+4")}
+	goals := []*goal.Goal{goal.MustNew("cost > 3")}
 	ruleAssessments := []*RuleAssessment{
 		newRuleAssessment(
 			rule.NewEQFV("month", dlit.NewString("May")),
-			[]aggregator.Spec{aggregator.MustNew("a", "calc", "3+4")},
-			[]*goal.Goal{goal.MustNew("cost > 3")},
+			aggregatorSpecs,
+			goals,
 		),
 	}
 	wantErr := dexpr.InvalidExprError{
 		Expr: "cost > 3",
 		Err:  dexpr.VarNotExistError("cost"),
 	}
-	assessment := New()
+	assessment := New(aggregatorSpecs, goals)
 	err := assessment.addRuleAssessments(ruleAssessments)
 	if err == nil || err.Error() != wantErr.Error() {
 		t.Errorf("AddRuleAssessors: err: %s, wantErr: %s", err, wantErr)
@@ -1892,8 +2016,8 @@ func BenchmarkAssessRules(b *testing.B) {
 	}
 	b.StartTimer()
 	for n := 0; n < b.N; n++ {
-		assessment := New()
-		err := assessment.AssessRules(dataset, rules, aggregatorSpecs, goals)
+		assessment := New(aggregatorSpecs, goals)
+		err := assessment.AssessRules(dataset, rules)
 		if err != nil {
 			b.Errorf("AssessRules: %s", err)
 		}

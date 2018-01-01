@@ -47,6 +47,10 @@ func (l *LiteralDataset) Fields() []string {
 	return l.fieldNames
 }
 
+func (l *LiteralDataset) NumRecords() int64 {
+	return int64(len(l.records))
+}
+
 func (lc *LiteralDatasetConn) Close() error {
 	return nil
 }

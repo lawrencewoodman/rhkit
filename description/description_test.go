@@ -837,6 +837,10 @@ func (l *FailingDataset) Fields() []string {
 	return l.dataset.Fields()
 }
 
+func (l *FailingDataset) NumRecords() int64 {
+	return l.dataset.NumRecords()
+}
+
 func (lc *FailingDatasetConn) Close() error {
 	if lc.dataset.stage == lc.dataset.errStage {
 		return lc.dataset.err
