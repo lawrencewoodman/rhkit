@@ -226,6 +226,8 @@ func (a *Assessment) ProcessRecord(r ddataset.Record) error {
 
 // Update the internal analysis for all the RuleAssessments
 func (a *Assessment) Update() error {
+	a.mux.Lock()
+	defer a.mux.Unlock()
 	for _, ruleAssessment := range a.RuleAssessments {
 		if err := ruleAssessment.update(a.NumRecords); err != nil {
 			return err
