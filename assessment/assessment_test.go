@@ -1,6 +1,11 @@
 package assessment
 
 import (
+	"path/filepath"
+	"reflect"
+	"sync"
+	"testing"
+
 	"github.com/lawrencewoodman/ddataset/dcsv"
 	"github.com/lawrencewoodman/ddataset/dtruncate"
 	"github.com/lawrencewoodman/dexpr"
@@ -9,10 +14,6 @@ import (
 	"github.com/vlifesystems/rhkit/goal"
 	"github.com/vlifesystems/rhkit/internal/testhelpers"
 	"github.com/vlifesystems/rhkit/rule"
-	"path/filepath"
-	"reflect"
-	"sync"
-	"testing"
 )
 
 func TestAssessRules(t *testing.T) {
@@ -351,10 +352,10 @@ func TestProcessRecord(t *testing.T) {
 				"percentMatches": dlit.MustNew("100"),
 				"numIncomeGt2":   dlit.MustNew("1"),
 				"numBandGt4":     dlit.MustNew("0"),
-				"goalsScore":     dlit.MustNew(0.0),
+				"goalsScore":     dlit.MustNew(1),
 			},
 			Goals: []*GoalAssessment{
-				{"numIncomeGt2 == 1", false},
+				{"numIncomeGt2 == 1", true},
 				{"numIncomeGt2 == 2", false},
 				{"numIncomeGt2 == 3", false},
 				{"numIncomeGt2 == 4", false},
@@ -371,10 +372,10 @@ func TestProcessRecord(t *testing.T) {
 				"percentMatches": dlit.MustNew("100"),
 				"numIncomeGt2":   dlit.MustNew("1"),
 				"numBandGt4":     dlit.MustNew("0"),
-				"goalsScore":     dlit.MustNew(0.0),
+				"goalsScore":     dlit.MustNew(1),
 			},
 			Goals: []*GoalAssessment{
-				{"numIncomeGt2 == 1", false},
+				{"numIncomeGt2 == 1", true},
 				{"numIncomeGt2 == 2", false},
 				{"numIncomeGt2 == 3", false},
 				{"numIncomeGt2 == 4", false},
@@ -387,9 +388,11 @@ func TestProcessRecord(t *testing.T) {
 	}
 	gotAssessment := New(aggregatorSpecs, goals)
 	gotAssessment.AddRules(rules)
-	err = gotAssessment.ProcessRecord(record)
-	if err != nil {
-		t.Errorf("AssessRules: %v", err)
+	if err := gotAssessment.ProcessRecord(record); err != nil {
+		t.Fatalf("ProcessRecord: %s", err)
+	}
+	if err := gotAssessment.Update(); err != nil {
+		t.Fatalf("Update: %s", err)
 	}
 
 	assessmentsMatch := areAssessmentsEqv(
@@ -2058,6 +2061,9 @@ func areAssessmentsEqv(
 		return false
 	}
 	if got.IsRefined() != wantIsRefined {
+		return false
+	}
+	if len(got.RuleAssessments) != len(wantRuleAssessments) {
 		return false
 	}
 	for _, gotRuleAssesment := range got.RuleAssessments {

@@ -7,12 +7,13 @@ package assessment
 import (
 	"errors"
 	"fmt"
+	"sort"
+	"sync"
+
 	"github.com/lawrencewoodman/ddataset"
 	"github.com/vlifesystems/rhkit/aggregator"
 	"github.com/vlifesystems/rhkit/goal"
 	"github.com/vlifesystems/rhkit/rule"
-	"sort"
-	"sync"
 )
 
 var ErrNumRecordsChanged = errors.New("number of records changed in dataset")
@@ -43,9 +44,13 @@ func New(aggregatorSpecs []aggregator.Spec, goals []*goal.Goal) *Assessment {
 }
 
 func (a *Assessment) AddRules(rules []rule.Rule) {
-	ruleAssessments := make([]*RuleAssessment, len(rules))
-	for i, rule := range rules {
-		ruleAssessments[i] = newRuleAssessment(rule, a.aggregatorSpecs, a.goals)
+	a.mux.Lock()
+	defer a.mux.Unlock()
+	for _, rule := range rules {
+		a.RuleAssessments = append(
+			a.RuleAssessments,
+			newRuleAssessment(rule, a.aggregatorSpecs, a.goals),
+		)
 	}
 }
 
@@ -216,6 +221,16 @@ func (a *Assessment) ProcessRecord(r ddataset.Record) error {
 	a.mux.Lock()
 	a.NumRecords++
 	a.mux.Unlock()
+	return nil
+}
+
+// Update the internal analysis for all the RuleAssessments
+func (a *Assessment) Update() error {
+	for _, ruleAssessment := range a.RuleAssessments {
+		if err := ruleAssessment.update(a.NumRecords); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
