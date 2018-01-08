@@ -10,6 +10,9 @@ environment:
   GOPATH: c:\gopath
 
 install:
+  - IF "%PLATFORM%" == "x86" set PATH=C:\MinGW\bin;%PATH%
+  - IF "%PLATFORM%" == "x64" set PATH=C:\msys64\mingw64\bin;%PATH%
+  - echo %PATH%
   - go version
   - go env
   - go get -v -t ./...
