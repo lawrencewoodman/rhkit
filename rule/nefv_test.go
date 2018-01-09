@@ -49,7 +49,7 @@ func TestNEFVIsTrue(t *testing.T) {
 		want  bool
 	}{
 		{"income", dlit.MustNew(19.0), false},
-		{"income", dlit.MustNew(math.MaxInt64), true},
+		{"income", dlit.MustNew(int64(math.MaxInt64)), true},
 		{"income", dlit.MustNew(-19.0), true},
 		{"income", dlit.MustNew(20.0), true},
 		{"flow", dlit.MustNew(124.564), false},
@@ -64,7 +64,7 @@ func TestNEFVIsTrue(t *testing.T) {
 		{"success", dlit.MustNew("TRUE"), false},
 		{"success", dlit.MustNew("true"), true},
 		{"success", dlit.MustNew("1"), true},
-		{"bigNums", dlit.MustNew(math.MaxInt64), false},
+		{"bigNums", dlit.MustNew(int64(math.MaxInt64)), false},
 		{"bigNums", dlit.MustNew("1"), true},
 	}
 	record := map[string]*dlit.Literal{
@@ -72,7 +72,7 @@ func TestNEFVIsTrue(t *testing.T) {
 		"flow":    dlit.MustNew(124.564),
 		"band":    dlit.MustNew("alpha"),
 		"success": dlit.MustNew("TRUE"),
-		"bigNums": dlit.MustNew(math.MaxInt64),
+		"bigNums": dlit.MustNew(int64(math.MaxInt64)),
 	}
 	for _, c := range cases {
 		r := NewNEFV(c.field, c.value)

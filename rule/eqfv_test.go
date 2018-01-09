@@ -48,7 +48,7 @@ func TestEQFVIsTrue(t *testing.T) {
 		want  bool
 	}{
 		{"income", dlit.MustNew(19.0), true},
-		{"income", dlit.MustNew(math.MaxInt64), false},
+		{"income", dlit.MustNew(int64(math.MaxInt64)), false},
 		{"income", dlit.MustNew(-19.0), false},
 		{"income", dlit.MustNew(20.0), false},
 		{"flow", dlit.MustNew(124.564), true},
@@ -63,7 +63,7 @@ func TestEQFVIsTrue(t *testing.T) {
 		{"success", dlit.MustNew("TRUE"), true},
 		{"success", dlit.MustNew("true"), false},
 		{"success", dlit.MustNew("1"), false},
-		{"bigNums", dlit.MustNew(math.MaxInt64), true},
+		{"bigNums", dlit.MustNew(int64(math.MaxInt64)), true},
 		{"bigNums", dlit.MustNew("1"), false},
 	}
 	record := map[string]*dlit.Literal{
@@ -71,7 +71,7 @@ func TestEQFVIsTrue(t *testing.T) {
 		"flow":    dlit.MustNew(124.564),
 		"band":    dlit.MustNew("alpha"),
 		"success": dlit.MustNew("TRUE"),
-		"bigNums": dlit.MustNew(math.MaxInt64),
+		"bigNums": dlit.MustNew(int64(math.MaxInt64)),
 	}
 	for _, c := range cases {
 		r := NewEQFV(c.field, c.value)
