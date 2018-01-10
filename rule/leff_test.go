@@ -122,6 +122,13 @@ func TestGenerateLEFF(t *testing.T) {
 				MaxDP:  2,
 				Values: map[string]description.Value{},
 			},
+			"flowMid": {
+				Kind:   description.Number,
+				Min:    dlit.MustNew(1),
+				Max:    dlit.MustNew(4),
+				MaxDP:  2,
+				Values: map[string]description.Value{},
+			},
 			"flowOut": {
 				Kind:   description.Number,
 				Min:    dlit.MustNew(0.95),

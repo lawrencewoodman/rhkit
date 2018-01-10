@@ -326,6 +326,16 @@ func TestGenerateCountGTVF(t *testing.T) {
 				},
 				NumValues: 4,
 			},
+			"groupCa": {
+				Kind: description.String,
+				Values: map[string]description.Value{
+					"Fred":    {dlit.NewString("Fred"), 3},
+					"Mary":    {dlit.NewString("Mary"), 4},
+					"Rebecca": {dlit.NewString("Rebecca"), 2},
+					"Harry":   {dlit.NewString("Harry"), 2},
+				},
+				NumValues: 4,
+			},
 			"groupD": {
 				Kind: description.String,
 				Values: map[string]description.Value{
