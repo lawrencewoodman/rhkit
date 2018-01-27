@@ -28,7 +28,6 @@ type meanInstance struct {
 
 var meanExpr = dexpr.MustNew("sum/n", dexprfuncs.CallFuncs)
 var meanSumExpr = dexpr.MustNew("sum+value", dexprfuncs.CallFuncs)
-var roundExpr = dexpr.MustNew("roundto(n, dp)", dexprfuncs.CallFuncs)
 
 func init() {
 	Register("mean", &meanAggregator{})
@@ -111,11 +110,7 @@ func (ai *meanInstance) Result(
 		"sum": ai.sum,
 		"n":   dlit.MustNew(ai.numRecords),
 	}
-	rVars := map[string]*dlit.Literal{
-		"n":  meanExpr.Eval(vars),
-		"dp": dlit.MustNew(ai.maxDP + 2),
-	}
-	return roundExpr.Eval(rVars)
+	return roundTo(meanExpr.Eval(vars), ai.maxDP+2)
 }
 
 func numDecPlaces(l *dlit.Literal) int {
