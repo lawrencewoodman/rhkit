@@ -1,9 +1,11 @@
-// Copyright (C) 2016-2017 vLife Systems Ltd <http://vlifesystems.com>
+// Copyright (C) 2016-2018 vLife Systems Ltd <http://vlifesystems.com>
 // Licensed under an MIT licence.  Please see LICENSE.md for details.
 
 package aggregator
 
 import (
+	"strings"
+
 	"github.com/lawrencewoodman/dexpr"
 	"github.com/lawrencewoodman/dlit"
 	"github.com/vlifesystems/rhkit/goal"
@@ -21,10 +23,12 @@ type meanInstance struct {
 	spec       *meanSpec
 	sum        *dlit.Literal
 	numRecords int64
+	maxDP      int
 }
 
 var meanExpr = dexpr.MustNew("sum/n", dexprfuncs.CallFuncs)
 var meanSumExpr = dexpr.MustNew("sum+value", dexprfuncs.CallFuncs)
+var roundExpr = dexpr.MustNew("roundto(n, dp)", dexprfuncs.CallFuncs)
 
 func init() {
 	Register("mean", &meanAggregator{})
@@ -50,6 +54,7 @@ func (ad *meanSpec) New() Instance {
 		spec:       ad,
 		sum:        dlit.MustNew(0),
 		numRecords: 0,
+		maxDP:      0,
 	}
 }
 
@@ -80,6 +85,10 @@ func (ai *meanInstance) NextRecord(
 			return err
 		}
 
+		if dp := numDecPlaces(exprValue); dp > ai.maxDP {
+			ai.maxDP = dp
+		}
+
 		vars := map[string]*dlit.Literal{
 			"sum":   ai.sum,
 			"value": exprValue,
@@ -102,5 +111,22 @@ func (ai *meanInstance) Result(
 		"sum": ai.sum,
 		"n":   dlit.MustNew(ai.numRecords),
 	}
-	return meanExpr.Eval(vars)
+	rVars := map[string]*dlit.Literal{
+		"n":  meanExpr.Eval(vars),
+		"dp": dlit.MustNew(ai.maxDP + 2),
+	}
+	return roundExpr.Eval(rVars)
+}
+
+func numDecPlaces(l *dlit.Literal) int {
+	if _, isInt := l.Int(); isInt {
+		return 0
+	}
+	s := l.String()
+	i := strings.IndexByte(s, '.')
+	if i > -1 {
+		s = strings.TrimRight(s, "0")
+		return len(s) - i - 1
+	}
+	return 0
 }
