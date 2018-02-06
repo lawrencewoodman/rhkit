@@ -371,6 +371,38 @@ func TestGenerate(t *testing.T) {
 	}
 }
 
+func TestGenerate_no_rule_fields(t *testing.T) {
+	inputDescription := &description.Description{
+		map[string]*description.Field{
+			"team": {
+				Kind: description.String,
+				Values: map[string]description.Value{
+					"a": {dlit.NewString("a"), 3},
+					"b": {dlit.NewString("b"), 3},
+					"c": {dlit.NewString("c"), 3},
+				},
+			},
+		}}
+
+	wantRules := []Rule{
+		NewTrue(),
+	}
+	generationDesc := testhelpers.GenerationDesc{
+		DFields:     []string{},
+		DArithmetic: true,
+	}
+	got, err := Generate(inputDescription, generationDesc)
+	if err != nil {
+		t.Fatalf("Generate: %s", err)
+	}
+	if err := rulesContain(got, wantRules); err != nil {
+		t.Errorf("Generate (rulesContain): %s", err)
+	}
+	if len(got) != len(wantRules) {
+		t.Errorf("Generate: len(got): %d, want: %d", len(got), len(wantRules))
+	}
+}
+
 func TestGenerate_counteqfv(t *testing.T) {
 	inputDescription := &description.Description{
 		map[string]*description.Field{
@@ -616,8 +648,6 @@ func TestGenerate_errors(t *testing.T) {
 	}{
 		{ruleFields: []string{"directionIn", "bob"},
 			wantErr: InvalidRuleFieldError("bob")},
-		{ruleFields: []string{},
-			wantErr: ErrNoRuleFieldsSpecified},
 	}
 	for _, c := range cases {
 		generationDesc := testhelpers.GenerationDesc{
