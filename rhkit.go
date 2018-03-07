@@ -110,26 +110,40 @@ func processGenerate(
 	numUserRules int,
 	opts Options,
 ) error {
-	generatedRules, err := rule.Generate(fieldDescriptions, opts)
-	if err != nil {
-		return GenerateRulesError{Err: err}
+	for stage := 0; ; stage++ {
+		generatedRules, moreRules, err :=
+			rule.Generate(fieldDescriptions, opts, stage)
+		if err != nil {
+			return GenerateRulesError{Err: err}
+		}
+		if err := ass.AssessRules(dataset, generatedRules); err != nil {
+			return AssessError{Err: err}
+		}
+
+		ass.Sort(sortOrder)
+		ass.Refine()
+		if !moreRules {
+			break
+		}
 	}
-	if len(generatedRules) < 2 {
+
+	if len(opts.Fields()) == 2 {
+		cRules := rule.Combine(ass.Rules())
+		if err := ass.AssessRules(dataset, cRules); err != nil {
+			return AssessError{Err: err}
+		}
+
+		ass.Sort(sortOrder)
+		ass.Refine()
+	}
+
+	bestRules := ass.Rules()
+	if len(bestRules) < 2 {
 		return ErrNoRulesGenerated
 	}
 
-	err = ass.AssessRules(dataset, generatedRules)
-	if err != nil {
-		return AssessError{Err: err}
-	}
-
-	ass.Sort(sortOrder)
-	ass.Refine()
-	bestRules := ass.Rules()
-
 	tweakableRules := rule.Tweak(1, bestRules, fieldDescriptions)
-	err = ass.AssessRules(dataset, tweakableRules)
-	if err != nil {
+	if err := ass.AssessRules(dataset, tweakableRules); err != nil {
 		return AssessError{Err: err}
 	}
 	ass.Sort(sortOrder)
@@ -138,8 +152,7 @@ func processGenerate(
 	bestRules = ass.Rules()
 	reducedDPRules := rule.ReduceDP(bestRules)
 
-	err = ass.AssessRules(dataset, reducedDPRules)
-	if err != nil {
+	if err := ass.AssessRules(dataset, reducedDPRules); err != nil {
 		return AssessError{Err: err}
 	}
 	ass.Sort(sortOrder)
@@ -149,8 +162,7 @@ func processGenerate(
 	bestNonCombinedRules := ass.Rules(numRulesToCombine)
 	combinedRules := rule.Combine(bestNonCombinedRules)
 
-	err = ass.AssessRules(dataset, combinedRules)
-	if err != nil {
+	if err := ass.AssessRules(dataset, combinedRules); err != nil {
 		return AssessError{Err: err}
 	}
 	return nil

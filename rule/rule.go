@@ -1,4 +1,4 @@
-// Copyright (C) 2016-2017 vLife Systems Ltd <http://vlifesystems.com>
+// Copyright (C) 2016-2018 vLife Systems Ltd <http://vlifesystems.com>
 // Licensed under an MIT licence.  Please see LICENSE.md for details.
 
 // Package rule implements rules to be tested against a dataset
@@ -58,29 +58,48 @@ type Valuer interface {
 }
 
 // Generate generates rules for rules that have registered a generator.
+// Start by passing 0 as stage, then keep incrementing it until the
+// second return argument indicates that there are no more rules to generate
+// by returning false.
 func Generate(
 	inputDescription *description.Description,
 	generationDesc GenerationDescriber,
-) ([]Rule, error) {
+	stage int,
+) ([]Rule, bool, error) {
 	err := checkRuleFieldsValid(inputDescription, generationDesc.Fields())
 	if err != nil {
-		return []Rule{}, err
+		return []Rule{}, false, err
 	}
 	rules := make([]Rule, 1)
 	rules[0] = NewTrue()
-	for _, generator := range generators {
-		newRules := generator(inputDescription, generationDesc)
-		rules = append(rules, newRules...)
+	moreRules := true
+
+	// The following is needed because range on maps aren't in a consistent order
+	generatorNames := make([]string, len(generators))
+	i := 0
+	for n, _ := range generators {
+		generatorNames[i] = n
+		i++
+	}
+	sort.Strings(generatorNames)
+
+	for j, name := range generatorNames {
+		if j == len(generators)-1 {
+			moreRules = false
+		}
+		if j == stage {
+			newRules := generators[name](inputDescription, generationDesc)
+			rules = append(rules, newRules...)
+			break
+		}
+		i++
 	}
 
-	if len(generationDesc.Fields()) == 2 {
-		cRules := Combine(rules)
-		rules = append(rules, cRules...)
-	}
 	Sort(rules)
-	return Uniq(rules), nil
+	return Uniq(rules), moreRules, nil
 }
 
+// Combine combines rules together using And and Or
 func Combine(rules []Rule) []Rule {
 	Sort(rules)
 	combinedRules := make([]Rule, 0)

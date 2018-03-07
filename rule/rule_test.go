@@ -358,16 +358,31 @@ func TestGenerate(t *testing.T) {
 		MustNewBetweenFV("position", dlit.MustNew(9), dlit.MustNew(12)),
 		MustNewOutsideFV("position", dlit.MustNew(9), dlit.MustNew(12)),
 	}
+
 	generationDesc := testhelpers.GenerationDesc{
 		DFields:     []string{"team", "teamOut", "level", "flow", "position"},
 		DArithmetic: true,
 	}
-	got, err := Generate(inputDescription, generationDesc)
-	if err != nil {
-		t.Fatalf("Generate: %s", err)
+	allGotRules := []Rule{}
+	for stage := 0; stage < 30; stage++ {
+		got, gotMoreRules, err :=
+			Generate(inputDescription, generationDesc, stage)
+		if err != nil {
+			t.Fatalf("Generate: %s", err)
+		}
+		if stage >= 25 && gotMoreRules {
+			t.Errorf("Generate - stage: %d - gotMoreRules: %t, wantMoreRules: %t",
+				stage, gotMoreRules, false)
+		}
+		if stage <= 19 && !gotMoreRules {
+			t.Errorf("Generate - stage: %d - gotMoreRules: %t, wantMoreRules: %t",
+				stage, gotMoreRules, true)
+		}
+		allGotRules = append(allGotRules, got...)
 	}
-	if err := rulesContain(got, wantRules); err != nil {
+	if err := rulesContain(allGotRules, wantRules); err != nil {
 		t.Errorf("Generate: %s", err)
+		t.Errorf("allGotRules: %s", allGotRules)
 	}
 }
 
@@ -391,235 +406,17 @@ func TestGenerate_no_rule_fields(t *testing.T) {
 		DFields:     []string{},
 		DArithmetic: true,
 	}
-	got, err := Generate(inputDescription, generationDesc)
-	if err != nil {
-		t.Fatalf("Generate: %s", err)
-	}
-	if err := rulesContain(got, wantRules); err != nil {
-		t.Errorf("Generate (rulesContain): %s", err)
-	}
-	if len(got) != len(wantRules) {
-		t.Errorf("Generate: len(got): %d, want: %d", len(got), len(wantRules))
-	}
-}
-
-func TestGenerate_counteqfv(t *testing.T) {
-	inputDescription := &description.Description{
-		map[string]*description.Field{
-			"teamA": {
-				Kind: description.String,
-				Values: map[string]description.Value{
-					"a": {dlit.NewString("a"), 3},
-					"b": {dlit.NewString("b"), 3},
-					"c": {dlit.NewString("c"), 3},
-				},
-				NumValues: 3,
-			},
-			"teamB": {
-				Kind: description.String,
-				Values: map[string]description.Value{
-					"a": {dlit.NewString("a"), 3},
-					"c": {dlit.NewString("c"), 1},
-					"d": {dlit.NewString("d"), 3},
-					"e": {dlit.NewString("e"), 3},
-				},
-				NumValues: 4,
-			},
-			"teamC": {
-				Kind: description.String,
-				Values: map[string]description.Value{
-					"z": {dlit.NewString("a"), 3},
-					"y": {dlit.NewString("c"), 1},
-					"c": {dlit.NewString("d"), 3},
-					"x": {dlit.NewString("e"), 3},
-				},
-				NumValues: 4,
-			},
-			"teamD": {
-				Kind: description.String,
-				Values: map[string]description.Value{
-					"a": {dlit.NewString("a"), 3},
-					"b": {dlit.NewString("c"), 1},
-					"c": {dlit.NewString("d"), 3},
-					"d": {dlit.NewString("e"), 3},
-					"e": {dlit.NewString("e"), 3},
-				},
-				NumValues: 5,
-			},
-			"teamZ": {
-				Kind: description.String,
-				Values: map[string]description.Value{
-					"a": {dlit.NewString("a"), 3},
-					"b": {dlit.NewString("c"), 1},
-					"c": {dlit.NewString("d"), 3},
-					"d": {dlit.NewString("e"), 3},
-				},
-				NumValues: 4,
-			},
-		},
-	}
-
-	wantRules := []Rule{
-		NewTrue(),
-		NewCountEQVF(
-			dlit.NewString("a"),
-			[]string{"teamA", "teamB"},
-			int64(0),
-		),
-		NewCountEQVF(
-			dlit.NewString("a"),
-			[]string{"teamA", "teamB"},
-			int64(1),
-		),
-		NewCountEQVF(
-			dlit.NewString("a"),
-			[]string{"teamA", "teamB"},
-			int64(2),
-		),
-		NewCountEQVF(
-			dlit.NewString("a"),
-			[]string{"teamA", "teamB", "teamC"},
-			int64(0),
-		),
-		NewCountEQVF(
-			dlit.NewString("a"),
-			[]string{"teamA", "teamB", "teamC"},
-			int64(1),
-		),
-		NewCountEQVF(
-			dlit.NewString("a"),
-			[]string{"teamA", "teamB", "teamC"},
-			int64(2),
-		),
-		NewCountEQVF(
-			dlit.NewString("a"),
-			[]string{"teamA", "teamB", "teamC"},
-			int64(3),
-		),
-		NewCountEQVF(
-			dlit.NewString("a"),
-			[]string{"teamA", "teamC"},
-			int64(0),
-		),
-		NewCountEQVF(
-			dlit.NewString("a"),
-			[]string{"teamA", "teamC"},
-			int64(1),
-		),
-		NewCountEQVF(
-			dlit.NewString("a"),
-			[]string{"teamA", "teamC"},
-			int64(2),
-		),
-		NewCountEQVF(
-			dlit.NewString("c"),
-			[]string{"teamA", "teamC"},
-			int64(1),
-		),
-		NewCountEQVF(
-			dlit.NewString("c"),
-			[]string{"teamA", "teamC"},
-			int64(1),
-		),
-		NewCountEQVF(
-			dlit.NewString("c"),
-			[]string{"teamA", "teamC"},
-			int64(2),
-		),
-	}
-	generationDesc := testhelpers.GenerationDesc{
-		DFields:     []string{"teamA", "teamB", "teamC", "teamD"},
-		DArithmetic: false,
-	}
-	got, err := Generate(inputDescription, generationDesc)
-	if err != nil {
-		t.Fatalf("Generate: %s", err)
-	}
-	if err := rulesContain(got, wantRules); err != nil {
-		t.Errorf("Generate: %s", err)
-	}
-}
-
-func TestGenerate_combinations(t *testing.T) {
-	inputDescription := &description.Description{
-		map[string]*description.Field{
-			"directionIn": {
-				Kind: description.String,
-				Values: map[string]description.Value{
-					"gogledd": {dlit.MustNew("gogledd"), 3},
-					"de":      {dlit.MustNew("de"), 3},
-				},
-			},
-			"directionOut": {
-				Kind: description.String,
-				Values: map[string]description.Value{
-					"dwyrain":   {dlit.MustNew("dwyrain"), 3},
-					"gorllewin": {dlit.MustNew("gorllewin"), 3},
-				},
-			},
-		}}
-
-	want := []Rule{
-		NewEQFV("directionIn", dlit.MustNew("de")),
-		NewEQFV("directionIn", dlit.MustNew("gogledd")),
-		NewEQFV("directionOut", dlit.MustNew("dwyrain")),
-		NewEQFV("directionOut", dlit.MustNew("gorllewin")),
-		MustNewAnd(
-			NewEQFV("directionIn", dlit.MustNew("de")),
-			NewEQFV("directionOut", dlit.MustNew("dwyrain")),
-		),
-		MustNewAnd(
-			NewEQFV("directionIn", dlit.MustNew("de")),
-			NewEQFV("directionOut", dlit.MustNew("gorllewin")),
-		),
-		MustNewAnd(
-			NewEQFV("directionIn", dlit.MustNew("gogledd")),
-			NewEQFV("directionOut", dlit.MustNew("dwyrain")),
-		),
-		MustNewAnd(
-			NewEQFV("directionIn", dlit.MustNew("gogledd")),
-			NewEQFV("directionOut", dlit.MustNew("gorllewin")),
-		),
-		MustNewOr(
-			NewEQFV("directionIn", dlit.MustNew("de")),
-			NewEQFV("directionIn", dlit.MustNew("gogledd")),
-		),
-		MustNewOr(
-			NewEQFV("directionIn", dlit.MustNew("de")),
-			NewEQFV("directionOut", dlit.MustNew("dwyrain")),
-		),
-		MustNewOr(
-			NewEQFV("directionIn", dlit.MustNew("de")),
-			NewEQFV("directionOut", dlit.MustNew("gorllewin")),
-		),
-		MustNewOr(
-			NewEQFV("directionIn", dlit.MustNew("gogledd")),
-			NewEQFV("directionOut", dlit.MustNew("dwyrain")),
-		),
-		MustNewOr(
-			NewEQFV("directionIn", dlit.MustNew("gogledd")),
-			NewEQFV("directionOut", dlit.MustNew("gorllewin")),
-		),
-		MustNewOr(
-			NewEQFV("directionOut", dlit.MustNew("dwyrain")),
-			NewEQFV("directionOut", dlit.MustNew("gorllewin")),
-		),
-		NewTrue(),
-	}
-
-	generationDesc := testhelpers.GenerationDesc{
-		DFields:     []string{"directionIn", "directionOut"},
-		DArithmetic: true,
-	}
-	got, err := Generate(inputDescription, generationDesc)
-	if err != nil {
-		t.Fatalf("Generate: %s", err)
-	}
-	Sort(got)
-	Sort(want)
-	if err := matchRulesUnordered(got, want); err != nil {
-		t.Errorf("matchRulesUnordered: %s\n got: %s\nwant: %s\n",
-			err, got, want)
+	for i := 0; i < 50; i++ {
+		got, _, err := Generate(inputDescription, generationDesc, i)
+		if err != nil {
+			t.Fatalf("Generate: %s", err)
+		}
+		if err := rulesContain(got, wantRules); err != nil {
+			t.Errorf("Generate (rulesContain): %s", err)
+		}
+		if len(got) != len(wantRules) {
+			t.Errorf("Generate: len(got): %d, want: %d", len(got), len(wantRules))
+		}
 	}
 }
 
@@ -654,7 +451,7 @@ func TestGenerate_errors(t *testing.T) {
 			DFields:     c.ruleFields,
 			DArithmetic: true,
 		}
-		_, err := Generate(inputDescription, generationDesc)
+		_, _, err := Generate(inputDescription, generationDesc, 0)
 		if err == nil || err.Error() != c.wantErr.Error() {
 			t.Errorf("Generate - err: %s, wantErr: %s", err, c.wantErr)
 		}
