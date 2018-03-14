@@ -58,45 +58,24 @@ type Valuer interface {
 }
 
 // Generate generates rules for rules that have registered a generator.
-// Start by passing 0 as stage, then keep incrementing it until the
-// second return argument indicates that there are no more rules to generate
-// by returning false.
 func Generate(
 	inputDescription *description.Description,
 	generationDesc GenerationDescriber,
-	stage int,
-) ([]Rule, bool, error) {
+) ([]Rule, error) {
 	err := checkRuleFieldsValid(inputDescription, generationDesc.Fields())
 	if err != nil {
-		return []Rule{}, false, err
+		return []Rule{}, err
 	}
 	rules := make([]Rule, 1)
 	rules[0] = NewTrue()
-	moreRules := true
 
-	// The following is needed because range on maps aren't in a consistent order
-	generatorNames := make([]string, len(generators))
-	i := 0
-	for n, _ := range generators {
-		generatorNames[i] = n
-		i++
-	}
-	sort.Strings(generatorNames)
-
-	for j, name := range generatorNames {
-		if j == len(generators)-1 {
-			moreRules = false
-		}
-		if j == stage {
-			newRules := generators[name](inputDescription, generationDesc)
-			rules = append(rules, newRules...)
-			break
-		}
-		i++
+	for _, generator := range generators {
+		newRules := generator(inputDescription, generationDesc)
+		rules = append(rules, newRules...)
 	}
 
 	Sort(rules)
-	return Uniq(rules), moreRules, nil
+	return Uniq(rules), nil
 }
 
 // Combine combines rules together using And and Or

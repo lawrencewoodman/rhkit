@@ -110,37 +110,31 @@ func processGenerate(
 	numUserRules int,
 	opts Options,
 ) error {
-	for stage := 0; ; stage++ {
-		generatedRules, moreRules, err :=
-			rule.Generate(fieldDescriptions, opts, stage)
-		if err != nil {
-			return GenerateRulesError{Err: err}
-		}
-		if err := ass.AssessRules(dataset, generatedRules); err != nil {
-			return AssessError{Err: err}
-		}
-
-		ass.Sort(sortOrder)
-		ass.Refine()
-		if !moreRules {
-			break
-		}
+	generatedRules, err := rule.Generate(fieldDescriptions, opts)
+	if err != nil {
+		return GenerateRulesError{Err: err}
 	}
+	if len(generatedRules) < 2 {
+		return ErrNoRulesGenerated
+	}
+
+	if err := ass.AssessRules(dataset, generatedRules); err != nil {
+		return AssessError{Err: err}
+	}
+
+	ass.Sort(sortOrder)
+	ass.Refine()
 
 	if len(opts.Fields()) == 2 {
 		cRules := rule.Combine(ass.Rules())
 		if err := ass.AssessRules(dataset, cRules); err != nil {
 			return AssessError{Err: err}
 		}
-
 		ass.Sort(sortOrder)
 		ass.Refine()
 	}
 
 	bestRules := ass.Rules()
-	if len(bestRules) < 2 {
-		return ErrNoRulesGenerated
-	}
 
 	tweakableRules := rule.Tweak(1, bestRules, fieldDescriptions)
 	if err := ass.AssessRules(dataset, tweakableRules); err != nil {

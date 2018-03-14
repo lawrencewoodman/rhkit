@@ -363,26 +363,12 @@ func TestGenerate(t *testing.T) {
 		DFields:     []string{"team", "teamOut", "level", "flow", "position"},
 		DArithmetic: true,
 	}
-	allGotRules := []Rule{}
-	for stage := 0; stage < 30; stage++ {
-		got, gotMoreRules, err :=
-			Generate(inputDescription, generationDesc, stage)
-		if err != nil {
-			t.Fatalf("Generate: %s", err)
-		}
-		if stage >= 25 && gotMoreRules {
-			t.Errorf("Generate - stage: %d - gotMoreRules: %t, wantMoreRules: %t",
-				stage, gotMoreRules, false)
-		}
-		if stage <= 19 && !gotMoreRules {
-			t.Errorf("Generate - stage: %d - gotMoreRules: %t, wantMoreRules: %t",
-				stage, gotMoreRules, true)
-		}
-		allGotRules = append(allGotRules, got...)
+	got, err := Generate(inputDescription, generationDesc)
+	if err != nil {
+		t.Fatalf("Generate: %s", err)
 	}
-	if err := rulesContain(allGotRules, wantRules); err != nil {
+	if err := rulesContain(got, wantRules); err != nil {
 		t.Errorf("Generate: %s", err)
-		t.Errorf("allGotRules: %s", allGotRules)
 	}
 }
 
@@ -406,17 +392,15 @@ func TestGenerate_no_rule_fields(t *testing.T) {
 		DFields:     []string{},
 		DArithmetic: true,
 	}
-	for i := 0; i < 50; i++ {
-		got, _, err := Generate(inputDescription, generationDesc, i)
-		if err != nil {
-			t.Fatalf("Generate: %s", err)
-		}
-		if err := rulesContain(got, wantRules); err != nil {
-			t.Errorf("Generate (rulesContain): %s", err)
-		}
-		if len(got) != len(wantRules) {
-			t.Errorf("Generate: len(got): %d, want: %d", len(got), len(wantRules))
-		}
+	got, err := Generate(inputDescription, generationDesc)
+	if err != nil {
+		t.Fatalf("Generate: %s", err)
+	}
+	if err := rulesContain(got, wantRules); err != nil {
+		t.Errorf("Generate (rulesContain): %s", err)
+	}
+	if len(got) != len(wantRules) {
+		t.Errorf("Generate: len(got): %d, want: %d", len(got), len(wantRules))
 	}
 }
 
@@ -451,7 +435,7 @@ func TestGenerate_errors(t *testing.T) {
 			DFields:     c.ruleFields,
 			DArithmetic: true,
 		}
-		_, _, err := Generate(inputDescription, generationDesc, 0)
+		_, err := Generate(inputDescription, generationDesc)
 		if err == nil || err.Error() != c.wantErr.Error() {
 			t.Errorf("Generate - err: %s, wantErr: %s", err, c.wantErr)
 		}
