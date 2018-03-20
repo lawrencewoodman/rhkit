@@ -100,7 +100,7 @@ func TestProcess(t *testing.T) {
 			GenerateArithmeticRules: true,
 		},
 			wantMinNumRules: 1100,
-			wantMaxNumRules: 1300,
+			wantMaxNumRules: 1400,
 		},
 	}
 	for i, c := range cases {

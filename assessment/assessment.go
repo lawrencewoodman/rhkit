@@ -332,11 +332,12 @@ func (sortedAssessment *Assessment) excludePoorRules() {
 	trueFound := false
 	goodRuleAssessments := make([]*RuleAssessment, 0)
 	for _, a := range sortedAssessment.RuleAssessments {
-		numMatches, numMatchesIsInt := a.Aggregators["numMatches"].Int()
-		if !numMatchesIsInt {
-			panic("numMatches aggregator isn't an int")
+		percentMatches, percentMatchesIsFloat :=
+			a.Aggregators["percentMatches"].Float()
+		if !percentMatchesIsFloat {
+			panic("percentMatches aggregator isn't a float")
 		}
-		if numMatches > 1 {
+		if percentMatches >= 0.005 {
 			goodRuleAssessments = append(goodRuleAssessments, a)
 		}
 		if _, isTrueRule := a.Rule.(rule.True); isTrueRule {

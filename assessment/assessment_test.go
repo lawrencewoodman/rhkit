@@ -837,8 +837,8 @@ func TestRefine(t *testing.T) {
 			{
 				Rule: rule.NewGEFV("band", dlit.MustNew(4)),
 				Aggregators: map[string]*dlit.Literal{
-					"numMatches":     dlit.MustNew("150"),
-					"percentMatches": dlit.MustNew("50"),
+					"numMatches":     dlit.MustNew("2"),
+					"percentMatches": dlit.MustNew("0.005"),
 					"numIncomeGt2":   dlit.MustNew("1"),
 					"goalsScore":     dlit.MustNew(1),
 				},
@@ -947,8 +947,8 @@ func TestRefine(t *testing.T) {
 			{
 				Rule: rule.NewEQFV("band", dlit.MustNew(7)),
 				Aggregators: map[string]*dlit.Literal{
-					"numMatches":     dlit.MustNew("0"),
-					"percentMatches": dlit.MustNew("43"),
+					"numMatches":     dlit.MustNew("1"),
+					"percentMatches": dlit.MustNew("0.0045"),
 					"numIncomeGt2":   dlit.MustNew("2"),
 					"goalsScore":     dlit.MustNew(0.1),
 				},
