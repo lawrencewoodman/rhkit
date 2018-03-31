@@ -329,24 +329,16 @@ func (sortedAssessment *Assessment) excludeSameRecordsRules() {
 }
 
 func (sortedAssessment *Assessment) excludePoorRules() {
-	trueFound := false
-	goodRuleAssessments := make([]*RuleAssessment, 0)
+	goodRuleAssessments := []*RuleAssessment{}
 	for _, a := range sortedAssessment.RuleAssessments {
 		percentMatches, percentMatchesIsFloat :=
 			a.Aggregators["percentMatches"].Float()
 		if !percentMatchesIsFloat {
 			panic("percentMatches aggregator isn't a float")
 		}
-		if percentMatches >= 0.005 {
+		if percentMatches >= 0.5 {
 			goodRuleAssessments = append(goodRuleAssessments, a)
 		}
-		if _, isTrueRule := a.Rule.(rule.True); isTrueRule {
-			trueFound = true
-			break
-		}
-	}
-	if !trueFound {
-		panic("No True rule found")
 	}
 	sortedAssessment.RuleAssessments = goodRuleAssessments
 }

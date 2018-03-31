@@ -838,7 +838,7 @@ func TestRefine(t *testing.T) {
 				Rule: rule.NewGEFV("band", dlit.MustNew(4)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("2"),
-					"percentMatches": dlit.MustNew("0.005"),
+					"percentMatches": dlit.MustNew("0.5"),
 					"numIncomeGt2":   dlit.MustNew("1"),
 					"goalsScore":     dlit.MustNew(1),
 				},
@@ -984,10 +984,36 @@ func TestRefine(t *testing.T) {
 				},
 			},
 			{
-				Rule: rule.NewGEFV("cost", dlit.MustNew(1.2)),
+				Rule: rule.NewGEFV("cost", dlit.MustNew(1.9)),
 				Aggregators: map[string]*dlit.Literal{
 					"numMatches":     dlit.MustNew("141"),
-					"percentMatches": dlit.MustNew("41"),
+					"percentMatches": dlit.MustNew("0.5"),
+					"numIncomeGt2":   dlit.MustNew("2"),
+					"goalsScore":     dlit.MustNew(0.1),
+				},
+				Goals: []*GoalAssessment{
+					{"numIncomeGt2 == 1", false},
+					{"numIncomeGt2 == 2", true},
+				},
+			},
+			{
+				Rule: rule.NewGEFV("cost", dlit.MustNew(1.7)),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("141"),
+					"percentMatches": dlit.MustNew("0.45"),
+					"numIncomeGt2":   dlit.MustNew("2"),
+					"goalsScore":     dlit.MustNew(0.1),
+				},
+				Goals: []*GoalAssessment{
+					{"numIncomeGt2 == 1", false},
+					{"numIncomeGt2 == 2", true},
+				},
+			},
+			{
+				Rule: rule.NewLEFV("cost", dlit.MustNew(1.2)),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches":     dlit.MustNew("147"),
+					"percentMatches": dlit.MustNew("0.6"),
 					"numIncomeGt2":   dlit.MustNew("2"),
 					"goalsScore":     dlit.MustNew(0.1),
 				},
@@ -1004,6 +1030,8 @@ func TestRefine(t *testing.T) {
 		rule.NewInFV("team", testhelpers.MakeStringsDlitSlice("a", "b")),
 		rule.NewInFV("band", testhelpers.MakeStringsDlitSlice("99", "23")),
 		rule.NewTrue(),
+		rule.NewGEFV("cost", dlit.MustNew(1.9)),
+		rule.NewLEFV("cost", dlit.MustNew(1.2)),
 	}
 	sortedAssessment.Refine()
 	gotRules := sortedAssessment.Rules()
@@ -1507,7 +1535,7 @@ func TestRefine_outside(t *testing.T) {
 	}
 }
 
-func TestRefine_panic_1(t *testing.T) {
+func TestRefine_panic(t *testing.T) {
 	testPurpose := "Ensure panics if assessment not sorted"
 	unsortedAssessment := &Assessment{
 		NumRecords: 20,
@@ -1544,52 +1572,6 @@ func TestRefine_panic_1(t *testing.T) {
 		}
 	}()
 	unsortedAssessment.Refine()
-	if !paniced {
-		t.Errorf("Test: %s\n", testPurpose)
-		t.Errorf("Refine() - failed to panic with: %s", wantPanic)
-	}
-}
-
-func TestRefine_panic_2(t *testing.T) {
-	testPurpose := "Ensure panics if True rule missing"
-	sortedAssessment := &Assessment{
-		NumRecords: 20,
-		flags: map[string]bool{
-			"sorted": true,
-		},
-		RuleAssessments: []*RuleAssessment{
-			{
-				Rule: rule.NewGEFV("band", dlit.MustNew(4)),
-				Aggregators: map[string]*dlit.Literal{
-					"numMatches":     dlit.MustNew("2"),
-					"percentMatches": dlit.MustNew("50"),
-				},
-				Goals: []*GoalAssessment{},
-			},
-			{
-				Rule: rule.NewGEFV("team", dlit.MustNew(7)),
-				Aggregators: map[string]*dlit.Literal{
-					"numMatches":     dlit.MustNew("4"),
-					"percentMatches": dlit.MustNew("100"),
-				},
-				Goals: []*GoalAssessment{},
-			},
-		},
-	}
-	paniced := false
-	wantPanic := "No True rule found"
-	defer func() {
-		if r := recover(); r != nil {
-			if r.(string) == wantPanic {
-				paniced = true
-			} else {
-				t.Errorf("Test: %s\n", testPurpose)
-				t.Errorf("Refine() - got panic: %s, wanted: %s",
-					r, wantPanic)
-			}
-		}
-	}()
-	sortedAssessment.Refine()
 	if !paniced {
 		t.Errorf("Test: %s\n", testPurpose)
 		t.Errorf("Refine() - failed to panic with: %s", wantPanic)
