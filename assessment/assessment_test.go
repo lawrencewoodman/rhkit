@@ -1637,6 +1637,18 @@ func TestTruncateRuleAssessments(t *testing.T) {
 					{"numIncomeGt2 == 1", false},
 				},
 			},
+			{
+				Rule: rule.NewInFV(
+					"band",
+					testhelpers.MakeStringsDlitSlice("98", "24"),
+				),
+				Aggregators: map[string]*dlit.Literal{
+					"numMatches": dlit.MustNew("4"),
+				},
+				Goals: []*GoalAssessment{
+					{"numIncomeGt2 == 1", false},
+				},
+			},
 		},
 	}
 	// The increasing order of the numRules is important as this also checks that
@@ -1690,6 +1702,17 @@ func TestTruncateRuleAssessments(t *testing.T) {
 				rule.NewInFV("team", testhelpers.MakeStringsDlitSlice("a", "b")),
 				rule.NewInFV("band", testhelpers.MakeStringsDlitSlice("99", "23")),
 				rule.NewTrue(),
+				rule.NewInFV("band", testhelpers.MakeStringsDlitSlice("98", "24")),
+			},
+		},
+		{7,
+			[]rule.Rule{
+				rule.NewGEFV("band", dlit.MustNew(4)),
+				rule.NewInFV("band", testhelpers.MakeStringsDlitSlice("4", "3", "2")),
+				rule.NewInFV("team", testhelpers.MakeStringsDlitSlice("a", "b")),
+				rule.NewInFV("band", testhelpers.MakeStringsDlitSlice("99", "23")),
+				rule.NewTrue(),
+				rule.NewInFV("band", testhelpers.MakeStringsDlitSlice("98", "24")),
 			},
 		},
 	}
@@ -1748,7 +1771,7 @@ func TestTruncateRuleAssessment_panic_1(t *testing.T) {
 }
 
 func TestTruncateRuleAssessment_panic_2(t *testing.T) {
-	testPurpose := "Ensure panics if assessment not refined"
+	testPurpose := "Ensure panics if no True rule"
 	unsortedAssessment := &Assessment{
 		NumRecords: 20,
 		flags: map[string]bool{
@@ -1763,18 +1786,10 @@ func TestTruncateRuleAssessment_panic_2(t *testing.T) {
 				},
 				Goals: []*GoalAssessment{},
 			},
-			{
-				Rule: rule.NewTrue(),
-				Aggregators: map[string]*dlit.Literal{
-					"numMatches":     dlit.MustNew("4"),
-					"percentMatches": dlit.MustNew("100"),
-				},
-				Goals: []*GoalAssessment{},
-			},
 		},
 	}
 	paniced := false
-	wantPanic := "Assessment isn't refined"
+	wantPanic := "Assessment doesn't have True rule"
 	defer func() {
 		if r := recover(); r != nil {
 			if r.(string) == wantPanic {

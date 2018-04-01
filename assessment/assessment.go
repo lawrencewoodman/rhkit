@@ -119,38 +119,52 @@ func (a *Assessment) Merge(o *Assessment) (*Assessment, error) {
 	return r, nil
 }
 
-// Assessment must be sorted and refined first
+// Assessment must be sorted first
 func (a *Assessment) TruncateRuleAssessments(
 	numRuleAssessments int,
 ) *Assessment {
 	if !a.IsSorted() {
 		panic("Assessment isn't sorted")
 	}
-	if !a.IsRefined() {
-		panic("Assessment isn't refined")
-	}
-	if len(a.RuleAssessments) < numRuleAssessments {
-		numRuleAssessments = len(a.RuleAssessments)
-	}
-	numNonTrueRuleAssessments := numRuleAssessments - 1
-
-	ruleAssessments := make([]*RuleAssessment, numRuleAssessments)
-	for i := 0; i < numNonTrueRuleAssessments; i++ {
-		ruleAssessments[i] = a.RuleAssessments[i].clone()
-	}
-
-	if numRuleAssessments > 0 {
-		trueRuleAssessment := a.RuleAssessments[len(a.RuleAssessments)-1]
-		if _, isTrueRule := trueRuleAssessment.Rule.(rule.True); !isTrueRule {
-			panic("Assessment doesn't have True rule last")
+	var trueRuleAssessment *RuleAssessment
+	for _, ra := range a.RuleAssessments {
+		if _, isTrueRule := ra.Rule.(rule.True); isTrueRule {
+			trueRuleAssessment = ra
 		}
+	}
 
-		ruleAssessments[numNonTrueRuleAssessments] = trueRuleAssessment
+	if trueRuleAssessment == nil {
+		panic("Assessment doesn't have True rule")
+	}
+
+	trueRuleAppended := false
+	ruleAssessments := []*RuleAssessment{}
+	for i, ra := range a.RuleAssessments {
+		if i >= numRuleAssessments {
+			break
+		}
+		_, isTrueRule := ra.Rule.(rule.True)
+		if isTrueRule {
+			if trueRuleAppended {
+				continue
+			} else {
+				trueRuleAppended = true
+			}
+		}
+		ruleAssessments = append(ruleAssessments, ra.clone())
+	}
+
+	if !trueRuleAppended && numRuleAssessments > 0 {
+		if len(ruleAssessments) >= numRuleAssessments {
+			ruleAssessments[len(ruleAssessments)-1] = trueRuleAssessment.clone()
+		} else {
+			ruleAssessments = append(ruleAssessments, trueRuleAssessment.clone())
+		}
 	}
 
 	flags := map[string]bool{
 		"sorted":  true,
-		"refined": true,
+		"refined": false,
 	}
 	return &Assessment{
 		NumRecords:      a.NumRecords,
