@@ -63,10 +63,6 @@ func (a *Assessment) IsSorted() bool {
 	return a.flags["sorted"]
 }
 
-func (a *Assessment) IsRefined() bool {
-	return a.flags["refined"]
-}
-
 // TODO: Test this
 func (a *Assessment) IsEqual(o *Assessment) bool {
 	if a.NumRecords != o.NumRecords {
@@ -103,7 +99,6 @@ func (sortedAssessment *Assessment) Refine() {
 	sortedAssessment.excludePoorRules()
 	sortedAssessment.excludeSameRecordsRules()
 	sortedAssessment.excludePoorerOverlappingRules()
-	sortedAssessment.flags["refined"] = true
 }
 
 func (a *Assessment) Merge(o *Assessment) (*Assessment, error) {
@@ -163,8 +158,7 @@ func (a *Assessment) TruncateRuleAssessments(
 	}
 
 	flags := map[string]bool{
-		"sorted":  true,
-		"refined": false,
+		"sorted": true,
 	}
 	return &Assessment{
 		NumRecords:      a.NumRecords,
@@ -276,8 +270,7 @@ func processDataset(
 
 func (a *Assessment) resetFlags() {
 	a.flags = map[string]bool{
-		"sorted":  false,
-		"refined": false,
+		"sorted": false,
 	}
 }
 

@@ -53,7 +53,6 @@ func TestAssessRules(t *testing.T) {
 		t.Fatalf("MakeGoals: %s", err)
 	}
 	wantIsSorted := false
-	wantIsRefined := false
 	wantNumRecords := int64(len(records))
 	wantRuleAssessments := []*RuleAssessment{
 		{
@@ -127,15 +126,13 @@ func TestAssessRules(t *testing.T) {
 		gotAssessment,
 		wantNumRecords,
 		wantIsSorted,
-		wantIsRefined,
 		wantRuleAssessments,
 	)
 	if !assessmentsMatch {
 		t.Errorf("AssessRules: assessments don't match")
 		t.Errorf("got: %v", gotAssessment)
-		t.Errorf("wantRuleAssessments: %v, wantNumRecords: %d, wantIsSorted: %t, wantIsRefined: %t",
-			wantRuleAssessments,
-			wantNumRecords, wantIsSorted, wantIsRefined)
+		t.Errorf("wantRuleAssessments: %v, wantNumRecords: %d, wantIsSorted: %t",
+			wantRuleAssessments, wantNumRecords, wantIsSorted)
 	}
 }
 
@@ -322,7 +319,6 @@ func TestProcessRecord(t *testing.T) {
 		t.Fatalf("MakeGoals: %s", err)
 	}
 	wantIsSorted := false
-	wantIsRefined := false
 	wantNumRecords := int64(1)
 	wantRuleAssessments := []*RuleAssessment{
 		{
@@ -399,15 +395,13 @@ func TestProcessRecord(t *testing.T) {
 		gotAssessment,
 		wantNumRecords,
 		wantIsSorted,
-		wantIsRefined,
 		wantRuleAssessments,
 	)
 	if !assessmentsMatch {
 		t.Errorf("ProcessRecord: assessments don't match")
 		t.Errorf("got: %v", gotAssessment)
-		t.Errorf("wantRuleAssessments: %v, wantNumRecords: %d, wantIsSorted: %t, wantIsRefined: %t",
-			wantRuleAssessments,
-			wantNumRecords, wantIsSorted, wantIsRefined)
+		t.Errorf("wantRuleAssessments: %v, wantNumRecords: %d, wantIsSorted: %t",
+			wantRuleAssessments, wantNumRecords, wantIsSorted)
 	}
 }
 
@@ -669,8 +663,7 @@ func TestMerge(t *testing.T) {
 	wantAssessment := &Assessment{
 		NumRecords: 8,
 		flags: map[string]bool{
-			"sorted":  false,
-			"refined": false,
+			"sorted": false,
 		},
 		RuleAssessments: []*RuleAssessment{
 			{
@@ -1582,8 +1575,7 @@ func TestTruncateRuleAssessments(t *testing.T) {
 	refinedAssessment := &Assessment{
 		NumRecords: 20,
 		flags: map[string]bool{
-			"sorted":  true,
-			"refined": true,
+			"sorted": true,
 		},
 		RuleAssessments: []*RuleAssessment{
 			{
@@ -2048,16 +2040,12 @@ func areAssessmentsEqv(
 	got *Assessment,
 	wantNumRecords int64,
 	wantIsSorted bool,
-	wantIsRefined bool,
 	wantRuleAssessments []*RuleAssessment,
 ) bool {
 	if got.NumRecords != wantNumRecords {
 		return false
 	}
 	if got.IsSorted() != wantIsSorted {
-		return false
-	}
-	if got.IsRefined() != wantIsRefined {
 		return false
 	}
 	if len(got.RuleAssessments) != len(wantRuleAssessments) {
