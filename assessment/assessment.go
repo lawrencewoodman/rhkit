@@ -113,43 +113,38 @@ func (a *Assessment) Merge(o *Assessment) (*Assessment, error) {
 	return r, nil
 }
 
+func getTrueRuleAssessment(ruleAssessments []*RuleAssessment) *RuleAssessment {
+	for _, ra := range ruleAssessments {
+		if _, isTrueRule := ra.Rule.(rule.True); isTrueRule {
+			return ra
+		}
+	}
+	return nil
+}
+
 // Assessment must be sorted first
 func (a *Assessment) TruncateRuleAssessments(
-	numRuleAssessments int,
+	maxRuleAssessments int,
 ) *Assessment {
 	if !a.IsSorted() {
 		panic("Assessment isn't sorted")
 	}
-	var trueRuleAssessment *RuleAssessment
-	for _, ra := range a.RuleAssessments {
-		if _, isTrueRule := ra.Rule.(rule.True); isTrueRule {
-			trueRuleAssessment = ra
-		}
-	}
+	trueRuleAssessment := getTrueRuleAssessment(a.RuleAssessments)
 
 	if trueRuleAssessment == nil {
 		panic("Assessment doesn't have True rule")
 	}
 
-	trueRuleAppended := false
 	ruleAssessments := []*RuleAssessment{}
 	for i, ra := range a.RuleAssessments {
-		if i >= numRuleAssessments {
+		if i >= maxRuleAssessments {
 			break
-		}
-		_, isTrueRule := ra.Rule.(rule.True)
-		if isTrueRule {
-			if trueRuleAppended {
-				continue
-			} else {
-				trueRuleAppended = true
-			}
 		}
 		ruleAssessments = append(ruleAssessments, ra.clone())
 	}
 
-	if !trueRuleAppended && numRuleAssessments > 0 {
-		if len(ruleAssessments) >= numRuleAssessments {
+	if getTrueRuleAssessment(ruleAssessments) != nil && maxRuleAssessments > 0 {
+		if len(ruleAssessments) >= maxRuleAssessments {
 			ruleAssessments[len(ruleAssessments)-1] = trueRuleAssessment.clone()
 		} else {
 			ruleAssessments = append(ruleAssessments, trueRuleAssessment.clone())
