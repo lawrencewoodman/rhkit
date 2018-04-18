@@ -90,7 +90,7 @@ func (a *Assessment) IsEqual(o *Assessment) bool {
 	return true
 }
 
-// Refine removes rules that are poorer than similar rules
+// Refine removes ruleAssessments that are poorer than similar rules
 func (sortedAssessment *Assessment) Refine() {
 	if !sortedAssessment.IsSorted() {
 		panic("Assessment isn't sorted")
