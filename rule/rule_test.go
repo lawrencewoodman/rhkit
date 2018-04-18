@@ -444,10 +444,11 @@ func TestGenerate_errors(t *testing.T) {
 
 func TestCombine(t *testing.T) {
 	cases := []struct {
-		in   []Rule
-		want []Rule
+		inRules       []Rule
+		inMaxNumRules int
+		want          []Rule
 	}{
-		{in: []Rule{
+		{inRules: []Rule{
 			NewEQFV("group", dlit.MustNew("a")),
 			NewGEFV("band", dlit.MustNew(4)),
 			NewInFV(
@@ -455,6 +456,7 @@ func TestCombine(t *testing.T) {
 				testhelpers.MakeStringsDlitSlice("red", "green", "blue"),
 			),
 		},
+			inMaxNumRules: 100,
 			want: []Rule{
 				MustNewAnd(
 					NewGEFV("band", dlit.MustNew(4)),
@@ -494,12 +496,13 @@ func TestCombine(t *testing.T) {
 				),
 			},
 		},
-		{in: []Rule{
+		{inRules: []Rule{
 			NewEQFV("team", dlit.MustNew("a")),
 			NewGEFV("band", dlit.MustNew(4)),
 			NewGEFV("band", dlit.MustNew(2)),
 			NewGEFV("flow", dlit.MustNew(6)),
 		},
+			inMaxNumRules: 100,
 			want: []Rule{
 				MustNewAnd(NewGEFV("band", dlit.MustNew(2)),
 					NewGEFV("flow", dlit.MustNew(6))),
@@ -523,7 +526,25 @@ func TestCombine(t *testing.T) {
 					NewEQFV("team", dlit.MustNew("a"))),
 			},
 		},
-		{in: []Rule{
+		{inRules: []Rule{
+			NewEQFV("team", dlit.MustNew("a")),
+			NewGEFV("band", dlit.MustNew(4)),
+			NewGEFV("band", dlit.MustNew(2)),
+			NewGEFV("flow", dlit.MustNew(6)),
+		},
+			inMaxNumRules: 4,
+			want: []Rule{
+				MustNewAnd(NewGEFV("band", dlit.MustNew(2)),
+					NewGEFV("flow", dlit.MustNew(6))),
+				MustNewAnd(NewGEFV("band", dlit.MustNew(2)),
+					NewEQFV("team", dlit.MustNew("a"))),
+				MustNewOr(NewGEFV("band", dlit.MustNew(2)),
+					NewGEFV("flow", dlit.MustNew(6))),
+				MustNewOr(NewGEFV("band", dlit.MustNew(2)),
+					NewEQFV("team", dlit.MustNew("a"))),
+			},
+		},
+		{inRules: []Rule{
 			NewInFV(
 				"team",
 				testhelpers.MakeStringsDlitSlice("pink", "yellow", "blue"),
@@ -533,6 +554,7 @@ func TestCombine(t *testing.T) {
 				testhelpers.MakeStringsDlitSlice("red", "green", "blue"),
 			),
 		},
+			inMaxNumRules: 100,
 			want: []Rule{
 				NewInFV(
 					"team",
@@ -543,7 +565,7 @@ func TestCombine(t *testing.T) {
 				),
 			},
 		},
-		{in: []Rule{
+		{inRules: []Rule{
 			NewInFV(
 				"team",
 				testhelpers.MakeStringsDlitSlice("pink", "yellow", "blue"),
@@ -553,6 +575,7 @@ func TestCombine(t *testing.T) {
 				testhelpers.MakeStringsDlitSlice("red", "green", "blue"),
 			),
 		},
+			inMaxNumRules: 100,
 			want: []Rule{
 				MustNewAnd(
 					NewInFV(
@@ -576,18 +599,67 @@ func TestCombine(t *testing.T) {
 				),
 			},
 		},
-		{in: []Rule{NewEQFV("team", dlit.MustNew("a"))},
-			want: []Rule{}},
-		{in: []Rule{}, want: []Rule{}},
+		{inRules: []Rule{
+			NewInFV(
+				"team",
+				testhelpers.MakeStringsDlitSlice("pink", "yellow", "blue"),
+			),
+			NewInFV(
+				"group",
+				testhelpers.MakeStringsDlitSlice("red", "green", "blue"),
+			),
+		},
+			inMaxNumRules: 1,
+			want: []Rule{
+				MustNewAnd(
+					NewInFV(
+						"group",
+						testhelpers.MakeStringsDlitSlice("red", "green", "blue"),
+					),
+					NewInFV(
+						"team",
+						testhelpers.MakeStringsDlitSlice("pink", "yellow", "blue"),
+					),
+				),
+			},
+		},
+		{inRules: []Rule{
+			NewInFV(
+				"team",
+				testhelpers.MakeStringsDlitSlice("pink", "yellow", "blue"),
+			),
+			NewInFV(
+				"group",
+				testhelpers.MakeStringsDlitSlice("red", "green", "blue"),
+			),
+		},
+			inMaxNumRules: 0,
+			want: []Rule{
+				MustNewAnd(
+					NewInFV(
+						"group",
+						testhelpers.MakeStringsDlitSlice("red", "green", "blue"),
+					),
+					NewInFV(
+						"team",
+						testhelpers.MakeStringsDlitSlice("pink", "yellow", "blue"),
+					),
+				),
+			},
+		},
+		{inRules: []Rule{NewEQFV("team", dlit.MustNew("a"))},
+			inMaxNumRules: 100,
+			want:          []Rule{}},
+		{inRules: []Rule{}, inMaxNumRules: 100, want: []Rule{}},
 	}
 
-	for _, c := range cases {
-		gotRules := Combine(c.in)
+	for i, c := range cases {
+		gotRules := Combine(c.inRules, c.inMaxNumRules)
 		if err := matchRulesUnordered(gotRules, c.want); err != nil {
 			gotRuleStrs := rulesToSortedStrings(gotRules)
 			wantRuleStrs := rulesToSortedStrings(c.want)
-			t.Errorf("matchRulesUnordered() rules don't match: %s\n got: %s\n want: %s\n",
-				err, gotRuleStrs, wantRuleStrs)
+			t.Errorf("[%d] matchRulesUnordered() rules don't match: %s\n got: %s\n want: %s\n",
+				i, err, gotRuleStrs, wantRuleStrs)
 		}
 	}
 }
