@@ -309,6 +309,7 @@ func (sortedAssessment *Assessment) excludeSameRecordsRules() {
 		for k, v := range lastAggregators {
 			if a.Aggregators[k].String() != v.String() {
 				aggregatorsMatch = false
+				break
 			}
 		}
 		switch a.Rule.(type) {
