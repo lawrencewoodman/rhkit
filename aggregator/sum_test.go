@@ -63,26 +63,29 @@ func TestSumResult(t *testing.T) {
 }
 
 func TestSumNextRecord_errors(t *testing.T) {
-	as := MustNew("a", "sum", "cost + 2")
-	ai := as.New()
 	cases := []struct {
 		record map[string]*dlit.Literal
+		arg    string
 		want   error
 	}{
 		{record: map[string]*dlit.Literal{},
+			arg: "cost + 2",
 			want: dexpr.InvalidExprError{
 				Expr: "cost + 2",
 				Err:  dexpr.VarNotExistError("cost"),
 			},
 		},
 		{record: map[string]*dlit.Literal{"cost": dlit.NewString("hello")},
+			arg: "cost",
 			want: dexpr.InvalidExprError{
-				Expr: "cost + 2",
+				Expr: "sum+value",
 				Err:  dexpr.ErrIncompatibleTypes,
 			},
 		},
 	}
 	for _, c := range cases {
+		as := MustNew("a", "sum", c.arg)
+		ai := as.New()
 		got := ai.NextRecord(c.record, true)
 		if got == nil || got.Error() != c.want.Error() {
 			t.Errorf("NextRecord: got: %s, want: %s", got, c.want)
