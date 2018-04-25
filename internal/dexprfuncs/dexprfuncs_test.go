@@ -7,6 +7,82 @@ import (
 	"testing"
 )
 
+var errThisIsAnError = errors.New("this is an error")
+
+func TestIfFunc(t *testing.T) {
+	cases := []struct {
+		in   []*dlit.Literal
+		want *dlit.Literal
+	}{
+		{in: []*dlit.Literal{
+			dlit.MustNew(1),
+			dlit.NewString("fred"),
+			dlit.NewString("martha"),
+		},
+			want: dlit.NewString("fred"),
+		},
+		{in: []*dlit.Literal{
+			dlit.MustNew(0),
+			dlit.NewString("fred"),
+			dlit.NewString("martha"),
+		},
+			want: dlit.NewString("martha"),
+		},
+	}
+
+	for i, c := range cases {
+		got, err := ifFunc(c.in)
+		if err != nil {
+			t.Errorf("[%d] ifFunc: %s", i, err)
+		}
+		if got.String() != c.want.String() {
+			t.Errorf("[%d] ifFunc got: %s, want: %s", i, got, c.want)
+		}
+	}
+}
+
+func TestIfFunc_errors(t *testing.T) {
+	cases := []struct {
+		in   []*dlit.Literal
+		want *dlit.Literal
+		err  error
+	}{
+		{in: []*dlit.Literal{
+			dlit.NewString("bob"),
+			dlit.NewString("martha"),
+		},
+			want: dlit.MustNew(WrongNumOfArgsError{Got: 2, Want: 3}),
+			err:  WrongNumOfArgsError{Got: 2, Want: 3},
+		},
+		{in: []*dlit.Literal{
+			dlit.NewString("bob"),
+			dlit.NewString("fred"),
+			dlit.NewString("martha"),
+		},
+			want: dlit.MustNew(
+				CantConvertToTypeError{Kind: "bool", Value: dlit.NewString("bob")},
+			),
+			err: CantConvertToTypeError{Kind: "bool", Value: dlit.NewString("bob")},
+		},
+		{in: []*dlit.Literal{
+			dlit.MustNew(errThisIsAnError),
+			dlit.NewString("fred"),
+			dlit.NewString("martha"),
+		},
+			want: dlit.MustNew(errThisIsAnError),
+			err:  errThisIsAnError,
+		},
+	}
+
+	for i, c := range cases {
+		got, err := ifFunc(c.in)
+		checkErrorMatch(t, fmt.Sprintf("[%d] ifFunc", i), err, c.err)
+		if got.String() != c.want.String() {
+			t.Errorf("[%d] ifFunc got: %s, want: %s", i, got, c.want)
+		}
+	}
+}
+
 func TestSqrt(t *testing.T) {
 	cases := []struct {
 		in   *dlit.Literal
@@ -27,8 +103,6 @@ func TestSqrt(t *testing.T) {
 		}
 	}
 }
-
-var errThisIsAnError = errors.New("this is an error")
 
 func TestSqrt_errors(t *testing.T) {
 	cases := []struct {
