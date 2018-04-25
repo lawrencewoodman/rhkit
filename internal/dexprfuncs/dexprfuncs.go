@@ -17,6 +17,7 @@ var CallFuncs = map[string]dexpr.CallFun{}
 
 func init() {
 	CallFuncs["if"] = ifFunc
+	CallFuncs["iferr"] = ifErrFunc
 	CallFuncs["in"] = in
 	CallFuncs["ni"] = ni
 	CallFuncs["min"] = min
@@ -75,6 +76,23 @@ func ifFunc(args []*dlit.Literal) (*dlit.Literal, error) {
 		return trueValue, nil
 	}
 	return falseValue, nil
+}
+
+// ifErrFunc returns an alternative value if a value is an error,
+// otherwise the original value is returned
+// e.g. ifErrFunc(testValue, alternativeValue)
+func ifErrFunc(args []*dlit.Literal) (*dlit.Literal, error) {
+	if len(args) != 2 {
+		err := WrongNumOfArgsError{Got: len(args), Want: 2}
+		r := dlit.MustNew(err)
+		return r, err
+	}
+	testValue := args[0]
+	alternativeValue := args[1]
+	if err := testValue.Err(); err != nil {
+		return alternativeValue, nil
+	}
+	return testValue, nil
 }
 
 // sqrt returns the square root of a number

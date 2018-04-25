@@ -83,6 +83,67 @@ func TestIfFunc_errors(t *testing.T) {
 	}
 }
 
+func TestIfErrFunc(t *testing.T) {
+	cases := []struct {
+		in   []*dlit.Literal
+		want *dlit.Literal
+	}{
+		{in: []*dlit.Literal{
+			dlit.NewString("fred"),
+			dlit.NewString("martha"),
+		},
+			want: dlit.NewString("fred"),
+		},
+		{in: []*dlit.Literal{
+			dlit.MustNew(errThisIsAnError),
+			dlit.NewString("martha"),
+		},
+			want: dlit.NewString("martha"),
+		},
+	}
+
+	for i, c := range cases {
+		got, err := ifErrFunc(c.in)
+		if err != nil {
+			t.Errorf("[%d] ifErrFunc: %s", i, err)
+		}
+		if got.String() != c.want.String() {
+			t.Errorf("[%d] ifErrFunc got: %s, want: %s", i, got, c.want)
+		}
+	}
+}
+
+func TestIfErrFunc_errors(t *testing.T) {
+	cases := []struct {
+		in   []*dlit.Literal
+		want *dlit.Literal
+		err  error
+	}{
+		{in: []*dlit.Literal{
+			dlit.NewString("martha"),
+		},
+			want: dlit.MustNew(WrongNumOfArgsError{Got: 1, Want: 2}),
+			err:  WrongNumOfArgsError{Got: 1, Want: 2},
+		},
+		{in: []*dlit.Literal{
+			dlit.NewString("martha"),
+			dlit.NewString("fred"),
+			dlit.NewString("rebecca"),
+		},
+			want: dlit.MustNew(WrongNumOfArgsError{Got: 3, Want: 2}),
+			err:  WrongNumOfArgsError{Got: 3, Want: 2},
+		},
+	}
+
+	for i, c := range cases {
+		got, err := ifErrFunc(c.in)
+		checkErrorMatch(t, fmt.Sprintf("[%d] ifErrFunc", i), err, c.err)
+		if got.String() != c.want.String() {
+			t.Errorf("[%d] ifErrFunc got: %s, want: %s", i, got, c.want)
+		}
+	}
+}
+
 func TestSqrt(t *testing.T) {
 	cases := []struct {
 		in   *dlit.Literal
