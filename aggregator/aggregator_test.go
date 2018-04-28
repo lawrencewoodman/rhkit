@@ -211,7 +211,7 @@ func TestMakeSpecs(t *testing.T) {
 	want := []Spec{
 		MustNew("numMatches", "count", "true()"),
 		MustNew("percentMatches", "calc",
-			"roundto(100.0 * numMatches / numRecords, 2)"),
+			"iferr(roundto(100.0 * numMatches / numRecords, 2), 0)"),
 		// num_married to check for allowed characters
 		MustNew("num_married", "count", "marital == \"married\""),
 		MustNew("numSignedUp", "count", "y == \"yes\""),
