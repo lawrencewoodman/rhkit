@@ -91,7 +91,7 @@ func generateInFV(
 	for _, field := range generationDesc.Fields() {
 		fd := inputDescription.Fields[field]
 		numValues := len(fd.Values)
-		if generationDesc.Deny("INFV", field) ||
+		if generationDesc.Deny("InFV", field) ||
 			(fd.Kind != description.String && fd.Kind != description.Number) ||
 			numValues <= 3 || numValues > (12+extra) {
 			continue
