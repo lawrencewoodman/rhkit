@@ -1,4 +1,4 @@
-// Copyright (C) 2017 vLife Systems Ltd <http://vlifesystems.com>
+// Copyright (C) 2017-2018 vLife Systems Ltd <http://vlifesystems.com>
 // Licensed under an MIT licence.  Please see LICENSE.md for details.
 
 package rule
@@ -65,7 +65,8 @@ func generateCountLTVF(
 	validFields := []string{}
 	for _, f := range generationDesc.Fields() {
 		fd := inputDescription.Fields[f]
-		if fd.NumValues >= 2 && fd.NumValues <= 4 &&
+		if !generationDesc.Deny("CountLTVF", f) &&
+			fd.NumValues >= 2 && fd.NumValues <= 4 &&
 			(fd.Kind == description.String || fd.Kind == description.Number) {
 			validFields = append(validFields, f)
 		}

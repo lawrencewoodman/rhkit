@@ -222,3 +222,114 @@ func TestGenerateEQFF(t *testing.T) {
 			err, got, want)
 	}
 }
+
+func TestGenerateEQFF_deny(t *testing.T) {
+	inputDescription := &description.Description{
+		map[string]*description.Field{
+			"bandA": {
+				Kind:   description.Number,
+				Min:    dlit.MustNew(1),
+				Max:    dlit.MustNew(3),
+				Values: map[string]description.Value{},
+			},
+			"groupA": {
+				Kind: description.String,
+				Values: map[string]description.Value{
+					"Nelson":      {dlit.NewString("Nelson"), 3},
+					"Collingwood": {dlit.NewString("Collingwood"), 1},
+					"Mountbatten": {dlit.NewString("Mountbatten"), 1},
+					"Drake":       {dlit.NewString("Drake"), 2},
+				},
+			},
+			"groupB": {
+				Kind: description.String,
+				Values: map[string]description.Value{
+					"Nelson":      {dlit.NewString("Nelson"), 3},
+					"Mountbatten": {dlit.NewString("Mountbatten"), 1},
+					"Drake":       {dlit.NewString("Drake"), 2},
+				},
+			},
+			"groupC": {
+				Kind: description.String,
+				Values: map[string]description.Value{
+					"Nelson": {dlit.NewString("Nelson"), 3},
+					"Drake":  {dlit.NewString("Drake"), 2},
+				},
+			},
+			"groupD": {
+				Kind: description.String,
+				Values: map[string]description.Value{
+					"Drake": {dlit.NewString("Drake"), 2},
+				},
+			},
+			"groupE": {
+				Kind: description.String,
+				Values: map[string]description.Value{
+					"Drake":       {dlit.NewString("Drake"), 2},
+					"Chaucer":     {dlit.NewString("Chaucer"), 2},
+					"Shakespeare": {dlit.NewString("Shakespeare"), 2},
+					"Marlowe":     {dlit.NewString("Marlowe"), 2},
+				},
+			},
+			"groupF": {
+				Kind: description.String,
+				Values: map[string]description.Value{
+					"Nelson":      {dlit.NewString("Nelson"), 3},
+					"Drake":       {dlit.NewString("Drake"), 2},
+					"Chaucer":     {dlit.NewString("Chaucer"), 2},
+					"Shakespeare": {dlit.NewString("Shakespeare"), 2},
+					"Marlowe":     {dlit.NewString("Marlowe"), 2},
+				},
+			},
+			"bandB": {
+				Kind: description.Number,
+				Min:  dlit.MustNew(1),
+				Max:  dlit.MustNew(3),
+				Values: map[string]description.Value{
+					"1": {dlit.NewString("1"), 3},
+					"2": {dlit.NewString("2"), 2},
+					"3": {dlit.NewString("3"), 1},
+				},
+			},
+			"bandC": {
+				Kind: description.Number,
+				Min:  dlit.MustNew(2),
+				Max:  dlit.MustNew(7),
+				Values: map[string]description.Value{
+					"7": {dlit.NewString("7"), 3},
+					"2": {dlit.NewString("2"), 2},
+					"6": {dlit.NewString("6"), 1},
+				},
+			},
+			"bandD": {
+				Kind: description.Number,
+				Min:  dlit.MustNew(2),
+				Max:  dlit.MustNew(8),
+				Values: map[string]description.Value{
+					"3": {dlit.NewString("3"), 3},
+					"2": {dlit.NewString("2"), 2},
+					"8": {dlit.NewString("8"), 1},
+				},
+			},
+		},
+	}
+	want := []Rule{
+		NewEQFF("groupA", "groupC"),
+		NewEQFF("groupA", "groupF"),
+		NewEQFF("groupC", "groupF"),
+		NewEQFF("groupE", "groupF"),
+	}
+	generationDesc := testhelpers.GenerationDesc{
+		DFields: []string{
+			"bandA", "groupA", "groupB", "groupC", "groupD",
+			"groupE", "groupF", "bandB", "bandC", "bandD",
+		},
+		DArithmetic: false,
+		DDeny:       map[string][]string{"EQFF": []string{"groupB", "bandD"}},
+	}
+	got := generateEQFF(inputDescription, generationDesc)
+	if err := matchRulesUnordered(got, want); err != nil {
+		t.Errorf("matchRulesUnordered() rules don't match: %s\ngot: %s\nwant: %s\n",
+			err, got, want)
+	}
+}

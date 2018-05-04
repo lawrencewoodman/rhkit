@@ -239,7 +239,8 @@ func TestLEFVTweak(t *testing.T) {
 func TestGenerateLEFV(t *testing.T) {
 	cases := []struct {
 		description *description.Description
-		field       string
+		fields      []string
+		denyFields  []string
 		minNumRules int
 		maxNumRules int
 		min         *dlit.Literal
@@ -257,7 +258,8 @@ func TestGenerateLEFV(t *testing.T) {
 				},
 			},
 		},
-			field:       "income",
+			fields:      []string{"income"},
+			denyFields:  []string{},
 			minNumRules: 18,
 			maxNumRules: 20,
 			min:         dlit.MustNew(500),
@@ -275,7 +277,8 @@ func TestGenerateLEFV(t *testing.T) {
 				},
 			},
 		},
-			field:       "income",
+			fields:      []string{"income"},
+			denyFields:  []string{},
 			minNumRules: 18,
 			maxNumRules: 20,
 			min:         dlit.MustNew(790),
@@ -293,7 +296,8 @@ func TestGenerateLEFV(t *testing.T) {
 				},
 			},
 		},
-			field:       "income",
+			fields:      []string{"income"},
+			denyFields:  []string{},
 			minNumRules: 1,
 			maxNumRules: 1,
 			min:         dlit.MustNew(799),
@@ -314,12 +318,38 @@ func TestGenerateLEFV(t *testing.T) {
 				},
 			},
 		},
-			field:       "month",
+			fields:      []string{"month"},
+			denyFields:  []string{},
 			minNumRules: 0,
 			maxNumRules: 0,
 			min:         dlit.MustNew(0),
 			max:         dlit.MustNew(0),
 			mid:         dlit.MustNew(0),
+			maxDP:       0,
+		},
+		{description: &description.Description{
+			map[string]*description.Field{
+				"income": {
+					Kind:  description.Number,
+					Min:   dlit.MustNew(799),
+					Max:   dlit.MustNew(801),
+					MaxDP: 0,
+				},
+				"spending": {
+					Kind:  description.Number,
+					Min:   dlit.MustNew(799),
+					Max:   dlit.MustNew(801),
+					MaxDP: 0,
+				},
+			},
+		},
+			fields:      []string{"income", "spending"},
+			denyFields:  []string{"spending"},
+			minNumRules: 1,
+			maxNumRules: 1,
+			min:         dlit.MustNew(799),
+			max:         dlit.MustNew(801),
+			mid:         dlit.MustNew(800),
 			maxDP:       0,
 		},
 	}
@@ -335,8 +365,9 @@ func TestGenerateLEFV(t *testing.T) {
 	}
 	for i, c := range cases {
 		generationDesc := testhelpers.GenerationDesc{
-			DFields:     []string{c.field},
+			DFields:     c.fields,
 			DArithmetic: false,
+			DDeny:       map[string][]string{"LEFV": c.denyFields},
 		}
 		got := generateLEFV(c.description, generationDesc)
 		err := checkRulesComply(

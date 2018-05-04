@@ -1,4 +1,4 @@
-// Copyright (C) 2016-2017 vLife Systems Ltd <http://vlifesystems.com>
+// Copyright (C) 2016-2018 vLife Systems Ltd <http://vlifesystems.com>
 // Licensed under an MIT licence.  Please see LICENSE.md for details.
 
 package rule
@@ -62,7 +62,7 @@ func generateLEFF(
 	rules := make([]Rule, 0)
 	for _, field := range generationDesc.Fields() {
 		fd := inputDescription.Fields[field]
-		if fd.Kind != description.Number {
+		if generationDesc.Deny("LEFF", field) || fd.Kind != description.Number {
 			continue
 		}
 		fieldNum := description.CalcFieldNum(inputDescription.Fields, field)
@@ -70,7 +70,8 @@ func generateLEFF(
 			oFd := inputDescription.Fields[oField]
 			oFieldNum := description.CalcFieldNum(inputDescription.Fields, oField)
 			isComparable := hasComparableNumberRange(fd, oFd)
-			if fieldNum < oFieldNum && isComparable {
+			if !generationDesc.Deny("LEFF", oField) &&
+				fieldNum < oFieldNum && isComparable {
 				r := NewLEFF(field, oField)
 				rules = append(rules, r)
 			}

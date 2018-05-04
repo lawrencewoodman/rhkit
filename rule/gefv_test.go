@@ -267,6 +267,7 @@ func TestGenerateGEFV(t *testing.T) {
 	cases := []struct {
 		description *description.Description
 		field       string
+		deny        map[string][]string
 		minNumRules int
 		maxNumRules int
 		min         *dlit.Literal
@@ -287,6 +288,25 @@ func TestGenerateGEFV(t *testing.T) {
 			field:       "income",
 			minNumRules: 18,
 			maxNumRules: 20,
+			min:         dlit.MustNew(500),
+			max:         dlit.MustNew(1000),
+			mid:         dlit.MustNew(750),
+			maxDP:       0,
+		},
+		{description: &description.Description{
+			map[string]*description.Field{
+				"income": {
+					Kind:  description.Number,
+					Min:   dlit.MustNew(500),
+					Max:   dlit.MustNew(1000),
+					MaxDP: 2,
+				},
+			},
+		},
+			field:       "income",
+			deny:        map[string][]string{"GEFV": []string{"income"}},
+			minNumRules: 0,
+			maxNumRules: 0,
 			min:         dlit.MustNew(500),
 			max:         dlit.MustNew(1000),
 			mid:         dlit.MustNew(750),
@@ -364,6 +384,7 @@ func TestGenerateGEFV(t *testing.T) {
 		generationDesc := testhelpers.GenerationDesc{
 			DFields:     []string{c.field},
 			DArithmetic: false,
+			DDeny:       c.deny,
 		}
 		got := generateGEFV(c.description, generationDesc)
 		err := checkRulesComply(

@@ -49,6 +49,7 @@ type Options struct {
 	MaxNumRules             int
 	RuleFields              []string
 	GenerateArithmeticRules bool
+	DenyGeneratorFields     map[string][]string
 }
 
 func (o Options) Fields() []string {
@@ -57,6 +58,16 @@ func (o Options) Fields() []string {
 
 func (o Options) Arithmetic() bool {
 	return o.GenerateArithmeticRules
+}
+
+func (o Options) Deny(generatorName string, field string) bool {
+	fields := o.DenyGeneratorFields[generatorName]
+	for _, f := range fields {
+		if f == field {
+			return true
+		}
+	}
+	return false
 }
 
 // Process processes a Dataset to find Rules to meet the supplied requirements

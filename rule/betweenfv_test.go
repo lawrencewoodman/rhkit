@@ -291,6 +291,7 @@ func TestGenerateBetweenFV(t *testing.T) {
 	cases := []struct {
 		description *description.Description
 		field       string
+		deny        map[string][]string
 		minNumRules int
 		maxNumRules int
 		min         *dlit.Literal
@@ -373,11 +374,31 @@ func TestGenerateBetweenFV(t *testing.T) {
 			mid:         dlit.MustNew(0),
 			maxDP:       0,
 		},
+		{description: &description.Description{
+			map[string]*description.Field{
+				"income": {
+					Kind:  description.Number,
+					Min:   dlit.MustNew(790.73),
+					Max:   dlit.MustNew(1000),
+					MaxDP: 2,
+				},
+			},
+		},
+			field:       "income",
+			deny:        map[string][]string{"BetweenFV": []string{"income"}},
+			minNumRules: 0,
+			maxNumRules: 0,
+			min:         dlit.MustNew(790),
+			max:         dlit.MustNew(1000),
+			mid:         dlit.MustNew(903),
+			maxDP:       2,
+		},
 	}
 	for i, c := range cases {
 		generationDesc := testhelpers.GenerationDesc{
 			DFields:     []string{c.field},
 			DArithmetic: false,
+			DDeny:       c.deny,
 		}
 		complyFunc := func(r Rule) error {
 			x, ok := r.(*BetweenFV)

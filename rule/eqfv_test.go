@@ -123,7 +123,18 @@ func TestEQFVFields(t *testing.T) {
 func TestGenerateEQFV(t *testing.T) {
 	inputDescription := &description.Description{
 		map[string]*description.Field{
-			"band": {
+			"bandA": {
+				Kind: description.Number,
+				Min:  dlit.MustNew(1),
+				Max:  dlit.MustNew(4),
+				Values: map[string]description.Value{
+					"1": {dlit.NewString("1"), 3},
+					"2": {dlit.NewString("2"), 1},
+					"3": {dlit.NewString("3"), 2},
+					"4": {dlit.NewString("4"), 5},
+				},
+			},
+			"bandB": {
 				Kind: description.Number,
 				Min:  dlit.MustNew(1),
 				Max:  dlit.MustNew(4),
@@ -166,9 +177,9 @@ func TestGenerateEQFV(t *testing.T) {
 		},
 	}
 	want := []Rule{
-		NewEQFV("band", dlit.MustNew(1)),
-		NewEQFV("band", dlit.MustNew(3)),
-		NewEQFV("band", dlit.MustNew(4)),
+		NewEQFV("bandA", dlit.MustNew(1)),
+		NewEQFV("bandA", dlit.MustNew(3)),
+		NewEQFV("bandA", dlit.MustNew(4)),
 		NewEQFV("flow", dlit.MustNew(1)),
 		NewEQFV("flow", dlit.MustNew(3.37)),
 		NewEQFV("flow", dlit.MustNew(3.3)),
@@ -177,8 +188,9 @@ func TestGenerateEQFV(t *testing.T) {
 		NewEQFV("group", dlit.MustNew("Drake")),
 	}
 	generationDesc := testhelpers.GenerationDesc{
-		DFields:     []string{"band", "flow", "group", "month"},
+		DFields:     []string{"bandA", "bandB", "flow", "group", "month"},
 		DArithmetic: false,
+		DDeny:       map[string][]string{"EQFV": []string{"bandB"}},
 	}
 	got := generateEQFV(inputDescription, generationDesc)
 	if err := matchRulesUnordered(got, want); err != nil {

@@ -1,4 +1,4 @@
-// Copyright (C) 2016-2017 vLife Systems Ltd <http://vlifesystems.com>
+// Copyright (C) 2016-2018 vLife Systems Ltd <http://vlifesystems.com>
 // Licensed under an MIT licence.  Please see LICENSE.md for details.
 
 package rule
@@ -124,7 +124,9 @@ func generateAddGEF(
 	rules := make([]Rule, 0)
 	for _, field := range generationDesc.Fields() {
 		fd := inputDescription.Fields[field]
-		if !generationDesc.Arithmetic() || fd.Kind != description.Number {
+		if generationDesc.Deny("AddGEF", field) ||
+			!generationDesc.Arithmetic() ||
+			fd.Kind != description.Number {
 			continue
 		}
 		fieldNum := description.CalcFieldNum(inputDescription.Fields, field)
@@ -132,7 +134,9 @@ func generateAddGEF(
 		for _, oField := range generationDesc.Fields() {
 			oFd := inputDescription.Fields[oField]
 			oFieldNum := description.CalcFieldNum(inputDescription.Fields, oField)
-			if fieldNum < oFieldNum && oFd.Kind == description.Number {
+			if !generationDesc.Deny("AddGEF", oField) &&
+				fieldNum < oFieldNum &&
+				oFd.Kind == description.Number {
 				vars := map[string]*dlit.Literal{
 					"min":  fd.Min,
 					"max":  fd.Max,

@@ -1,4 +1,4 @@
-// Copyright (C) 2016-2017 vLife Systems Ltd <http://vlifesystems.com>
+// Copyright (C) 2016-2018 vLife Systems Ltd <http://vlifesystems.com>
 // Licensed under an MIT licence.  Please see LICENSE.md for details.
 
 package rule
@@ -71,11 +71,14 @@ func generateNEFF(
 	rules := make([]Rule, 0)
 	for _, field := range generationDesc.Fields() {
 		fd := inputDescription.Fields[field]
-		if fd.Kind != description.String && fd.Kind != description.Number {
+		if generationDesc.Deny("NEFF", field) || (fd.Kind != description.String && fd.Kind != description.Number) {
 			continue
 		}
 		fieldNum := description.CalcFieldNum(inputDescription.Fields, field)
 		for _, oField := range generationDesc.Fields() {
+			if generationDesc.Deny("NEFF", oField) {
+				continue
+			}
 			oFd := inputDescription.Fields[oField]
 			if oFd.Kind == fd.Kind {
 				oFieldNum := description.CalcFieldNum(inputDescription.Fields, oField)

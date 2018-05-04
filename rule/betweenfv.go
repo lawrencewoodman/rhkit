@@ -1,4 +1,4 @@
-// Copyright (C) 2016-2017 vLife Systems Ltd <http://vlifesystems.com>
+// Copyright (C) 2016-2018 vLife Systems Ltd <http://vlifesystems.com>
 // Licensed under an MIT licence.  Please see LICENSE.md for details.
 
 package rule
@@ -162,7 +162,8 @@ func generateBetweenFV(
 	rules := make([]Rule, 0)
 	for _, field := range generationDesc.Fields() {
 		fd := inputDescription.Fields[field]
-		if fd.Kind != description.Number {
+		if generationDesc.Deny("BetweenFV", field) ||
+			fd.Kind != description.Number {
 			continue
 		}
 		rulesMap := make(map[string]Rule)

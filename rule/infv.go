@@ -1,4 +1,4 @@
-// Copyright (C) 2016-2017 vLife Systems Ltd <http://vlifesystems.com>
+// Copyright (C) 2016-2018 vLife Systems Ltd <http://vlifesystems.com>
 // Licensed under an MIT licence.  Please see LICENSE.md for details.
 
 package rule
@@ -91,7 +91,8 @@ func generateInFV(
 	for _, field := range generationDesc.Fields() {
 		fd := inputDescription.Fields[field]
 		numValues := len(fd.Values)
-		if fd.Kind != description.String && fd.Kind != description.Number ||
+		if generationDesc.Deny("INFV", field) ||
+			(fd.Kind != description.String && fd.Kind != description.Number) ||
 			numValues <= 3 || numValues > (12+extra) {
 			continue
 		}

@@ -1,4 +1,4 @@
-// Copyright (C) 2016-2017 vLife Systems Ltd <http://vlifesystems.com>
+// Copyright (C) 2016-2018 vLife Systems Ltd <http://vlifesystems.com>
 // Licensed under an MIT licence.  Please see LICENSE.md for details.
 
 package rule
@@ -124,12 +124,16 @@ func generateMulGEF(
 	rules := make([]Rule, 0)
 	for _, field := range generationDesc.Fields() {
 		fd := inputDescription.Fields[field]
-		if !generationDesc.Arithmetic() || fd.Kind != description.Number {
+		if generationDesc.Deny("MulGEF", field) || !generationDesc.Arithmetic() ||
+			fd.Kind != description.Number {
 			continue
 		}
 		fieldNum := description.CalcFieldNum(inputDescription.Fields, field)
 
 		for _, oField := range generationDesc.Fields() {
+			if generationDesc.Deny("MulGEF", oField) {
+				continue
+			}
 			oFd := inputDescription.Fields[oField]
 			oFieldNum := description.CalcFieldNum(inputDescription.Fields, oField)
 			if fieldNum < oFieldNum &&

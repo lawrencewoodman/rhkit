@@ -28,6 +28,8 @@ type GenerationDescriber interface {
 	Fields() []string
 	// Arithmetic indicates whether to generate arithmetic rules
 	Arithmetic() bool
+	// Deny indicates whether a field should not be used for a generator.
+	Deny(generatorName string, field string) bool
 }
 
 type generatorFunc func(

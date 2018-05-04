@@ -124,7 +124,29 @@ func TestNEFVFields(t *testing.T) {
 func TestGenerateNEFV(t *testing.T) {
 	inputDescription := &description.Description{
 		map[string]*description.Field{
-			"band": {
+			"bandA": {
+				Kind: description.Number,
+				Min:  dlit.MustNew(1),
+				Max:  dlit.MustNew(4),
+				Values: map[string]description.Value{
+					"1": {dlit.NewString("1"), 3},
+					"2": {dlit.NewString("2"), 1},
+					"3": {dlit.NewString("3"), 2},
+					"4": {dlit.NewString("4"), 5},
+				},
+			},
+			"bandB": {
+				Kind: description.Number,
+				Min:  dlit.MustNew(1),
+				Max:  dlit.MustNew(4),
+				Values: map[string]description.Value{
+					"1": {dlit.NewString("1"), 3},
+					"2": {dlit.NewString("2"), 1},
+					"3": {dlit.NewString("3"), 2},
+					"4": {dlit.NewString("4"), 5},
+				},
+			},
+			"bandC": {
 				Kind: description.Number,
 				Min:  dlit.MustNew(1),
 				Max:  dlit.MustNew(4),
@@ -168,9 +190,9 @@ func TestGenerateNEFV(t *testing.T) {
 		},
 	}
 	want := []Rule{
-		NewNEFV("band", dlit.MustNew(1)),
-		NewNEFV("band", dlit.MustNew(3)),
-		NewNEFV("band", dlit.MustNew(4)),
+		NewNEFV("bandA", dlit.MustNew(1)),
+		NewNEFV("bandA", dlit.MustNew(3)),
+		NewNEFV("bandA", dlit.MustNew(4)),
 		NewNEFV("flow", dlit.MustNew(1)),
 		NewNEFV("flow", dlit.MustNew(3.37)),
 		NewNEFV("flow", dlit.MustNew(3.3)),
@@ -179,8 +201,9 @@ func TestGenerateNEFV(t *testing.T) {
 		NewNEFV("group", dlit.MustNew("Drake")),
 	}
 	generationDesc := testhelpers.GenerationDesc{
-		DFields:     []string{"band", "flow", "group", "month"},
+		DFields:     []string{"bandA", "bandB", "bandC", "flow", "group", "month"},
 		DArithmetic: false,
+		DDeny:       map[string][]string{"NEFV": []string{"bandB", "bandC"}},
 	}
 	got := generateNEFV(inputDescription, generationDesc)
 	if err := matchRulesUnordered(got, want); err != nil {

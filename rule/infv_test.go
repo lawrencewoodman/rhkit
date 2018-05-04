@@ -483,6 +483,9 @@ func TestGenerateInFV_num_fields(t *testing.T) {
 			"flowB": {
 				Kind: description.Number,
 			},
+			"flowC": {
+				Kind: description.Number,
+			},
 		},
 	}
 	cases := []struct {
@@ -537,6 +540,17 @@ func TestGenerateInFV_num_fields(t *testing.T) {
 			wantMinNumRules:  2000,
 			wantMaxNumRules:  4000,
 			wantMaxNumValues: 8,
+		},
+		{
+			generationDesc: testhelpers.GenerationDesc{
+				DFields:     []string{"group", "flowA", "flowB"},
+				DArithmetic: false,
+				DDeny:       map[string][]string{"INFV": []string{"group"}},
+			},
+			groupValues:      map[string]description.Value{},
+			wantMinNumRules:  0,
+			wantMaxNumRules:  0,
+			wantMaxNumValues: 0,
 		},
 	}
 	for i, c := range cases {

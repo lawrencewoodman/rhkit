@@ -109,7 +109,19 @@ func TestLEFFFields(t *testing.T) {
 func TestGenerateLEFF(t *testing.T) {
 	inputDescription := &description.Description{
 		map[string]*description.Field{
-			"band": {
+			"bandA": {
+				Kind:   description.Number,
+				Min:    dlit.MustNew(1),
+				Max:    dlit.MustNew(3),
+				Values: map[string]description.Value{},
+			},
+			"bandB": {
+				Kind:   description.Number,
+				Min:    dlit.MustNew(1),
+				Max:    dlit.MustNew(3),
+				Values: map[string]description.Value{},
+			},
+			"bandC": {
 				Kind:   description.Number,
 				Min:    dlit.MustNew(1),
 				Max:    dlit.MustNew(3),
@@ -162,14 +174,15 @@ func TestGenerateLEFF(t *testing.T) {
 		},
 	}
 	want := []Rule{
-		NewLEFF("band", "flowIn"),
-		NewLEFF("band", "flowOut"),
+		NewLEFF("bandA", "flowIn"),
+		NewLEFF("bandA", "flowOut"),
 		NewLEFF("flowIn", "flowOut"),
 	}
 	generationDesc := testhelpers.GenerationDesc{
-		DFields: []string{"band", "flowIn", "flowOut", "rateIn",
-			"rateOut", "group"},
+		DFields: []string{"bandA", "bandB", "bandC", "flowIn",
+			"flowOut", "rateIn", "rateOut", "group"},
 		DArithmetic: false,
+		DDeny:       map[string][]string{"LEFF": []string{"bandB", "bandC"}},
 	}
 	got := generateLEFF(inputDescription, generationDesc)
 	if err := matchRulesUnordered(got, want); err != nil {

@@ -538,7 +538,17 @@ func TestGenerateMulLEF_multiple_fields(t *testing.T) {
 				Min:  dlit.MustNew(250),
 				Max:  dlit.MustNew(500),
 			},
-			"income": {
+			"incomeA": {
+				Kind: description.Number,
+				Min:  dlit.MustNew(250),
+				Max:  dlit.MustNew(500),
+			},
+			"incomeB": {
+				Kind: description.Number,
+				Min:  dlit.MustNew(250),
+				Max:  dlit.MustNew(500),
+			},
+			"incomeC": {
 				Kind: description.Number,
 				Min:  dlit.MustNew(250),
 				Max:  dlit.MustNew(500),
@@ -555,8 +565,11 @@ func TestGenerateMulLEF_multiple_fields(t *testing.T) {
 	}
 
 	generationDesc := testhelpers.GenerationDesc{
-		DFields:     []string{"balance", "income", "reserve"},
+		DFields: []string{
+			"balance", "incomeA", "incomeB", "incomeC", "reserve",
+		},
 		DArithmetic: true,
+		DDeny:       map[string][]string{"MulLEF": []string{"incomeB", "incomeC"}},
 	}
 	got := generateMulLEF(description, generationDesc)
 
@@ -568,7 +581,7 @@ func TestGenerateMulLEF_multiple_fields(t *testing.T) {
 			t.Errorf("wrong type: %T (%s)", r, r)
 		}
 		if x.fieldA == "balance" {
-			if x.fieldB == "income" {
+			if x.fieldB == "incomeA" {
 				numIncome++
 			} else if x.fieldB == "reserve" {
 				numReserve++

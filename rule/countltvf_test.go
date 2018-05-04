@@ -617,6 +617,15 @@ func TestGenerateCountLTVF_num_fields(t *testing.T) {
 			wantMaxNumFields: 3,
 		},
 		{generationDesc: testhelpers.GenerationDesc{
+			DFields:     []string{"groupA", "groupC", "groupG"},
+			DArithmetic: false,
+			DDeny:       map[string][]string{"CountLTVF": []string{"groupG"}},
+		},
+			wantMinNumRules:  3,
+			wantMaxNumRules:  3,
+			wantMaxNumFields: 2,
+		},
+		{generationDesc: testhelpers.GenerationDesc{
 			DFields: []string{"groupA", "groupC", "groupG", "groupH",
 				"groupI", "groupJ"},
 			DArithmetic: false,

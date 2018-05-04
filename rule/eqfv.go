@@ -1,4 +1,4 @@
-// Copyright (C) 2016-2017 vLife Systems Ltd <http://vlifesystems.com>
+// Copyright (C) 2016-2018 vLife Systems Ltd <http://vlifesystems.com>
 // Licensed under an MIT licence.  Please see LICENSE.md for details.
 
 package rule
@@ -66,7 +66,8 @@ func generateEQFV(
 	for _, field := range generationDesc.Fields() {
 		fd := inputDescription.Fields[field]
 		values := fd.Values
-		if len(values) >= 2 && fd.Kind != description.Ignore {
+		if !generationDesc.Deny("EQFV", field) &&
+			len(values) >= 2 && fd.Kind != description.Ignore {
 			for _, vd := range values {
 				if vd.Num >= 2 {
 					r := NewEQFV(field, vd.Value)

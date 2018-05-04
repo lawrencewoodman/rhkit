@@ -523,6 +523,58 @@ func TestGenerateAddLEF(t *testing.T) {
 			mid:         dlit.MustNew(800),
 			maxDP:       0,
 		},
+		{description: &description.Description{
+			map[string]*description.Field{
+				"balance": {
+					Kind: description.Number,
+					Min:  dlit.MustNew(200),
+					Max:  dlit.MustNew(200),
+				},
+				"income": {
+					Kind: description.Number,
+					Min:  dlit.MustNew(200),
+					Max:  dlit.MustNew(205),
+				},
+			},
+		},
+			generationDesc: testhelpers.GenerationDesc{
+				DFields:     ruleFields,
+				DArithmetic: true,
+				DDeny:       map[string][]string{"AddLEF": []string{"balance"}},
+			},
+			minNumRules: 0,
+			maxNumRules: 0,
+			min:         dlit.MustNew(400),
+			max:         dlit.MustNew(405),
+			mid:         dlit.MustNew(403),
+			maxDP:       0,
+		},
+		{description: &description.Description{
+			map[string]*description.Field{
+				"balance": {
+					Kind: description.Number,
+					Min:  dlit.MustNew(200),
+					Max:  dlit.MustNew(200),
+				},
+				"income": {
+					Kind: description.Number,
+					Min:  dlit.MustNew(200),
+					Max:  dlit.MustNew(205),
+				},
+			},
+		},
+			generationDesc: testhelpers.GenerationDesc{
+				DFields:     ruleFields,
+				DArithmetic: true,
+				DDeny:       map[string][]string{"AddLEF": []string{"income"}},
+			},
+			minNumRules: 0,
+			maxNumRules: 0,
+			min:         dlit.MustNew(400),
+			max:         dlit.MustNew(405),
+			mid:         dlit.MustNew(403),
+			maxDP:       0,
+		},
 	}
 	complyFunc := func(r Rule) error {
 		x, ok := r.(*AddLEF)

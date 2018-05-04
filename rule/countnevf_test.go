@@ -733,6 +733,15 @@ func TestGenerateCountNEVF_num_fields(t *testing.T) {
 			wantMaxNumFields: 3,
 		},
 		{generationDesc: testhelpers.GenerationDesc{
+			DFields:     []string{"groupA", "groupC", "groupG"},
+			DArithmetic: false,
+			DDeny:       map[string][]string{"CountNEVF": []string{"groupG"}},
+		},
+			wantMinNumRules:  9,
+			wantMaxNumRules:  9,
+			wantMaxNumFields: 2,
+		},
+		{generationDesc: testhelpers.GenerationDesc{
 			DFields: []string{"groupA", "groupC", "groupG", "groupH",
 				"groupI", "groupJ"},
 			DArithmetic: false,

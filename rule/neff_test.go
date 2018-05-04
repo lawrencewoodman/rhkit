@@ -167,6 +167,26 @@ func TestGenerateNEFF(t *testing.T) {
 					"Marlowe":     {dlit.NewString("Marlowe"), 2},
 				},
 			},
+			"groupG": {
+				Kind: description.String,
+				Values: map[string]description.Value{
+					"Nelson":      {dlit.NewString("Nelson"), 3},
+					"Drake":       {dlit.NewString("Drake"), 2},
+					"Chaucer":     {dlit.NewString("Chaucer"), 2},
+					"Shakespeare": {dlit.NewString("Shakespeare"), 2},
+					"Marlowe":     {dlit.NewString("Marlowe"), 2},
+				},
+			},
+			"groupH": {
+				Kind: description.String,
+				Values: map[string]description.Value{
+					"Nelson":      {dlit.NewString("Nelson"), 3},
+					"Drake":       {dlit.NewString("Drake"), 2},
+					"Chaucer":     {dlit.NewString("Chaucer"), 2},
+					"Shakespeare": {dlit.NewString("Shakespeare"), 2},
+					"Marlowe":     {dlit.NewString("Marlowe"), 2},
+				},
+			},
 			"bandB": {
 				Kind: description.Number,
 				Min:  dlit.MustNew(1),
@@ -212,9 +232,11 @@ func TestGenerateNEFF(t *testing.T) {
 	generationDesc := testhelpers.GenerationDesc{
 		DFields: []string{
 			"bandA", "groupA", "groupB", "groupC", "groupD",
-			"groupE", "groupF", "bandB", "bandC", "bandD",
+			"groupE", "groupF", "groupG", "groupH",
+			"bandB", "bandC", "bandD",
 		},
 		DArithmetic: false,
+		DDeny:       map[string][]string{"NEFF": []string{"groupG", "groupH"}},
 	}
 	got := generateNEFF(inputDescription, generationDesc)
 	if err := matchRulesUnordered(got, want); err != nil {

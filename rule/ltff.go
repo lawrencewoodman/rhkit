@@ -1,4 +1,4 @@
-// Copyright (C) 2016-2017 vLife Systems Ltd <http://vlifesystems.com>
+// Copyright (C) 2016-2018 vLife Systems Ltd <http://vlifesystems.com>
 // Licensed under an MIT licence.  Please see LICENSE.md for details.
 
 package rule
@@ -62,7 +62,7 @@ func generateLTFF(
 	rules := make([]Rule, 0)
 	for _, field := range generationDesc.Fields() {
 		fd := inputDescription.Fields[field]
-		if fd.Kind != description.Number {
+		if generationDesc.Deny("LTFF", field) || fd.Kind != description.Number {
 			continue
 		}
 		fieldNum := description.CalcFieldNum(inputDescription.Fields, field)
@@ -70,7 +70,8 @@ func generateLTFF(
 			oFd := inputDescription.Fields[oField]
 			oFieldNum := description.CalcFieldNum(inputDescription.Fields, oField)
 			isComparable := hasComparableNumberRange(fd, oFd)
-			if fieldNum < oFieldNum && isComparable {
+			if !generationDesc.Deny("LTFF", oField) &&
+				fieldNum < oFieldNum && isComparable {
 				r := NewLTFF(field, oField)
 				rules = append(rules, r)
 			}

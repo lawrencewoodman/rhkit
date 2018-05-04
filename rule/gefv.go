@@ -1,4 +1,4 @@
-// Copyright (C) 2016-2017 vLife Systems Ltd <http://vlifesystems.com>
+// Copyright (C) 2016-2018 vLife Systems Ltd <http://vlifesystems.com>
 // Licensed under an MIT licence.  Please see LICENSE.md for details.
 
 package rule
@@ -97,6 +97,9 @@ func generateGEFV(
 ) []Rule {
 	rules := make([]Rule, 0)
 	for _, field := range generationDesc.Fields() {
+		if generationDesc.Deny("GEFV", field) {
+			continue
+		}
 		fd := inputDescription.Fields[field]
 		if fd.Kind == description.Number {
 			points := internal.GeneratePoints(fd.Min, fd.Max, fd.MaxDP)
